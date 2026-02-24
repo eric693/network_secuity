@@ -1,0 +1,2132 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stage 01 — 企業交換路由基礎課程 | SEC_TRACK</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e14;
+    --bg2: #0f1520;
+    --bg3: #151d2e;
+    --surface: #1a2438;
+    --border: #243050;
+    --accent: #00d4aa;
+    --text: #e8edf5;
+    --text2: #8a9bbf;
+    --text3: #5a6b8a;
+    --green: #00d4aa;
+    --blue: #0096ff;
+    --orange: #ff6b35;
+    --red: #ff4757;
+    --yellow: #ffd32a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,170,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,170,0.025) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    height: 64px;
+    background: rgba(10,14,20,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .nav-logo span { color: var(--text3); }
+  .nav-stage { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text3); }
+  .nav-back { color: var(--text2); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+  .nav-back:hover { color: var(--accent); }
+
+  /* LAYOUT */
+  .layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+    padding-top: 64px;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    position: sticky;
+    top: 64px;
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    padding: 32px 0;
+    z-index: 10;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .sidebar-header {
+    padding: 0 24px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .sidebar-stage {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .sidebar-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .chapter-group { margin-bottom: 4px; }
+
+  .chapter-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 24px;
+    background: none;
+    border: none;
+    color: var(--text2);
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    gap: 8px;
+  }
+  .chapter-btn:hover { color: var(--text); background: var(--bg3); }
+  .chapter-btn.active { color: var(--accent); background: rgba(0,212,170,0.06); }
+  .chapter-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text3);
+    min-width: 24px;
+  }
+  .chapter-btn.active .chapter-num { color: var(--accent); }
+  .chapter-chevron { font-size: 0.6rem; transition: transform 0.2s; color: var(--text3); }
+  .chapter-btn.open .chapter-chevron { transform: rotate(90deg); }
+
+  .lesson-list {
+    display: none;
+    flex-direction: column;
+  }
+  .lesson-list.open { display: flex; }
+
+  .lesson-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 24px 8px 44px;
+    background: none;
+    border: none;
+    color: var(--text3);
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 0.78rem;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    transition: all 0.2s;
+  }
+  .lesson-btn:hover { color: var(--text2); }
+  .lesson-btn.active { color: var(--accent); }
+  .lesson-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--text3);
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .lesson-btn.active .lesson-dot { background: var(--accent); }
+  .lesson-btn.done .lesson-dot { background: var(--green); }
+  .lesson-btn.done { color: var(--text3); }
+
+  .sidebar-progress {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    margin-top: 16px;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--text3);
+    margin-bottom: 8px;
+  }
+  .progress-track {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s;
+  }
+
+  /* MAIN CONTENT */
+  .main {
+    position: relative;
+    z-index: 1;
+    min-height: calc(100vh - 64px);
+  }
+
+  .lesson-header {
+    padding: 48px 60px 40px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+  }
+  .lesson-breadcrumb {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+  }
+  .lesson-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+    line-height: 1.25;
+  }
+  .lesson-meta {
+    display: flex;
+    gap: 24px;
+    font-size: 0.8rem;
+    color: var(--text3);
+  }
+  .lesson-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .meta-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .lesson-content {
+    padding: 48px 60px 80px;
+    max-width: 860px;
+  }
+
+  /* CONTENT COMPONENTS */
+  .content-block {
+    display: none;
+  }
+  .content-block.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  h2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin: 40px 0 16px;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+  h2:first-child { margin-top: 0; }
+
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 28px 0 12px;
+    color: var(--text);
+  }
+
+  p {
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: var(--text2);
+    margin-bottom: 16px;
+    font-weight: 300;
+  }
+
+  .highlight {
+    background: rgba(0,212,170,0.08);
+    border-left: 3px solid var(--accent);
+    padding: 16px 20px;
+    margin: 24px 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .highlight p { margin: 0; color: var(--text); }
+  .highlight-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .warning {
+    background: rgba(255,107,53,0.08);
+    border-left: 3px solid var(--orange);
+    padding: 16px 20px;
+    margin: 24px 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .warning .highlight-label { color: var(--orange); }
+  .warning p { margin: 0; }
+
+  .info-box {
+    background: rgba(0,150,255,0.08);
+    border-left: 3px solid var(--blue);
+    padding: 16px 20px;
+    margin: 24px 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .info-box .highlight-label { color: var(--blue); }
+  .info-box p { margin: 0; }
+
+  .code-block {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin: 20px 0;
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .code-copy {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text3);
+    cursor: pointer;
+    background: none;
+    border: none;
+    transition: color 0.2s;
+  }
+  .code-copy:hover { color: var(--accent); }
+  pre {
+    padding: 20px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: var(--text);
+  }
+  pre .kw { color: #ff79c6; }
+  pre .str { color: #f1fa8c; }
+  pre .cm { color: var(--text3); font-style: italic; }
+  pre .num { color: #bd93f9; }
+  pre .fn { color: #8be9fd; }
+  pre .val { color: #50fa7b; }
+
+  .diagram {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px;
+    margin: 24px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 1.8;
+    color: var(--text2);
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .key-terms {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin: 24px 0;
+  }
+  .term {
+    background: var(--bg2);
+    padding: 16px 20px;
+  }
+  .term-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .term-def {
+    font-size: 0.82rem;
+    color: var(--text2);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    margin: 24px 0;
+  }
+  table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  table.data-table th {
+    background: var(--surface);
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 0.72rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+  }
+  table.data-table td {
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-weight: 300;
+    vertical-align: top;
+  }
+  table.data-table tr:hover td { background: var(--bg3); }
+
+  .quiz-box {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px;
+    margin: 32px 0;
+  }
+  .quiz-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--yellow);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .quiz-q {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+  .quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .quiz-opt {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.875rem;
+    color: var(--text2);
+  }
+  .quiz-opt:hover { border-color: var(--accent); color: var(--text); }
+  .quiz-opt.correct { border-color: var(--green); background: rgba(0,212,170,0.08); color: var(--green); }
+  .quiz-opt.wrong { border-color: var(--red); background: rgba(255,71,87,0.08); color: var(--red); }
+  .quiz-letter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    min-width: 20px;
+    color: var(--text3);
+  }
+  .quiz-explain {
+    display: none;
+    margin-top: 16px;
+    padding: 14px;
+    background: rgba(0,212,170,0.06);
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+  .quiz-explain.show { display: block; }
+
+  /* NAV FOOTER */
+  .lesson-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 32px 60px;
+    border-top: 1px solid var(--border);
+    background: var(--bg2);
+    position: sticky;
+    bottom: 0;
+  }
+  .nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: none;
+    color: var(--text2);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Noto Sans TC', sans-serif;
+  }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 700; }
+  .nav-btn.primary:hover { background: #00f0c2; }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .lesson-counter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text3);
+  }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; height: auto; display: none; }
+    .sidebar.open { display: block; }
+    .lesson-header, .lesson-content { padding-left: 24px; padding-right: 24px; }
+    .lesson-nav { padding: 20px 24px; }
+    .key-terms { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">SEC<span>_</span>TRACK</a>
+  <span class="nav-stage">STAGE 01 — 企業交換路由基礎</span>
+  <a href="index.html" class="nav-back">返回課程首頁</a>
+</nav>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-stage">STAGE 01</div>
+      <div class="sidebar-title">企業交換路由<br>基礎必備課程</div>
+    </div>
+
+    <!-- Chapter 1 -->
+    <div class="chapter-group">
+      <button class="chapter-btn open active" onclick="toggleChapter(this, 'ch1')">
+        <span class="chapter-num">CH1</span>
+        <span>網路基礎概念介紹</span>
+        <span class="chapter-chevron">&#9658;</span>
+      </button>
+      <div class="lesson-list open" id="ch1">
+        <button class="lesson-btn active" onclick="showLesson('l1-1', this)"><span class="lesson-dot"></span>網路課程概述與通訊概念</button>
+        <button class="lesson-btn" onclick="showLesson('l1-2', this)"><span class="lesson-dot"></span>網路通訊硬體介紹</button>
+        <button class="lesson-btn" onclick="showLesson('l1-3', this)"><span class="lesson-dot"></span>網路拓撲結構</button>
+        <button class="lesson-btn" onclick="showLesson('l1-4', this)"><span class="lesson-dot"></span>OSI 與 TCP/IP 模型</button>
+        <button class="lesson-btn" onclick="showLesson('l1-5', this)"><span class="lesson-dot"></span>資料封裝解封過程</button>
+      </div>
+    </div>
+
+    <!-- Chapter 2 -->
+    <div class="chapter-group">
+      <button class="chapter-btn" onclick="toggleChapter(this, 'ch2')">
+        <span class="chapter-num">CH2</span>
+        <span>網路協議概念介紹</span>
+        <span class="chapter-chevron">&#9658;</span>
+      </button>
+      <div class="lesson-list" id="ch2">
+        <button class="lesson-btn" onclick="showLesson('l2-1', this)"><span class="lesson-dot"></span>網路層次協議介紹</button>
+        <button class="lesson-btn" onclick="showLesson('l2-2', this)"><span class="lesson-dot"></span>TCP 三次握手與四次揮手</button>
+        <button class="lesson-btn" onclick="showLesson('l2-3', this)"><span class="lesson-dot"></span>ARP 地址映射原理</button>
+      </div>
+    </div>
+
+    <!-- Chapter 3 -->
+    <div class="chapter-group">
+      <button class="chapter-btn" onclick="toggleChapter(this, 'ch3')">
+        <span class="chapter-num">CH3</span>
+        <span>網路基礎操作知識</span>
+        <span class="chapter-chevron">&#9658;</span>
+      </button>
+      <div class="lesson-list" id="ch3">
+        <button class="lesson-btn" onclick="showLesson('l3-1', this)"><span class="lesson-dot"></span>域名解析過程（DNS）</button>
+        <button class="lesson-btn" onclick="showLesson('l3-2', this)"><span class="lesson-dot"></span>IP 地址組成與分類</button>
+        <button class="lesson-btn" onclick="showLesson('l3-3', this)"><span class="lesson-dot"></span>子網劃分詳解</button>
+        <button class="lesson-btn" onclick="showLesson('l3-4', this)"><span class="lesson-dot"></span>Cisco Packet Tracer 安裝</button>
+      </div>
+    </div>
+
+    <!-- Chapter 4 -->
+    <div class="chapter-group">
+      <button class="chapter-btn" onclick="toggleChapter(this, 'ch4')">
+        <span class="chapter-num">CH4</span>
+        <span>網路靜態路由配置</span>
+        <span class="chapter-chevron">&#9658;</span>
+      </button>
+      <div class="lesson-list" id="ch4">
+        <button class="lesson-btn" onclick="showLesson('l4-1', this)"><span class="lesson-dot"></span>網路設備管理方法</button>
+        <button class="lesson-btn" onclick="showLesson('l4-2', this)"><span class="lesson-dot"></span>設備配置模式與路由介紹</button>
+        <button class="lesson-btn" onclick="showLesson('l4-3', this)"><span class="lesson-dot"></span>靜態路由實戰配置</button>
+      </div>
+    </div>
+
+    <!-- Chapter 5 -->
+    <div class="chapter-group">
+      <button class="chapter-btn" onclick="toggleChapter(this, 'ch5')">
+        <span class="chapter-num">CH5</span>
+        <span>RIP 動態路由協議</span>
+        <span class="chapter-chevron">&#9658;</span>
+      </button>
+      <div class="lesson-list" id="ch5">
+        <button class="lesson-btn" onclick="showLesson('l5-1', this)"><span class="lesson-dot"></span>動態路由概述與分類</button>
+        <button class="lesson-btn" onclick="showLesson('l5-2', this)"><span class="lesson-dot"></span>RIP 工作原理與配置</button>
+      </div>
+    </div>
+
+    <!-- Chapter 6 -->
+    <div class="chapter-group">
+      <button class="chapter-btn" onclick="toggleChapter(this, 'ch6')">
+        <span class="chapter-num">CH6</span>
+        <span>OSPF 動態路由協議</span>
+        <span class="chapter-chevron">&#9658;</span>
+      </button>
+      <div class="lesson-list" id="ch6">
+        <button class="lesson-btn" onclick="showLesson('l6-1', this)"><span class="lesson-dot"></span>OSPF 原理與特性</button>
+        <button class="lesson-btn" onclick="showLesson('l6-2', this)"><span class="lesson-dot"></span>OSPF 實戰配置</button>
+      </div>
+    </div>
+
+    <!-- Chapter 7 -->
+    <div class="chapter-group">
+      <button class="chapter-btn" onclick="toggleChapter(this, 'ch7')">
+        <span class="chapter-num">CH7</span>
+        <span>網路地址轉換（NAT）</span>
+        <span class="chapter-chevron">&#9658;</span>
+      </button>
+      <div class="lesson-list" id="ch7">
+        <button class="lesson-btn" onclick="showLesson('l7-1', this)"><span class="lesson-dot"></span>NAT 概念與靜態 NAT</button>
+        <button class="lesson-btn" onclick="showLesson('l7-2', this)"><span class="lesson-dot"></span>動態 NAT 與 PAT 配置</button>
+        <button class="lesson-btn" onclick="showLesson('l7-3', this)"><span class="lesson-dot"></span>TCP 負載均衡與 NAT 排錯</button>
+      </div>
+    </div>
+
+    <!-- Chapter 8 -->
+    <div class="chapter-group">
+      <button class="chapter-btn" onclick="toggleChapter(this, 'ch8')">
+        <span class="chapter-num">CH8</span>
+        <span>VLAN 交換配置</span>
+        <span class="chapter-chevron">&#9658;</span>
+      </button>
+      <div class="lesson-list" id="ch8">
+        <button class="lesson-btn" onclick="showLesson('l8-1', this)"><span class="lesson-dot"></span>二層交換基礎與 VLAN 概述</button>
+        <button class="lesson-btn" onclick="showLesson('l8-2', this)"><span class="lesson-dot"></span>VLAN 配置與不同 VLAN 互訪</button>
+      </div>
+    </div>
+
+    <!-- Chapter 9 -->
+    <div class="chapter-group">
+      <button class="chapter-btn" onclick="toggleChapter(this, 'ch9')">
+        <span class="chapter-num">CH9</span>
+        <span>訪問控制列表（ACL）</span>
+        <span class="chapter-chevron">&#9658;</span>
+      </button>
+      <div class="lesson-list" id="ch9">
+        <button class="lesson-btn" onclick="showLesson('l9-1', this)"><span class="lesson-dot"></span>ACL 概念、類型與配置</button>
+      </div>
+    </div>
+
+    <div class="sidebar-progress">
+      <div class="progress-label">
+        <span>學習進度</span>
+        <span id="progress-pct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="lesson-header" id="lesson-header">
+      <div class="lesson-breadcrumb" id="lesson-breadcrumb">STAGE 01 &gt; 第一章 &gt; 課程1</div>
+      <h1 class="lesson-title" id="lesson-title">網路課程概述與通訊概念</h1>
+      <div class="lesson-meta">
+        <span><span class="meta-dot"></span>基礎概念</span>
+        <span>預計閱讀時間：15分鐘</span>
+      </div>
+    </div>
+
+    <div class="lesson-content">
+
+      <!-- ==================== L1-1 ==================== -->
+      <div class="content-block active" id="l1-1">
+        <h2>為什麼要學網路？</h2>
+        <p>網路是資安工程師最重要的基礎。無論是滲透測試、入侵偵測、還是應急響應，幾乎每一項安全工作都必須建立在對網路的深刻理解之上。如果你不懂 TCP/IP、不知道封包如何傳輸、不理解路由與交換的差異，就很難真正理解攻擊的本質。</p>
+
+        <div class="highlight">
+          <div class="highlight-label">核心觀念</div>
+          <p>資安工程師必須先是一名合格的網路工程師。所有的攻擊流量，都必須透過網路傳遞；所有的防禦機制，也都建立在網路協議之上。</p>
+        </div>
+
+        <h2>什麼是網路通訊？</h2>
+        <p>網路通訊是指兩台或多台設備之間，透過某種媒介（如電纜、光纖、無線電波）交換資料的過程。要讓這個過程順利進行，需要解決三個核心問題：</p>
+
+        <div class="key-terms">
+          <div class="term">
+            <div class="term-name">如何尋址？</div>
+            <div class="term-def">每台設備需要一個唯一的地址（如 IP 地址），這樣資料才知道該發往哪裡，就像郵寄信件需要門牌號碼。</div>
+          </div>
+          <div class="term">
+            <div class="term-name">如何路由？</div>
+            <div class="term-def">資料在從來源到目的地的過程中，需要經過多個中轉節點，路由器負責決定每一跳的最佳路徑。</div>
+          </div>
+          <div class="term">
+            <div class="term-name">如何確保可靠？</div>
+            <div class="term-def">網路中的資料傳輸可能發生丟失或錯誤，協議（如 TCP）負責保證資料能完整、正確地到達目的地。</div>
+          </div>
+          <div class="term">
+            <div class="term-name">如何轉換資料格式？</div>
+            <div class="term-def">不同的應用程式產生不同格式的資料，網路協議定義了如何對資料進行封裝，使其能在網路上統一傳輸。</div>
+          </div>
+        </div>
+
+        <h2>資安視角：理解網路的重要性</h2>
+        <p>從資安的角度來看，理解網路通訊可以幫助你：</p>
+        <p><strong style="color: var(--text);">識別異常流量</strong> — 當你看到大量的 ICMP 封包或者不尋常的端口掃描時，能夠快速判斷這是攻擊行為。</p>
+        <p><strong style="color: var(--text);">理解攻擊原理</strong> — ARP 欺騙、DNS 污染、SYN Flood 等攻擊，本質上都是對網路協議的濫用。</p>
+        <p><strong style="color: var(--text);">設計防禦策略</strong> — 防火牆規則、ACL 配置、網路分段，都需要對網路架構有深刻理解。</p>
+
+        <div class="warning">
+          <div class="highlight-label">學習提示</div>
+          <p>本章節內容看起來很理論化，但每個概念在後面的滲透測試階段都會直接用到。建議先完整理解，不要跳過。</p>
+        </div>
+
+        <div class="quiz-box">
+          <div class="quiz-label">小測驗</div>
+          <div class="quiz-q">為什麼資安工程師需要深入了解網路知識？</div>
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="checkQuiz(this, false)"><span class="quiz-letter">A</span> 因為考試會考到網路相關題目</div>
+            <div class="quiz-opt" onclick="checkQuiz(this, true)"><span class="quiz-letter">B</span> 幾乎所有攻擊都透過網路進行，防禦也建立在網路協議之上</div>
+            <div class="quiz-opt" onclick="checkQuiz(this, false)"><span class="quiz-letter">C</span> 網路工程師薪水比資安工程師高</div>
+            <div class="quiz-opt" onclick="checkQuiz(this, false)"><span class="quiz-letter">D</span> 資安工作主要是寫報告，不需要懂技術</div>
+          </div>
+          <div class="quiz-explain" id="quiz-explain">正確！所有的網路攻擊（如 ARP 欺騙、SQL 注入、DDoS）都需要透過網路傳輸，而防禦機制（如防火牆、IDS/IPS）也都依賴對網路協議的深刻理解。沒有網路基礎，就無法真正理解安全漏洞的成因。</div>
+        </div>
+      </div>
+
+      <!-- ==================== L1-2 ==================== -->
+      <div class="content-block" id="l1-2">
+        <h2>網路通訊硬體完整介紹</h2>
+        <p>組建企業網路需要多種硬體設備協同工作，每種設備在 OSI 模型的不同層次發揮作用。從資安角度，每種設備都有其對應的攻擊面——理解設備的工作原理，才能理解針對它的攻擊，進而設計防禦策略。</p>
+
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>設備</th><th>OSI 層次</th><th>核心功能</th><th>攻擊面</th><th>防禦措施</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong style="color:var(--accent)">集線器 Hub</strong></td><td>第1層</td><td>廣播所有流量</td><td>任何人皆可嗅探全部流量</td><td>替換為交換機</td></tr>
+              <tr><td><strong style="color:var(--accent)">交換機 Switch</strong></td><td>第2層</td><td>MAC 地址精確轉發</td><td>MAC Flooding、ARP 欺騙、VLAN Hopping</td><td>端口安全、DAI、BPDU Guard</td></tr>
+              <tr><td><strong style="color:var(--accent)">路由器 Router</strong></td><td>第3層</td><td>IP 路由決策</td><td>弱口令、路由注入、Telnet 明文</td><td>SSH 管理、路由認證、ACL</td></tr>
+              <tr><td><strong style="color:var(--accent)">防火牆</strong></td><td>第3-7層</td><td>流量過濾策略</td><td>規則配置錯誤、管理介面暴露</td><td>最小化規則、禁止管理介面外網</td></tr>
+              <tr><td><strong style="color:var(--accent)">IDS/IPS</strong></td><td>第3-7層</td><td>入侵偵測/阻斷</td><td>特徵逃逸、加密隧道繞過</td><td>行為分析、SSL 解密檢測</td></tr>
+              <tr><td><strong style="color:var(--accent)">無線 AP</strong></td><td>第1-2層</td><td>Wi-Fi 接入</td><td>握手包破解、Evil Twin 偽裝</td><td>WPA3 或 WPA2-Enterprise（802.1X）</td></tr>
+              <tr><td><strong style="color:var(--accent)">負載均衡器</strong></td><td>第4-7層</td><td>流量分發</td><td>健康檢查繞過、後端直連</td><td>限制後端只接受 LB 流量</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>交換機工作原理深度解析</h3>
+        <p>交換機是現代企業網路的核心設備，維護一張 <strong>CAM 表（Content Addressable Memory Table）</strong>，也叫 MAC 地址表。它記錄了每個交換機端口對應的 MAC 地址，讓交換機能精確轉發而不是廣播。</p>
+
+        <div class="diagram">交換機 CAM 表學習過程（完整示例）：
+
+  網路環境：
+  端口1 ── PC_A (MAC: AA:AA:AA:AA:AA:AA, IP: 192.168.1.10)
+  端口2 ── PC_B (MAC: BB:BB:BB:BB:BB:BB, IP: 192.168.1.20)
+  端口3 ── PC_C (MAC: CC:CC:CC:CC:CC:CC, IP: 192.168.1.30)
+
+  ── 初始狀態：CAM 表為空 ──
+
+  步驟1：PC_A 發幀給 PC_B（目標 MAC: BB:BB）
+    交換機收到 → 來源 MAC AA:AA 在端口1 → 寫入 CAM 表
+    查 CAM 表找 BB:BB → 沒有！
+    動作：洪泛廣播（Flood）→ 端口2和端口3都收到
+
+    CAM 表：端口1 = AA:AA
+
+  步驟2：PC_B 回應 PC_A（目標 MAC: AA:AA）
+    交換機收到 → 來源 MAC BB:BB 在端口2 → 寫入 CAM 表
+    查 CAM 表找 AA:AA → 在端口1！
+    動作：只從端口1轉發（單播！PC_C 收不到）
+
+    CAM 表：端口1=AA:AA, 端口2=BB:BB
+
+  步驟3：之後 PC_A 再發給 PC_B
+    查 CAM 表找 BB:BB → 在端口2
+    動作：只從端口2轉發（精確單播）
+    → PC_C 無法嗅探到 PC_A 和 PC_B 的通信！</div>
+
+        <div class="info-box">
+          <div class="highlight-label">攻擊：MAC Flooding（MAC 洪泛）</div>
+          <p>攻擊工具 <code>macof</code>（Kali Linux 自帶）每秒可發送數千個隨機 MAC 地址的幀，耗盡 CAM 表（通常容量 8,000～16,000 條）。CAM 表滿後，交換機對目標 MAC 未知的幀只能洪泛廣播，效果等同於 Hub——攻擊者就能用 Wireshark 嗅探所有人的流量。</p>
+          <p style="margin-top:8px"><strong>防禦：端口安全（Port Security）</strong>——限制每個端口能學習的 MAC 地址數量（通常設為 1 或 3），超過限制則關閉端口（err-disable）並告警。</p>
+        </div>
+
+        <h3>路由器的路由表</h3>
+        <p>路由器維護的路由表是所有路由決策的依據。每一條路由條目包含：目的網路、子網遮罩、下一跳（Next Hop）、出口介面、度量值（Metric）、來源（靜態/動態協議學習）。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Cisco IOS — show ip route 輸出解讀</span><button class="code-copy" onclick="copyCode(this)">複製</button></div>
+          <pre>Router# show ip route
+
+Codes: C - connected, S - static, R - RIP, O - OSPF, B - BGP
+
+     10.0.0.0/8 is variably subnetted, 2 subnets, 2 masks
+C       10.0.0.0/30 is directly connected, GigabitEthernet0/1
+L       10.0.0.1/32 is directly connected, GigabitEthernet0/1
+     192.168.1.0/24 is variably subnetted, 2 subnets, 2 masks
+C       192.168.1.0/24 is directly connected, GigabitEthernet0/0
+L       192.168.1.1/32 is directly connected, GigabitEthernet0/0
+S    192.168.2.0/24 [1/0] via 10.0.0.2          <span class="cm">← 靜態路由</span>
+O    192.168.3.0/24 [110/2] via 10.0.0.2, 00:01:23, Gi0/1  <span class="cm">← OSPF 學習</span>
+S*   0.0.0.0/0 [1/0] via 203.0.113.1            <span class="cm">← 默認路由（去往互聯網）</span>
+
+<span class="cm"># 解讀：
+# C = 直連路由（Connected）：路由器直接連接的網段
+# S = 靜態路由（Static）：手動配置
+# O = OSPF：動態路由協議學習到的
+# [1/0] = [管理距離/度量值]，管理距離越小越優先
+# via 10.0.0.2 = 下一跳 IP 地址
+# S* = 默認路由（候選，*表示被選中）</span></pre>
+        </div>
+
+        <h3>防火牆類型比較</h3>
+
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>類型</th><th>工作層次</th><th>能做什麼</th><th>不能做什麼</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong style="color:var(--accent)">包過濾防火牆</strong></td>
+                <td>第3-4層</td>
+                <td>根據 IP/端口/協議放行或拒絕；速度最快</td>
+                <td>無法檢測應用層攻擊（SQL注入、XSS）；無法追蹤連接狀態</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--accent)">狀態防火牆</strong></td>
+                <td>第3-4層</td>
+                <td>追蹤 TCP/UDP 連接狀態，防止 TCP 欺騙；能識別「回應封包」自動放行</td>
+                <td>仍無法識別應用層內容；無法阻止已建立連接中的惡意資料</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--accent)">應用層防火牆（WAF）</strong></td>
+                <td>第7層</td>
+                <td>理解 HTTP/HTTPS 內容；識別並阻止 SQL 注入、XSS、文件上傳攻擊</td>
+                <td>計算開銷大；有誤報；攻擊者可透過混淆/編碼繞過</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--accent)">下一代防火牆（NGFW）</strong></td>
+                <td>全層次</td>
+                <td>集成 IPS + 應用識別 + 用戶識別 + SSL 解密 + 威脅情報</td>
+                <td>成本最高；需要專業人員維護策略；SSL 解密有隱私爭議</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="highlight">
+          <div class="highlight-label">資安工程師的思維框架</div>
+          <p>當你看到一個企業網路時，應該習慣性地問：「這裡部署了什麼設備？它工作在哪一層？有什麼攻擊面？」例如看到開放 80 端口的服務器前面有 WAF → 你需要考慮 WAF 繞過技術（編碼、分塊傳輸、HTTP 協議模糊）。看到只有包過濾防火牆 → 應用層攻擊可能不被攔截。</p>
+        </div>
+
+        <div class="quiz-box">
+          <div class="quiz-label">小測驗</div>
+          <div class="quiz-q">攻擊者發現目標企業只部署了包過濾防火牆（只過濾 IP/端口），並且允許 TCP 80（HTTP）進入。攻擊者在 HTTP 請求中嵌入 SQL 注入 Payload。防火牆會攔截這個攻擊嗎？</div>
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="checkQuiz(this, false)"><span class="quiz-letter">A</span>會攔截，因為 SQL 注入是已知攻擊，所有防火牆都有規則</div>
+            <div class="quiz-opt" onclick="checkQuiz(this, true)"><span class="quiz-letter">B</span>不會攔截。包過濾防火牆只看 IP/端口，不解析 HTTP 內容，允許 80 端口就放行所有 HTTP 流量</div>
+            <div class="quiz-opt" onclick="checkQuiz(this, false)"><span class="quiz-letter">C</span>不確定，取決於防火牆品牌</div>
+            <div class="quiz-opt" onclick="checkQuiz(this, false)"><span class="quiz-letter">D</span>會攔截，因為 SQL 注入包的封包大小異常</div>
+          </div>
+          <div class="quiz-explain">正確！包過濾防火牆工作在第三/四層，它只能看到「這是一個 TCP 封包，目標端口 80，來源 IP 合法」→ 放行。它完全不理解 HTTP 協議的內容，更不知道 URL 參數裡有 SQL 注入的 Payload。要防禦應用層攻擊，必須部署 WAF（Web Application Firewall）或 NGFW（下一代防火牆）進行應用層深度包檢測。</div>
+        </div>
+      </div>
+
+      <!-- ==================== L1-3 ==================== -->
+      <div class="content-block" id="l1-3">
+        <h2>網路拓撲結構</h2>
+        <p>網路拓撲描述了網路中各設備的物理或邏輯連接方式。不同的拓撲有不同的特性，直接影響網路的性能、可靠性和安全性。</p>
+
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>拓撲類型</th>
+                <th>結構特點</th>
+                <th>優點</th>
+                <th>缺點</th>
+                <th>常見場景</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong style="color:var(--accent)">匯流排型 Bus</strong></td>
+                <td>所有設備連到一條主幹線</td>
+                <td>佈線簡單、成本低</td>
+                <td>主幹線故障全網癱瘓、難排錯</td>
+                <td>早期以太網，現已淘汰</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--accent)">星型 Star</strong></td>
+                <td>所有設備連到中央設備</td>
+                <td>管理方便、單點故障影響小</td>
+                <td>中央設備成單點故障</td>
+                <td>現代辦公室最常見</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--accent)">環形 Ring</strong></td>
+                <td>設備依次首尾相連成環</td>
+                <td>傳輸效率高</td>
+                <td>單點故障影響整環</td>
+                <td>部分骨幹網</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--accent)">樹型 Tree</strong></td>
+                <td>星型拓撲的層次化擴展</td>
+                <td>易擴展、層次清晰</td>
+                <td>上層節點故障影響大</td>
+                <td>企業多樓層網路</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--accent)">網狀 Mesh</strong></td>
+                <td>設備間有多條路徑連接</td>
+                <td>高可靠性、無單點故障</td>
+                <td>成本高、配置複雜</td>
+                <td>數據中心、骨幹網</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>企業三層網路架構</h3>
+        <p>現代企業通常採用三層架構來設計網路，這個架構在後面的滲透測試中非常重要，因為你需要理解如何從一個區域橫向滲透到另一個區域。</p>
+
+        <div class="diagram">企業三層網路架構示意圖：
+
+  ┌────────────────────────────────────────────────────┐
+  │                    核心層 (Core Layer)              │
+  │              [核心交換機/路由器] 高速轉發            │
+  └───────────────────┬────────────────────────────────┘
+                      │
+  ┌───────────────────┴────────────────────────────────┐
+  │                  匯聚層 (Distribution Layer)        │
+  │      [匯聚交換機] 策略控制、路由、ACL、VLAN 間路由   │
+  └────┬─────────────────────────────────────┬─────────┘
+       │                                     │
+  ┌────┴────────────┐               ┌────────┴────────┐
+  │  接入層 (Access) │               │  接入層 (Access) │
+  │  [接入交換機]    │               │  [接入交換機]    │
+  │  連接終端設備    │               │  連接終端設備    │
+  │  PC/印表機/IP電話│               │  伺服器區        │
+  └─────────────────┘               └─────────────────┘</div>
+
+        <div class="info-box">
+          <div class="highlight-label">滲透測試相關</div>
+          <p>在後期進行內網橫向滲透時，你需要了解目標企業的網路架構。如果能繪製出類似上面的拓撲圖，就能更有效地規劃滲透路徑，找到從 DMZ 到核心伺服器區的突破口。信息收集階段的一個重要目標，就是繪製目標網路的拓撲圖。</p>
+        </div>
+      </div>
+
+      <!-- ==================== L1-4 ==================== -->
+      <div class="content-block" id="l1-4">
+        <h2>OSI 七層模型深度解析</h2>
+        <p>OSI（Open Systems Interconnection）七層模型是 1984 年 ISO 發布的網路通信標準框架，是網路工程師和資安工程師的共同語言。理解 OSI 不是為了背誦，而是為了在面對任何攻擊或故障時，能快速定位問題發生在哪一層、部署防禦在哪一層。</p>
+
+        <div class="info-box">
+          <div class="highlight-label">為什麼 OSI 對資安人員格外重要</div>
+          <p>所有安全工具的設計、CVE 漏洞的描述、滲透測試的分析，都基於 OSI 框架。當你說「這個漏洞在應用層」和「這個攻擊在傳輸層」，你就能知道：用哪種工具偵測、防火牆規則放在哪、封包捕獲要看哪些欄位。</p>
+        </div>
+
+        <h3>第一層：物理層（Physical Layer）</h3>
+        <p>物理層是最底層，負責定義如何在物理介質（網線、光纖、無線電波）上傳輸原始的位元（0 和 1）流。它只關心訊號的物理特性，完全不理解資料的含義。</p>
+        <ul>
+          <li><strong>PDU 單元</strong>：位元（Bit）</li>
+          <li><strong>代表技術</strong>：RJ-45 介面規格、Cat6 網線標準、IEEE 802.3 乙太網物理標準、Wi-Fi 射頻規格</li>
+          <li><strong>安全威脅</strong>：物理竊聽（搭線）、電磁輻射竊聽（Van Eck Phreaking）、硬體植入後門（如供應鏈攻擊中植入竊聽晶片）</li>
+          <li><strong>防禦</strong>：物理安全（機房門禁、攝影機）、使用光纖（比銅纜更難竊聽）、Faraday 屏蔽（軍事設施）</li>
+        </ul>
+
+        <h3>第二層：資料鏈路層（Data Link Layer）</h3>
+        <p>資料鏈路層負責在同一個廣播域（局域網）內的設備之間可靠傳輸幀，使用 MAC 地址定址，並提供基本的錯誤偵測（FCS 幀校驗序列）。分為 LLC（邏輯鏈路控制）和 MAC（媒體訪問控制）兩個子層。</p>
+        <ul>
+          <li><strong>PDU 單元</strong>：幀（Frame）</li>
+          <li><strong>代表協議</strong>：Ethernet（802.3）、Wi-Fi（802.11）、PPP</li>
+          <li><strong>代表設備</strong>：交換機（Switch）、無線 AP</li>
+          <li><strong>安全威脅</strong>：ARP 欺騙（中間人）、MAC 洪泛攻擊、VLAN Hopping、STP 拓撲攻擊</li>
+          <li><strong>防禦</strong>：動態 ARP 檢測（DAI）、端口安全（Port Security）、BPDU Guard</li>
+        </ul>
+
+        <h3>第三層：網路層（Network Layer）</h3>
+        <p>網路層負責在不同網段之間傳輸資料包，使用 IP 地址進行邏輯定址，並由路由器根據路由表決定每個包的最優路徑（路由決策）。這一層實現了端到端（End-to-End）的通信。</p>
+        <ul>
+          <li><strong>PDU 單元</strong>：包（Packet）</li>
+          <li><strong>代表協議</strong>：IPv4、IPv6、ICMP（ping）、OSPF、BGP、IGMP</li>
+          <li><strong>代表設備</strong>：路由器（Router）、三層交換機（L3 Switch）</li>
+          <li><strong>安全威脅</strong>：IP 欺騙（Spoofing）、ICMP Flood（Ping of Death）、路由劫持（BGP Hijacking）、Smurf 攻擊</li>
+          <li><strong>防禦</strong>：Ingress/Egress 過濾、uRPF（單播反向路徑轉發）、BGP 認證（BGPsec）</li>
+        </ul>
+
+        <div class="info-box">
+          <div class="highlight-label">BGP 劫持：互聯網路由的最大威脅</div>
+          <p>BGP（邊界閘道協議）是互聯網路由的基礎，負責在不同 AS（自治系統）間交換路由信息。BGP 默認信任所有鄰居的路由宣告——這是一個致命的設計缺陷。2018 年，有人宣告了 Google 的 IP 段（8.8.8.8 等），導致全球部分 Google 流量被路由到俄羅斯 Rostelecom 達 74 分鐘。這種攻擊叫做 BGP 劫持，輕則流量被重定向，重則 HTTPS 被中間人攻擊。</p>
+        </div>
+
+        <h3>第四層：傳輸層（Transport Layer）</h3>
+        <p>傳輸層提供進程到進程（Process-to-Process）的通信服務，用端口號（Port Number 0～65535）區分同一主機上的不同應用進程。TCP 和 UDP 是這層最重要的兩個協議。</p>
+
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>特性</th><th>TCP</th><th>UDP</th></tr></thead>
+            <tbody>
+              <tr><td>連接類型</td><td>面向連接（三次握手建立，四次揮手斷開）</td><td>無連接（直接發送）</td></tr>
+              <tr><td>可靠性</td><td>可靠（確認機制、重傳機制、序列號）</td><td>不可靠（無確認，可能丟包）</td></tr>
+              <tr><td>速度</td><td>較慢（開銷大）</td><td>快（開銷小）</td></tr>
+              <tr><td>適用場景</td><td>HTTP/HTTPS、SSH、FTP、SMTP（需要準確）</td><td>DNS、DHCP、視頻流、遊戲（速度優先）</td></tr>
+              <tr><td>DDoS 威脅</td><td>SYN Flood、ACK Flood、TCP 連接耗盡</td><td>UDP Flood、DNS 放大攻擊、NTP 放大攻擊</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>第五至七層：上三層</h3>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>層次</th><th>職責</th><th>代表協議</th><th>安全攻擊</th><th>防禦重點</th></tr></thead>
+            <tbody>
+              <tr>
+                <td style="color:var(--accent);font-weight:700">第5層<br>會話層</td>
+                <td>建立、管理、終止應用間的會話（對話）</td>
+                <td>NetBIOS、RPC、SQL Session</td>
+                <td>會話劫持、重放攻擊、NTLM 中繼</td>
+                <td>會話超時、Token 繫結、SMB 簽名</td>
+              </tr>
+              <tr>
+                <td style="color:var(--accent);font-weight:700">第6層<br>表示層</td>
+                <td>資料格式轉換、加密/解密、壓縮/解壓縮，確保發送方和接收方能理解彼此的資料格式</td>
+                <td>TLS/SSL、ASCII、Base64、JPEG</td>
+                <td>SSL 降級攻擊（BEAST/POODLE）、Heartbleed、弱加密套件</td>
+                <td>只允許 TLS 1.2/1.3、強加密套件、憑證透明度</td>
+              </tr>
+              <tr>
+                <td style="color:var(--accent);font-weight:700">第7層<br>應用層</td>
+                <td>為應用程式提供網路服務介面，是用戶直接交互的層次</td>
+                <td>HTTP、HTTPS、FTP、DNS、SSH、SMTP、RDP</td>
+                <td>SQL 注入、XSS、命令注入、路徑穿越、SSRF、反序列化</td>
+                <td>輸入驗證、WAF、安全編碼、最小權限</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>OSI 層次 vs 實際攻擊對應表</h3>
+        <div class="diagram">攻擊類型                     OSI 層次    主要防禦措施
+──────────────────────────────────────────────────────────────
+SQL 注入 / XSS / 命令注入     第7層     WAF、輸入過濾、安全編碼
+SSL/TLS 降級攻擊              第6層     強制 TLS 1.2+、HSTS
+會話劫持 / NTLM 中繼          第5層     會話超時、SMB 簽名
+SYN Flood / UDP Flood         第4層     SYN Cookie、速率限制、防火牆
+IP 欺騙 / BGP 劫持            第3層     uRPF、BGP 過濾
+ARP 欺騙 / MAC 洪泛           第2層     DAI、端口安全、靜態 ARP
+物理竊聽 / 硬體植入            第1層     物理安全、光纖、機房門禁</div>
+
+        <div class="highlight">
+          <div class="highlight-label">記憶口訣（OSI 由下到上）</div>
+          <p><strong>物資網傳，會表應</strong><br>物理 / 資料鏈路 / 網路 / 傳輸 / 會話 / 表示 / 應用<br><br>
+          英文：<strong>Please Do Not Throw Sausage Pizza Away</strong><br>
+          Physical / Data Link / Network / Transport / Session / Presentation / Application</p>
+        </div>
+
+        <div class="quiz-box">
+          <div class="quiz-label">小測驗</div>
+          <div class="quiz-q">Heartbleed（CVE-2014-0160）是 OpenSSL 的一個嚴重漏洞，攻擊者可以讀取伺服器記憶體中的私鑰和密碼。它主要影響 OSI 哪一層？為什麼？</div>
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="checkQuiz(this, false)"><span class="quiz-letter">A</span>第三層（網路層）——影響了伺服器的 IP 地址通信</div>
+            <div class="quiz-opt" onclick="checkQuiz(this, false)"><span class="quiz-letter">B</span>第四層（傳輸層）——TLS 運行在 TCP 之上</div>
+            <div class="quiz-opt" onclick="checkQuiz(this, true)"><span class="quiz-letter">C</span>第六層（表示層）——TLS/SSL 協議屬於表示層，負責加密解密</div>
+            <div class="quiz-opt" onclick="checkQuiz(this, false)"><span class="quiz-letter">D</span>第七層（應用層）——因為是透過 HTTPS 傳輸觸發的</div>
+          </div>
+          <div class="quiz-explain">正確！TLS/SSL 屬於 OSI 第六層（表示層），負責資料格式轉換和加密解密。Heartbleed 是 OpenSSL 在實現 TLS 心跳擴展（RFC 6520）時的邊界未檢查漏洞：攻擊者發送一個聲稱長度為 65535 但實際只有 1 bytes 的心跳請求，伺服器從記憶體中讀取 64KB 並回傳，其中包含私鑰、密碼、Cookie 等敏感內容。即使是 HTTPS（第7層應用），其加密是在第6層完成的，所以這個漏洞本質上是表示層的問題。</div>
+        </div>
+      </div>
+
+      <!-- ==================== L1-5 ==================== -->
+      <div class="content-block" id="l1-5">
+        <h2>資料封裝與解封過程</h2>
+        <p>當應用程式發送資料時，資料需要逐層向下封裝（添加每層的頭部信息），最終以電訊號的形式在物理媒介上傳輸。接收方則逐層向上解封，最終將資料交給應用程式。</p>
+
+        <h3>封裝過程（發送方）</h3>
+        <div class="diagram">應用層資料（HTTP Request）："GET /index.html HTTP/1.1"
+  
+  [應用層] → 產生資料（Data）
+       ↓ 加上傳輸層頭部
+  [傳輸層] → 產生段（Segment）= TCP頭 + 資料
+       ↓ 加上網路層頭部
+  [網路層] → 產生包（Packet）= IP頭 + 段
+       ↓ 加上資料鏈路層頭部尾部
+  [資料鏈路層] → 產生幀（Frame）= MAC頭 + 包 + FCS
+       ↓ 轉換為物理訊號
+  [物理層] → 在網線上傳輸比特（0 和 1）</div>
+
+        <h3>各層封裝的信息</h3>
+        <div class="key-terms">
+          <div class="term">
+            <div class="term-name">傳輸層 — Segment</div>
+            <div class="term-def">添加來源端口、目標端口、序列號等。端口號用於區分同一台主機上的不同服務（如 80=HTTP、443=HTTPS、22=SSH）。</div>
+          </div>
+          <div class="term">
+            <div class="term-name">網路層 — Packet</div>
+            <div class="term-def">添加來源 IP、目標 IP。IP 地址用於跨網路（跨路由器）定址，實現端到端的路由。</div>
+          </div>
+          <div class="term">
+            <div class="term-name">資料鏈路層 — Frame</div>
+            <div class="term-def">添加來源 MAC、目標 MAC、FCS（幀校驗序列）。MAC 地址用於同一局域網內的設備定址。</div>
+          </div>
+          <div class="term">
+            <div class="term-name">路由器的特殊行為</div>
+            <div class="term-def">每經過一個路由器，幀（Frame）的 MAC 地址會重新封裝（更新為下一跳的 MAC），但 IP 地址不變（除非有 NAT）。</div>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <div class="highlight-label">Wireshark 抓包知識點</div>
+          <p>當你用 Wireshark 抓包時，能看到每個封包的完整層次結構：乙太網幀頭部（MAC 地址）、IP 頭部（IP 地址）、TCP/UDP 頭部（端口號）、應用層資料（HTTP 請求等）。這個分層結構對於後面分析惡意流量非常重要。</p>
+        </div>
+
+        <h3>實際案例：你打開 google.com 發生了什麼？</h3>
+        <p>讓我們把所有知識串聯起來，看看一個完整的 HTTP 請求過程：</p>
+        <p><strong style="color: var(--text);">步驟一：DNS 解析</strong> — 瀏覽器發現 google.com 是個域名，先查詢本機 hosts 文件，沒有就發 DNS 查詢給設定的 DNS 伺服器，獲取 google.com 的 IP 地址（如 142.250.80.46）。</p>
+        <p><strong style="color: var(--text);">步驟二：路由選擇</strong> — 你的電腦發現目標 IP 不在本地局域網，資料需要送到默認閘道（路由器）。</p>
+        <p><strong style="color: var(--text);">步驟三：ARP 解析</strong> — 電腦知道閘道的 IP，但不知道其 MAC 地址，發送 ARP 廣播詢問「誰是 192.168.1.1？」，路由器回應自己的 MAC。</p>
+        <p><strong style="color: var(--text);">步驟四：封裝與傳送</strong> — 資料逐層封裝，目標 MAC 是路由器 MAC，目標 IP 是 google.com 的 IP，在本地網路傳到路由器。</p>
+        <p><strong style="color: var(--text);">步驟五：路由轉發</strong> — 路由器剝除幀頭，根據 IP 路由表找到下一跳，重新封裝幀頭，一跳一跳向 google.com 方向轉發。</p>
+
+        <div class="quiz-box">
+          <div class="quiz-label">小測驗</div>
+          <div class="quiz-q">資料從你的電腦傳送到另一個網段的伺服器，在經過路由器時，哪個地址會改變，哪個不會？</div>
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="checkQuiz(this, false)"><span class="quiz-letter">A</span> IP 地址改變，MAC 地址不變</div>
+            <div class="quiz-opt" onclick="checkQuiz(this, true)"><span class="quiz-letter">B</span> MAC 地址改變（更新為下一跳），IP 地址不變</div>
+            <div class="quiz-opt" onclick="checkQuiz(this, false)"><span class="quiz-letter">C</span> IP 地址和 MAC 地址都改變</div>
+            <div class="quiz-opt" onclick="checkQuiz(this, false)"><span class="quiz-letter">D</span> IP 地址和 MAC 地址都不變</div>
+          </div>
+          <div class="quiz-explain">正確！路由器在第三層（網路層）工作，每經過一個路由器，幀（Frame）的 MAC 地址（來源和目標）都會被更新為對應鏈路上的 MAC 地址，但 IP 頭部的來源 IP 和目標 IP 始終保持不變（除非有 NAT 轉換）。這就是為什麼 IP 地址可以實現端到端的定址。</div>
+        </div>
+      </div>
+
+      <!-- ==================== L2-1 ==================== -->
+      <div class="content-block" id="l2-1">
+        <h2>網路層次協議介紹</h2>
+        <p>不同的網路層次有各自的協議族，每個協議都有特定的用途。了解這些協議是後續學習滲透測試的基礎，因為很多漏洞和攻擊都是利用協議本身的設計缺陷。</p>
+
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>層次</th>
+                <th>協議</th>
+                <th>全名</th>
+                <th>主要功能</th>
+                <th>常用端口</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>應用層</td>
+                <td style="color:var(--accent);font-weight:700">HTTP/HTTPS</td>
+                <td>超文本傳輸協議</td>
+                <td>Web 頁面傳輸</td>
+                <td>80/443</td>
+              </tr>
+              <tr>
+                <td>應用層</td>
+                <td style="color:var(--accent);font-weight:700">DNS</td>
+                <td>域名系統</td>
+                <td>域名到 IP 的解析</td>
+                <td>53</td>
+              </tr>
+              <tr>
+                <td>應用層</td>
+                <td style="color:var(--accent);font-weight:700">SSH</td>
+                <td>安全外殼協議</td>
+                <td>加密遠端登入</td>
+                <td>22</td>
+              </tr>
+              <tr>
+                <td>應用層</td>
+                <td style="color:var(--accent);font-weight:700">FTP</td>
+                <td>文件傳輸協議</td>
+                <td>文件上傳下載</td>
+                <td>21/20</td>
+              </tr>
+              <tr>
+                <td>應用層</td>
+                <td style="color:var(--accent);font-weight:700">SMTP/POP3</td>
+                <td>郵件發送/接收</td>
+                <td>電子郵件傳輸</td>
+                <td>25/110</td>
+              </tr>
+              <tr>
+                <td>傳輸層</td>
+                <td style="color:var(--accent);font-weight:700">TCP</td>
+                <td>傳輸控制協議</td>
+                <td>可靠的連接導向傳輸</td>
+                <td>各服務不同</td>
+              </tr>
+              <tr>
+                <td>傳輸層</td>
+                <td style="color:var(--accent);font-weight:700">UDP</td>
+                <td>用戶資料報協議</td>
+                <td>不可靠但高效的無連接傳輸</td>
+                <td>53/67/68</td>
+              </tr>
+              <tr>
+                <td>網路層</td>
+                <td style="color:var(--accent);font-weight:700">IP</td>
+                <td>網際協議</td>
+                <td>跨網段尋址與路由</td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td>網路層</td>
+                <td style="color:var(--accent);font-weight:700">ICMP</td>
+                <td>網際控制訊息協議</td>
+                <td>網路診斷（ping）、錯誤回報</td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td>資料鏈路層</td>
+                <td style="color:var(--accent);font-weight:700">ARP</td>
+                <td>地址解析協議</td>
+                <td>IP → MAC 地址解析</td>
+                <td>—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="highlight">
+          <div class="highlight-label">關鍵端口記憶</div>
+          <p>資安工程師必須熟記常用端口：21(FTP)、22(SSH)、23(Telnet)、25(SMTP)、53(DNS)、80(HTTP)、110(POP3)、143(IMAP)、443(HTTPS)、445(SMB)、3306(MySQL)、3389(RDP)、6379(Redis)。在滲透測試的端口掃描階段，識別開放端口對應的服務是判斷攻擊面的關鍵。</p>
+        </div>
+      </div>
+
+      <!-- ==================== L2-2 ==================== -->
+      <div class="content-block" id="l2-2">
+        <h2>TCP 三次握手與四次揮手</h2>
+        <p>TCP 是互聯網上最重要的傳輸層協議之一，它提供可靠的、面向連接的資料傳輸。理解 TCP 的工作機制，是理解很多網路攻擊（如 SYN Flood、TCP 劫持）的基礎。</p>
+
+        <h3>TCP 三次握手（建立連接）</h3>
+        <p>TCP 在傳輸資料之前，必須先通過三次握手建立連接。這個過程確保雙方都有發送和接收能力。</p>
+
+        <div class="diagram">三次握手過程：
+
+  客戶端 (Client)                          伺服器 (Server)
+       |                                        |
+       |  ──── SYN (seq=x) ─────────────────>  |   第一次握手：
+       |  Client 說：我想連線，我的序號是 x      |   SYN_SENT 狀態
+       |                                        |
+       |  <─── SYN+ACK (seq=y, ack=x+1) ────  |   第二次握手：
+       |  Server 說：好的，我的序號是 y，        |   SYN_RECEIVED 狀態
+       |  我確認你的序號 x                       |
+       |                                        |
+       |  ──── ACK (ack=y+1) ───────────────>  |   第三次握手：
+       |  Client 說：我確認你的序號 y            |   ESTABLISHED 狀態
+       |                                        |
+       |  ═══════ 連線建立，開始傳輸資料 ══════  |</div>
+
+        <div class="info-box">
+          <div class="highlight-label">SYN Flood 攻擊原理</div>
+          <p>SYN Flood 是一種 DDoS 攻擊，攻擊者發送大量偽造來源 IP 的 SYN 包，伺服器回應 SYN+ACK 後等待最後的 ACK（進入半連接狀態），但因為來源 IP 是偽造的，ACK 永遠不會到達。伺服器的半連接佇列被耗盡，無法響應正常用戶的連接請求。防禦方法：SYN Cookie 技術、減小 SYN 等待超時時間。</p>
+        </div>
+
+        <h3>TCP 四次揮手（斷開連接）</h3>
+        <p>TCP 連接的斷開需要四次揮手，因為 TCP 連接是全雙工的，兩個方向的連接需要分別關閉。</p>
+
+        <div class="diagram">四次揮手過程：
+
+  客戶端 (Client)                          伺服器 (Server)
+       |                                        |
+       |  ──── FIN ─────────────────────────>  |   第一次揮手：
+       |  Client 說：我沒資料要發了，想斷連      |   FIN_WAIT_1
+       |                                        |
+       |  <─── ACK ─────────────────────────  |   第二次揮手：
+       |  Server 說：收到，但我可能還有資料要發  |   CLOSE_WAIT
+       |                                        |
+       |     [Server 繼續發送剩餘資料...]        |
+       |                                        |
+       |  <─── FIN ─────────────────────────  |   第三次揮手：
+       |  Server 說：我也沒資料了，也要斷連了    |   LAST_ACK
+       |                                        |
+       |  ──── ACK ─────────────────────────>  |   第四次揮手：
+       |  Client 說：收到，等待 2MSL 後關閉     |   CLOSED
+       |                                        |
+       |  ══════════ 連線斷開 ═══════════════  |</div>
+
+        <div class="quiz-box">
+          <div class="quiz-label">小測驗</div>
+          <div class="quiz-q">為什麼 TCP 建立連接需要三次握手，而不是兩次？</div>
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="checkQuiz(this, false)"><span class="quiz-letter">A</span> 因為網路標準規定必須三次</div>
+            <div class="quiz-opt" onclick="checkQuiz(this, false)"><span class="quiz-letter">B</span> 三次比兩次更快</div>
+            <div class="quiz-opt" onclick="checkQuiz(this, true)"><span class="quiz-letter">C</span> 確保雙方都驗證了對方的發送和接收能力，兩次無法確認客戶端的接收能力</div>
+            <div class="quiz-opt" onclick="checkQuiz(this, false)"><span class="quiz-letter">D</span> 為了讓 SYN Flood 攻擊更容易防禦</div>
+          </div>
+          <div class="quiz-explain">正確！兩次握手只能確認：(1) 客戶端能發送，伺服器能接收；(2) 伺服器能發送。但無法確認客戶端能接收伺服器的資料。第三次握手（客戶端發 ACK）正是為了讓伺服器確認客戶端有能力接收資料。這也解釋了為什麼三次是最少的可靠次數。</div>
+        </div>
+      </div>
+
+      <!-- ==================== L2-3 ==================== -->
+      <div class="content-block" id="l2-3">
+        <h2>ARP 地址解析協議</h2>
+        <p>ARP（Address Resolution Protocol）負責將 IP 地址解析為 MAC 地址。在同一個局域網內，設備通信需要知道對方的 MAC 地址。ARP 的設計有一個重大的安全缺陷：它是無狀態的，任何人都可以發送假的 ARP 回應，這就是 ARP 欺騙攻擊的基礎。</p>
+
+        <h3>ARP 工作流程</h3>
+        <div class="diagram">ARP 解析過程（PC A 想發資料給 PC B）：
+
+  PC A (192.168.1.10)          PC B (192.168.1.20)         PC C (192.168.1.30)
+        |                             |                            |
+        |  ARP Request（廣播）          |                            |
+        | ─── 誰是 192.168.1.20？ ──> | ────────────────────────> |
+        |      我是 AA:BB:CC:11:22:33 |                            |
+        |                             | ARP Reply（單播）            |
+        | <── 我是 192.168.1.20       |                            |
+        |     MAC: DD:EE:FF:44:55:66  |                            |
+        |                             |                            |
+  PC A 更新 ARP 快取：
+  192.168.1.20 → DD:EE:FF:44:55:66  
+  
+  PC C 收到廣播，但不會回應（因為問的不是他）</div>
+
+        <div class="warning">
+          <div class="highlight-label">ARP 欺騙攻擊（中間人攻擊）</div>
+          <p>ARP 協議沒有身份驗證機制！攻擊者可以發送偽造的 ARP 回應，告訴 PC A「我就是閘道（192.168.1.1）的 MAC 是 XX:XX:XX:XX:XX:XX（攻擊者的 MAC）」，同時告訴閘道「PC A（192.168.1.10）的 MAC 是 XX:XX:XX:XX:XX:XX」，這樣所有流量都會先經過攻擊者，攻擊者就能嗅探或篡改流量（中間人攻擊）。防禦方式：動態 ARP 檢測（DAI）、靜態 ARP 條目、使用 HTTPS。</p>
+        </div>
+
+        <h3>查看和清除 ARP 快取</h3>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Windows CMD / PowerShell</span>
+            <button class="code-copy" onclick="copyCode(this)">複製</button>
+          </div>
+          <pre><span class="cm"># 查看 ARP 快取表</span>
+arp -a
+
+<span class="cm"># 清除 ARP 快取（需要管理員權限）</span>
+arp -d *
+
+<span class="cm"># 添加靜態 ARP 條目（防 ARP 欺騙）</span>
+arp -s 192.168.1.1 00-11-22-33-44-55</pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Linux Terminal</span>
+            <button class="code-copy" onclick="copyCode(this)">複製</button>
+          </div>
+          <pre><span class="cm"># 查看 ARP 快取表</span>
+arp -n
+
+<span class="cm"># 使用 ip 命令（現代 Linux）</span>
+ip neigh show
+
+<span class="cm"># 清除 ARP 快取</span>
+ip neigh flush all
+
+<span class="cm"># 使用 arping 工具發送 ARP 請求（需安裝）</span>
+arping -I eth0 192.168.1.1</pre>
+        </div>
+      </div>
+
+      <!-- ==================== L3-1 ==================== -->
+      <div class="content-block" id="l3-1">
+        <h2>域名解析過程（DNS）</h2>
+        <p>DNS（Domain Name System）是互聯網的「電話簿」，負責將人類可讀的域名（如 google.com）解析為電腦可處理的 IP 地址。DNS 也是滲透測試中重要的信息收集目標。</p>
+
+        <h3>DNS 層次結構</h3>
+        <div class="diagram">DNS 域名層次結構：
+
+  根域 (.)
+   ├── 頂級域 (TLD)： .com  .org  .tw  .cn
+   │    ├── 二級域：  google.com  microsoft.com
+   │    │    └── 主機名：  www.google.com  mail.google.com
+   │    └── ...
+   └── ...</div>
+
+        <h3>完整的 DNS 查詢過程</h3>
+        <div class="diagram">用戶訪問 www.example.com 的完整 DNS 解析流程：
+
+  瀏覽器 → 本機 hosts 文件 → 本機 DNS 快取
+       ↓ 都沒有命中
+  本地 DNS 伺服器（ISP 提供，如 8.8.8.8）
+       ↓ 快取中沒有
+  根 DNS 伺服器（全球 13 個根服務器集群）
+       ↓ 回應：.com 的 TLD 伺服器地址
+  .com TLD 伺服器
+       ↓ 回應：example.com 的授權伺服器地址
+  example.com 授權 DNS 伺服器
+       ↓ 回應：www.example.com = 93.184.216.34
+  本地 DNS 伺服器快取結果 → 回傳給瀏覽器</div>
+
+        <div class="info-box">
+          <div class="highlight-label">滲透測試：DNS 信息收集</div>
+          <p>DNS 是信息收集的重要來源。透過 DNS 查詢可以：(1) 發現子域名（子域名爆破）；(2) 查詢 MX 記錄找郵件伺服器；(3) 查詢 TXT 記錄發現 SPF/DKIM 配置；(4) DNS 區域傳送漏洞（AXFR）可能洩露所有 DNS 記錄。常用工具：nslookup、dig、dnsenum、subfinder。</p>
+        </div>
+
+        <h3>常用 DNS 查詢命令</h3>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">nslookup / dig 命令</span>
+            <button class="code-copy" onclick="copyCode(this)">複製</button>
+          </div>
+          <pre><span class="cm"># 基本 A 記錄查詢（域名 → IP）</span>
+nslookup www.example.com
+dig www.example.com A
+
+<span class="cm"># 查詢 MX 記錄（郵件伺服器）</span>
+dig example.com MX
+
+<span class="cm"># 查詢所有記錄類型</span>
+dig example.com ANY
+
+<span class="cm"># 測試 DNS 區域傳送漏洞</span>
+dig axfr @dns.example.com example.com
+
+<span class="cm"># 反向解析（IP → 域名）</span>
+dig -x 93.184.216.34</pre>
+        </div>
+      </div>
+
+      <!-- ==================== L3-2 ==================== -->
+      <div class="content-block" id="l3-2">
+        <h2>IP 地址組成與分類</h2>
+        <p>IP 地址（IPv4）是一個 32 位元的二進制數，通常用四個十進制數表示（如 192.168.1.1）。理解 IP 地址的結構是進行子網劃分和網路規劃的基礎。</p>
+
+        <h3>IP 地址的組成</h3>
+        <div class="diagram">IP 地址 = 網路部分 + 主機部分
+
+  例：192.168.1.100 / 24
+
+  二進制：11000000.10101000.00000001.01100100
+          ←─────── 網路部分 ────────→←主機→
+          192      .168      .1        .100
+
+  子網遮罩：/24 = 255.255.255.0
+  二進制：  11111111.11111111.11111111.00000000
+  
+  其中 1 的位數對應網路部分，0 的位數對應主機部分</div>
+
+        <h3>IPv4 地址分類（有類地址）</h3>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>類別</th>
+                <th>地址範圍</th>
+                <th>默認子網遮罩</th>
+                <th>用途</th>
+                <th>私有地址範圍</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="color:var(--accent);font-weight:700">A 類</td>
+                <td>1.0.0.0 — 126.255.255.255</td>
+                <td>/8 (255.0.0.0)</td>
+                <td>大型網路</td>
+                <td>10.0.0.0/8</td>
+              </tr>
+              <tr>
+                <td style="color:var(--accent);font-weight:700">B 類</td>
+                <td>128.0.0.0 — 191.255.255.255</td>
+                <td>/16 (255.255.0.0)</td>
+                <td>中型網路</td>
+                <td>172.16.0.0/12</td>
+              </tr>
+              <tr>
+                <td style="color:var(--accent);font-weight:700">C 類</td>
+                <td>192.0.0.0 — 223.255.255.255</td>
+                <td>/24 (255.255.255.0)</td>
+                <td>小型網路</td>
+                <td>192.168.0.0/16</td>
+              </tr>
+              <tr>
+                <td style="color:var(--accent);font-weight:700">D 類</td>
+                <td>224.0.0.0 — 239.255.255.255</td>
+                <td>—</td>
+                <td>組播（Multicast）</td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td style="color:var(--accent);font-weight:700">E 類</td>
+                <td>240.0.0.0 — 255.255.255.255</td>
+                <td>—</td>
+                <td>實驗保留</td>
+                <td>—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="highlight">
+          <div class="highlight-label">私有地址與 NAT</div>
+          <p>私有 IP 地址（10.x.x.x、172.16-31.x.x、192.168.x.x）不能直接在互聯網上路由，只能在私有網路內使用。企業和家庭網路使用私有地址，透過 NAT（網路地址轉換）映射到公網 IP 地址進行互聯網通信。這也是為什麼你家裡很多設備可以共用一個公網 IP 的原因。</p>
+        </div>
+
+        <div class="quiz-box">
+          <div class="quiz-label">小測驗</div>
+          <div class="quiz-q">下列哪個 IP 地址是私有 IP 地址？</div>
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="checkQuiz(this, false)"><span class="quiz-letter">A</span> 8.8.8.8</div>
+            <div class="quiz-opt" onclick="checkQuiz(this, false)"><span class="quiz-letter">B</span> 114.114.114.114</div>
+            <div class="quiz-opt" onclick="checkQuiz(this, true)"><span class="quiz-letter">C</span> 172.20.10.1</div>
+            <div class="quiz-opt" onclick="checkQuiz(this, false)"><span class="quiz-letter">D</span> 61.135.169.121</div>
+          </div>
+          <div class="quiz-explain">正確！172.20.10.1 屬於 172.16.0.0/12 的私有地址範圍（172.16.0.0 到 172.31.255.255）。8.8.8.8 是 Google 的公共 DNS，114.114.114.114 是國內公共 DNS，61.135.169.121 是百度的公網 IP。記住三段私有地址：10.0.0.0/8、172.16.0.0/12、192.168.0.0/16。</div>
+        </div>
+      </div>
+
+      <!-- ==================== L3-3 ==================== -->
+      <div class="content-block" id="l3-3">
+        <h2>子網劃分詳解</h2>
+        <p>子網劃分是將一個大的 IP 地址空間分割成多個小的子網的技術。在企業網路設計中，子網劃分用於隔離不同部門的流量，在滲透測試中，理解子網劃分有助於分析目標網路的結構。</p>
+
+        <h3>CIDR 表示法</h3>
+        <p>CIDR（無類別域間路由）使用前綴長度表示子網遮罩：192.168.1.0/<strong style="color:var(--accent)">24</strong>，其中 /24 表示前 24 位是網路部分。</p>
+
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>CIDR 前綴</th>
+                <th>子網遮罩</th>
+                <th>可用主機數</th>
+                <th>常見用途</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="color:var(--accent);font-family:monospace">/8</td>
+                <td>255.0.0.0</td>
+                <td>16,777,214</td>
+                <td>大型 ISP、A 類地址</td>
+              </tr>
+              <tr>
+                <td style="color:var(--accent);font-family:monospace">/16</td>
+                <td>255.255.0.0</td>
+                <td>65,534</td>
+                <td>大型企業</td>
+              </tr>
+              <tr>
+                <td style="color:var(--accent);font-family:monospace">/24</td>
+                <td>255.255.255.0</td>
+                <td>254</td>
+                <td>最常見，辦公室/部門</td>
+              </tr>
+              <tr>
+                <td style="color:var(--accent);font-family:monospace">/25</td>
+                <td>255.255.255.128</td>
+                <td>126</td>
+                <td>小型部門</td>
+              </tr>
+              <tr>
+                <td style="color:var(--accent);font-family:monospace">/30</td>
+                <td>255.255.255.252</td>
+                <td>2</td>
+                <td>路由器間的點對點連接</td>
+              </tr>
+              <tr>
+                <td style="color:var(--accent);font-family:monospace">/32</td>
+                <td>255.255.255.255</td>
+                <td>1</td>
+                <td>單台主機路由</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>子網計算練習</h3>
+        <p>給定網段 <strong style="color:var(--accent)">192.168.10.0/26</strong>，計算以下信息：</p>
+
+        <div class="diagram">已知：192.168.10.0/26
+
+  /26 → 子網遮罩：255.255.255.192（二進制末段：11000000）
+
+  網路地址（主機位全0）：  192.168.10.0
+  廣播地址（主機位全1）：  192.168.10.63
+  可用主機範圍：          192.168.10.1 ~ 192.168.10.62
+  可用主機數：            2^(32-26) - 2 = 2^6 - 2 = 62 台
+
+  計算公式：
+  可用主機數 = 2^(主機位數) - 2
+  子網數    = 2^(借用的位數)</div>
+
+        <div class="highlight">
+          <div class="highlight-label">滲透測試實用技巧</div>
+          <p>在滲透測試中，當你發現目標的一個 IP（如 192.168.10.5/24），你應該立刻知道整個子網是 192.168.10.0/24，可以對這個段進行主機發現掃描（nmap -sn 192.168.10.0/24），找到同一子網下的其他主機，這是內網橫向滲透的第一步。</p>
+        </div>
+      </div>
+
+      <!-- placeholder for other lessons -->
+      <div class="content-block" id="l3-4">
+        <h2>Cisco Packet Tracer 安裝與基礎使用</h2>
+        <p>Cisco Packet Tracer 是 Cisco 官方推出的免費網路模擬器，讓你在沒有真實設備的情況下練習網路配置。</p>
+        <h3>安裝步驟</h3>
+        <p>前往 Cisco NetAcad 官網（netacad.com）免費註冊帳號，即可下載最新版 Packet Tracer（支援 Windows、macOS、Linux）。安裝完成後使用 NetAcad 帳號登入即可使用。</p>
+        <div class="highlight">
+          <div class="highlight-label">替代工具</div>
+          <p>如果不想安裝 Packet Tracer，也可以使用 GNS3（開源，支援真實 IOS 映像）或 EVE-NG（企業級網路模擬）。對於本課程，Packet Tracer 已完全足夠。</p>
+        </div>
+        <h3>基本界面介紹</h3>
+        <p>左側設備面板可拖拉路由器、交換機、PC 等設備到工作區；點選連接工具（閃電圖示）可連接設備；點選設備進入配置界面，可選擇 CLI（命令行）或 Config（圖形化）模式進行配置。</p>
+      </div>
+
+      <!-- Static route lesson -->
+      <div class="content-block" id="l4-1">
+        <h2>網路設備管理方法</h2>
+        <p>管理路由器和交換機的方式有多種，了解這些方式有助於在滲透測試中尋找管理介面。</p>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>管理方式</th><th>連接方式</th><th>安全性</th><th>說明</th></tr></thead>
+            <tbody>
+              <tr><td style="color:var(--accent)">Console（控制台）</td><td>直連 Console 端口</td><td>高</td><td>物理接觸才能管理，最安全</td></tr>
+              <tr><td style="color:var(--accent)">Telnet</td><td>網路遠端</td><td>極低</td><td>明文傳輸，現已不推薦使用</td></tr>
+              <tr><td style="color:var(--accent)">SSH</td><td>網路遠端</td><td>高</td><td>加密傳輸，推薦使用</td></tr>
+              <tr><td style="color:var(--accent)">Web GUI（HTTP/HTTPS）</td><td>瀏覽器</td><td>中/高</td><td>圖形化管理介面</td></tr>
+              <tr><td style="color:var(--accent)">SNMP</td><td>網路管理協議</td><td>中</td><td>v1/v2c 明文，v3 加密</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="warning">
+          <div class="highlight-label">資安警告</div>
+          <p>很多企業的網路設備仍然開啟了 Telnet 管理（明文傳輸！）或使用默認帳號密碼（cisco/cisco）。這是滲透測試中常見的發現。在信息收集階段，如果發現 23（Telnet）或 80（HTTP 管理介面）端口開放，應立即進行驗證。</p>
+        </div>
+      </div>
+
+      <div class="content-block" id="l4-2">
+        <h2>Cisco 設備配置模式</h2>
+        <p>Cisco 路由器和交換機的 CLI 有多個配置模式，了解這些模式是進行設備配置的前提。</p>
+        <div class="diagram">Cisco IOS 配置模式層次：
+
+  Router>               ← 用戶 EXEC 模式（只讀，有限命令）
+  Router# enable        ← 輸入 enable 進入特權模式
+  Router#               ← 特權 EXEC 模式（可查看所有信息）
+  Router# configure terminal
+  Router(config)#       ← 全局配置模式（修改全局設定）
+  Router(config)# interface GigabitEthernet0/0
+  Router(config-if)#    ← 介面配置模式（配置具體介面）
+  Router(config)# router ospf 1
+  Router(config-router)# ← 路由協議配置模式</div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Cisco IOS — 基礎配置命令</span><button class="code-copy" onclick="copyCode(this)">複製</button></div>
+          <pre><span class="cm">! 設定主機名稱</span>
+Router(config)# hostname R1
+
+<span class="cm">! 設定特權模式密碼（加密）</span>
+R1(config)# enable secret Str0ngP@ss
+
+<span class="cm">! 設定控制台密碼</span>
+R1(config)# line console 0
+R1(config-line)# password Console123
+R1(config-line)# login
+
+<span class="cm">! 開啟 SSH（代替 Telnet）</span>
+R1(config)# ip domain-name example.com
+R1(config)# crypto key generate rsa modulus 2048
+R1(config)# ip ssh version 2
+R1(config)# line vty 0 4
+R1(config-line)# transport input ssh
+R1(config-line)# login local
+
+<span class="cm">! 保存配置</span>
+R1# write memory  <span class="cm">或</span>  R1# copy running-config startup-config</pre>
+        </div>
+      </div>
+
+      <div class="content-block" id="l4-3">
+        <h2>靜態路由實戰配置</h2>
+        <p>靜態路由是手動配置的路由條目，告訴路由器「要到達某個網段，下一跳是哪裡」。雖然不像動態路由那樣自動學習，但靜態路由更穩定、更安全，適合小型網路或特定流量的控制。</p>
+        <div class="diagram">靜態路由配置場景：
+
+  [PC A: 192.168.1.10]
+        |
+  [R1] G0/0: 192.168.1.1   G0/1: 10.0.0.1
+                                  |
+                            [R2] G0/0: 10.0.0.2   G0/1: 192.168.2.1
+                                                         |
+                                                  [PC B: 192.168.2.10]
+
+  問題：PC A 怎麼訪問 PC B？
+  → R1 需要知道：要到 192.168.2.0/24，下一跳是 10.0.0.2（R2）
+  → R2 需要知道：要到 192.168.1.0/24，下一跳是 10.0.0.1（R1）</div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Cisco IOS — 靜態路由配置</span><button class="code-copy" onclick="copyCode(this)">複製</button></div>
+          <pre><span class="cm">! R1 的配置</span>
+R1(config)# interface GigabitEthernet0/0
+R1(config-if)# ip address 192.168.1.1 255.255.255.0
+R1(config-if)# no shutdown
+
+R1(config)# interface GigabitEthernet0/1
+R1(config-if)# ip address 10.0.0.1 255.255.255.252
+R1(config-if)# no shutdown
+
+<span class="cm">! 添加靜態路由：到 192.168.2.0/24，下一跳 10.0.0.2</span>
+R1(config)# ip route 192.168.2.0 255.255.255.0 10.0.0.2
+
+<span class="cm">! 查看路由表</span>
+R1# show ip route
+
+<span class="cm">! 測試連通性</span>
+R1# ping 192.168.2.10</pre>
+        </div>
+      </div>
+
+      <!-- Remaining stubs -->
+      <div class="content-block" id="l5-1">
+        <h2>動態路由協議概述與分類</h2>
+        <p>動態路由協議讓路由器自動學習網路拓撲，無需手動配置每條路由。當網路拓撲發生變化時（如某條鏈路斷了），路由器能自動收斂找到新的路徑。</p>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>分類</th><th>協議</th><th>算法</th><th>適用範圍</th></tr></thead>
+            <tbody>
+              <tr><td>距離向量</td><td style="color:var(--accent)">RIP v1/v2</td><td>Bellman-Ford</td><td>小型網路（跳數≤15）</td></tr>
+              <tr><td>鏈路狀態</td><td style="color:var(--accent)">OSPF</td><td>Dijkstra（SPF）</td><td>企業中大型網路</td></tr>
+              <tr><td>鏈路狀態</td><td style="color:var(--accent)">IS-IS</td><td>Dijkstra</td><td>ISP 骨幹網</td></tr>
+              <tr><td>路徑向量</td><td style="color:var(--accent)">BGP</td><td>路徑向量</td><td>互聯網 AS 間路由</td></tr>
+              <tr><td>增強距離向量</td><td style="color:var(--accent)">EIGRP</td><td>DUAL</td><td>Cisco 私有協議</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="content-block" id="l5-2">
+        <h2>RIP 工作原理與配置</h2>
+        <p>RIP（Routing Information Protocol）是最古老的動態路由協議之一，以「跳數（Hop Count）」作為度量值，最大跳數為 15（16 跳視為不可達）。</p>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Cisco IOS — RIP v2 配置</span><button class="code-copy" onclick="copyCode(this)">複製</button></div>
+          <pre><span class="cm">! 啟用 RIP，版本 2</span>
+R1(config)# router rip
+R1(config-router)# version 2
+R1(config-router)# no auto-summary
+
+<span class="cm">! 宣告直連網路</span>
+R1(config-router)# network 192.168.1.0
+R1(config-router)# network 10.0.0.0
+
+<span class="cm">! 查看 RIP 路由</span>
+R1# show ip route rip
+R1# debug ip rip</pre>
+        </div>
+        <div class="warning">
+          <div class="highlight-label">RIP 的安全問題</div>
+          <p>RIP 默認沒有認證機制，攻擊者可以注入偽造的路由信息（路由欺騙），導致流量被重定向到攻擊者控制的設備。RIP v2 支持 MD5 認證，但現代網路已基本被 OSPF 或 EIGRP 取代。</p>
+        </div>
+      </div>
+
+      <div class="content-block" id="l6-1">
+        <h2>OSPF 原理與特性</h2>
+        <p>OSPF（Open Shortest Path First）是企業網路中最廣泛使用的動態路由協議，使用 Dijkstra 最短路徑算法計算最優路徑。</p>
+        <div class="key-terms">
+          <div class="term"><div class="term-name">Router ID</div><div class="term-def">每台 OSPF 路由器的唯一標識，通常使用 Loopback 介面的 IP 地址，格式為 x.x.x.x。</div></div>
+          <div class="term"><div class="term-name">LSDB</div><div class="term-def">鏈路狀態數據庫，保存整個 OSPF 區域的拓撲信息，同一區域的所有路由器 LSDB 相同。</div></div>
+          <div class="term"><div class="term-name">DR/BDR</div><div class="term-def">在廣播網路（如乙太網）上選出指定路由器（DR）和備份指定路由器（BDR），減少 LSA 泛洪。</div></div>
+          <div class="term"><div class="term-name">Area</div><div class="term-def">OSPF 可劃分為多個區域（Area），Area 0 是骨幹區域，所有其他區域必須連接到 Area 0。</div></div>
+        </div>
+      </div>
+
+      <div class="content-block" id="l6-2">
+        <h2>OSPF 實戰配置</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Cisco IOS — OSPF 基礎配置</span><button class="code-copy" onclick="copyCode(this)">複製</button></div>
+          <pre><span class="cm">! 啟用 OSPF，進程號 1</span>
+R1(config)# router ospf 1
+
+<span class="cm">! 設定 Router ID</span>
+R1(config-router)# router-id 1.1.1.1
+
+<span class="cm">! 宣告網路（在 Area 0）</span>
+R1(config-router)# network 192.168.1.0 0.0.0.255 area 0
+R1(config-router)# network 10.0.0.0 0.0.0.3 area 0
+
+<span class="cm">! 查看 OSPF 鄰居關係</span>
+R1# show ip ospf neighbor
+
+<span class="cm">! 查看 OSPF 路由</span>
+R1# show ip route ospf</pre>
+        </div>
+      </div>
+
+      <div class="content-block" id="l7-1">
+        <h2>NAT 概念與靜態 NAT</h2>
+        <p>NAT（Network Address Translation）解決了 IPv4 地址不足的問題，允許多台私有 IP 設備共用少量公網 IP 地址進行互聯網通信。</p>
+        <div class="key-terms">
+          <div class="term"><div class="term-name">靜態 NAT</div><div class="term-def">一對一映射：一個私有 IP ↔ 一個公網 IP。通常用於需要從外網訪問的伺服器（如 Web 伺服器）。</div></div>
+          <div class="term"><div class="term-name">動態 NAT</div><div class="term-def">多對多映射：從公網 IP 池中動態分配。連接斷開後公網 IP 歸還池中。</div></div>
+          <div class="term"><div class="term-name">PAT（NAT Overload）</div><div class="term-def">多對一映射：多台私有設備共用一個公網 IP，用不同的端口號區分。家用路由器最常用。</div></div>
+          <div class="term"><div class="term-name">資安影響</div><div class="term-def">NAT 提供了一定程度的隱藏，但不是防火牆！不要依賴 NAT 作為安全措施，仍需配置 ACL 和防火牆規則。</div></div>
+        </div>
+      </div>
+
+      <div class="content-block" id="l7-2">
+        <h2>動態 NAT 與 PAT 配置</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Cisco IOS — PAT 配置（最常用）</span><button class="code-copy" onclick="copyCode(this)">複製</button></div>
+          <pre><span class="cm">! 定義內部網路 ACL</span>
+R1(config)# access-list 1 permit 192.168.1.0 0.0.0.255
+
+<span class="cm">! 配置 PAT（使用外部介面 IP）</span>
+R1(config)# ip nat inside source list 1 interface GigabitEthernet0/1 overload
+
+<span class="cm">! 標記內部和外部介面</span>
+R1(config)# interface GigabitEthernet0/0
+R1(config-if)# ip nat inside
+
+R1(config)# interface GigabitEthernet0/1
+R1(config-if)# ip nat outside
+
+<span class="cm">! 查看 NAT 轉換表</span>
+R1# show ip nat translations
+R1# show ip nat statistics</pre>
+        </div>
+      </div>
+
+      <div class="content-block" id="l7-3">
+        <h2>NAT 排錯與 TCP 負載均衡</h2>
+        <p>NAT 配置常見問題排查步驟：確認介面是否正確標記 inside/outside、確認 ACL 是否匹配正確的源地址、確認路由表是否有到外部的默認路由。</p>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Cisco IOS — NAT 排錯命令</span><button class="code-copy" onclick="copyCode(this)">複製</button></div>
+          <pre><span class="cm">! 查看 NAT 轉換（是否有條目生成）</span>
+R1# show ip nat translations
+
+<span class="cm">! 查看 NAT 統計（看 hits 和 misses）</span>
+R1# show ip nat statistics
+
+<span class="cm">! 開啟 NAT 調試（謹慎使用）</span>
+R1# debug ip nat
+
+<span class="cm">! 清除 NAT 轉換表</span>
+R1# clear ip nat translation *</pre>
+        </div>
+      </div>
+
+      <div class="content-block" id="l8-1">
+        <h2>二層交換基礎與 VLAN 概述</h2>
+        <p>VLAN（Virtual Local Area Network）虛擬局域網，是在一台物理交換機上劃分出多個邏輯上獨立的廣播域。不同 VLAN 的設備默認無法直接通信，需要透過路由器或三層交換機進行跨 VLAN 路由。</p>
+        <div class="highlight">
+          <div class="highlight-label">VLAN 的安全價值</div>
+          <p>VLAN 是企業網路安全設計的重要工具。例如：將財務部門和研發部門放在不同 VLAN，即使有一台設備被攻陷，攻擊者也無法直接橫向移動到其他部門。這正是「網路分段（Network Segmentation）」安全策略的基礎。</p>
+        </div>
+      </div>
+
+      <div class="content-block" id="l8-2">
+        <h2>VLAN 配置與跨 VLAN 路由</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Cisco IOS — VLAN 基礎配置</span><button class="code-copy" onclick="copyCode(this)">複製</button></div>
+          <pre><span class="cm">! 創建 VLAN</span>
+SW1(config)# vlan 10
+SW1(config-vlan)# name Finance
+SW1(config)# vlan 20
+SW1(config-vlan)# name Engineering
+
+<span class="cm">! 將端口分配到 VLAN（Access 端口）</span>
+SW1(config)# interface GigabitEthernet0/1
+SW1(config-if)# switchport mode access
+SW1(config-if)# switchport access vlan 10
+
+<span class="cm">! 配置 Trunk 端口（連接路由器或其他交換機）</span>
+SW1(config)# interface GigabitEthernet0/24
+SW1(config-if)# switchport mode trunk
+SW1(config-if)# switchport trunk allowed vlan 10,20
+
+<span class="cm">! 查看 VLAN 信息</span>
+SW1# show vlan brief</pre>
+        </div>
+      </div>
+
+      <div class="content-block" id="l9-1">
+        <h2>訪問控制列表（ACL）配置</h2>
+        <p>ACL（Access Control List）是路由器上的流量過濾工具，根據定義的規則允許或拒絕特定的網路流量。ACL 是實現基本網路安全策略的重要手段。</p>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Cisco IOS — ACL 配置</span><button class="code-copy" onclick="copyCode(this)">複製</button></div>
+          <pre><span class="cm">! 標準 ACL（只基於源 IP 過濾）</span>
+R1(config)# access-list 10 permit 192.168.1.0 0.0.0.255
+R1(config)# access-list 10 deny any
+
+<span class="cm">! 擴展 ACL（基於源/目標 IP、協議、端口）</span>
+R1(config)# ip access-list extended BLOCK_TELNET
+R1(config-ext-nacl)# deny tcp any any eq 23
+R1(config-ext-nacl)# deny tcp any any eq 21
+R1(config-ext-nacl)# permit ip any any
+
+<span class="cm">! 將 ACL 應用到介面</span>
+R1(config)# interface GigabitEthernet0/0
+R1(config-if)# ip access-group BLOCK_TELNET in
+
+<span class="cm">! 查看 ACL</span>
+R1# show access-lists</pre>
+        </div>
+        <div class="highlight">
+          <div class="highlight-label">第一階段完成！</div>
+          <p>恭喜你完成了第一階段的學習！你現在掌握了企業網路的基礎知識，包括網路協議、IP 規劃、路由配置（靜態/RIP/OSPF）、NAT、VLAN 和 ACL。這些知識將在後續的滲透測試、應急響應和等保評估中反覆用到。接下來進入第二階段：Linux 運維基礎。</p>
+        </div>
+        <div style="margin-top:24px;display:flex;gap:16px;">
+          <a href="stage2.html" class="btn-primary" style="display:inline-block;padding:14px 32px;background:var(--accent);color:var(--bg);text-decoration:none;font-weight:700;border-radius:4px;">前往第二階段：Linux 運維基礎</a>
+          <a href="index.html" class="btn-ghost" style="display:inline-block;padding:14px 32px;border:1px solid var(--border);color:var(--text2);text-decoration:none;border-radius:4px;">返回課程首頁</a>
+        </div>
+      </div>
+
+    </div><!-- /lesson-content -->
+
+    <!-- LESSON NAV -->
+    <div class="lesson-nav">
+      <button class="nav-btn" id="prev-btn" onclick="prevLesson()" disabled>
+        &#8592; 上一課
+      </button>
+      <span class="lesson-counter" id="lesson-counter">1 / 24</span>
+      <button class="nav-btn primary" id="next-btn" onclick="nextLesson()">
+        下一課 &#8594;
+      </button>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const lessons = [
+  { id: 'l1-1', chapter: 'CH1', title: '網路課程概述與通訊概念', time: '15分鐘', type: '基礎概念' },
+  { id: 'l1-2', chapter: 'CH1', title: '網路通訊硬體介紹', time: '12分鐘', type: '設備知識' },
+  { id: 'l1-3', chapter: 'CH1', title: '網路拓撲結構', time: '10分鐘', type: '架構設計' },
+  { id: 'l1-4', chapter: 'CH1', title: 'OSI 與 TCP/IP 模型', time: '20分鐘', type: '協議基礎' },
+  { id: 'l1-5', chapter: 'CH1', title: '資料封裝解封過程', time: '18分鐘', type: '協議原理' },
+  { id: 'l2-1', chapter: 'CH2', title: '網路層次協議介紹', time: '15分鐘', type: '協議表' },
+  { id: 'l2-2', chapter: 'CH2', title: 'TCP 三次握手與四次揮手', time: '20分鐘', type: '傳輸層' },
+  { id: 'l2-3', chapter: 'CH2', title: 'ARP 地址解析協議', time: '15分鐘', type: '資安重點' },
+  { id: 'l3-1', chapter: 'CH3', title: '域名解析過程（DNS）', time: '15分鐘', type: '應用層' },
+  { id: 'l3-2', chapter: 'CH3', title: 'IP 地址組成與分類', time: '15分鐘', type: '位址管理' },
+  { id: 'l3-3', chapter: 'CH3', title: '子網劃分詳解', time: '20分鐘', type: '網路規劃' },
+  { id: 'l3-4', chapter: 'CH3', title: 'Cisco Packet Tracer 安裝', time: '8分鐘', type: '工具安裝' },
+  { id: 'l4-1', chapter: 'CH4', title: '網路設備管理方法', time: '12分鐘', type: '設備管理' },
+  { id: 'l4-2', chapter: 'CH4', title: 'Cisco 設備配置模式', time: '15分鐘', type: '實戰配置' },
+  { id: 'l4-3', chapter: 'CH4', title: '靜態路由實戰配置', time: '20分鐘', type: '路由配置' },
+  { id: 'l5-1', chapter: 'CH5', title: '動態路由協議概述與分類', time: '12分鐘', type: '協議比較' },
+  { id: 'l5-2', chapter: 'CH5', title: 'RIP 工作原理與配置', time: '18分鐘', type: '實戰配置' },
+  { id: 'l6-1', chapter: 'CH6', title: 'OSPF 原理與特性', time: '18分鐘', type: '協議原理' },
+  { id: 'l6-2', chapter: 'CH6', title: 'OSPF 實戰配置', time: '20分鐘', type: '實戰配置' },
+  { id: 'l7-1', chapter: 'CH7', title: 'NAT 概念與靜態 NAT', time: '15分鐘', type: '地址轉換' },
+  { id: 'l7-2', chapter: 'CH7', title: '動態 NAT 與 PAT 配置', time: '18分鐘', type: '實戰配置' },
+  { id: 'l7-3', chapter: 'CH7', title: 'NAT 排錯與負載均衡', time: '12分鐘', type: '故障排除' },
+  { id: 'l8-1', chapter: 'CH8', title: 'VLAN 概述與二層交換基礎', time: '15分鐘', type: '交換技術' },
+  { id: 'l8-2', chapter: 'CH8', title: 'VLAN 配置與跨 VLAN 路由', time: '20分鐘', type: '實戰配置' },
+  { id: 'l9-1', chapter: 'CH9', title: 'ACL 概念、類型與配置', time: '25分鐘', type: '訪問控制' },
+];
+
+const completedLessons = new Set(JSON.parse(localStorage.getItem('stage1_completed') || '[]'));
+let currentIndex = 0;
+
+function showLesson(id, btn) {
+  // Hide all
+  document.querySelectorAll('.content-block').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.lesson-btn').forEach(b => b.classList.remove('active'));
+  
+  // Show target
+  const block = document.getElementById(id);
+  if (block) block.classList.add('active');
+  if (btn) btn.classList.add('active');
+  
+  currentIndex = lessons.findIndex(l => l.id === id);
+  updateHeader();
+  updateNavButtons();
+  updateCounter();
+  
+  // Mark done buttons
+  completedLessons.forEach(lid => {
+    const btns = document.querySelectorAll('.lesson-btn');
+    btns.forEach(b => {
+      if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(lid)) {
+        b.classList.add('done');
+      }
+    });
+  });
+  
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleChapter(btn, id) {
+  const list = document.getElementById(id);
+  btn.classList.toggle('open');
+  list.classList.toggle('open');
+}
+
+function updateHeader() {
+  const lesson = lessons[currentIndex];
+  if (!lesson) return;
+  document.getElementById('lesson-breadcrumb').textContent = `STAGE 01 > ${lesson.chapter} > ${lesson.title}`;
+  document.getElementById('lesson-title').textContent = lesson.title;
+}
+
+function updateNavButtons() {
+  document.getElementById('prev-btn').disabled = currentIndex <= 0;
+  document.getElementById('next-btn').disabled = currentIndex >= lessons.length - 1;
+  
+  if (currentIndex >= lessons.length - 1) {
+    document.getElementById('next-btn').textContent = '章節完成';
+  } else {
+    document.getElementById('next-btn').innerHTML = '下一課 &#8594;';
+  }
+}
+
+function updateCounter() {
+  document.getElementById('lesson-counter').textContent = `${currentIndex + 1} / ${lessons.length}`;
+  const pct = Math.round((completedLessons.size / lessons.length) * 100);
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+function nextLesson() {
+  // Mark current as completed
+  completedLessons.add(lessons[currentIndex].id);
+  localStorage.setItem('stage1_completed', JSON.stringify([...completedLessons]));
+  
+  if (currentIndex < lessons.length - 1) {
+    const next = lessons[currentIndex + 1];
+    const btns = document.querySelectorAll('.lesson-btn');
+    let targetBtn = null;
+    btns.forEach(b => {
+      if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(next.id)) {
+        targetBtn = b;
+      }
+    });
+    
+    // Open the chapter if needed
+    const chId = 'ch' + next.id.split('-')[0].replace('l', '');
+    const chList = document.getElementById(chId);
+    if (chList && !chList.classList.contains('open')) {
+      const chBtns = document.querySelectorAll('.chapter-btn');
+      chBtns.forEach(b => {
+        if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(chId)) {
+          b.classList.add('open');
+          chList.classList.add('open');
+        }
+      });
+    }
+    
+    showLesson(next.id, targetBtn);
+  }
+}
+
+function prevLesson() {
+  if (currentIndex > 0) {
+    const prev = lessons[currentIndex - 1];
+    const btns = document.querySelectorAll('.lesson-btn');
+    let targetBtn = null;
+    btns.forEach(b => {
+      if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(prev.id)) {
+        targetBtn = b;
+      }
+    });
+    showLesson(prev.id, targetBtn);
+  }
+}
+
+function checkQuiz(el, correct) {
+  // Don't recheck if already answered
+  if (el.classList.contains('correct') || el.classList.contains('wrong')) return;
+  
+  const box = el.closest('.quiz-box');
+  const opts = box.querySelectorAll('.quiz-opt');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  
+  if (correct) {
+    el.classList.add('correct');
+  } else {
+    el.classList.add('wrong');
+    opts.forEach(o => {
+      if (o.getAttribute('onclick').includes('true')) o.classList.add('correct');
+    });
+  }
+  
+  const explain = box.querySelector('.quiz-explain');
+  if (explain) explain.classList.add('show');
+}
+
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  const text = pre.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '已複製';
+    setTimeout(() => btn.textContent = '複製', 2000);
+  });
+}
+
+// Init
+updateHeader();
+updateNavButtons();
+updateCounter();
+
+// Restore completed states
+completedLessons.forEach(lid => {
+  const btns = document.querySelectorAll('.lesson-btn');
+  btns.forEach(b => {
+    if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(lid)) {
+      if (!b.classList.contains('active')) b.classList.add('done');
+    }
+  });
+});
+</script>
+
+</body>
+</html>

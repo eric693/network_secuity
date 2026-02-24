@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>資安全攻略 - 老男孩2025網路安全完整課程</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e14;
+    --bg2: #0f1520;
+    --bg3: #151d2e;
+    --surface: #1a2438;
+    --border: #243050;
+    --accent: #00d4aa;
+    --accent2: #0096ff;
+    --accent3: #ff6b35;
+    --text: #e8edf5;
+    --text2: #8a9bbf;
+    --text3: #5a6b8a;
+    --green: #00d4aa;
+    --blue: #0096ff;
+    --orange: #ff6b35;
+    --red: #ff4757;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,170,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,170,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ---- NAV ---- */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    height: 64px;
+    background: rgba(10,14,20,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+
+  .nav-logo span { color: var(--text2); }
+
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.2s;
+    letter-spacing: 0.02em;
+  }
+
+  .nav-links a:hover { color: var(--accent); }
+
+  .nav-cta {
+    background: var(--accent);
+    color: var(--bg) !important;
+    padding: 8px 20px;
+    border-radius: 4px;
+    font-weight: 700 !important;
+    transition: opacity 0.2s !important;
+  }
+
+  .nav-cta:hover { opacity: 0.85; color: var(--bg) !important; }
+
+  /* ---- HERO ---- */
+  .hero {
+    position: relative;
+    z-index: 1;
+    padding: 160px 40px 100px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    padding: 4px 14px;
+    background: rgba(0,212,170,0.1);
+    border: 1px solid rgba(0,212,170,0.3);
+    border-radius: 2px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    font-size: 1.15rem;
+    color: var(--text2);
+    line-height: 1.7;
+    max-width: 600px;
+    margin-bottom: 48px;
+    font-weight: 300;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 48px;
+    margin-bottom: 56px;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stat-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--text3);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    padding: 14px 32px;
+    background: var(--accent);
+    color: var(--bg);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    border-radius: 4px;
+    letter-spacing: 0.02em;
+    transition: all 0.2s;
+  }
+
+  .btn-primary:hover {
+    background: #00f0c2;
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost {
+    display: inline-block;
+    padding: 14px 32px;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ---- SECTION ---- */
+  .section {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 80px 40px;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .section-title {
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+
+  .section-desc {
+    color: var(--text2);
+    font-size: 1rem;
+    line-height: 1.7;
+    max-width: 580px;
+    margin-bottom: 60px;
+    font-weight: 300;
+  }
+
+  /* ---- STAGE GRID ---- */
+  .stages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .stage-card {
+    background: var(--bg2);
+    padding: 36px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.25s;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+
+  .stage-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--card-color, var(--accent));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+
+  .stage-card:hover { background: var(--bg3); }
+  .stage-card:hover::before { transform: scaleX(1); }
+
+  .stage-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+  }
+
+  .stage-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    line-height: 1.3;
+    color: var(--text);
+  }
+
+  .stage-desc {
+    font-size: 0.875rem;
+    color: var(--text2);
+    line-height: 1.6;
+    margin-bottom: 24px;
+    font-weight: 300;
+  }
+
+  .stage-meta {
+    display: flex;
+    gap: 20px;
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .meta-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--card-color, var(--accent));
+  }
+
+  .meta-key {
+    font-size: 0.72rem;
+    color: var(--text3);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .stage-arrow {
+    position: absolute;
+    bottom: 36px;
+    right: 36px;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text3);
+    font-size: 1rem;
+    transition: all 0.2s;
+  }
+
+  .stage-card:hover .stage-arrow {
+    border-color: var(--card-color, var(--accent));
+    color: var(--card-color, var(--accent));
+    transform: translate(2px, -2px);
+  }
+
+  /* ---- PATH SECTION ---- */
+  .path-section {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .path-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--border);
+  }
+
+  .path-item {
+    display: grid;
+    grid-template-columns: 64px 1fr auto;
+    align-items: center;
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--border);
+    gap: 24px;
+    transition: background 0.2s;
+  }
+
+  .path-item:last-child { border-bottom: none; }
+  .path-item:hover { background: var(--bg3); }
+
+  .path-index {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text3);
+  }
+
+  .path-info h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .path-info p {
+    font-size: 0.8rem;
+    color: var(--text3);
+    font-weight: 300;
+  }
+
+  .path-tag {
+    padding: 4px 12px;
+    border-radius: 2px;
+    font-size: 0.72rem;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .tag-beginner { background: rgba(0,212,170,0.12); color: var(--green); }
+  .tag-intermediate { background: rgba(0,150,255,0.12); color: var(--blue); }
+  .tag-advanced { background: rgba(255,107,53,0.12); color: var(--orange); }
+  .tag-expert { background: rgba(255,71,87,0.12); color: var(--red); }
+
+  /* ---- FEATURE GRID ---- */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 60px;
+  }
+
+  .feature {
+    background: var(--bg2);
+    padding: 32px;
+  }
+
+  .feature-icon {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+  }
+
+  .feature h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .feature p {
+    font-size: 0.825rem;
+    color: var(--text2);
+    line-height: 1.65;
+    font-weight: 300;
+  }
+
+  /* ---- CERT TABLE ---- */
+  .cert-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid var(--border);
+    margin-top: 40px;
+    font-size: 0.875rem;
+  }
+
+  .cert-table th {
+    background: var(--surface);
+    padding: 14px 20px;
+    text-align: left;
+    font-size: 0.72rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .cert-table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+    font-weight: 300;
+  }
+
+  .cert-table tr:last-child td { border-bottom: none; }
+  .cert-table tr:hover td { background: var(--bg3); }
+
+  .cert-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* ---- CTA ---- */
+  .cta-section {
+    position: relative;
+    z-index: 1;
+    padding: 100px 40px;
+    text-align: center;
+    border-top: 1px solid var(--border);
+  }
+
+  .cta-section h2 {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+
+  .cta-section p {
+    color: var(--text2);
+    font-size: 1rem;
+    margin-bottom: 40px;
+    font-weight: 300;
+  }
+
+  /* ---- FOOTER ---- */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--text3);
+  }
+
+  .footer-note {
+    font-size: 0.8rem;
+    color: var(--text3);
+    font-weight: 300;
+  }
+
+  /* ---- DIVIDER ---- */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0;
+  }
+
+  /* ---- ANIMATIONS ---- */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-up {
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .delay-1 { animation-delay: 0.1s; }
+  .delay-2 { animation-delay: 0.2s; }
+  .delay-3 { animation-delay: 0.3s; }
+  .delay-4 { animation-delay: 0.4s; }
+
+  /* terminal blink */
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  .cursor {
+    display: inline-block;
+    width: 3px;
+    height: 1.1em;
+    background: var(--accent);
+    vertical-align: text-bottom;
+    margin-left: 4px;
+    animation: blink 1s step-end infinite;
+  }
+
+  /* progress indicator */
+  .progress-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+  }
+
+  .progress-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+
+  .progress-dot.active { background: var(--card-color, var(--accent)); }
+
+  @media (max-width: 768px) {
+    nav { padding: 0 20px; }
+    .nav-links { display: none; }
+    .hero { padding: 120px 20px 60px; }
+    .hero-stats { gap: 28px; flex-wrap: wrap; }
+    .section { padding: 60px 20px; }
+    .stages-grid { grid-template-columns: 1fr; }
+    .features-grid { grid-template-columns: 1fr; }
+    footer { flex-direction: column; gap: 16px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">SEC<span>_</span>TRACK</div>
+  <ul class="nav-links">
+    <li><a href="#stages">課程架構</a></li>
+    <li><a href="#path">學習路徑</a></li>
+    <li><a href="#certs">證照培訓</a></li>
+    <li><a href="stage1.html" class="nav-cta">開始學習</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge fade-up">2025 完整版 · 資安工程師培訓計畫</div>
+  <h1 class="fade-up delay-1">從零開始<br>掌握<em>網路安全</em><span class="cursor"></span></h1>
+  <p class="hero-sub fade-up delay-2">老男孩2025年全新十五維一體AI網路安全課程，完整涵蓋滲透測試、應急響應、等保合規、移動安全與AI攻防，體系化培養資安工程師。</p>
+  <div class="hero-stats fade-up delay-3">
+    <div class="stat">
+      <span class="stat-num">15</span>
+      <span class="stat-label">學習階段</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">200+</span>
+      <span class="stat-label">課程章節</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">12+</span>
+      <span class="stat-label">月學習周期</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">30K+</span>
+      <span class="stat-label">預期起薪</span>
+    </div>
+  </div>
+  <div class="hero-actions fade-up delay-4">
+    <a href="stage1.html" class="btn-primary">從第一階段開始</a>
+    <a href="#stages" class="btn-ghost">查看完整大綱</a>
+  </div>
+</section>
+
+<!-- STAGES -->
+<section class="section" id="stages">
+  <div class="section-label">課程架構</div>
+  <h2 class="section-title">十五大學習階段</h2>
+  <p class="section-desc">從基礎網路知識到進階AI攻防，每一個階段都有明確的技能目標與市場價值，讓你的學習路徑清晰可見。</p>
+
+  <div class="stages-grid">
+
+    <a href="stage1.html" class="stage-card" style="--card-color: #00d4aa;">
+      <div class="stage-num">STAGE 01</div>
+      <h3 class="stage-title">企業交換路由基礎課程</h3>
+      <p class="stage-desc">網路概念、協議原理、靜態與動態路由、NAT、VLAN 及 ACL 配置，建立扎實的網路底層知識。</p>
+      <div class="stage-meta">
+        <div class="meta-item">
+          <span class="meta-val">1周</span>
+          <span class="meta-key">學習時長</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">9章</span>
+          <span class="meta-key">課程章節</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">6-8K</span>
+          <span class="meta-key">市場月薪</span>
+        </div>
+      </div>
+      <div class="stage-arrow">&#8599;</div>
+    </a>
+
+    <a href="stage2.html" class="stage-card" style="--card-color: #00b8e6;">
+      <div class="stage-num">STAGE 02</div>
+      <h3 class="stage-title">Linux 運維基礎</h3>
+      <p class="stage-desc">Linux 安裝配置、必備命令、VIM 編輯器、權限管理、Docker 部署及 ELK 日誌收集系統。</p>
+      <div class="stage-meta">
+        <div class="meta-item">
+          <span class="meta-val">2周</span>
+          <span class="meta-key">學習時長</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">10章</span>
+          <span class="meta-key">課程章節</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">6-8K</span>
+          <span class="meta-key">市場月薪</span>
+        </div>
+      </div>
+      <div class="stage-arrow">&#8599;</div>
+    </a>
+
+    <a href="stage3.html" class="stage-card" style="--card-color: #0096ff;">
+      <div class="stage-num">STAGE 03</div>
+      <h3 class="stage-title">網路安全基礎與提升</h3>
+      <p class="stage-desc">資安法律法規、HTML/JS/PHP 入門、MySQL 資料庫操作、攻防環境搭建、安全漏洞基礎認識。</p>
+      <div class="stage-meta">
+        <div class="meta-item">
+          <span class="meta-val">1周</span>
+          <span class="meta-key">學習時長</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">4章</span>
+          <span class="meta-key">課程章節</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">入門級</span>
+          <span class="meta-key">階段定位</span>
+        </div>
+      </div>
+      <div class="stage-arrow">&#8599;</div>
+    </a>
+
+    <a href="stage4.html" class="stage-card" style="--card-color: #4a7fff;">
+      <div class="stage-num">STAGE 04</div>
+      <h3 class="stage-title">Web 滲透測試</h3>
+      <p class="stage-desc">SQL 注入、XSS、文件上傳、CSRF、SSRF、XXE、遠端代碼執行、MSF 工具、WAF 繞過與源碼審計。</p>
+      <div class="stage-meta">
+        <div class="meta-item">
+          <span class="meta-val">2月</span>
+          <span class="meta-key">學習時長</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">32章</span>
+          <span class="meta-key">課程章節</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">8-45K</span>
+          <span class="meta-key">市場月薪</span>
+        </div>
+      </div>
+      <div class="stage-arrow">&#8599;</div>
+    </a>
+
+    <a href="stage5.html" class="stage-card" style="--card-color: #7b68ee;">
+      <div class="stage-num">STAGE 05</div>
+      <h3 class="stage-title">移動端滲透測試</h3>
+      <p class="stage-desc">APK 反編譯、靜態與動態分析、Android 安全漏洞分析、Frida/Xposed Hook 框架、逆向工程技術。</p>
+      <div class="stage-meta">
+        <div class="meta-item">
+          <span class="meta-val">專項</span>
+          <span class="meta-key">學習類型</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">4章</span>
+          <span class="meta-key">課程章節</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">15-30K</span>
+          <span class="meta-key">市場月薪</span>
+        </div>
+      </div>
+      <div class="stage-arrow">&#8599;</div>
+    </a>
+
+    <a href="stage6.html" class="stage-card" style="--card-color: #9b59b6;">
+      <div class="stage-num">STAGE 06</div>
+      <h3 class="stage-title">微信小程序逆向</h3>
+      <p class="stage-desc">小程序基本結構、逆向流程、請求協議抓包分析、反編譯、靜態/動態分析、加密解密算法分析。</p>
+      <div class="stage-meta">
+        <div class="meta-item">
+          <span class="meta-val">1周</span>
+          <span class="meta-key">學習時長</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">專項</span>
+          <span class="meta-key">學習類型</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">高需求</span>
+          <span class="meta-key">市場稀缺度</span>
+        </div>
+      </div>
+      <div class="stage-arrow">&#8599;</div>
+    </a>
+
+    <a href="stage7.html" class="stage-card" style="--card-color: #ff6b35;">
+      <div class="stage-num">STAGE 07</div>
+      <h3 class="stage-title">CTF 競賽訓練</h3>
+      <p class="stage-desc">CTF 歷史與分類、靶場搭建、Web/Misc/Crypto/Pwn/Reverse 各類題型解題思路與技巧。</p>
+      <div class="stage-meta">
+        <div class="meta-item">
+          <span class="meta-val">2周</span>
+          <span class="meta-key">學習時長</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">5章</span>
+          <span class="meta-key">課程章節</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">競賽向</span>
+          <span class="meta-key">學習類型</span>
+        </div>
+      </div>
+      <div class="stage-arrow">&#8599;</div>
+    </a>
+
+    <a href="stage8.html" class="stage-card" style="--card-color: #ff4757;">
+      <div class="stage-num">STAGE 08</div>
+      <h3 class="stage-title">雲平台雲原生安全評估</h3>
+      <p class="stage-desc">Kubernetes 入門、雲原生概念、容器攻擊面分析、容器逃逸技術、K8S 後滲透、雲原生加固方案。</p>
+      <div class="stage-meta">
+        <div class="meta-item">
+          <span class="meta-val">專項</span>
+          <span class="meta-key">學習類型</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">6章</span>
+          <span class="meta-key">課程章節</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">前沿</span>
+          <span class="meta-key">技術方向</span>
+        </div>
+      </div>
+      <div class="stage-arrow">&#8599;</div>
+    </a>
+
+    <a href="stage9.html" class="stage-card" style="--card-color: #e84393;">
+      <div class="stage-num">STAGE 09</div>
+      <h3 class="stage-title">應急響應</h3>
+      <p class="stage-desc">應急響應流程、網路應急（ARP/DDoS）、系統應急（病毒查殺）、Web 站點應急與報告編寫。</p>
+      <div class="stage-meta">
+        <div class="meta-item">
+          <span class="meta-val">1周</span>
+          <span class="meta-key">學習時長</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">5章</span>
+          <span class="meta-key">課程章節</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">1萬起/次</span>
+          <span class="meta-key">外包行情</span>
+        </div>
+      </div>
+      <div class="stage-arrow">&#8599;</div>
+    </a>
+
+    <a href="stage10.html" class="stage-card" style="--card-color: #ffd32a;">
+      <div class="stage-num">STAGE 10</div>
+      <h3 class="stage-title">等級保護 2.0</h3>
+      <p class="stage-desc">等保定級備案、差距評估、整改建設、等保測評驗收，掌握完整等保流程實戰操作能力。</p>
+      <div class="stage-meta">
+        <div class="meta-item">
+          <span class="meta-val">2周</span>
+          <span class="meta-key">學習時長</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">4章</span>
+          <span class="meta-key">課程章節</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">8-35K</span>
+          <span class="meta-key">市場月薪</span>
+        </div>
+      </div>
+      <div class="stage-arrow">&#8599;</div>
+    </a>
+
+    <a href="stage11.html" class="stage-card" style="--card-color: #00d4aa;">
+      <div class="stage-num">STAGE 11</div>
+      <h3 class="stage-title">風險評估</h3>
+      <p class="stage-desc">資產調研、脆弱性評估（網路設備/資料庫/中間件/主機）、滲透測試、風險控制規劃與報告輸出。</p>
+      <div class="stage-meta">
+        <div class="meta-item">
+          <span class="meta-val">專項</span>
+          <span class="meta-key">學習類型</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">5章</span>
+          <span class="meta-key">課程章節</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">合規向</span>
+          <span class="meta-key">技術方向</span>
+        </div>
+      </div>
+      <div class="stage-arrow">&#8599;</div>
+    </a>
+
+    <a href="stage12.html" class="stage-card" style="--card-color: #00b8e6;">
+      <div class="stage-num">STAGE 12</div>
+      <h3 class="stage-title">安全巡檢</h3>
+      <p class="stage-desc">安全巡檢項目實施、資產調研、策略檢查、日誌分析、漏洞掃描及綜合巡檢報告編寫。</p>
+      <div class="stage-meta">
+        <div class="meta-item">
+          <span class="meta-val">專項</span>
+          <span class="meta-key">學習類型</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">3步驟</span>
+          <span class="meta-key">實戰流程</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">運維向</span>
+          <span class="meta-key">技術方向</span>
+        </div>
+      </div>
+      <div class="stage-arrow">&#8599;</div>
+    </a>
+
+    <a href="stage13.html" class="stage-card" style="--card-color: #0096ff;">
+      <div class="stage-num">STAGE 13</div>
+      <h3 class="stage-title">數據安全</h3>
+      <p class="stage-desc">數據安全法律法規、數據識別、數據處理活動分析、數據安全技術、個人信息保護合規評估。</p>
+      <div class="stage-meta">
+        <div class="meta-item">
+          <span class="meta-val">1周</span>
+          <span class="meta-key">學習時長</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">9章</span>
+          <span class="meta-key">課程章節</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">合規向</span>
+          <span class="meta-key">技術方向</span>
+        </div>
+      </div>
+      <div class="stage-arrow">&#8599;</div>
+    </a>
+
+    <a href="stage14.html" class="stage-card" style="--card-color: #4a7fff;">
+      <div class="stage-num">STAGE 14</div>
+      <h3 class="stage-title">ISO 27001 信息安全管理體系</h3>
+      <p class="stage-desc">ISO27001 體系介紹、風險評估、安全委員會、內審員訓練、體系制度建設與業務連續性管理。</p>
+      <div class="stage-meta">
+        <div class="meta-item">
+          <span class="meta-val">專項</span>
+          <span class="meta-key">學習類型</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">10章</span>
+          <span class="meta-key">課程章節</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">管理向</span>
+          <span class="meta-key">技術方向</span>
+        </div>
+      </div>
+      <div class="stage-arrow">&#8599;</div>
+    </a>
+
+    <a href="stage15.html" class="stage-card" style="--card-color: #7b68ee;">
+      <div class="stage-num">STAGE 15</div>
+      <h3 class="stage-title">Python 安全開發基礎</h3>
+      <p class="stage-desc">Python 基礎語法、數據結構、正規表達式、Web/多線程/網路/資料庫編程、爬蟲技術與安全應用。</p>
+      <div class="stage-meta">
+        <div class="meta-item">
+          <span class="meta-val">專項</span>
+          <span class="meta-key">學習類型</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">4章</span>
+          <span class="meta-key">課程章節</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-val">20K+</span>
+          <span class="meta-key">結合其他技能</span>
+        </div>
+      </div>
+      <div class="stage-arrow">&#8599;</div>
+    </a>
+
+  </div>
+</section>
+
+<!-- LEARNING PATH -->
+<div class="path-section">
+  <section class="section" id="path">
+    <div class="section-label">學習路徑</div>
+    <h2 class="section-title">建議學習順序</h2>
+    <p class="section-desc">課程設計由淺入深，建議按照以下順序學習，確保每個階段的知識都能打好基礎。</p>
+
+    <div class="path-list">
+      <div class="path-item">
+        <span class="path-index">01–02</span>
+        <div class="path-info">
+          <h4>基礎建設期</h4>
+          <p>網路基礎 + Linux 運維，必要的底層知識</p>
+        </div>
+        <span class="path-tag tag-beginner">入門</span>
+      </div>
+      <div class="path-item">
+        <span class="path-index">03</span>
+        <div class="path-info">
+          <h4>前置知識補充</h4>
+          <p>資安法規 + HTML/PHP/MySQL 基礎，為滲透測試做準備</p>
+        </div>
+        <span class="path-tag tag-beginner">入門</span>
+      </div>
+      <div class="path-item">
+        <span class="path-index">04</span>
+        <div class="path-info">
+          <h4>核心技能攻克</h4>
+          <p>Web 滲透測試 — 課程最重要、最密集的核心階段</p>
+        </div>
+        <span class="path-tag tag-intermediate">中級</span>
+      </div>
+      <div class="path-item">
+        <span class="path-index">05–06</span>
+        <div class="path-info">
+          <h4>移動端專項</h4>
+          <p>Android/小程序逆向與安全分析，高薪稀缺方向</p>
+        </div>
+        <span class="path-tag tag-intermediate">中級</span>
+      </div>
+      <div class="path-item">
+        <span class="path-index">07–08</span>
+        <div class="path-info">
+          <h4>競賽與雲原生</h4>
+          <p>CTF 實戰能力 + 雲原生/K8S 安全，進階技能提升</p>
+        </div>
+        <span class="path-tag tag-advanced">進階</span>
+      </div>
+      <div class="path-item">
+        <span class="path-index">09–12</span>
+        <div class="path-info">
+          <h4>企業安全運營</h4>
+          <p>應急響應、等保合規、風險評估、安全巡檢</p>
+        </div>
+        <span class="path-tag tag-advanced">進階</span>
+      </div>
+      <div class="path-item">
+        <span class="path-index">13–15</span>
+        <div class="path-info">
+          <h4>合規管理與開發</h4>
+          <p>數據安全、ISO27001、Python 安全開發，綜合能力提升</p>
+        </div>
+        <span class="path-tag tag-expert">專家</span>
+      </div>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature">
+        <div class="feature-icon">01</div>
+        <h4>理論 + 實戰並重</h4>
+        <p>每個知識點都配有實際的靶場環境與真實案例演練，確保學到的技能能夠真正在工作中使用。</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">02</div>
+        <h4>工具鏈完整覆蓋</h4>
+        <p>Burp Suite、Nessus、AWVS、Metasploit、SQLMap、Nmap 等業界主流工具全面掌握。</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">03</div>
+        <h4>攻防雙向思維</h4>
+        <p>每項漏洞技術都同時學習攻擊手法與防禦修復策略，培養真正的安全工程師思維。</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">04</div>
+        <h4>報告輸出能力</h4>
+        <p>滲透報告、等保報告、風險評估報告等各類文件的專業編寫，提升職場競爭力。</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">05</div>
+        <h4>最新漏洞追蹤</h4>
+        <p>涵蓋 Log4j、Shiro、Spring、ThinkPHP 等近年高危漏洞的攻防還原與分析。</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">06</div>
+        <h4>AI 輔助安全</h4>
+        <p>AI 護網研判、AI 代碼審計、AI 自動化漏洞挖掘等前沿 AI+安全應用場景。</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- CERTS -->
+<section class="section" id="certs">
+  <div class="section-label">認證培訓</div>
+  <h2 class="section-title">國內外主流資安證照</h2>
+  <p class="section-desc">課程附帶主流資安認證培訓，有效提升市場競爭力。</p>
+
+  <table class="cert-table">
+    <thead>
+      <tr>
+        <th>簡稱</th>
+        <th>認證名稱</th>
+        <th>發證機構</th>
+        <th>適用方向</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="cert-name">CISP / CISP-PTE</span></td>
+        <td>國家註冊信息安全專業人員 / 滲透測試工程師</td>
+        <td>中國信息安全測評中心</td>
+        <td>最權威的國家級認證，招標必須資質</td>
+      </tr>
+      <tr>
+        <td><span class="cert-name">CISSP</span></td>
+        <td>國際信息系統安全專家</td>
+        <td>ISC2</td>
+        <td>最全面的國際化信息系統安全認證</td>
+      </tr>
+      <tr>
+        <td><span class="cert-name">CCSK / CCSSP</span></td>
+        <td>雲安全認證（中級）/ 雲安全專家</td>
+        <td>CSA 雲安全聯盟</td>
+        <td>雲平台安全方向</td>
+      </tr>
+      <tr>
+        <td><span class="cert-name">CDSP / CZTP</span></td>
+        <td>數據安全專家 / 零信任專家認證</td>
+        <td>CSA 雲安全聯盟</td>
+        <td>數據安全合規方向</td>
+      </tr>
+      <tr>
+        <td><span class="cert-name">CISAW</span></td>
+        <td>信息安全保障人員認證-風險管理</td>
+        <td>中國網絡安全審查技術與認證中心</td>
+        <td>安全部門上崗必備資格</td>
+      </tr>
+      <tr>
+        <td><span class="cert-name">NISP</span></td>
+        <td>國家信息安全水平考試</td>
+        <td>中國信息安全測評中心</td>
+        <td>高校學生從業入門認證（可免考換 CISP）</td>
+      </tr>
+      <tr>
+        <td><span class="cert-name">PMP</span></td>
+        <td>項目管理專業人士資格認證</td>
+        <td>美國項目管理協會（PMI）</td>
+        <td>安全項目管理方向</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2>準備好開始了嗎？</h2>
+  <p>從第一階段開始，一步步成為資安工程師</p>
+  <a href="stage1.html" class="btn-primary">立即開始第一階段</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">SEC_TRACK · 老男孩2025資安培訓</div>
+  <div class="footer-note">課程解讀權規老男孩所有 · 僅供學習參考</div>
+</footer>
+
+</body>
+</html>
