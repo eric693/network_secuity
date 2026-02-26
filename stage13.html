@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Stage 13 — 數據安全 | SEC_TRACK</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#030b12;--bg2:#05101a;--bg3:#091620;--sur:#0e2030;--bdr:#163248;
+  --acc:#0ea5e9;--acc2:#0284c7;--txt:#c6e4f8;--txt2:#4882a8;--txt3:#1e4a66;
+  --red:#f05252;--grn:#3ecf8e;--cyn:#67e8f9;--ylw:#fbbf24;--pur:#a78bfa;--rose:#fb7185;--org:#f97316;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse 60% 40% at 8% 0%,rgba(14,165,233,.05) 0%,transparent 55%),
+  radial-gradient(ellipse 45% 30% at 92% 100%,rgba(2,132,199,.04) 0%,transparent 55%);
+  pointer-events:none;z-index:0;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 36px;background:rgba(3,11,18,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--bdr);}
+.n-logo{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.95rem;color:var(--acc);text-decoration:none;}
+.n-logo span{color:var(--txt3);}
+.n-mid{display:flex;align-items:center;gap:10px;}
+.s-pill{font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;background:rgba(14,165,233,.1);color:var(--acc);border:1px solid rgba(14,165,233,.28);}
+.n-sname{font-size:.8rem;color:var(--txt2);}
+.n-back{font-size:.8rem;color:var(--txt3);text-decoration:none;transition:color .2s;}
+.n-back:hover{color:var(--acc);}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh;padding-top:60px;}
+.sidebar{position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;background:var(--bg2);border-right:1px solid var(--bdr);display:flex;flex-direction:column;z-index:10;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--bdr);}
+.sb-h{padding:22px 22px 16px;border-bottom:1px solid var(--bdr);flex-shrink:0;}
+.sb-tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--acc);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
+.sb-title{font-size:.88rem;font-weight:700;line-height:1.45;margin-bottom:13px;}
+.sb-meta{display:flex;gap:16px;}
+.sm-item{display:flex;flex-direction:column;gap:2px;}
+.sm-val{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;color:var(--acc);}
+.sm-key{font-size:.62rem;color:var(--txt3);letter-spacing:.06em;text-transform:uppercase;}
+.sb-nav{flex:1;overflow-y:auto;padding:6px 0;}
+.ch-btn{width:100%;display:flex;align-items:center;gap:9px;padding:9px 22px;background:none;border:none;border-bottom:1px solid rgba(22,50,72,.7);color:var(--txt2);font-family:'Noto Sans TC',sans-serif;font-size:.79rem;font-weight:500;cursor:pointer;text-align:left;transition:color .18s,background .18s;}
+.ch-btn:hover{color:var(--txt);background:var(--bg3);}
+.ch-btn.cact{color:var(--acc);}
+.ch-num{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt3);min-width:26px;flex-shrink:0;}
+.ch-btn.cact .ch-num{color:var(--acc);}
+.ch-arr{font-size:.52rem;color:var(--txt3);transition:transform .2s;flex-shrink:0;}
+.ch-btn.copen .ch-arr{transform:rotate(90deg);}
+.ls-list{display:none;flex-direction:column;background:rgba(0,0,0,.15);}
+.ls-list.lopen{display:flex;}
+.ls-btn{display:flex;align-items:flex-start;gap:9px;padding:7px 22px 7px 44px;background:none;border:none;border-bottom:1px solid rgba(22,50,72,.4);color:var(--txt3);font-family:'Noto Sans TC',sans-serif;font-size:.74rem;cursor:pointer;text-align:left;width:100%;transition:color .18s,background .18s;line-height:1.4;}
+.ls-btn:hover{color:var(--txt2);background:rgba(14,165,233,.03);}
+.ls-btn.lact{color:var(--acc);background:rgba(14,165,233,.06);}
+.ls-dot{width:5px;height:5px;border-radius:50%;background:var(--bdr);flex-shrink:0;margin-top:5px;transition:background .2s;}
+.ls-btn.lact .ls-dot,.ls-btn.ldone .ls-dot{background:var(--acc);}
+.sb-f{padding:13px 22px;border-top:1px solid var(--bdr);flex-shrink:0;}
+.pr{display:flex;justify-content:space-between;font-size:.68rem;color:var(--txt3);margin-bottom:6px;}
+.pt{height:3px;background:var(--bdr);border-radius:2px;overflow:hidden;}
+.pf{height:100%;background:var(--acc);border-radius:2px;transition:width .4s;}
+.main{position:relative;z-index:1;display:flex;flex-direction:column;}
+.lh{padding:38px 56px 30px;border-bottom:1px solid var(--bdr);background:linear-gradient(180deg,rgba(14,165,233,.03) 0%,transparent 100%);}
+.lh-crumb{font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--txt3);letter-spacing:.08em;margin-bottom:11px;}
+.lh-crumb em{color:var(--acc);font-style:normal;}
+.lh-title{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin-bottom:11px;}
+.lh-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{padding:3px 11px;border-radius:20px;font-size:.67rem;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;border:1px solid var(--bdr);color:var(--txt3);}
+.chip.ac{border-color:rgba(14,165,233,.4);color:var(--acc);}
+.cw{padding:38px 56px 80px;max-width:880px;}
+.cb{display:none;}
+.cb.on{display:block;animation:rise .25s ease both;}
+@keyframes rise{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:none;}}
+h2{font-size:1.25rem;font-weight:800;letter-spacing:-.01em;margin:36px 0 13px;color:var(--txt);display:flex;align-items:center;gap:10px;}
+h2::before{content:'';display:inline-block;width:3px;height:1.1em;border-radius:2px;background:var(--acc);flex-shrink:0;}
+h2:first-child{margin-top:0;}
+h3{font-size:.98rem;font-weight:700;margin:22px 0 9px;color:var(--txt);}
+p{font-size:.9rem;line-height:1.85;color:var(--txt2);margin-bottom:11px;font-weight:300;}
+strong{color:var(--txt);font-weight:600;}
+code{font-family:'JetBrains Mono',monospace;font-size:.8em;background:var(--sur);border:1px solid var(--bdr);padding:1px 6px;border-radius:3px;color:var(--acc);}
+.note{border-left:3px solid;padding:13px 17px;margin:18px 0;border-radius:0 4px 4px 0;}
+.note-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:6px;}
+.note p{margin:0;font-size:.86rem;line-height:1.7;}
+.note.tip{border-color:var(--acc);background:rgba(14,165,233,.06);}
+.note.tip .note-lbl{color:var(--acc);}
+.note.warn{border-color:var(--ylw);background:rgba(251,191,36,.06);}
+.note.warn .note-lbl{color:var(--ylw);}
+.note.law{border-color:var(--pur);background:rgba(167,139,250,.07);}
+.note.law .note-lbl{color:var(--pur);}
+.note.danger{border-color:var(--red);background:rgba(240,82,82,.07);}
+.note.danger .note-lbl{color:var(--red);}
+.note.sec{border-color:var(--grn);background:rgba(62,207,142,.06);}
+.note.sec .note-lbl{color:var(--grn);}
+.cblock{background:#020810;border:1px solid var(--bdr);border-radius:6px;margin:16px 0;overflow:hidden;}
+.ctop{display:flex;align-items:center;justify-content:space-between;padding:7px 15px;background:rgba(5,16,26,.8);border-bottom:1px solid var(--bdr);}
+.clang{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;}
+.ccopy{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);background:none;border:none;cursor:pointer;transition:color .2s;}
+.ccopy:hover{color:var(--acc);}
+pre{padding:16px 20px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.75;color:#b0d4f0;}
+pre .kw{color:#c792ea;}pre .fn{color:#82aaff;}pre .st{color:#c3e88d;}pre .cm{color:#1a3545;font-style:italic;}
+pre .nu{color:#f78c6c;}pre .hi{color:#0ea5e9;font-weight:700;}pre .ok{color:#3ecf8e;}
+pre .bad{color:#f05252;}pre .ylw{color:#fbbf24;}
+.tbl{overflow-x:auto;margin:16px 0;}
+table.t{width:100%;border-collapse:collapse;font-size:.82rem;}
+table.t th{background:var(--sur);padding:9px 14px;text-align:left;font-size:.63rem;font-family:'JetBrains Mono',monospace;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--bdr);}
+table.t td{padding:9px 14px;border:1px solid var(--bdr);color:var(--txt2);font-weight:300;vertical-align:top;line-height:1.55;}
+table.t tr:hover td{background:var(--bg3);}
+.kg{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--bdr);border:1px solid var(--bdr);margin:16px 0;}
+.kt{background:var(--bg2);padding:14px 17px;}
+.kt-n{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--acc);font-weight:700;margin-bottom:5px;}
+.kt-d{font-size:.79rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.ilist{display:flex;flex-direction:column;border:1px solid var(--bdr);border-radius:4px;overflow:hidden;margin:16px 0;}
+.il-item{display:flex;align-items:flex-start;gap:13px;padding:12px 17px;border-bottom:1px solid var(--bdr);transition:background .15s;}
+.il-item:last-child{border-bottom:none;}
+.il-item:hover{background:var(--bg3);}
+.il-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--acc);min-width:24px;flex-shrink:0;padding-top:2px;font-weight:700;}
+.il-txt{font-size:.85rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.il-txt strong{color:var(--txt);}
+.flow{display:flex;flex-direction:column;gap:3px;margin:18px 0;}
+.fl-step{display:flex;align-items:flex-start;gap:13px;padding:13px 16px;background:var(--sur);border:1px solid var(--bdr);border-radius:4px;position:relative;}
+.fl-step::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--bdr);border-radius:4px 0 0 4px;}
+.fl-s1::before{background:var(--acc);}
+.fl-s2::before{background:var(--cyn);}
+.fl-s3::before{background:var(--grn);}
+.fl-s4::before{background:var(--ylw);}
+.fl-s5::before{background:var(--org);}
+.fl-s6::before{background:var(--pur);}
+.fl-n{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt3);font-weight:700;min-width:44px;flex-shrink:0;padding-top:2px;letter-spacing:.04em;}
+.fl-t{font-size:.82rem;font-weight:700;color:var(--txt);margin-bottom:4px;}
+.fl-d{font-size:.78rem;color:var(--txt2);line-height:1.55;font-weight:300;}
+.badge-row{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0;}
+.badge{padding:5px 13px;border-radius:3px;font-size:.75rem;font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:.04em;}
+.badge-r{background:rgba(240,82,82,.12);color:var(--red);border:1px solid rgba(240,82,82,.25);}
+.badge-o{background:rgba(249,115,22,.12);color:var(--org);border:1px solid rgba(249,115,22,.25);}
+.badge-y{background:rgba(251,191,36,.12);color:var(--ylw);border:1px solid rgba(251,191,36,.25);}
+.badge-g{background:rgba(62,207,142,.12);color:var(--grn);border:1px solid rgba(62,207,142,.25);}
+.badge-b{background:rgba(14,165,233,.12);color:var(--acc);border:1px solid rgba(14,165,233,.25);}
+.badge-p{background:rgba(167,139,250,.12);color:var(--pur);border:1px solid rgba(167,139,250,.25);}
+.quiz{background:var(--bg3);border:1px solid var(--bdr);border-radius:6px;padding:22px;margin:26px 0;}
+.q-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--ylw);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;}
+.q-q{font-size:.9rem;font-weight:600;margin-bottom:13px;line-height:1.5;color:var(--txt);}
+.q-opts{display:flex;flex-direction:column;gap:6px;}
+.qo{display:flex;align-items:flex-start;gap:10px;padding:8px 13px;border:1px solid var(--bdr);border-radius:4px;cursor:pointer;font-size:.83rem;color:var(--txt2);transition:all .18s;line-height:1.5;}
+.qo:hover{border-color:var(--acc);color:var(--txt);}
+.qo.ok{border-color:var(--acc);background:rgba(14,165,233,.07);color:var(--acc);}
+.qo.bad{border-color:var(--red);background:rgba(240,82,82,.07);color:var(--red);}
+.qo-k{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--txt3);min-width:16px;padding-top:1px;flex-shrink:0;}
+.q-exp{display:none;margin-top:12px;padding:11px 14px;background:rgba(14,165,233,.05);border-left:2px solid var(--acc);border-radius:0 4px 4px 0;font-size:.82rem;color:var(--txt2);line-height:1.65;}
+.q-exp.on{display:block;}
+.done-banner{background:linear-gradient(135deg,rgba(14,165,233,.07),rgba(2,132,199,.05));border:1px solid rgba(14,165,233,.2);border-radius:6px;padding:28px;margin:34px 0 14px;text-align:center;}
+.done-banner h3{font-size:1.1rem;font-weight:800;color:var(--acc);margin-bottom:8px;}
+.done-banner p{font-size:.87rem;margin-bottom:20px;}
+.btn-row{display:flex;gap:11px;justify-content:center;flex-wrap:wrap;}
+.btn-p{display:inline-block;padding:10px 24px;background:var(--acc);color:#030b12;text-decoration:none;font-weight:700;font-size:.84rem;border-radius:4px;transition:all .2s;}
+.btn-p:hover{background:#38bdf8;transform:translateY(-1px);}
+.btn-g{display:inline-block;padding:10px 24px;border:1px solid var(--bdr);color:var(--txt2);text-decoration:none;font-size:.84rem;border-radius:4px;transition:all .2s;}
+.btn-g:hover{border-color:var(--acc);color:var(--acc);}
+.lnav{display:flex;justify-content:space-between;align-items:center;padding:22px 56px;border-top:1px solid var(--bdr);background:var(--bg2);position:sticky;bottom:0;z-index:5;}
+.lb{display:flex;align-items:center;gap:7px;padding:8px 18px;border:1px solid var(--bdr);border-radius:4px;background:none;color:var(--txt2);font-size:.82rem;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .18s;}
+.lb:hover:not(:disabled){border-color:var(--acc);color:var(--acc);}
+.lb.pri{background:var(--acc);color:#030b12;border-color:var(--acc);font-weight:700;}
+.lb.pri:hover:not(:disabled){background:#38bdf8;}
+.lb:disabled{opacity:.2;cursor:not-allowed;}
+.ln-mid{text-align:center;}
+.ln-cnt{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--txt3);}
+.ln-sub{font-size:.75rem;color:var(--txt3);margin-top:3px;max-width:260px;}
+@media(max-width:900px){.layout{grid-template-columns:1fr;}.sidebar{position:static;height:auto;}.lh,.cw{padding-left:20px;padding-right:20px;}.lnav{padding:16px 20px;}.kg{grid-template-columns:1fr;}.ln-sub{display:none;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="n-logo">SEC<span>_</span>TRACK</a>
+  <div class="n-mid"><span class="s-pill">STAGE 13</span><span class="n-sname">數據安全</span></div>
+  <a href="index.html" class="n-back">&#8592; 首頁</a>
+</nav>
+<div class="layout">
+<aside class="sidebar">
+  <div class="sb-h">
+    <div class="sb-tag">STAGE 13 · 1週</div>
+    <div class="sb-title">數據安全<br>合規與技術實戰</div>
+    <div class="sb-meta">
+      <div class="sm-item"><span class="sm-val">5</span><span class="sm-key">章節</span></div>
+      <div class="sm-item"><span class="sm-val">20</span><span class="sm-key">課程</span></div>
+      <div class="sm-item"><span class="sm-val">1週</span><span class="sm-key">時長</span></div>
+    </div>
+  </div>
+  <div class="sb-nav">
+    <div><button class="ch-btn copen cact" onclick="toggleCh(this,'ch1')"><span class="ch-num">CH1</span><span>數據安全法規框架</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list lopen" id="ch1">
+      <button class="ls-btn lact" onclick="go('l1-1',this)"><span class="ls-dot"></span>《數據安全法》核心要求</button>
+      <button class="ls-btn" onclick="go('l1-2',this)"><span class="ls-dot"></span>《個人信息保護法》解析</button>
+      <button class="ls-btn" onclick="go('l1-3',this)"><span class="ls-dot"></span>GDPR 與跨境數據傳輸</button>
+      <button class="ls-btn" onclick="go('l1-4',this)"><span class="ls-dot"></span>數據安全監管執法案例</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch2')"><span class="ch-num">CH2</span><span>數據識別與分類分級</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch2">
+      <button class="ls-btn" onclick="go('l2-1',this)"><span class="ls-dot"></span>數據分類分級方法論</button>
+      <button class="ls-btn" onclick="go('l2-2',this)"><span class="ls-dot"></span>敏感數據識別技術</button>
+      <button class="ls-btn" onclick="go('l2-3',this)"><span class="ls-dot"></span>數據資產梳理實戰</button>
+      <button class="ls-btn" onclick="go('l2-4',this)"><span class="ls-dot"></span>數據流圖繪製與分析</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch3')"><span class="ch-num">CH3</span><span>數據處理活動安全</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch3">
+      <button class="ls-btn" onclick="go('l3-1',this)"><span class="ls-dot"></span>數據採集與存儲安全</button>
+      <button class="ls-btn" onclick="go('l3-2',this)"><span class="ls-dot"></span>數據傳輸加密方案</button>
+      <button class="ls-btn" onclick="go('l3-3',this)"><span class="ls-dot"></span>數據使用與訪問控制</button>
+      <button class="ls-btn" onclick="go('l3-4',this)"><span class="ls-dot"></span>數據刪除與銷毀規範</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch4')"><span class="ch-num">CH4</span><span>數據安全技術</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch4">
+      <button class="ls-btn" onclick="go('l4-1',this)"><span class="ls-dot"></span>數據脫敏技術實現</button>
+      <button class="ls-btn" onclick="go('l4-2',this)"><span class="ls-dot"></span>數據庫加密與 TDE</button>
+      <button class="ls-btn" onclick="go('l4-3',this)"><span class="ls-dot"></span>DLP 數據防洩漏部署</button>
+      <button class="ls-btn" onclick="go('l4-4',this)"><span class="ls-dot"></span>數據水印與溯源技術</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch5')"><span class="ch-num">CH5</span><span>個人信息保護合規</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch5">
+      <button class="ls-btn" onclick="go('l5-1',this)"><span class="ls-dot"></span>個人信息處理合規評估</button>
+      <button class="ls-btn" onclick="go('l5-2',this)"><span class="ls-dot"></span>隱私影響評估（PIA）</button>
+      <button class="ls-btn" onclick="go('l5-3',this)"><span class="ls-dot"></span>數據主體權利保障實踐</button>
+      <button class="ls-btn" onclick="go('l5-4',this)"><span class="ls-dot"></span>數據安全合規評估報告</button>
+    </div></div>
+  </div>
+  <div class="sb-f">
+    <div class="pr"><span>學習進度</span><span id="pct">0%</span></div>
+    <div class="pt"><div class="pf" id="pf" style="width:0%"></div></div>
+  </div>
+</aside>
+<main class="main">
+  <div class="lh">
+    <div class="lh-crumb" id="crumb">STAGE 13 &gt; CH1 &gt; <em>課程 1</em></div>
+    <h1 class="lh-title" id="ltitle">《數據安全法》核心要求</h1>
+    <div class="lh-chips">
+      <span class="chip ac" id="chip1">法規基礎</span>
+      <span class="chip" id="chip2">25 分鐘</span>
+    </div>
+  </div>
+  <div class="cw">
+
+<!-- CH1 -->
+<div class="cb on" id="l1-1">
+<h2>《數據安全法》核心要求</h2>
+<p>《數據安全法》（DSL）於 2021 年 9 月 1 日正式施行，是中國首部專門針對數據安全的綜合性立法，確立了數據安全的主體責任框架、數據分類分級保護制度，並設置了嚴厲的違法處罰條款。</p>
+<div class="tbl"><table class="t"><thead><tr><th>制度</th><th>核心內容</th><th>企業合規義務</th></tr></thead><tbody>
+<tr><td><strong>數據分類分級保護</strong></td><td>依據數據對國家安全、公共利益或個人合法權益的影響程度分級；國家核心數據、重要數據、一般數據三級</td><td>識別並備案本企業的重要數據目錄；制定不同級別的安全保護措施</td></tr>
+<tr><td><strong>數據安全風險評估</strong></td><td>開展數據活動應當依法評估數據安全風險；在數據出境前應進行安全評估</td><td>建立數據安全風險評估機制；重要數據處理者定期開展評估</td></tr>
+<tr><td><strong>重要數據處理者義務</strong></td><td>明確數據安全負責人；定期開展風險評估；向有關主管部門報送評估報告</td><td>設置首席數據安全官（CDSO）或對應職位；建立合規台帳</td></tr>
+<tr><td><strong>數據安全事件報告</strong></td><td>發生數據安全事件應及時採取補救措施；按規定向主管部門報告</td><td>制定數據安全事件應急預案；建立事件分級報告流程</td></tr>
+<tr><td><strong>數據交易安全</strong></td><td>從事數據交易中介服務的機構應審核交易各方身份；不得交易非法獲取的數據</td><td>建立數據來源審核機制；簽訂數據安全協議</td></tr>
+</tbody></table></div>
+<h3>違法處罰條款（第四十五至五十條）</h3>
+<div class="ilist">
+  <div class="il-item"><span class="il-num" style="color:var(--red)">高</span><div class="il-txt"><strong>未履行數據安全保護義務</strong> — 責令改正，給予警告；拒不改正或造成大量數據洩露、被竊取、被篡改等嚴重後果的，處 <strong>200 萬元以下</strong> 罰款，對直接負責主管人員和其他責任人員處 1-10 萬元罰款；情節嚴重的處 <strong>200 萬至 1000 萬元</strong> 罰款，並可責令暫停相關業務、停業整頓、吊銷相關許可證或營業執照。</div></div>
+  <div class="il-item"><span class="il-num" style="color:var(--red)">高</span><div class="il-txt"><strong>向境外提供重要數據未履行申報義務</strong> — 責令改正，處 <strong>10 萬至 100 萬元</strong> 罰款；情節嚴重的處 <strong>100 萬至 1000 萬元</strong> 罰款，並可暫停業務、吊銷許可證。</div></div>
+  <div class="il-item"><span class="il-num" style="color:var(--org)">中</span><div class="il-txt"><strong>拒不配合數據調取</strong> — 依法向有關部門調取的數據，相關組織或個人拒不提供的，可依法追究法律責任。</div></div>
+</div>
+<div class="note law"><div class="note-lbl">「重要數據」的界定</div><p>DSL 未直接列舉重要數據的具體範圍，而由各行業主管部門制定目錄。已有規定的行業包括：汽車行業（包含地圖、交通流量、充電樁等）、工業數據（生產工藝、設備數據等）、互聯網平台數據等。企業應持續關注所在行業的重要數據目錄規定。</p></div>
+</div>
+
+<div class="cb" id="l1-2">
+<h2>《個人信息保護法》解析</h2>
+<p>《個人信息保護法》（PIPL）於 2021 年 11 月 1 日施行，是中國最嚴格的個人數據保護法律，被稱為「中國版 GDPR」，但在部分條款上比 GDPR 要求更為嚴格。</p>
+<div class="kg">
+  <div class="kt"><div class="kt-n">個人信息處理的合法性基礎（六項）</div><div class="kt-d">（1）取得個人同意（明示同意）；（2）履行合同所必需；（3）履行法定職責或義務所必需；（4）應對突發公共衛生事件所必需；（5）新聞報道、輿論監督等公共利益所必需；（6）在合理範圍內處理已公開的個人信息。缺乏上述任一合法性基礎即構成違法處理。</div></div>
+  <div class="kt"><div class="kt-n">敏感個人信息（需單獨同意）</div><div class="kt-d">生物識別信息（指紋/人臉/虹膜/基因）；宗教信仰；特定身份（種族/民族）；醫療健康；金融帳戶；行蹤軌跡；不滿 14 周歲未成年人個人信息。處理敏感個人信息必須具有特定目的和充分必要性，並取得<strong>單獨同意</strong>。</div></div>
+  <div class="kt"><div class="kt-n">個人的七項權利</div><div class="kt-d">（1）知情決定權；（2）查閱複製權；（3）更正補充權；（4）刪除權（被遺忘權）；（5）撤回同意權；（6）拒絕自動化決策適用權；（7）要求解釋說明的權利。企業必須建立機制保障用戶行使上述權利，並在 15 個工作日內響應。</div></div>
+  <div class="kt"><div class="kt-n">企業核心合規義務</div><div class="kt-d">制定個人信息保護制度；指定個人信息保護負責人（DPO）；定期開展合規審計；處理 100 萬人以上個人信息須向網信部門備案；向境外提供個人信息須通過安全評估、認證或標準合同；發生信息洩露後<strong>立即通知</strong>個人及監管機構。</div></div>
+</div>
+<div class="note danger"><div class="note-lbl">最高罰款：5000 萬元或年營業額 5%</div><p>PIPL 第 66 條：情節嚴重的，由省級以上網信部門處 <strong>5000 萬元以下或上一年度營業額 5% 以下</strong> 罰款，並可責令暫停或終止提供服務。對直接負責的主管人員和其他直接責任人員處 10 萬至 100 萬元罰款，並可禁止擔任相關企業的董事、監事、高管。這一罰款上限與 GDPR 的 2000 萬歐元或全球年營業額 4% 相當，處罰力度極強。</p></div>
+</div>
+
+<div class="cb" id="l1-3">
+<h2>GDPR 與跨境數據傳輸</h2>
+<p>對於業務涉及歐盟用戶的中國企業，GDPR 合規是必須面對的挑戰。同時，中國的個人信息出境規定（《個人信息保護法》第三章）對向境外提供數據設置了嚴格要求。兩套制度均需同時滿足。</p>
+<div class="tbl"><table class="t"><thead><tr><th>維度</th><th>中國 PIPL（境外提供）</th><th>歐盟 GDPR（境外傳輸）</th></tr></thead><tbody>
+<tr><td><strong>觸發條件</strong></td><td>向中國境外提供個人信息</td><td>將個人數據傳輸至 EEA（歐洲經濟區）以外</td></tr>
+<tr><td><strong>主要合規路徑</strong></td><td>（1）通過國家網信部門的安全評估；（2）取得個人信息保護認證；（3）與境外接收方簽訂標準合同（SCCs）</td><td>（1）充分性認定國家/地區；（2）標準合同條款（SCCs）；（3）企業約束性規則（BCRs）；（4）明示同意</td></tr>
+<tr><td><strong>安全評估觸發門檻</strong></td><td>累計向境外提供超過 10 萬人個人信息；或超過 1 萬人敏感個人信息；或關基運營者、處理 100 萬人以上個人信息者</td><td>無類似量化門檻；高風險處理活動需做 DPIA</td></tr>
+<tr><td><strong>標準合同</strong></td><td>《個人信息出境標準合同》（2023 年 6 月起施行）</td><td>歐盟委員會 2021 年更新版 SCCs</td></tr>
+<tr><td><strong>本地化存儲</strong></td><td>關基運營者收集的個人信息應在境內存儲；確需出境須通過安全評估</td><td>無強制本地化，但需滿足充分保護標準</td></tr>
+</tbody></table></div>
+<div class="note tip"><div class="note-lbl">跨境數據流動實踐建議</div><p>跨境業務的數據合規路徑選擇應基於規模和頻率：低頻、小量的數據傳輸優先使用標準合同；大規模、高頻的跨境傳輸應評估安全評估或認證路徑。建議建立數據出境清單，逐筆記錄數據接收方、數據類別、法律依據，確保可追溯、可審計。</p></div>
+</div>
+
+<div class="cb" id="l1-4">
+<h2>數據安全監管執法案例</h2>
+<p>研究真實執法案例是理解法規實際適用範圍的最佳方式。以下幾個典型案例揭示了監管機構的執法重點。</p>
+<div class="flow">
+  <div class="fl-step fl-s1"><span class="fl-n">案例 1</span><div><div class="fl-t">滴滴出行（2022 年，罰款 80.26 億元）</div><div class="fl-d">違規場景：在未通過網絡安全審查的情況下上市；過度收集用戶信息（收集車型信息超出必要範圍）；違法處理個人信息（人臉識別、精準位置等）；數據安全管理存在重大缺陷。核心教訓：平台上市前必須完成網絡安全審查；數據最小化原則需嚴格落實；不能以業務需要為由過度採集。</div></div></div>
+  <div class="fl-step fl-s2"><span class="fl-n">案例 2</span><div><div class="fl-t">某招聘平台（2022 年，PIPL 首批大額處罰）</div><div class="fl-d">違規場景：違規採集個人信息（在用戶不知情的情況下採集求職者簡歷中的敏感信息）；超範圍使用用戶簡歷；未嚴格履行個人信息保護義務。核心教訓：收集目的和使用範圍必須明確告知並取得同意；簡歷等求職數據屬於高敏感類別，需單獨同意。</div></div></div>
+  <div class="fl-step fl-s3"><span class="fl-n">案例 3</span><div><div class="fl-t">某電商平台數據洩露（個人信息批量洩露）</div><div class="fl-d">違規場景：未落實最小化授權訪問控制，導致內部人員可批量導出用戶數據；數據洩露後未按規定及時向監管部門報告。核心教訓：高敏感數據庫訪問必須實施行為審計；批量查詢/導出需要審批授權；洩露事件需在 72 小時內通知監管機構（GDPR 要求）。</div></div></div>
+  <div class="fl-step fl-s4"><span class="fl-n">GDPR 案例</span><div><div class="fl-t">Meta（2023 年，罰款 12 億歐元）</div><div class="fl-d">違規場景：將歐盟用戶個人數據傳輸至美國，未採取充分的數據保護措施（依賴已被法院裁定無效的隱私盾框架）。核心教訓：數據跨境傳輸的法律依據必須持續有效；SCCs 的有效性也需要定期驗證接收國的實際保護水平。</div></div></div>
+</div>
+<div class="quiz"><div class="q-lbl">小測驗</div>
+<div class="q-q">根據《個人信息保護法》，以下哪種情況下企業向境外提供個人信息，需要通過國家網信部門的安全評估？</div>
+<div class="q-opts">
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>任何情況下向境外提供個人信息都必須通過安全評估</div>
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">B</span>只要與境外接收方簽訂了標準合同，就無需安全評估</div>
+  <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">C</span>累計向境外提供超過 100 萬人個人信息的處理者，或關鍵信息基礎設施運營者，必須通過安全評估</div>
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>只有跨國企業才需要進行安全評估，國內企業無需</div>
+</div>
+<div class="q-exp">正確！《個人信息出境安全評估辦法》規定，以下情形需要申報安全評估：（1）向境外提供重要數據；（2）關鍵信息基礎設施運營者或處理 <strong>100 萬人以上</strong>個人信息的處理者向境外提供個人信息；（3）自上年 1 月 1 日起累計向境外提供 <strong>10 萬人</strong>個人信息或 <strong>1 萬人</strong>敏感個人信息。不滿足上述條件的，可選擇簽訂標準合同或通過個人信息保護認證的路徑。</div>
+</div>
+</div>
+
+<!-- CH2 -->
+<div class="cb" id="l2-1">
+<h2>數據分類分級方法論</h2>
+<p>數據分類分級是數據安全管理的基礎。只有清楚知道「有哪些數據、有多重要、在哪裡」，才能針對性地部署安全控制措施。《數據安全法》要求建立數據分類分級保護制度，各行業主管部門已陸續發佈行業數據分級指南。</p>
+<div class="tbl"><table class="t"><thead><tr><th>分級</th><th>定義</th><th>典型示例</th><th>安全控制要求</th></tr></thead><tbody>
+<tr><td><strong style="color:var(--red)">核心數據</strong></td><td>關係國家安全、國民經濟命脈、重要民生、重大公共利益的數據</td><td>國家機密、軍事數據、國家地理基礎數據、關鍵基礎設施核心配置</td><td>最高等級保護，僅限授權人員訪問，禁止出境，强制加密存儲</td></tr>
+<tr><td><strong style="color:var(--org)">重要數據</strong></td><td>一旦洩露或被篡改，可能危害國家安全、公共利益或個人合法權益</td><td>用戶精準位置軌跡（規模超 10 萬人）、行業核心生產數據、重要統計數據</td><td>備案報告，訪問審計，出境需評估，定期風險評估</td></tr>
+<tr><td><strong style="color:var(--ylw)">敏感個人信息</strong></td><td>洩露後可能對個人人身或財產安全造成嚴重危害的個人信息</td><td>生物識別、醫療健康、金融帳戶、行蹤軌跡、不滿 14 周歲信息</td><td>單獨同意，最小化採集，加密存儲，訪問最小授權</td></tr>
+<tr><td><strong style="color:var(--acc)">一般個人信息</strong></td><td>能夠識別特定自然人但不屬於敏感類別的個人信息</td><td>姓名、郵箱、手機號、IP 地址、購買記錄</td><td>明示同意，按需採集，脫敏後可用於分析</td></tr>
+<tr><td><strong style="color:var(--txt3)">公開數據</strong></td><td>已合法公開且無安全要求的數據</td><td>官方發佈的政務數據、新聞信息、用戶自主公開的信息</td><td>確認公開合法性，防止二次處理產生隱私問題</td></tr>
+</tbody></table></div>
+<div class="note tip"><div class="note-lbl">數據分級的「組合效應」</div><p>單條數據的敏感程度可能很低，但大量低敏感數據的組合可能產生高敏感結果。例如：姓名（公開）+ 手機號（一般個人信息）+ 精準位置（敏感）+ 就醫記錄（敏感）= 極高風險的個人畫像。數據分級時必須考慮數據組合後的潛在風險，而不只是單條數據的分級。</p></div>
+</div>
+
+<div class="cb" id="l2-2">
+<h2>敏感數據識別技術</h2>
+<p>企業往往擁有分散在各系統、數據庫、文件服務器中的海量數據，人工逐一識別效率極低。敏感數據自動發現工具通過正則表達式、機器學習、數據指紋等技術，在大規模數據資產中自動識別敏感數據並標記。</p>
+<div class="cblock"><div class="ctop"><span class="clang">正則表達式：常見敏感數據識別模式（Python）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="kw">import</span> re
+
+PATTERNS = {
+    <span class="cm"># 中國大陸居民身份證號（18位）</span>
+    <span class="st">"身份證號"</span>: <span class="st">r"[1-9]\d{5}(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dXx]"</span>,
+    <span class="cm"># 手機號（中國大陸，11位）</span>
+    <span class="st">"手機號"</span>: <span class="st">r"(?<!\d)(1[3-9]\d{9})(?!\d)"</span>,
+    <span class="cm"># 信用卡號（Luhn 算法需額外驗證）</span>
+    <span class="st">"信用卡號"</span>: <span class="st">r"(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13})"</span>,
+    <span class="cm"># 電子郵件</span>
+    <span class="st">"郵件地址"</span>: <span class="st">r"[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"</span>,
+    <span class="cm"># 銀行卡號（16-19位數字）</span>
+    <span class="st">"銀行卡號"</span>: <span class="st">r"(?<!\d)[4-9]\d{15,18}(?!\d)"</span>,
+    <span class="cm"># IPv4 地址</span>
+    <span class="st">"IPv4地址"</span>: <span class="st">r"(?<!\d)(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)(?!\d)"</span>,
+    <span class="cm"># 明文密碼（password= / pwd= 等關鍵詞後跟字符串）</span>
+    <span class="st">"疑似明文密碼"</span>: <span class="st">r"(?i)(?:password|passwd|pwd|secret|token)\s*[=:]\s*['"]?(\S{6,})"</span>,
+}
+
+<span class="kw">def</span> <span class="fn">scan_text</span>(text: str) -> dict:
+    <span class="st">"""掃描文本中的敏感數據，返回發現列表"""</span>
+    findings = {}
+    <span class="kw">for</span> label, pattern <span class="kw">in</span> PATTERNS.items():
+        matches = re.findall(pattern, text)
+        <span class="kw">if</span> matches:
+            <span class="cm"># 脫敏後記錄（僅顯示前後各2位）</span>
+            masked = [m[:<span class="nu">2</span>] + <span class="st">"****"</span> + m[-<span class="nu">2</span>:] <span class="kw">if</span> len(m) > <span class="nu">4</span> <span class="kw">else</span> <span class="st">"****"</span>
+                      <span class="kw">for</span> m <span class="kw">in</span> (matches <span class="kw">if</span> isinstance(matches[<span class="nu">0</span>], str)
+                                  <span class="kw">else</span> [m[<span class="nu">0</span>] <span class="kw">if</span> m <span class="kw">else</span> <span class="st">""</span> <span class="kw">for</span> m <span class="kw">in</span> matches])]
+            findings[label] = {<span class="st">"count"</span>: len(matches), <span class="st">"samples"</span>: masked[:<span class="nu">3</span>]}
+    <span class="kw">return</span> findings
+
+<span class="cm"># 掃描文件目錄（生產使用時需限制掃描目錄和文件類型）</span>
+<span class="kw">import</span> os
+<span class="kw">def</span> <span class="fn">scan_directory</span>(path: str, extensions=(<span class="st">".txt"</span>,<span class="st">".csv"</span>,<span class="st">".log"</span>,<span class="st">".sql"</span>)):
+    results = []
+    <span class="kw">for</span> root, _, files <span class="kw">in</span> os.walk(path):
+        <span class="kw">for</span> fname <span class="kw">in</span> files:
+            <span class="kw">if</span> <span class="kw">not</span> any(fname.endswith(ext) <span class="kw">for</span> ext <span class="kw">in</span> extensions):
+                <span class="kw">continue</span>
+            fpath = os.path.join(root, fname)
+            <span class="kw">try</span>:
+                text = open(fpath, encoding=<span class="st">"utf-8"</span>, errors=<span class="st">"ignore"</span>).read()
+                findings = scan_text(text)
+                <span class="kw">if</span> findings:
+                    results.append({<span class="st">"file"</span>: fpath, <span class="st">"findings"</span>: findings})
+            <span class="kw">except</span> Exception <span class="kw">as</span> e:
+                <span class="kw">pass</span>
+    <span class="kw">return</span> results</pre>
+</div>
+</div>
+
+<div class="cb" id="l2-3">
+<h2>數據資產梳理實戰</h2>
+<p>數據資產梳理（Data Asset Inventory）是建立完整數據地圖的過程，目標是弄清楚「我們有哪些數據、存在哪裡、誰在用、流向哪裡」。這是數據安全治理的起點，也是開展數據安全評估的前提。</p>
+<div class="flow">
+  <div class="fl-step fl-s1"><span class="fl-n">STEP 1</span><div><div class="fl-t">業務場景梳理</div><div class="fl-d">以業務流程為主線（如用戶註冊 → 下單 → 支付 → 配送），識別每個環節涉及的數據類型。訪談業務部門、研發部門、DBA，結合系統設計文檔（ER 圖、接口文檔），梳理出全業務數據流。</div></div></div>
+  <div class="fl-step fl-s2"><span class="fl-n">STEP 2</span><div><div class="fl-t">數據存儲盤點</div><div class="fl-d">掃描組織內所有數據存儲位置：結構化（MySQL/Oracle/MSSQL 等關係型數據庫）、半結構化（MongoDB/ES 等 NoSQL）、非結構化（文件服務器/對象存儲/郵件）、數據倉庫/湖（Hive/Spark）。每類存儲列出：系統名稱、IP/地址、數據類型、負責人、數據量級。</div></div></div>
+  <div class="fl-step fl-s3"><span class="fl-n">STEP 3</span><div><div class="fl-t">自動化掃描識別</div><div class="fl-d">使用敏感數據掃描工具（商業：Varonis、Nightfall、IBM Guardium；開源：OpenDLP、Datawalk）連接各數據存儲系統，自動識別其中的敏感數據字段，輸出敏感字段清單和分佈熱力圖。</div></div></div>
+  <div class="fl-step fl-s4"><span class="fl-n">STEP 4</span><div><div class="fl-t">數據分級打標</div><div class="fl-d">依據分類分級規則，對每個數據字段打上數據類別標籤（如「手機號」「身份證號」「訂單金額」）和安全級別標籤（核心/重要/敏感/一般/公開）。在數據庫字段註釋或元數據管理平台（Apache Atlas、DataHub）中記錄標籤。</div></div></div>
+  <div class="fl-step fl-s5"><span class="fl-n">STEP 5</span><div><div class="fl-t">輸出數據資產台帳</div><div class="fl-d">形成完整的數據資產清單：數據資產 ID、名稱、業務說明、存儲位置、數據量、安全級別、負責人、訪問授權清單、最後更新時間。台帳需要定期更新（建議每季度更新一次）。</div></div></div>
+</div>
+</div>
+
+<div class="cb" id="l2-4">
+<h2>數據流圖繪製與分析</h2>
+<p>數據流圖（Data Flow Diagram，DFD）是可視化數據在組織內部如何流動的工具。從安全角度分析 DFD，可以識別出數據安全邊界、高風險的流動路徑和潛在的洩露點。</p>
+<div class="cblock"><div class="ctop"><span class="clang">電商平台個人信息數據流分析示例</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="hi">數據流節點說明：</span>
+[用戶端] ──(手機號/密碼/地址/支付信息)──> [前端 API 層]
+[前端 API 層] ──(加密傳輸 HTTPS)──> [業務邏輯層]
+[業務邏輯層] ──(寫入)──> [用戶數據庫 MySQL] ← <span class="ylw">高風險節點</span>
+[業務邏輯層] ──(訂單數據)──> [訂單數據庫]
+[業務邏輯層] ──(支付信息)──> [第三方支付平台] ← <span class="ylw">數據出境節點</span>
+[用戶數據庫] ──(BI 同步)──> [數據倉庫 Hive] ← <span class="ylw">風險：全量用戶數據</span>
+[數據倉庫] ──(分析結果)──> [BI 報表工具]
+[業務邏輯層] ──(日誌)──> [日誌平台 ELK] ← <span class="bad">風險：可能含 PII 的日誌</span>
+[用戶數據庫] ──(備份)──> [備份存儲] ← 需確認訪問控制
+[業務邏輯層] ──(API 調用)──> [外部廣告 SDK] ← <span class="bad">高風險：第三方 SDK 採集</span>
+
+<span class="hi">安全分析要點：</span>
+1. 第三方 SDK（廣告/統計/推送）能訪問哪些數據？是否超過必要範圍？
+2. 日誌中是否記錄了敏感字段（手機號/身份證號）？需要脫敏後才能入日誌
+3. 數據倉庫是否有全量用戶 PII？誰能訪問？訪問是否有審計？
+4. 支付信息是否符合 PCI DSS？是否傳遞了原始卡號？
+5. 備份數據的加密和訪問控制是否與生產庫同等級？</pre>
+</div>
+<div class="quiz"><div class="q-lbl">小測驗</div>
+<div class="q-q">在進行數據資產梳理時，發現公司的 ELK 日誌平台中記錄了大量包含完整手機號的 API 請求日誌。以下哪個處置方案最符合數據安全最佳實踐？</div>
+<div class="q-opts">
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>立即刪除所有日誌，避免合規風險</div>
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">B</span>僅限安全管理員訪問日誌，其他人無法查看，風險可接受</div>
+  <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">C</span>在日誌採集層（Logstash/Filebeat）增加脫敏處理，對手機號等 PII 字段進行掩碼；已有的歷史日誌評估是否需要清理</div>
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>將 ELK 平台遷移至加密存儲，解決問題</div>
+</div>
+<div class="q-exp">正確！最佳做法是在日誌進入 ELK 之前，在 Logstash 的 filter 中進行脫敏處理（如使用 mutate 插件的 gsub 方法將手機號替換為 <code>138****1234</code> 格式）。加密存儲（D）只能防止外部攻擊者盜取，無法防止有合法訪問權限的內部人員查看明文 PII。限制訪問（B）降低了風險但未消除問題，且日誌系統往往有較多合法訪問者。立即刪除日誌（A）可能違反日誌保留的合規要求。</div>
+</div>
+</div>
+
+<!-- CH3 -->
+<div class="cb" id="l3-1">
+<h2>數據採集與存儲安全</h2>
+<p>數據採集是個人信息處理的起點，也是合規風險最高的環節。「採集即合規」原則要求在數據採集的設計階段就嵌入隱私保護考量（Privacy by Design），而不是在產品上線後再補充合規措施。</p>
+<h3>採集合規核心要求</h3>
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>最小化採集</strong> — 只採集實現業務目的所必需的數據，禁止「以防萬一」式的過度採集。評估標準：去掉這個字段，業務功能是否受到影響？若不影響，則不應採集。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>明確告知與有效同意</strong> — 隱私政策必須清晰說明採集目的、類型、使用方式、保留期限、第三方共享。同意機制需要：明示（默認不勾選）、自願（不綁定服務）、可撤回（提供便捷的撤回路徑）。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>第三方 SDK 管控</strong> — 集成到 App 中的第三方 SDK（廣告/分析/推送）也在採集用戶數據，企業需要對 SDK 的數據採集行為進行審核和監控，確認其不超越授權範圍。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>未成年人保護</strong> — 涉及不滿 14 周歲未成年人個人信息的，需取得其父母或其他監護人的同意，並對此類數據進行更嚴格的保護。</div></div>
+</div>
+<h3>存儲安全技術要求</h3>
+<div class="tbl"><table class="t"><thead><tr><th>存儲類型</th><th>核心安全措施</th></tr></thead><tbody>
+<tr><td>關係型數據庫</td><td>敏感字段加密存儲（AES-256）；列級加密（如手機號、身份證號）；嚴格的表/列級別訪問控制；不以明文存儲密碼（bcrypt/scrypt/Argon2 哈希）</td></tr>
+<tr><td>文件/對象存儲</td><td>服務端加密（SSE）；訪問 URL 設置有效期（Pre-signed URL）；禁止 Bucket 公開讀取；審計訪問記錄</td></tr>
+<tr><td>日誌存儲</td><td>採集前脫敏處理（手機號/郵箱掩碼）；日誌中禁止明文密碼；設置訪問權限避免全員可查</td></tr>
+<tr><td>緩存（Redis）</td><td>禁止存儲敏感數據明文；設置合理過期時間（TTL）；啟用認證（requirepass）；禁止外網訪問</td></tr>
+</tbody></table></div>
+</div>
+
+<div class="cb" id="l3-2">
+<h2>數據傳輸加密方案</h2>
+<p>數據在傳輸過程中的安全是數據安全的關鍵環節，「明文傳輸」是常見的高危問題。不同的傳輸場景需要不同的加密方案。</p>
+<div class="tbl"><table class="t"><thead><tr><th>傳輸場景</th><th>推薦方案</th><th>關鍵配置要點</th></tr></thead><tbody>
+<tr><td>Web/App 與後端 API</td><td>TLS 1.2 或 1.3（HTTPS）</td><td>禁用 SSLv2/v3/TLS1.0/1.1；使用 HSTS（包含 includeSubDomains）；證書使用 2048 位 RSA 或 256 位 EC；定期通過 SSL Labs 測試（目標 A+）</td></tr>
+<tr><td>服務間內部通信（微服務）</td><td>mTLS（雙向 TLS）</td><td>使用服務網格（Istio/Linkerd）自動管理 mTLS；服務間不因在「內網」就明文通信；零信任架構的核心</td></tr>
+<tr><td>數據庫連接</td><td>TLS 加密連接</td><td>MySQL: <code>require_secure_transport=ON</code>；禁止不加密連接；配置 SSL 憑證</td></tr>
+<tr><td>文件傳輸</td><td>SFTP / SCP / FTPS</td><td>禁用 FTP 明文協議；使用 SFTP（基於 SSH）；文件傳輸完成後驗證哈希</td></tr>
+<tr><td>消息隊列（Kafka/RabbitMQ）</td><td>TLS + SASL 認證</td><td>傳輸中的消息加密；生產者/消費者認證；敏感消息在應用層額外加密</td></tr>
+<tr><td>跨境數據傳輸</td><td>加密通道 + 端到端加密</td><td>VPN 或專用電路；對高敏感數據在應用層加密，確保傳輸層和存儲層均無法看到明文</td></tr>
+</tbody></table></div>
+<div class="cblock"><div class="ctop"><span class="clang">Nginx HTTPS 最佳配置</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre>server {
+    listen 443 ssl http2;
+    server_name api.example.com;
+
+    ssl_certificate     /etc/ssl/certs/example.crt;
+    ssl_certificate_key /etc/ssl/private/example.key;
+
+    <span class="cm"># 僅允許 TLS 1.2 和 1.3</span>
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    <span class="cm"># 強加密套件（禁用弱加密）</span>
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
+    ssl_prefer_server_ciphers on;
+
+    <span class="cm"># Session 緩存（提升性能）</span>
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+
+    <span class="cm"># HSTS：強制 HTTPS（一年，含子域名）</span>
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-Frame-Options DENY always;
+    add_header Content-Security-Policy "default-src 'self'" always;
+}</pre>
+</div>
+</div>
+
+<div class="cb" id="l3-3">
+<h2>數據使用與訪問控制</h2>
+<p>數據存入之後，如何控制「誰能訪問哪些數據、做什麼操作」是防止內部洩露的關鍵。最小權限原則（Principle of Least Privilege）在數據訪問控制中的落實包含多個層次。</p>
+<div class="kg">
+  <div class="kt"><div class="kt-n">角色級訪問控制（RBAC）</div><div class="kt-d">按職能角色授權：數據分析師只能訪問脫敏後的分析數據庫；客服人員只能查看必要的用戶字段（如訂單狀態、服務記錄），不能查看完整手機號和支付信息；DBA 的生產數據庫訪問必須通過堡壘機並留下完整操作記錄。</div></div>
+  <div class="kt"><div class="kt-n">列/行級安全（Row/Column Security）</div><div class="kt-d">數據庫層面的細粒度控制：PostgreSQL Row Security Policies 可以根據當前用戶限制只能看到自己的數據；視圖（View）隱藏敏感列；MySQL 列級別 GRANT 控制特定字段的讀寫。避免將所有用戶都賦予 SELECT * 的通用權限。</div></div>
+  <div class="kt"><div class="kt-n">動態數據脫敏</div><div class="kt-d">不同角色看到的相同字段內容不同：管理員看到完整手機號 <code>13800138000</code>，客服人員看到 <code>138****8000</code>，分析師看到 <code>1**********</code>。通過數據庫審計閘道（如 Imperva、安華金和）或應用層實現動態脫敏，確保敏感數據按需脫敏展示。</div></div>
+  <div class="kt"><div class="kt-n">數據訪問審計</div><div class="kt-d">對敏感數據的所有訪問行為（查詢/修改/刪除/導出）進行記錄，包含：操作者身份、時間、SQL 語句、影響行數、來源 IP。審計日誌本身要防篡改（寫後不可刪），並定期分析是否有異常批量查詢（潛在數據竊取行為）。</div></div>
+</div>
+</div>
+
+<div class="cb" id="l3-4">
+<h2>數據刪除與銷毀規範</h2>
+<p>數據刪除往往是最被忽視的安全環節。PIPL 明確了「數據刪除權（被遺忘權）」——用戶有權要求企業刪除其個人信息。同時，超過保留期的數據必須依規銷毀，避免不必要的數據積累成為安全隱患。</p>
+<div class="tbl"><table class="t"><thead><tr><th>場景</th><th>刪除要求</th><th>技術實現</th></tr></thead><tbody>
+<tr><td><strong>用戶申請刪除</strong>（被遺忘權）</td><td>在法律規定期限內（中國 PIPL：合理期限，GDPR：30 天）響應用戶刪除請求</td><td>「邏輯刪除 + 定期物理刪除」：先標記刪除狀態（is_deleted=1），定期批處理物理刪除；同時清除相關緩存（Redis）、日誌中的 PII、備份數據中的用戶記錄</td></tr>
+<tr><td><strong>超過保留期</strong></td><td>個人信息保存期限不超過實現處理目的所必要的時間</td><td>在數據模型設計時加入 <code>created_at</code> 和 <code>retention_days</code> 字段；建立定時清理任務；數倉中的 PII 數據設置自動過期分區</td></tr>
+<tr><td><strong>業務系統下線</strong></td><td>系統下線時必須完整銷毀所有數據</td><td>結構化數據庫：DROP TABLE 後覆寫磁碟扇區；雲數據庫：確認雲服務商的數據銷毀憑證；存儲介質物理銷毀（碎紙機/消磁/物理摧毀）</td></tr>
+<tr><td><strong>員工離職</strong></td><td>員工個人工作設備/帳號中的公司數據應在離職前徹底清除</td><td>MDM（移動設備管理）遠程擦除；筆記本電腦磁碟加密後重置；雲帳號訪問權限撤銷</td></tr>
+</tbody></table></div>
+<div class="note warn"><div class="note-lbl">「刪除」不等於「消失」</div><p>數據庫的 DELETE 操作只是標記行為已刪除，數據在磁碟上仍以碎片形式存在，可以通過取證工具恢復。真正的安全刪除需要：（1）覆寫（Overwrite）：用隨機數據多次覆寫存儲位置；（2）加密後刪除密鑰（Crypto-shredding）：如果數據已加密，銷毀加密密鑰等同於銷毀數據；（3）物理銷毀：對於硬盤等存儲介質。</p></div>
+</div>
+
+<!-- CH4 -->
+<div class="cb" id="l4-1">
+<h2>數據脫敏技術實現</h2>
+<p>數據脫敏（Data Masking）是在保留數據可用性的前提下，對敏感字段進行轉換處理，使其無法被用於識別特定個人。根據使用場景，分為靜態脫敏（Static Data Masking，SDM）和動態脫敏（Dynamic Data Masking，DDM）兩類。</p>
+<div class="tbl"><table class="t"><thead><tr><th>脫敏技術</th><th>說明</th><th>適用場景</th><th>可逆性</th></tr></thead><tbody>
+<tr><td><strong>替換（Substitution）</strong></td><td>用虛假但格式一致的數據替換真實數據（如真實手機號替換為另一個合法格式的手機號）</td><td>測試環境數據準備</td><td>不可逆</td></tr>
+<tr><td><strong>掩碼（Masking）</strong></td><td>保留部分字符，其他替換為 * 或 X（如 138****8000）</td><td>前端展示、客服系統、日誌</td><td>不可逆</td></tr>
+<tr><td><strong>哈希（Hashing）</strong></td><td>對敏感字段取哈希值（如 SHA-256），用於去重或關聯分析時保持一致性，但不可還原</td><td>數據分析中的 ID 匿名化</td><td>不可逆</td></tr>
+<tr><td><strong>令牌化（Tokenization）</strong></td><td>用無意義的令牌替換敏感數據，真實數據存入隔離的令牌庫（Vault）</td><td>支付卡數據（PCI DSS）、跨系統傳遞</td><td>可逆（需訪問 Vault）</td></tr>
+<tr><td><strong>差分隱私（Differential Privacy）</strong></td><td>在聚合統計結果中加入數學噪聲，確保單個記錄的加入不顯著改變統計結果</td><td>統計報告、數據發佈、聯邦學習</td><td>不可逆</td></tr>
+<tr><td><strong>泛化（Generalization）</strong></td><td>降低數據精度（如精確年齡 23 歲 → 年齡段 20-30 歲，精確位置 → 城市級別）</td><td>統計分析、公開數據集</td><td>不可逆</td></tr>
+</tbody></table></div>
+<div class="cblock"><div class="ctop"><span class="clang">Python 數據脫敏工具函數</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="kw">import</span> re, hashlib, hmac
+
+SECRET_KEY = b"your-secret-key-32bytes-minimum!"  <span class="cm"># 存於 HSM 或密鑰管理服務</span>
+
+<span class="kw">def</span> <span class="fn">mask_phone</span>(phone: str) -> str:
+    <span class="st">"""手機號掩碼：138****8000"""</span>
+    <span class="kw">if not</span> phone <span class="kw">or</span> len(phone) < <span class="nu">7</span>: <span class="kw">return</span> <span class="st">"****"</span>
+    <span class="kw">return</span> phone[:<span class="nu">3</span>] + <span class="st">"****"</span> + phone[-<span class="nu">4</span>:]
+
+<span class="kw">def</span> <span class="fn">mask_id_card</span>(id_card: str) -> str:
+    <span class="st">"""身份證掩碼：110101******1234"""</span>
+    <span class="kw">if not</span> id_card <span class="kw">or</span> len(id_card) < <span class="nu">10</span>: <span class="kw">return</span> <span class="st">"****"</span>
+    <span class="kw">return</span> id_card[:<span class="nu">6</span>] + <span class="st">"******"</span> + id_card[-<span class="nu">4</span>:]
+
+<span class="kw">def</span> <span class="fn">mask_email</span>(email: str) -> str:
+    <span class="st">"""郵箱掩碼：us***@example.com"""</span>
+    <span class="kw">if</span> <span class="st">"@"</span> <span class="kw">not in</span> email: <span class="kw">return</span> <span class="st">"****"</span>
+    user, domain = email.split(<span class="st">"@"</span>, <span class="nu">1</span>)
+    <span class="kw">return</span> user[:<span class="nu">2</span>] + <span class="st">"***"</span> + <span class="st">"@"</span> + domain
+
+<span class="kw">def</span> <span class="fn">tokenize</span>(value: str) -> str:
+    <span class="st">"""HMAC 令牌化：用密鑰衍生確定性令牌，相同輸入產生相同令牌（可用於關聯分析）"""</span>
+    token = hmac.new(SECRET_KEY, value.encode(), hashlib.sha256).hexdigest()
+    <span class="kw">return</span> <span class="st">f"TKN_{token[:16].upper()}"</span>
+
+<span class="kw">def</span> <span class="fn">mask_bank_card</span>(card: str) -> str:
+    <span class="st">"""銀行卡號：僅保留後 4 位"""</span>
+    card = re.sub(r<span class="st">"\D"</span>, <span class="st">""</span>, card)
+    <span class="kw">return</span> <span class="st">"**** **** **** "</span> + card[-<span class="nu">4</span>:]
+
+<span class="cm"># 批量脫敏 DataFrame（pandas）</span>
+<span class="kw">def</span> <span class="fn">desensitize_dataframe</span>(df):
+    <span class="kw">import</span> pandas <span class="kw">as</span> pd
+    field_map = {
+        <span class="st">"phone"</span>:   mask_phone,
+        <span class="st">"mobile"</span>:  mask_phone,
+        <span class="st">"id_card"</span>: mask_id_card,
+        <span class="st">"email"</span>:   mask_email,
+        <span class="st">"card_no"</span>: mask_bank_card,
+        <span class="st">"user_id"</span>: tokenize,   <span class="cm"># 令牌化保留關聯能力</span>
+    }
+    result = df.copy()
+    <span class="kw">for</span> col, fn <span class="kw">in</span> field_map.items():
+        <span class="kw">if</span> col <span class="kw">in</span> result.columns:
+            result[col] = result[col].astype(str).apply(fn)
+    <span class="kw">return</span> result</pre>
+</div>
+</div>
+
+<div class="cb" id="l4-2">
+<h2>數據庫加密與 TDE</h2>
+<p>透明數據加密（Transparent Data Encryption，TDE）是在數據庫存儲層對數據進行自動加密的技術。對應用程序完全透明——應用不需要修改任何代碼，數據庫引擎在寫入磁碟前自動加密、讀取時自動解密。TDE 主要防護的是「磁碟盜竊」或「未授權的備份文件訪問」場景。</p>
+<div class="cblock"><div class="ctop"><span class="clang">MySQL InnoDB TDE 啟用（MySQL 8.0+）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="cm">-- ─── 步驟 1：確認 keyring 插件已安裝 ───</span>
+SHOW PLUGINS LIKE '%keyring%';
+<span class="cm">-- 應看到 keyring_file 或 keyring_vault（生產推薦 vault）</span>
+
+<span class="cm">-- ─── 步驟 2：my.cnf 啟用 keyring 插件 ───</span>
+<span class="cm">-- [mysqld]</span>
+<span class="cm">-- early-plugin-load = keyring_file.so</span>
+<span class="cm">-- keyring_file_data = /var/lib/mysql-keyring/keyring</span>
+
+<span class="cm">-- ─── 步驟 3：對現有表啟用加密 ───</span>
+ALTER TABLE users ENCRYPTION='Y';
+ALTER TABLE orders ENCRYPTION='Y';
+ALTER TABLE payment_records ENCRYPTION='Y';
+
+<span class="cm">-- ─── 步驟 4：設置新建表默認加密 ───</span>
+SET GLOBAL default_table_encryption = ON;
+
+<span class="cm">-- 驗證加密狀態</span>
+SELECT TABLE_SCHEMA, TABLE_NAME, CREATE_OPTIONS
+FROM information_schema.TABLES
+WHERE CREATE_OPTIONS LIKE '%ENCRYPTION%';
+
+<span class="cm">-- ─── 列級加密（應用層，比 TDE 更細粒度）───</span>
+<span class="cm">-- 使用 MySQL AES 函數，密鑰由應用傳入（不存在數據庫中）</span>
+INSERT INTO users(phone_enc, name)
+VALUES (AES_ENCRYPT('13800138000', @encryption_key), '張三');
+
+SELECT AES_DECRYPT(phone_enc, @encryption_key) AS phone FROM users;</pre>
+</div>
+<div class="note warn"><div class="note-lbl">TDE 的局限性</div><p>TDE 只保護「靜止數據（Data at Rest）」，無法防護以下場景：（1）有合法資料庫訪問權限的內部人員；（2）SQL 注入攻擊（攻擊者通過 Web 應用查詢，TDE 對其透明）；（3）數據庫在線時的內存攻擊。因此 TDE 應與訪問控制、SQL 審計、應用層加密（對高敏感字段）配合使用，形成縱深防禦。</p></div>
+</div>
+
+<div class="cb" id="l4-3">
+<h2>DLP 數據防洩漏部署</h2>
+<p>DLP（Data Loss Prevention）系統通過監控數據的使用和流動，識別並阻斷未授權的數據洩露行為。DLP 通常部署在三個層面：網絡層（Network DLP）、端點層（Endpoint DLP）和雲端（Cloud DLP/CASB）。</p>
+<div class="tbl"><table class="t"><thead><tr><th>DLP 類型</th><th>監控範圍</th><th>典型能力</th><th>局限</th></tr></thead><tbody>
+<tr><td><strong>Network DLP</strong></td><td>出站網絡流量（HTTP/HTTPS/SMTP/FTP）</td><td>識別電郵/上傳/下載中的敏感內容；阻斷向個人郵箱發送包含身份證號的附件；記錄 HTTPS 傳輸的 PII 數據（需 SSL 解密）</td><td>加密流量需解密才能深度檢測；無法覆蓋物理介質（U 盤）</td></tr>
+<tr><td><strong>Endpoint DLP</strong></td><td>終端設備（PC/Mac）的本地操作</td><td>監控剪貼板複製、截圖、打印、U 盤複製、雲盤上傳等操作；可識別截圖中包含的敏感信息（OCR）；阻斷未授權的敏感文件複製到移動介質</td><td>部署複雜，可能影響終端性能；員工可能繞過（使用個人設備拍照）</td></tr>
+<tr><td><strong>Cloud DLP / CASB</strong></td><td>雲應用（O365/Google Workspace/Salesforce）</td><td>掃描雲存儲中的敏感內容；監控雲應用中的共享行為；識別過度開放的共享設置（Anyone with link）</td><td>配置複雜；雲服務商 API 能力各異</td></tr>
+</tbody></table></div>
+<div class="cblock"><div class="ctop"><span class="clang">DLP 策略規則示例（偽代碼/策略邏輯）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="hi">DLP 策略 1：阻止包含大量身份證號的文件外發</span>
+  觸發條件：
+    - 數據通道：電郵附件、雲盤上傳、即時通訊文件
+    - 內容匹配：文件包含 >= 10 個身份證號（正則匹配 + Luhn 驗證）
+  動作：
+    - 攔截傳輸
+    - 發送告警到安全運營中心
+    - 記錄操作者、時間、文件名、目的地
+    - 通知用戶（「文件包含敏感信息，已被安全策略攔截」）
+
+<span class="hi">DLP 策略 2：監控批量數據導出</span>
+  觸發條件：
+    - 來源：業務系統、數據庫查詢工具
+    - 行為：單次導出 CSV/Excel 包含個人信息字段 >= 1000 條
+  動作：
+    - 高敏感：立即攔截 + 告警
+    - 中敏感：允許但記錄 + 發送審批請求（導出者主管確認）
+    - 低敏感：允許 + 靜默記錄
+
+<span class="hi">DLP 策略 3：U 盤複製控制</span>
+  觸發條件：
+    - 設備：未在白名單的 USB 存儲設備
+    - 文件類型：.xlsx/.csv/.sql/.bak 等高風險類型
+  動作：
+    - 默認：阻止寫入
+    - 豁免：白名單設備（IT 資產管理發放，帶設備 ID）可寫入，但記錄操作</pre>
+</div>
+</div>
+
+<div class="cb" id="l4-4">
+<h2>數據水印與溯源技術</h2>
+<p>當數據洩露不可避免時，數據水印（Digital Watermarking）技術可以幫助確定洩露的數據來源——是哪個系統、哪個用戶、哪個時間點的數據被洩露，從而支持事後的事件調查和追責。</p>
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>文檔水印</strong> — 在 Word/PDF 等文件中嵌入不可見水印（如在頁面空白處用極小字體/白色字體印上訪問者信息和時間）。當文件被截圖或打印傳播後，仍可通過圖像分析提取水印識別洩露源頭。商業工具：Vitrium、Fasoo；開源方案：python-docx 自定義水印注入。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>數據庫水印（金絲雀記錄）</strong> — 在數據庫中為不同的數據訪問者植入略有不同的「金絲雀記錄」（Canary Record）——真實數據中嵌入微小差異（如某個日期字段的精度、某個城市字段的拼寫變體），每個接收者得到的數據集都有唯一的特徵組合。當洩露的數據集出現在網絡上，可以通過對比特徵鎖定洩露者。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>查詢水印（Query-based Watermarking）</strong> — 在 API 響應中根據請求者身份對特定字段進行微小編碼（如在浮點數的末位、在列表排序中植入水印信息），即使攻擊者拿到的是 API 回傳的 JSON 數據，也可以通過分析數值特征識別水印。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>截圖水印</strong> — 在 Web 界面上對不同用戶動態顯示不同的隱藏信息（如在頁面 DOM 中以透明元素/CSS 定位方式嵌入用戶 ID）。當用戶截圖洩露時，可以通過分析截圖中的細微差異識別截圖來源。</div></div>
+</div>
+<div class="quiz"><div class="q-lbl">小測驗</div>
+<div class="q-q">公司決定向合作夥伴 A 和合作夥伴 B 分別提供一份包含 50 萬條脫敏用戶數據的分析數據集。3 個月後，發現網絡上出現了疑似來自這批數據的洩露信息，但兩個合作夥伴都否認洩露。以下哪種技術能幫助確定洩露源頭？</div>
+<div class="q-opts">
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>對數據進行 AES-256 加密存儲後再提供</div>
+  <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">B</span>在提供給 A 和 B 的數據集中分別植入不同的金絲雀記錄（細微差異），根據洩露數據的特征識別來源</div>
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">C</span>要求兩個合作夥伴簽署更嚴格的保密協議</div>
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>在數據傳輸時使用 SFTP 加密通道</div>
+</div>
+<div class="q-exp">正確！這正是數據水印（金絲雀記錄）技術的經典應用場景。給 A 的數據集和給 B 的數據集在特定字段上有細微但可識別的差異（如 A 的數據集中某城市名稱統一使用「北京市」，B 的使用「北京」），洩露數據出現後，通過比對特征即可鎖定是 A 還是 B 的數據集被洩露。加密（A）只保護傳輸和存儲安全，不能防止授權方洩露；保密協議（C）是法律手段，無法進行技術溯源；加密通道（D）同樣無法解決授權方洩露的問題。</div>
+</div>
+</div>
+
+<!-- CH5 -->
+<div class="cb" id="l5-1">
+<h2>個人信息處理合規評估</h2>
+<p>個人信息處理合規評估是對企業個人信息處理活動進行系統性審查，確認各環節是否符合《個人信息保護法》等法規要求。評估通常圍繞六個處理環節展開：採集、存儲、使用、加工、傳輸共享、刪除。</p>
+<div class="flow">
+  <div class="fl-step fl-s1"><span class="fl-n">採集評估</span><div><div class="fl-t">合法性基礎與最小化核查</div><div class="fl-d">逐一核查每個個人信息字段的採集合法性基礎（同意/合同/法律義務等）；驗證是否有充分的業務需要；確認隱私政策是否清晰說明採集目的；評估同意機制是否有效（非默認勾選、可撤回）；核查 App 申請的系統權限是否超出必要範圍。</div></div></div>
+  <div class="fl-step fl-s2"><span class="fl-n">存儲評估</span><div><div class="fl-t">安全存儲與保留期核查</div><div class="fl-d">確認敏感個人信息是否加密存儲；核查密碼是否使用哈希存儲（而非明文或可逆加密）；評估存儲位置（是否含跨境存儲）；確認各類個人信息的保留期是否有明確定義並被執行；核查存儲訪問控制是否落實最小授權原則。</div></div></div>
+  <div class="fl-step fl-s3"><span class="fl-n">使用評估</span><div><div class="fl-t">目的限制與自動化決策</div><div class="fl-d">確認個人信息的使用是否超出採集時告知的目的（「目的限制原則」）；評估是否有自動化決策應用（如精準推薦、信用評分），確認用戶是否被告知有權拒絕；核查員工訪問日誌，識別異常訪問行為（如批量導出）。</div></div></div>
+  <div class="fl-step fl-s4"><span class="fl-n">共享評估</span><div><div class="fl-t">第三方共享合規核查</div><div class="fl-d">梳理所有向第三方提供個人信息的場景（第三方 SDK、合作夥伴、廣告平台）；確認每個共享是否有合法依據（用戶同意/合同必要）；核查與第三方的數據處理協議（DPA）是否簽訂；評估第三方的安全能力是否符合要求。</div></div></div>
+  <div class="fl-step fl-s5"><span class="fl-n">出境評估</span><div><div class="fl-t">跨境傳輸合規核查</div><div class="fl-d">識別所有個人信息出境場景（含使用境外雲服務、向境外母公司傳輸）；判斷是否達到需要申報安全評估的門檻（累計 10 萬人以上個人信息）；確認已選擇合規路徑（安全評估/標準合同/認證）並有對應的書面文件。</div></div></div>
+  <div class="fl-step fl-s6"><span class="fl-n">刪除評估</span><div><div class="fl-t">刪除機制與響應能力</div><div class="fl-d">確認是否建立了用戶行使刪除權的請求渠道；評估是否有完整的刪除流程（包括緩存、日誌、備份、第三方同步刪除）；核查是否在合理期限內完成刪除請求的響應；確認業務系統下線時的數據銷毀流程。</div></div></div>
+</div>
+</div>
+
+<div class="cb" id="l5-2">
+<h2>隱私影響評估（PIA）</h2>
+<p>隱私影響評估（Privacy Impact Assessment，PIA）又稱數據保護影響評估（DPIA），是在新業務、新系統、新技術投入使用前，系統性評估其對個人隱私的潛在影響，並採取措施降低風險的合規工具。PIPL 和 GDPR 均要求在處理高風險個人信息前進行 PIA/DPIA。</p>
+<div class="tbl"><table class="t"><thead><tr><th>PIPL 要求開展個人信息保護影響評估的場景</th></tr></thead><tbody>
+<tr><td>處理敏感個人信息（生物識別/醫療/金融帳戶等）</td></tr>
+<tr><td>利用個人信息進行自動化決策</td></tr>
+<tr><td>委託處理、共享、公開個人信息</td></tr>
+<tr><td>向境外提供個人信息</td></tr>
+<tr><td>其他對個人權益有重大影響的處理活動</td></tr>
+</tbody></table></div>
+<div class="cblock"><div class="ctop"><span class="clang">PIA 評估報告結構（核心章節）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="hi">一、評估基本信息</span>
+  項目/系統名稱：用戶畫像與精準推薦系統 v2.0
+  評估日期：2024-03-01
+  評估人員：數據安全部 + 法務部 + 業務部門
+  個人信息保護負責人：[姓名]
+
+<span class="hi">二、個人信息處理活動描述</span>
+  處理目的：基於用戶瀏覽、購買、搜索行為，構建用戶畫像，實現個性化推薦
+  處理的個人信息類型：
+    - 一般個人信息：用戶 ID、瀏覽記錄、搜索記錄、購買記錄
+    - 敏感個人信息：精確位置（外賣配送功能）、消費偏好
+  數據流向：前端埋點 → 數據採集服務 → 數據倉庫 → 畫像計算引擎 → 推薦 API
+  共享情況：推薦結果 API 供 App/Web 前端調用；畫像數據不向第三方提供
+
+<span class="hi">三、隱私風險識別與評估</span>
+  風險 1：位置數據精確到街道級，可推斷用戶居住地和工作地 [高風險]
+    → 緩解措施：位置數據採集後立即進行城市級泛化；原始精確位置僅保留 7 天
+  風險 2：自動化決策可能造成「信息繭房」偏見，影響用戶平等獲取信息 [中風險]
+    → 緩解措施：在推薦頁面提供「關閉個性化推薦」選項；定期引入多樣化內容
+  風險 3：畫像數據被未授權訪問 [高風險]
+    → 緩解措施：畫像數據庫訪問通過 API 閘道，禁止直連；所有訪問記錄審計
+
+<span class="hi">四、合規措施落實清單</span>
+  [ ] 隱私政策更新（增加精準推薦和位置使用說明）
+  [ ] 提供個性化推薦的開關入口
+  [ ] 位置數據泛化處理開發完成
+  [ ] 訪問審計日誌開啟
+  [ ] 上線前 DPO 審核確認
+
+<span class="hi">五、結論與批准</span>
+  評估結論：經緩解措施落實後，殘餘風險可接受
+  批准人：個人信息保護負責人 [簽名] 日期：2024-03-08</pre>
+</div>
+</div>
+
+<div class="cb" id="l5-3">
+<h2>數據主體權利保障實踐</h2>
+<p>《個人信息保護法》賦予個人七項核心權利，企業必須建立相應的操作機制確保用戶能夠便捷地行使這些權利，並在規定時限內響應。</p>
+<div class="tbl"><table class="t"><thead><tr><th>用戶權利</th><th>企業響應要求</th><th>技術實現方式</th></tr></thead><tbody>
+<tr><td><strong>查閱/複製權</strong></td><td>提供用戶訪問自己全部個人信息的途徑；提供下載/導出功能</td><td>「我的賬戶 → 個人信息下載」功能；生成包含用戶全部數據的 CSV/JSON 文件；在用戶中心頁面顯示主要個人信息類別</td></tr>
+<tr><td><strong>更正權</strong></td><td>允許用戶修改不準確或不完整的個人信息</td><td>個人信息編輯頁面；需要身份驗證才能修改手機號/身份證號等關鍵字段；修改記錄保留審計日誌</td></tr>
+<tr><td><strong>刪除權</strong></td><td>在滿足條件時（目的已實現/同意撤回/違法處理）刪除個人信息</td><td>「注銷帳號」功能（注銷後 15-30 天觸發數據刪除）；數據刪除工單系統，追蹤刪除完成狀態（含備份、日誌、第三方通知）</td></tr>
+<tr><td><strong>撤回同意權</strong></td><td>允許用戶隨時撤回同意，且撤回不影響撤回前處理的合法性</td><td>隱私中心頁面顯示所有已授權的處理活動；每項旁邊有「撤回同意」按鈕；撤回後觸發對應數據刪除/停止處理的工作流</td></tr>
+<tr><td><strong>拒絕自動化決策</strong></td><td>告知用戶是否有自動化決策；提供人工審核的替代選項</td><td>個性化推薦關閉開關；信用評分/風控決定提供人工審核申請入口；自動化決策結果的說明告知</td></tr>
+</tbody></table></div>
+<div class="note law"><div class="note-lbl">15 個工作日響應期</div><p>PIPL 第 51 條要求個人信息處理者建立便捷的申請受理和處理機制。行業實踐建議：建立用戶權利請求工單系統（Privacy Request System）；設置 <strong>15 個工作日</strong> 的響應 SLA；指定專職 DPO 或隱私管理崗負責審核和執行；記錄每條請求的接收時間、處理過程和完成時間，以備監管核查。</p></div>
+</div>
+
+<div class="cb" id="l5-4">
+<h2>數據安全合規評估報告</h2>
+<p>數據安全合規評估報告是對組織數據安全合規現狀的全面總結，服務於管理層決策、監管合規提交以及安全治理改進。報告需要同時滿足技術可信（有充分的檢查證據）和管理可讀（非技術管理者能理解核心問題）兩個目標。</p>
+<div class="cblock"><div class="ctop"><span class="clang">數據安全合規評估報告結構</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="hi">第一章 執行摘要（1-2 頁，管理層閱讀）</span>
+  - 評估目的、範圍、時間
+  - 整體合規評分（如：PIPL 合規達成率 72%）
+  - 高風險問題概覽（最緊迫的 3-5 個問題）
+  - 核心整改建議優先級
+  - 與上次評估的對比改進情況
+
+<span class="hi">第二章 法規合規性對照</span>
+  2.1 《個人信息保護法》要求對照
+    - 每個法規要求 → 現狀描述 → 符合/部分符合/不符合 → 差距說明
+  2.2 《數據安全法》要求對照
+  2.3 行業特定法規對照（如：金融行業《數據安全管理辦法》）
+  2.4 GDPR 要求對照（如適用）
+
+<span class="hi">第三章 數據資產現狀</span>
+  - 個人信息類型分佈統計
+  - 數據分級分佈（核心/重要/敏感/一般）
+  - 高風險數據資產清單（含存儲位置、訪問範圍）
+  - 數據流圖及高風險流動路徑
+
+<span class="hi">第四章 技術安全評估結果</span>
+  4.1 傳輸安全（HTTPS/TLS 配置）
+  4.2 存儲安全（加密、訪問控制）
+  4.3 脫敏現狀（測試環境、分析環境）
+  4.4 第三方 SDK 安全評估
+  4.5 數據刪除機制評估
+
+<span class="hi">第五章 管理制度評估</span>
+  - 個人信息保護負責人（DPO）設置
+  - 員工隱私培訓完成率
+  - 隱私政策更新及時性
+  - 用戶權利請求響應記錄
+  - PIA 執行情況
+
+<span class="hi">第六章 整改優先級建議</span>
+  P1 立即整改（1 個月）：[嚴重違規項]
+  P2 近期整改（3 個月）：[高風險問題]
+  P3 中期整改（6 個月）：[中風險問題]
+  附：整改路線圖（甘特圖格式）
+
+<span class="hi">附錄</span>
+  A. 評估方法說明及工具清單
+  B. 訪談人員及時間記錄
+  C. 主要法規要求原文引用
+  D. 術語表</pre>
+</div>
+<div class="done-banner">
+  <h3>STAGE 13 完成！</h3>
+  <p>您已掌握數據安全的完整知識體系，從法規合規到技術實現，從數據分類到隱私保護，形成「合規驅動 + 技術落地」的數據安全能力。</p>
+  <div class="btn-row">
+    <a href="stage12.html" class="btn-g">&#8592; Stage 12 安全巡檢</a>
+    <a href="index.html" class="btn-g">回到課程目錄</a>
+    <a href="stage14.html" class="btn-p">Stage 14 ISO 27001 &#8594;</a>
+  </div>
+</div>
+</div>
+  </div><!-- .cw -->
+  <div class="lnav">
+    <button class="lb" id="prevb" onclick="prevL()" disabled>&#8592; 上一課</button>
+    <div class="ln-mid">
+      <div class="ln-cnt" id="cnt">1 / 20</div>
+      <div class="ln-sub" id="lsub">《數據安全法》核心要求</div>
+    </div>
+    <button class="lb pri" id="nextb" onclick="nextL()">下一課 &#8594;</button>
+  </div>
+</main>
+</div>
+<script>
+const LS=[
+  {id:'l1-1',ch:'CH1',title:'《數據安全法》核心要求',time:'25分鐘',type:'法規基礎'},
+  {id:'l1-2',ch:'CH1',title:'《個人信息保護法》解析',time:'25分鐘',type:'PIPL合規'},
+  {id:'l1-3',ch:'CH1',title:'GDPR 與跨境數據傳輸',time:'20分鐘',type:'跨境合規'},
+  {id:'l1-4',ch:'CH1',title:'數據安全監管執法案例',time:'20分鐘',type:'執法案例'},
+  {id:'l2-1',ch:'CH2',title:'數據分類分級方法論',time:'25分鐘',type:'分類分級'},
+  {id:'l2-2',ch:'CH2',title:'敏感數據識別技術',time:'25分鐘',type:'數據識別'},
+  {id:'l2-3',ch:'CH2',title:'數據資產梳理實戰',time:'25分鐘',type:'資產梳理'},
+  {id:'l2-4',ch:'CH2',title:'數據流圖繪製與分析',time:'20分鐘',type:'數據流分析'},
+  {id:'l3-1',ch:'CH3',title:'數據採集與存儲安全',time:'20分鐘',type:'採集合規'},
+  {id:'l3-2',ch:'CH3',title:'數據傳輸加密方案',time:'20分鐘',type:'傳輸加密'},
+  {id:'l3-3',ch:'CH3',title:'數據使用與訪問控制',time:'20分鐘',type:'訪問控制'},
+  {id:'l3-4',ch:'CH3',title:'數據刪除與銷毀規範',time:'20分鐘',type:'刪除銷毀'},
+  {id:'l4-1',ch:'CH4',title:'數據脫敏技術實現',time:'25分鐘',type:'脫敏技術'},
+  {id:'l4-2',ch:'CH4',title:'數據庫加密與 TDE',time:'20分鐘',type:'數據庫加密'},
+  {id:'l4-3',ch:'CH4',title:'DLP 數據防洩漏部署',time:'25分鐘',type:'DLP部署'},
+  {id:'l4-4',ch:'CH4',title:'數據水印與溯源技術',time:'20分鐘',type:'水印溯源'},
+  {id:'l5-1',ch:'CH5',title:'個人信息處理合規評估',time:'25分鐘',type:'合規評估'},
+  {id:'l5-2',ch:'CH5',title:'隱私影響評估（PIA）',time:'25分鐘',type:'PIA評估'},
+  {id:'l5-3',ch:'CH5',title:'數據主體權利保障實踐',time:'20分鐘',type:'用戶權利'},
+  {id:'l5-4',ch:'CH5',title:'數據安全合規評估報告',time:'25分鐘',type:'評估報告'},
+];
+const done=new Set(JSON.parse(localStorage.getItem('s13_done')||'[]'));
+let cur=0;
+function go(id,btn){
+  document.querySelectorAll('.cb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.ls-btn').forEach(b=>b.classList.remove('lact'));
+  const bl=document.getElementById(id);if(bl)bl.classList.add('on');
+  if(btn)btn.classList.add('lact');
+  cur=LS.findIndex(l=>l.id===id);syncUI();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function toggleCh(btn,id){
+  btn.classList.toggle('copen');
+  const l=document.getElementById(id);if(l)l.classList.toggle('lopen');
+}
+function prevL(){if(cur>0)findAndGo(LS[cur-1].id);}
+function nextL(){
+  done.add(LS[cur].id);
+  localStorage.setItem('s13_done',JSON.stringify([...done]));
+  if(cur<LS.length-1)findAndGo(LS[cur+1].id);
+}
+function findAndGo(id){
+  let btn=null;
+  document.querySelectorAll('.ls-btn').forEach(b=>{
+    if((b.getAttribute('onclick')||'').includes("'"+id+"'")){
+      btn=b;
+      const p=b.parentElement;
+      if(p&&!p.classList.contains('lopen')){
+        p.classList.add('lopen');
+        const cb=p.previousElementSibling;
+        if(cb)cb.classList.add('copen');
+      }
+    }
+  });
+  go(id,btn);
+}
+function syncUI(){
+  const l=LS[cur];if(!l)return;
+  document.getElementById('crumb').innerHTML=`STAGE 13 &gt; ${l.ch} &gt; <em>${l.title}</em>`;
+  document.getElementById('ltitle').textContent=l.title;
+  document.getElementById('chip1').textContent=l.type;
+  document.getElementById('chip2').textContent=`預計 ${l.time}`;
+  document.getElementById('cnt').textContent=`${cur+1} / ${LS.length}`;
+  document.getElementById('lsub').textContent=l.title;
+  document.getElementById('prevb').disabled=cur===0;
+  document.getElementById('nextb').disabled=cur===LS.length-1;
+  if(cur===LS.length-1)document.getElementById('nextb').textContent='Stage 完成';
+  else document.getElementById('nextb').innerHTML='下一課 &#8594;';
+  const pct=done.size?Math.round(done.size/LS.length*100):0;
+  document.getElementById('pct').textContent=pct+'%';
+  document.getElementById('pf').style.width=pct+'%';
+  document.querySelectorAll('.ls-btn').forEach(b=>{
+    const m=(b.getAttribute('onclick')||'').match(/'(l\d+-\d+)'/);
+    if(m&&done.has(m[1])&&!b.classList.contains('lact'))b.classList.add('ldone');
+  });
+}
+function chkQ(el,correct){
+  const box=el.closest('.quiz');
+  if(box.dataset.answered)return;
+  box.dataset.answered='1';
+  box.querySelectorAll('.qo').forEach(o=>o.style.pointerEvents='none');
+  el.classList.add(correct?'ok':'bad');
+  if(!correct)box.querySelectorAll('.qo').forEach(o=>{
+    if((o.getAttribute('onclick')||'').includes('true'))o.classList.add('ok');
+  });
+  const exp=box.querySelector('.q-exp');
+  if(exp)exp.classList.add('on');
+}
+function cpCode(btn){
+  const pre=btn.closest('.cblock').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(()=>{
+    btn.textContent='已複製';setTimeout(()=>btn.textContent='複製',2000);
+  });
+}
+syncUI();
+</script>
+</body>
+</html>

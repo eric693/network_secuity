@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Stage 12 — 安全巡檢 | SEC_TRACK</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#040c10;--bg2:#071118;--bg3:#0b1921;--sur:#102535;--bdr:#183649;
+  --acc:#2ec4ef;--acc2:#1a9dc5;--txt:#cde9f5;--txt2:#5a8fa6;--txt3:#2d5c72;
+  --red:#f05252;--grn:#3ecf8e;--cyn:#22d3ee;--ylw:#fbbf24;--pur:#a78bfa;--rose:#fb7185;--org:#f97316;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse 60% 40% at 8% 0%,rgba(46,196,239,.05) 0%,transparent 55%),
+  radial-gradient(ellipse 45% 30% at 92% 100%,rgba(26,157,197,.04) 0%,transparent 55%);
+  pointer-events:none;z-index:0;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 36px;background:rgba(4,12,16,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--bdr);}
+.n-logo{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.95rem;color:var(--acc);text-decoration:none;}
+.n-logo span{color:var(--txt3);}
+.n-mid{display:flex;align-items:center;gap:10px;}
+.s-pill{font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;background:rgba(46,196,239,.1);color:var(--acc);border:1px solid rgba(46,196,239,.28);}
+.n-sname{font-size:.8rem;color:var(--txt2);}
+.n-back{font-size:.8rem;color:var(--txt3);text-decoration:none;transition:color .2s;}
+.n-back:hover{color:var(--acc);}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh;padding-top:60px;}
+.sidebar{position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;background:var(--bg2);border-right:1px solid var(--bdr);display:flex;flex-direction:column;z-index:10;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--bdr);}
+.sb-h{padding:22px 22px 16px;border-bottom:1px solid var(--bdr);flex-shrink:0;}
+.sb-tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--acc);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
+.sb-title{font-size:.88rem;font-weight:700;line-height:1.45;margin-bottom:13px;}
+.sb-meta{display:flex;gap:16px;}
+.sm-item{display:flex;flex-direction:column;gap:2px;}
+.sm-val{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;color:var(--acc);}
+.sm-key{font-size:.62rem;color:var(--txt3);letter-spacing:.06em;text-transform:uppercase;}
+.sb-nav{flex:1;overflow-y:auto;padding:6px 0;}
+.ch-btn{width:100%;display:flex;align-items:center;gap:9px;padding:9px 22px;background:none;border:none;border-bottom:1px solid rgba(24,54,73,.7);color:var(--txt2);font-family:'Noto Sans TC',sans-serif;font-size:.79rem;font-weight:500;cursor:pointer;text-align:left;transition:color .18s,background .18s;}
+.ch-btn:hover{color:var(--txt);background:var(--bg3);}
+.ch-btn.cact{color:var(--acc);}
+.ch-num{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt3);min-width:26px;flex-shrink:0;}
+.ch-btn.cact .ch-num{color:var(--acc);}
+.ch-arr{font-size:.52rem;color:var(--txt3);transition:transform .2s;flex-shrink:0;}
+.ch-btn.copen .ch-arr{transform:rotate(90deg);}
+.ls-list{display:none;flex-direction:column;background:rgba(0,0,0,.15);}
+.ls-list.lopen{display:flex;}
+.ls-btn{display:flex;align-items:flex-start;gap:9px;padding:7px 22px 7px 44px;background:none;border:none;border-bottom:1px solid rgba(24,54,73,.4);color:var(--txt3);font-family:'Noto Sans TC',sans-serif;font-size:.74rem;cursor:pointer;text-align:left;width:100%;transition:color .18s,background .18s;line-height:1.4;}
+.ls-btn:hover{color:var(--txt2);background:rgba(46,196,239,.03);}
+.ls-btn.lact{color:var(--acc);background:rgba(46,196,239,.06);}
+.ls-btn.ldone{color:var(--txt3);}
+.ls-dot{width:5px;height:5px;border-radius:50%;background:var(--bdr);flex-shrink:0;margin-top:5px;transition:background .2s;}
+.ls-btn.lact .ls-dot,.ls-btn.ldone .ls-dot{background:var(--acc);}
+.sb-f{padding:13px 22px;border-top:1px solid var(--bdr);flex-shrink:0;}
+.pr{display:flex;justify-content:space-between;font-size:.68rem;color:var(--txt3);margin-bottom:6px;}
+.pt{height:3px;background:var(--bdr);border-radius:2px;overflow:hidden;}
+.pf{height:100%;background:var(--acc);border-radius:2px;transition:width .4s;}
+.main{position:relative;z-index:1;display:flex;flex-direction:column;}
+.lh{padding:38px 56px 30px;border-bottom:1px solid var(--bdr);background:linear-gradient(180deg,rgba(46,196,239,.03) 0%,transparent 100%);}
+.lh-crumb{font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--txt3);letter-spacing:.08em;margin-bottom:11px;}
+.lh-crumb em{color:var(--acc);font-style:normal;}
+.lh-title{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin-bottom:11px;}
+.lh-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{padding:3px 11px;border-radius:20px;font-size:.67rem;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;border:1px solid var(--bdr);color:var(--txt3);}
+.chip.ac{border-color:rgba(46,196,239,.4);color:var(--acc);}
+.cw{padding:38px 56px 80px;max-width:880px;}
+.cb{display:none;}
+.cb.on{display:block;animation:rise .25s ease both;}
+@keyframes rise{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:none;}}
+h2{font-size:1.25rem;font-weight:800;letter-spacing:-.01em;margin:36px 0 13px;color:var(--txt);display:flex;align-items:center;gap:10px;}
+h2::before{content:'';display:inline-block;width:3px;height:1.1em;border-radius:2px;background:var(--acc);flex-shrink:0;}
+h2:first-child{margin-top:0;}
+h3{font-size:.98rem;font-weight:700;margin:22px 0 9px;color:var(--txt);}
+p{font-size:.9rem;line-height:1.85;color:var(--txt2);margin-bottom:11px;font-weight:300;}
+strong{color:var(--txt);font-weight:600;}
+code{font-family:'JetBrains Mono',monospace;font-size:.8em;background:var(--sur);border:1px solid var(--bdr);padding:1px 6px;border-radius:3px;color:var(--acc);}
+.note{border-left:3px solid;padding:13px 17px;margin:18px 0;border-radius:0 4px 4px 0;}
+.note-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:6px;}
+.note p{margin:0;font-size:.86rem;line-height:1.7;}
+.note.tip{border-color:var(--acc);background:rgba(46,196,239,.06);}
+.note.tip .note-lbl{color:var(--acc);}
+.note.warn{border-color:var(--ylw);background:rgba(251,191,36,.06);}
+.note.warn .note-lbl{color:var(--ylw);}
+.note.sec{border-color:var(--grn);background:rgba(62,207,142,.06);}
+.note.sec .note-lbl{color:var(--grn);}
+.note.danger{border-color:var(--red);background:rgba(240,82,82,.07);}
+.note.danger .note-lbl{color:var(--red);}
+.note.law{border-color:var(--pur);background:rgba(167,139,250,.07);}
+.note.law .note-lbl{color:var(--pur);}
+.cblock{background:#020a10;border:1px solid var(--bdr);border-radius:6px;margin:16px 0;overflow:hidden;}
+.ctop{display:flex;align-items:center;justify-content:space-between;padding:7px 15px;background:rgba(7,17,24,.8);border-bottom:1px solid var(--bdr);}
+.clang{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;}
+.ccopy{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);background:none;border:none;cursor:pointer;transition:color .2s;}
+.ccopy:hover{color:var(--acc);}
+pre{padding:16px 20px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.75;color:#b8d8e8;}
+pre .kw{color:#c792ea;}pre .fn{color:#82aaff;}pre .st{color:#c3e88d;}pre .cm{color:#1a3a4a;font-style:italic;}
+pre .nu{color:#f78c6c;}pre .tg{color:#f07178;}pre .at{color:#ffcb6b;}
+pre .hl{background:rgba(46,196,239,.12);border-radius:2px;padding:0 2px;}
+pre .hi{color:#2ec4ef;font-weight:700;}
+.tbl{overflow-x:auto;margin:16px 0;}
+table.t{width:100%;border-collapse:collapse;font-size:.82rem;}
+table.t th{background:var(--sur);padding:9px 14px;text-align:left;font-size:.63rem;font-family:'JetBrains Mono',monospace;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--bdr);}
+table.t td{padding:9px 14px;border:1px solid var(--bdr);color:var(--txt2);font-weight:300;vertical-align:top;line-height:1.55;}
+table.t tr:hover td{background:var(--bg3);}
+.mc{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--acc);}
+.kg{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--bdr);border:1px solid var(--bdr);margin:16px 0;}
+.kt{background:var(--bg2);padding:14px 17px;}
+.kt-n{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--acc);font-weight:700;margin-bottom:5px;}
+.kt-d{font-size:.79rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.ilist{display:flex;flex-direction:column;border:1px solid var(--bdr);border-radius:4px;overflow:hidden;margin:16px 0;}
+.il-item{display:flex;align-items:flex-start;gap:13px;padding:12px 17px;border-bottom:1px solid var(--bdr);transition:background .15s;}
+.il-item:last-child{border-bottom:none;}
+.il-item:hover{background:var(--bg3);}
+.il-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--acc);min-width:24px;flex-shrink:0;padding-top:2px;font-weight:700;}
+.il-txt{font-size:.85rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.il-txt strong{color:var(--txt);}
+.atkflow{display:flex;flex-direction:column;gap:3px;margin:18px 0;}
+.af-step{display:flex;align-items:flex-start;gap:13px;padding:13px 16px;background:var(--sur);border:1px solid var(--bdr);border-radius:4px;position:relative;}
+.af-step::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--bdr);border-radius:4px 0 0 4px;}
+.af-step.s1::before{background:var(--acc);}
+.af-step.s2::before{background:var(--ylw);}
+.af-step.s3::before{background:var(--org);}
+.af-step.s4::before{background:var(--cyn);}
+.af-step.s5::before{background:var(--pur);}
+.af-step.s6::before{background:var(--grn);}
+.af-n{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt3);font-weight:700;min-width:44px;flex-shrink:0;padding-top:2px;letter-spacing:.04em;}
+.af-t{font-size:.82rem;font-weight:700;color:var(--txt);margin-bottom:4px;}
+.af-d{font-size:.78rem;color:var(--txt2);line-height:1.55;font-weight:300;}
+.quiz{background:var(--bg3);border:1px solid var(--bdr);border-radius:6px;padding:22px;margin:26px 0;}
+.q-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--ylw);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;}
+.q-q{font-size:.9rem;font-weight:600;margin-bottom:13px;line-height:1.5;color:var(--txt);}
+.q-opts{display:flex;flex-direction:column;gap:6px;}
+.qo{display:flex;align-items:flex-start;gap:10px;padding:8px 13px;border:1px solid var(--bdr);border-radius:4px;cursor:pointer;font-size:.83rem;color:var(--txt2);transition:all .18s;line-height:1.5;}
+.qo:hover{border-color:var(--acc);color:var(--txt);}
+.qo.ok{border-color:var(--acc);background:rgba(46,196,239,.07);color:var(--acc);}
+.qo.bad{border-color:var(--red);background:rgba(240,82,82,.07);color:var(--red);}
+.qo-k{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--txt3);min-width:16px;padding-top:1px;flex-shrink:0;}
+.q-exp{display:none;margin-top:12px;padding:11px 14px;background:rgba(46,196,239,.05);border-left:2px solid var(--acc);border-radius:0 4px 4px 0;font-size:.82rem;color:var(--txt2);line-height:1.65;}
+.q-exp.on{display:block;}
+.done-banner{background:linear-gradient(135deg,rgba(46,196,239,.07),rgba(26,157,197,.05));border:1px solid rgba(46,196,239,.2);border-radius:6px;padding:28px;margin:34px 0 14px;text-align:center;}
+.done-banner h3{font-size:1.1rem;font-weight:800;color:var(--acc);margin-bottom:8px;}
+.done-banner p{font-size:.87rem;margin-bottom:20px;}
+.btn-row{display:flex;gap:11px;justify-content:center;flex-wrap:wrap;}
+.btn-p{display:inline-block;padding:10px 24px;background:var(--acc);color:#040c10;text-decoration:none;font-weight:700;font-size:.84rem;border-radius:4px;transition:all .2s;}
+.btn-p:hover{background:#60d8f5;transform:translateY(-1px);}
+.btn-g{display:inline-block;padding:10px 24px;border:1px solid var(--bdr);color:var(--txt2);text-decoration:none;font-size:.84rem;border-radius:4px;transition:all .2s;}
+.btn-g:hover{border-color:var(--acc);color:var(--acc);}
+.lnav{display:flex;justify-content:space-between;align-items:center;padding:22px 56px;border-top:1px solid var(--bdr);background:var(--bg2);position:sticky;bottom:0;z-index:5;}
+.lb{display:flex;align-items:center;gap:7px;padding:8px 18px;border:1px solid var(--bdr);border-radius:4px;background:none;color:var(--txt2);font-size:.82rem;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .18s;}
+.lb:hover:not(:disabled){border-color:var(--acc);color:var(--acc);}
+.lb.pri{background:var(--acc);color:#040c10;border-color:var(--acc);font-weight:700;}
+.lb.pri:hover:not(:disabled){background:#60d8f5;}
+.lb:disabled{opacity:.2;cursor:not-allowed;}
+.ln-mid{text-align:center;}
+.ln-cnt{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--txt3);}
+.ln-sub{font-size:.75rem;color:var(--txt3);margin-top:3px;max-width:260px;}
+@media(max-width:900px){.layout{grid-template-columns:1fr;}.sidebar{position:static;height:auto;}.lh,.cw{padding-left:20px;padding-right:20px;}.lnav{padding:16px 20px;}.kg{grid-template-columns:1fr;}.ln-sub{display:none;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="n-logo">SEC<span>_</span>TRACK</a>
+  <div class="n-mid"><span class="s-pill">STAGE 12</span><span class="n-sname">安全巡檢</span></div>
+  <a href="index.html" class="n-back">&#8592; 首頁</a>
+</nav>
+<div class="layout">
+<aside class="sidebar">
+  <div class="sb-h">
+    <div class="sb-tag">STAGE 12 · 2週</div>
+    <div class="sb-title">安全巡檢<br>全流程實戰</div>
+    <div class="sb-meta">
+      <div class="sm-item"><span class="sm-val">5</span><span class="sm-key">章節</span></div>
+      <div class="sm-item"><span class="sm-val">20</span><span class="sm-key">課程</span></div>
+      <div class="sm-item"><span class="sm-val">2週</span><span class="sm-key">時長</span></div>
+    </div>
+  </div>
+  <div class="sb-nav">
+    <div><button class="ch-btn copen cact" onclick="toggleCh(this,'ch1')"><span class="ch-num">CH1</span><span class="ch-name">安全巡檢概述</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list lopen" id="ch1">
+      <button class="ls-btn lact" onclick="go('l1-1',this)"><span class="ls-dot"></span>安全巡檢定義與服務場景</button>
+      <button class="ls-btn" onclick="go('l1-2',this)"><span class="ls-dot"></span>巡檢流程與項目管理</button>
+      <button class="ls-btn" onclick="go('l1-3',this)"><span class="ls-dot"></span>資產調研與巡檢清單制定</button>
+      <button class="ls-btn" onclick="go('l1-4',this)"><span class="ls-dot"></span>巡檢工具箱準備</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch2')"><span class="ch-num">CH2</span><span class="ch-name">策略與配置檢查</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch2">
+      <button class="ls-btn" onclick="go('l2-1',this)"><span class="ls-dot"></span>防火牆策略巡檢</button>
+      <button class="ls-btn" onclick="go('l2-2',this)"><span class="ls-dot"></span>帳號與訪問控制巡檢</button>
+      <button class="ls-btn" onclick="go('l2-3',this)"><span class="ls-dot"></span>安全設備策略巡檢（IDS/IPS/WAF）</button>
+      <button class="ls-btn" onclick="go('l2-4',this)"><span class="ls-dot"></span>備份與災備策略巡檢</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch3')"><span class="ch-num">CH3</span><span class="ch-name">日誌分析</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch3">
+      <button class="ls-btn" onclick="go('l3-1',this)"><span class="ls-dot"></span>日誌巡檢框架：收集與規範化</button>
+      <button class="ls-btn" onclick="go('l3-2',this)"><span class="ls-dot"></span>系統與網絡日誌分析</button>
+      <button class="ls-btn" onclick="go('l3-3',this)"><span class="ls-dot"></span>Web 訪問日誌與攻擊特徵識別</button>
+      <button class="ls-btn" onclick="go('l3-4',this)"><span class="ls-dot"></span>SIEM 平台巡檢告警分析</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch4')"><span class="ch-num">CH4</span><span class="ch-name">漏洞掃描與補丁</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch4">
+      <button class="ls-btn" onclick="go('l4-1',this)"><span class="ls-dot"></span>定期漏洞掃描規劃與執行</button>
+      <button class="ls-btn" onclick="go('l4-2',this)"><span class="ls-dot"></span>補丁管理流程與合規核查</button>
+      <button class="ls-btn" onclick="go('l4-3',this)"><span class="ls-dot"></span>互聯網暴露面持續監控</button>
+      <button class="ls-btn" onclick="go('l4-4',this)"><span class="ls-dot"></span>常態化弱密碼掃描</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch5')"><span class="ch-num">CH5</span><span class="ch-name">巡檢報告與閉環</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch5">
+      <button class="ls-btn" onclick="go('l5-1',this)"><span class="ls-dot"></span>巡檢發現分類與評級</button>
+      <button class="ls-btn" onclick="go('l5-2',this)"><span class="ls-dot"></span>綜合巡檢報告撰寫規範</button>
+      <button class="ls-btn" onclick="go('l5-3',this)"><span class="ls-dot"></span>整改追蹤與閉環管理</button>
+      <button class="ls-btn" onclick="go('l5-4',this)"><span class="ls-dot"></span>巡檢自動化腳本開發</button>
+    </div></div>
+  </div>
+  <div class="sb-f">
+    <div class="pr"><span>學習進度</span><span id="pct">0%</span></div>
+    <div class="pt"><div class="pf" id="pf" style="width:0%"></div></div>
+  </div>
+</aside>
+<main class="main">
+  <div class="lh">
+    <div class="lh-crumb" id="crumb">STAGE 12 &gt; CH1 &gt; <em>課程 1</em></div>
+    <h1 class="lh-title" id="ltitle">安全巡檢定義與服務場景</h1>
+    <div class="lh-chips">
+      <span class="chip ac" id="chip1">巡檢概述</span>
+      <span class="chip" id="chip2">20 分鐘</span>
+    </div>
+  </div>
+  <div class="cw">
+
+<!-- ===== CH1: 安全巡檢概述 ===== -->
+
+<!-- L1-1 定義與場景 -->
+<div class="cb on" id="l1-1">
+<h2>安全巡檢定義與服務場景</h2>
+<p>安全巡檢（Security Inspection）是對組織資訊系統進行週期性、系統化的健康狀態檢查，目標是在既有安全措施下持續驗證安全控制有效性，發現配置偏差、新出現的漏洞及異常狀況。與一次性的風險評估不同，安全巡檢是一種<strong>常態化的安全運營活動</strong>。</p>
+
+<h3>安全巡檢與風險評估的區別</h3>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>維度</th><th>安全巡檢</th><th>風險評估</th></tr></thead>
+    <tbody>
+      <tr><td><strong>頻率</strong></td><td>按週期進行（月度/季度/年度），部分項目每日自動執行</td><td>通常一年一次，或重大系統上線前後</td></tr>
+      <tr><td><strong>深度</strong></td><td>較淺，注重覆蓋面和一致性核查</td><td>較深，包含深度滲透測試和業務影響分析</td></tr>
+      <tr><td><strong>目標</strong></td><td>驗證安全基準是否持續符合，及早發現偏差</td><td>全面識別、計算和評價風險，支撐管理決策</td></tr>
+      <tr><td><strong>輸出</strong></td><td>巡檢報告（合格/不合格清單）、整改工單</td><td>風險評估報告（風險等級、優先整改建議）</td></tr>
+      <tr><td><strong>執行方</strong></td><td>可由內部安全團隊或外部服務商定期執行</td><td>通常由專業安全機構或持牌評估機構執行</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>典型服務場景</h3>
+<div class="kg">
+  <div class="kt"><div class="kt-n">等保合規維護場景</div><div class="kt-d">等保 2.0 要求三級系統每年至少自查一次，兩次測評之間需持續維護安全狀態。安全巡檢作為等保自查的落地手段，確保在下次等保測評前各項指標持續符合要求，避免「應試式」安全建設。</div></div>
+  <div class="kt"><div class="kt-n">安全運維服務（MSS）</div><div class="kt-d">安全服務商（如安全外包 MSS 提供商）為客戶提供週期性安全巡檢服務，替代客戶自建安全運營團隊。月度或季度交付巡檢報告，作為持續安全服務的核心交付物。</div></div>
+  <div class="kt"><div class="kt-n">重大事件/節假日前保障</div><div class="kt-d">重大節假日（春節、國慶）或重大活動（大型晚會、直播、重要業務上線）前，進行專項安全巡檢，確認關鍵系統安全狀態，識別可能導致業務中斷的安全隱患。</div></div>
+  <div class="kt"><div class="kt-n">系統變更後驗證</div><div class="kt-d">系統上線、重大版本升級、網絡架構調整後，進行安全配置巡檢，驗證變更是否引入新的安全隱患，確認既有安全控制措施在新環境中仍然有效。</div></div>
+</div>
+</div>
+
+<!-- L1-2 巡檢流程 -->
+<div class="cb" id="l1-2">
+<h2>巡檢流程與項目管理</h2>
+<p>安全巡檢項目雖週期短（通常 3-10 個工作日），但需嚴格遵循標準流程，確保每次巡檢結果具有可比性，便於趨勢分析。</p>
+
+<div class="atkflow">
+  <div class="af-step s1"><span class="af-n">啟動</span><div><div class="af-t">計劃確認與授權</div><div class="af-d">與客戶確認本次巡檢範圍（哪些系統、哪些項目）；確認授權文件（巡檢工作單或服務合同中的週期服務條款）；確認巡檢時間窗口（通常避開業務高峰期）；建立本次巡檢的溝通聯繫人。</div></div></div>
+  <div class="af-step s2"><span class="af-n">資產確認</span><div><div class="af-t">更新資產清單</div><div class="af-d">對比上次巡檢以來的資產變更（新增/下線/配置變更）；更新資產清冊；確認本次巡檢需要覆蓋的所有目標（IP 清單、系統清單、設備清單）；確認必要的訪問憑證和系統賬號。</div></div></div>
+  <div class="af-step s3"><span class="af-n">現場巡檢</span><div><div class="af-t">按清單逐項核查</div><div class="af-d">策略配置核查（防火牆規則、帳號策略、安全設備策略）；日誌審查（按週期收集並分析異常）；漏洞掃描（對比上次掃描結果，關注新增漏洞）；配置基線核查（對照標準基線逐項驗證）。</div></div></div>
+  <div class="af-step s4"><span class="af-n">結果分析</span><div><div class="af-t">發現整理與評級</div><div class="af-d">彙總所有巡檢發現；對發現進行分類（配置問題/漏洞/管理問題/異常事件線索）；評定每個發現的嚴重程度（嚴重/高/中/低/建議）；與上次巡檢結果對比（新增問題/已修復問題/持續問題）。</div></div></div>
+  <div class="af-step s5"><span class="af-n">報告輸出</span><div><div class="af-t">撰寫並交付報告</div><div class="af-d">撰寫巡檢報告（安全狀態趨勢 + 本次發現 + 整改建議）；生成整改工單（責任人、截止日期）；提交給客戶安全負責人；安排報告宣講會（可選，季度或年度巡檢通常需要）。</div></div></div>
+  <div class="af-step s6"><span class="af-n">閉環追蹤</span><div><div class="af-t">整改驗證</div><div class="af-d">在整改截止日前跟進整改進展；整改完成後進行驗證核查（複查高危發現是否已修復）；更新巡檢問題台帳（標記已修復、延期、接受）；為下次巡檢提供基線對比數據。</div></div></div>
+</div>
+</div>
+
+<!-- L1-3 資產調研與清單 -->
+<div class="cb" id="l1-3">
+<h2>資產調研與巡檢清單制定</h2>
+<p>巡檢清單（Inspection Checklist）是安全巡檢的核心工具，決定了巡檢的覆蓋範圍和一致性。優質的清單應兼顧全面性和可操作性：每個檢查項都能被明確判斷為「符合」或「不符合」。</p>
+
+<h3>資產調研問卷核心項目</h3>
+<div class="cblock">
+  <div class="ctop"><span class="clang">資產調研收集清單（首次建立 / 每次更新）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="hi">一、網路設備</span>
+□ 品牌型號/韌體版本：_______________
+□ 管理 IP 地址：_______________
+□ 設備角色（核心交換/邊界路由/防火牆/...）：_______________
+□ 上次韌體更新時間：_______________
+□ 管理方式（SSH/Web Console/串口）：_______________
+
+<span class="hi">二、伺服器主機</span>
+□ 主機名/IP/作業系統版本：_______________
+□ 上線時間/業務用途：_______________
+□ 最近補丁更新時間：_______________
+□ 是否有 Agent（防毒/EDR/HIDS）：_______________
+□ 特權帳號清單（root/Administrator 以外）：_______________
+
+<span class="hi">三、應用系統</span>
+□ 系統名稱/URL：_______________
+□ 技術棧（語言/框架/中間件版本）：_______________
+□ 資料庫類型及版本：_______________
+□ 是否有 WAF 防護：_______________
+□ 是否直接暴露互聯網：_______________
+
+<span class="hi">四、安全設備</span>
+□ 防火牆型號/策略最後更新時間：_______________
+□ IDS/IPS 特徵庫版本：_______________
+□ WAF 規則集最後更新時間：_______________
+□ SIEM 告警響應狀態：_______________
+
+<span class="hi">五、變更記錄（上次巡檢後）</span>
+□ 新增系統/設備：_______________
+□ 下線系統/設備：_______________
+□ 重大配置變更：_______________
+□ 發生過的安全事件：_______________</pre>
+</div>
+
+<h3>巡檢清單示例格式</h3>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>編號</th><th>巡檢項</th><th>核查方法</th><th>合格標準</th><th>本次結果</th></tr></thead>
+    <tbody>
+      <tr><td class="mc">NET-001</td><td>防火牆是否禁用 Telnet 管理</td><td>登入防火牆，查看 <code>show running-config</code> 確認無 telnet 配置</td><td>不存在 telnet 相關配置或 telnet 服務已禁用</td><td>合格 / 不合格 / N/A</td></tr>
+      <tr><td class="mc">SRV-003</td><td>Linux 系統 root 帳號是否禁用 SSH 直接登入</td><td>查看 <code>/etc/ssh/sshd_config</code> 中 PermitRootLogin 值</td><td>PermitRootLogin no 或 PermitRootLogin prohibit-password</td><td></td></tr>
+      <tr><td class="mc">DB-002</td><td>MySQL 是否存在空密碼帳號</td><td>執行 SQL 查詢核查 mysql.user 表</td><td>無帳號的 authentication_string 欄位為空</td><td></td></tr>
+      <tr><td class="mc">LOG-001</td><td>防火牆是否配置 Syslog 集中轉發</td><td>查看防火牆 Syslog 服務器配置，確認已配置外部日誌服務器</td><td>已配置 Syslog 服務器且日誌可正常接收（驗證日誌服務器有收到日誌）</td><td></td></tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+<!-- L1-4 工具箱 -->
+<div class="cb" id="l1-4">
+<h2>巡檢工具箱準備</h2>
+<p>一個準備充分的巡檢工具箱能顯著提升效率和一致性，避免現場臨時找工具的混亂情況。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>工具類別</th><th>推薦工具</th><th>主要用途</th></tr></thead>
+    <tbody>
+      <tr><td><strong>漏洞掃描</strong></td><td>Nessus Essentials（免費，16 個 IP）、OpenVAS/Greenbone、Nuclei（開源，模板掃描）</td><td>自動化識別已知 CVE 漏洞、補丁缺失、配置問題</td></tr>
+      <tr><td><strong>端口/服務發現</strong></td><td>Nmap（必備）、Masscan（大規模快速掃描）</td><td>確認暴露的服務和端口，發現未授權服務</td></tr>
+      <tr><td><strong>Web 應用掃描</strong></td><td>AWVS/Acunetix、OWASP ZAP（免費）、Nikto（快速指紋）</td><td>Web 漏洞掃描，HTTP 安全頭檢查</td></tr>
+      <tr><td><strong>配置核查</strong></td><td>CIS-CAT（CIS 基準核查）、Lynis（Linux 安全審計）、自研 Python/Ansible 腳本</td><td>系統配置基線符合性自動核查</td></tr>
+      <tr><td><strong>弱密碼掃描</strong></td><td>Hydra（多協議）、Medusa、CrackMapExec（Windows/AD）</td><td>SSH/FTP/SMB/RDP/資料庫等服務弱密碼探測（授權範圍內）</td></tr>
+      <tr><td><strong>日誌分析</strong></td><td>ELK（Elasticsearch+Logstash+Kibana）、Splunk、手工 grep/awk/sed</td><td>集中日誌分析、異常行為識別、攻擊特徵查找</td></tr>
+      <tr><td><strong>SSL/TLS 核查</strong></td><td>testssl.sh（開源，命令行）、SSLyze、ssllabs.com（線上）</td><td>HTTPS 配置安全性核查（協議版本/加密套件/證書）</td></tr>
+      <tr><td><strong>文件記錄</strong></td><td>截圖工具（Flameshot/Snipaste）、Typora/Notion（筆記）、Excel（巡檢清單台帳）</td><td>規範記錄每個發現的證據（截圖+說明）</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="note tip">
+  <div class="note-lbl">工具箱最佳實踐</div>
+  <p>建議將常用工具打包到一個可攜式虛擬機（如 Kali Linux VM）或 Docker 容器中，確保工具版本一致性，方便在客戶現場或遠端連接時快速部署。同時為每種工具準備標準的調用命令模板，避免現場手忙腳亂查閱文檔。</p>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">某組織每季度開展一次安全巡檢，發現本季度防火牆策略中有一條「允許任意來源訪問 22 端口（SSH）至內網所有伺服器」的規則，評估後定為高危發現。此時最適合的處置步驟是？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>立即刪除此防火牆規則，然後記錄在巡檢報告中</div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">B</span>記錄為高危發現並在報告中說明，向客戶安全負責人口頭預警，提供具體整改建議（限制來源 IP），由客戶確認後執行整改，並在整改完成後複驗</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">C</span>因為只是巡檢服務商，不應修改客戶系統，僅在報告中記錄，等客戶下次聯繫時再處理</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>納入下次巡檢觀察，如果下季度仍存在再作高危記錄</td></div>
+  </div>
+  <div class="q-exp">正確！安全巡檢中發現的高危問題，服務商的正確做法是：（1）<strong>記錄並評級</strong>（記錄為高危發現，保存截圖證據）；（2）<strong>及時預警</strong>（高危問題不應等到報告交付才告知，應口頭或即時通訊立即通知客戶負責人）；（3）<strong>提供可執行建議</strong>（不只說「有問題」，要給出具體整改步驟）；（4）<strong>由客戶授權後執行</strong>（巡檢服務商通常不應直接修改客戶生產環境，需獲得客戶明確授權）；（5）<strong>驗證整改效果</strong>（整改完成後複查確認）。直接修改客戶系統（選項A）在未明確授權的情況下可能違反合同，且可能影響業務。</div>
+</div>
+</div>
+
+
+<!-- ===== CH2: 策略與配置檢查 ===== -->
+
+<!-- L2-1 防火牆策略巡檢 -->
+<div class="cb" id="l2-1">
+<h2>防火牆策略巡檢</h2>
+<p>防火牆策略（規則集）是組織邊界防禦的核心，但隨著時間推移，規則集往往累積了大量冗餘、衝突甚至危險的規則。定期的防火牆策略巡檢是安全巡檢中最重要的環節之一。</p>
+
+<h3>防火牆策略巡檢核心檢查項</h3>
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>「任意到任意」寬鬆規則識別</strong> — 掃描規則集中所有源地址為 <code>any/0.0.0.0/0</code> 且目標地址為 <code>any</code> 的規則，這類規則通常意味著完全不受限制的訪問。重點關注允許從互聯網（外網）直接訪問內網任意目標或任意端口的規則。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>高危服務端口對外暴露</strong> — 核查以下高危端口是否被允許從互聯網直接訪問：<code>22</code>(SSH)、<code>23</code>(Telnet)、<code>3389</code>(RDP)、<code>445</code>(SMB)、<code>1433</code>(MSSQL)、<code>3306</code>(MySQL)、<code>6379</code>(Redis)、<code>27017</code>(MongoDB)。任何此類直接暴露都應記錄為高危發現。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>冗餘規則與死規則清理</strong> — 識別長期未被命中的規則（可通過命中計數器判斷：<code>hit count = 0</code> 且規則存在超過 90 天）。這類規則增加維護複雜度，也可能因誤解而保留不安全的訪問。建議標記後由業務確認是否可以刪除。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>規則順序與衝突</strong> — 防火牆規則按順序匹配，排列靠前的規則優先生效。核查是否存在寬鬆規則在嚴格規則之前（導致嚴格規則永遠不生效）；是否存在允許規則和拒絕規則相互衝突的情況。</div></div>
+  <div class="il-item"><span class="il-num">05</span><div class="il-txt"><strong>默認動作核查</strong> — 防火牆的默認策略（default policy）應為 <strong>DENY</strong>（即沒有明確允許的流量一律拒絕），而非 <code>PERMIT</code>。若默認動作為允許，則所有未被明確拒絕的流量都可通過，安全性大幅降低。</div></div>
+  <div class="il-item"><span class="il-num">06</span><div class="il-txt"><strong>NAT 與規則關聯一致性</strong> — 核查 NAT 映射規則與防火牆允許規則是否一致，避免出現「NAT 可以轉發但防火牆沒有對應允許規則」或相反情況，導致訪問控制邏輯不符合設計意圖。</div></div>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Cisco ASA / iptables 防火牆規則巡檢命令</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── Cisco ASA 防火牆策略核查 ───</span>
+<span class="cm"># 查看所有訪問控制列表</span>
+show access-list
+show access-list | include <span class="hi">any any</span>              <span class="cm">! 識別任意到任意的危險規則</span>
+show access-list | include <span class="hi">permit any</span>          <span class="cm">! 查找寬泛的 permit any 規則</span>
+
+<span class="cm"># 查看命中計數（找出從未被命中的規則）</span>
+show access-list | include <span class="hl">hitcnt=0</span>             <span class="cm">! hitcnt=0 的規則為死規則</span>
+
+<span class="cm"># 查看接口的訪問組（哪個接口應用了哪條 ACL）</span>
+show running-config | include access-group
+
+<span class="cm"># 查看 NAT 配置</span>
+show nat detail
+
+<span class="cm"># ─── Linux iptables 規則核查 ───</span>
+<span class="cm"># 查看所有規則（含計數）</span>
+iptables -L -n -v --line-numbers
+iptables -L INPUT -n -v --line-numbers    <span class="cm"># 入站規則</span>
+iptables -L FORWARD -n -v --line-numbers  <span class="cm"># 轉發規則</span>
+
+<span class="cm"># 核查默認策略（應為 DROP）</span>
+iptables -L | grep <span class="st">'Chain INPUT\|Chain FORWARD\|Chain OUTPUT'</span>
+<span class="cm"># 預期：Chain INPUT (policy DROP)   ← 安全</span>
+<span class="cm"># 危險：Chain INPUT (policy ACCEPT) ← 需告警</span>
+
+<span class="cm"># ─── 自動化核查腳本（識別高危端口開放）───</span>
+<span class="cm"># 從外部視角驗證哪些端口實際可到達</span>
+<span class="kw">for</span> port in 22 23 3389 445 1433 3306 6379 27017 11211 5432; <span class="kw">do</span>
+  result=$(nc -z -w 2 TARGET_IP $port <span class="nu">2</span>>&amp;1 &amp;&amp; echo <span class="st">"OPEN"</span> || echo <span class="st">"CLOSED"</span>)
+  [ <span class="st">"$result"</span> = <span class="st">"OPEN"</span> ] &amp;&amp; echo <span class="hl">"[高危] 端口 $port 對外開放！"</span>
+<span class="kw">done</span></pre>
+</div>
+</div>
+
+<!-- L2-2 帳號與訪問控制 -->
+<div class="cb" id="l2-2">
+<h2>帳號與訪問控制巡檢</h2>
+<p>帳號管理是安全巡檢中的高頻發現領域——未及時清理的離職人員帳號、過度授權的服務帳號、未啟用 MFA 的特權帳號，都是高價值的攻擊入口。</p>
+
+<h3>帳號安全巡檢全面檢查項</h3>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>類別</th><th>巡檢項</th><th>核查方法</th><th>合格標準</th></tr></thead>
+    <tbody>
+      <tr><td><strong>離職帳號清理</strong></td><td>已離職人員帳號是否及時停用/刪除</td><td>對比 HR 系統離職人員名單與 AD/系統帳號清單，比對用戶名/郵箱</td><td>離職後 24 小時內停用，30 天後刪除或封存</td></tr>
+      <tr><td><strong>長期未登入帳號</strong></td><td>超過 90 天未登入的帳號</td><td>查詢系統登入記錄（AD lastLogon、Linux lastlog）</td><td>超過 90 天未登入的帳號應禁用並通知業務確認是否可刪除</td></tr>
+      <tr><td><strong>默認帳號</strong></td><td>系統/設備默認帳號是否已重命名或禁用</td><td>核查 Administrator/Guest/admin/root 之外的默認帳號狀態</td><td>默認管理員帳號重命名或禁用，默認 Guest 帳號禁用</td></tr>
+      <tr><td><strong>共享帳號</strong></td><td>是否存在多人共用的帳號</td><td>訪談 IT 人員，核查是否有「team_admin」等共享帳號</td><td>特權操作禁止使用共享帳號，每人有獨立帳號（可追溯）</td></tr>
+      <tr><td><strong>密碼策略</strong></td><td>密碼複雜度/有效期/歷史策略</td><td>查看域策略（AD GPO）或系統密碼策略配置</td><td>最小長度 ≥8，含大小寫+數字+特殊字符，最長 90 天，歷史 5 次</td></tr>
+      <tr><td><strong>特權帳號 MFA</strong></td><td>特權帳號（管理員/root）是否啟用多因素認證</td><td>核查 VPN/堡壘機/雲控制台的 MFA 配置</td><td>所有特權帳號的遠端訪問必須啟用 MFA</td></tr>
+      <tr><td><strong>服務帳號</strong></td><td>應用/服務帳號是否遵循最小權限</td><td>核查服務帳號的實際授權範圍，與業務所需權限比較</td><td>服務帳號僅有業務必需的最小權限，不得用於交互式登入</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">AD 域帳號安全巡檢（PowerShell）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── AD 域帳號安全巡檢 PowerShell 腳本 ───</span>
+<span class="kw">Import-Module</span> ActiveDirectory
+
+<span class="cm"># 1. 長期未登入的帳號（90天）</span>
+<span class="tg">$cutoff</span> = (Get-Date).AddDays(-<span class="nu">90</span>)
+Get-ADUser -Filter {LastLogonDate -lt <span class="tg">$cutoff</span> -and Enabled -eq <span class="tg">$true</span>} `
+  -Properties LastLogonDate, Department, Manager |
+  Select-Object Name, SamAccountName, LastLogonDate, Department |
+  Export-Csv <span class="st">"inactive_users.csv"</span> -Encoding UTF8
+<span class="fn">Write-Host</span> <span class="st">"長期未登入帳號："</span> (Get-ADUser -Filter {LastLogonDate -lt <span class="tg">$cutoff</span> -and Enabled -eq <span class="tg">$true</span>}).Count
+
+<span class="cm"># 2. 密碼永不過期的帳號（潛在風險）</span>
+Get-ADUser -Filter {PasswordNeverExpires -eq <span class="tg">$true</span> -and Enabled -eq <span class="tg">$true</span>} `
+  -Properties PasswordNeverExpires |
+  Select-Object Name, SamAccountName, DistinguishedName |
+  Export-Csv <span class="st">"password_never_expires.csv"</span> -Encoding UTF8
+
+<span class="cm"># 3. 域管理員帳號清單（人數應嚴格控制）</span>
+Get-ADGroupMember -Identity <span class="st">"Domain Admins"</span> |
+  Select-Object Name, SamAccountName, objectClass
+<span class="fn">Write-Host</span> <span class="st">"域管理員數量："</span> (Get-ADGroupMember <span class="st">"Domain Admins"</span>).Count
+<span class="cm"># 一般組織域管不應超過 5 個，且應有具體業務理由</span>
+
+<span class="cm"># 4. 禁用帳號清單（應定期清理）</span>
+Get-ADUser -Filter {Enabled -eq <span class="tg">$false</span>} -Properties WhenChanged |
+  Where-Object {<span class="tg">$_</span>.WhenChanged -lt (Get-Date).AddDays(-<span class="nu">365</span>)} |
+  Select-Object Name, SamAccountName, WhenChanged |
+  Export-Csv <span class="st">"old_disabled_accounts.csv"</span> -Encoding UTF8
+
+<span class="cm"># 5. 帳號鎖定策略核查</span>
+<span class="tg">$policy</span> = Get-ADDefaultDomainPasswordPolicy
+<span class="fn">Write-Host</span> <span class="st">"密碼最小長度："</span> <span class="tg">$policy</span>.MinPasswordLength
+<span class="fn">Write-Host</span> <span class="st">"密碼最大有效期："</span> <span class="tg">$policy</span>.MaxPasswordAge.Days <span class="st">"天"</span>
+<span class="fn">Write-Host</span> <span class="st">"帳號鎖定閾值："</span> <span class="tg">$policy</span>.LockoutThreshold <span class="st">"次失敗"</span>
+<span class="fn">Write-Host</span> <span class="st">"複雜度要求："</span> <span class="tg">$policy</span>.ComplexityEnabled</pre>
+</div>
+</div>
+
+<!-- L2-3 安全設備策略 -->
+<div class="cb" id="l2-3">
+<h2>安全設備策略巡檢（IDS/IPS/WAF）</h2>
+<p>安全設備若未得到及時維護（特徵庫更新、誤報調優、規則清理），往往會演變成擺設——要麼因誤報太多被業務投訴後靜默，要麼規則太老無法識別新型攻擊。</p>
+
+<div class="kg">
+  <div class="kt"><div class="kt-n">IDS/IPS 巡檢要點</div><div class="kt-d">特徵庫（Signature）版本及最後更新時間（應在 7 天內）；是否有大量低置信度規則觸發（可能是誤報或掃描噪音）；IPS 攔截率統計（過去 30 天攔截事件數量及類型）；高危告警是否有及時響應記錄；Bypass 接口是否有異常（設備宕機是否會旁路）。</div></div>
+  <div class="kt"><div class="kt-n">WAF 巡檢要點</div><div class="kt-d">規則集版本及最後更新時間；防護模式是否為攔截模式（Detection vs Block）；過去 30 天 Top 攻擊類型統計；誤報率核查（是否有合法業務流量被誤攔截）；自訂規則清單核查（是否有業務白名單規則過度寬鬆）；HTTPS 解密配置是否正確（明文流量是否都經過 WAF 檢測）。</div></div>
+  <div class="kt"><div class="kt-n">防毒/EDR 巡檢要點</div><div class="kt-d">病毒庫更新狀態（應在 24 小時內）；終端覆蓋率（多少主機已部署 / 應覆蓋主機總數）；過去 30 天告警統計（檢測數、阻斷數、漏掉數）；是否有未處理的高危告警；失聯主機列表（長時間未上報狀態的終端）。</div></div>
+  <div class="kt"><div class="kt-n">VPN 巡檢要點</div><div class="kt-d">VPN 協議版本（SSL VPN / IPSec，禁用 SSLv3/TLS1.0）；並發連接數是否接近授權上限；異常登入記錄（非工作時間、非常用 IP）；證書有效期核查（是否即將過期）；訪問控制：VPN 用戶能訪問哪些內網資源（是否過於寬鬆）。</div></div>
+</div>
+</div>
+
+<!-- L2-4 備份與災備 -->
+<div class="cb" id="l2-4">
+<h2>備份與災備策略巡檢</h2>
+<p>備份是最後一道防線，尤其是在勒索軟件攻擊後。但「有備份」不等於「能恢復」——許多組織在真正發生災難時才發現備份已損壞或恢復流程從未測試過。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">備份巡檢核查清單</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="hi">一、備份完整性核查</span>
+□ 確認關鍵系統（資料庫/核心業務系統/文件服務）的備份任務是否在規律執行
+  - 核查備份作業的最後成功執行時間（應在設定週期內）
+  - 核查備份文件大小趨勢（異常縮小可能表示備份損壞）
+□ 抽查驗證備份文件完整性
+  - 數據庫備份：嘗試還原到測試環境並驗證數據完整性
+  - 文件備份：抽查 5-10 個文件確認可正常讀取
+□ 備份日誌核查：過去 30 天是否有備份失敗記錄？失敗是否有告警通知？
+
+<span class="hi">二、備份策略符合性</span>
+□ 是否遵循 3-2-1 備份原則：
+    - 3 份備份數據
+    - 2 種不同存儲介質（本地磁盤 + NAS 或雲）
+    - 1 份異地備份（物理隔離，防範勒索軟件橫向加密備份）
+□ 備份保留週期是否符合業務要求（等保/合規通常要求 ≥6 個月日誌、3 個月數據快照）
+□ 備份數據是否加密存儲（防止備份介質丟失導致數據洩露）
+
+<span class="hi">三、容災恢復（DR）驗證</span>
+□ 上次恢復演練時間（應每半年至少演練一次）
+□ RTO 目標（Recovery Time Objective）：需多長時間恢復？上次演練是否達標？
+□ RPO 目標（Recovery Point Objective）：最多丟失多少數據？備份頻率是否滿足？
+□ 恢復文檔是否完整（任何人拿到文檔都能執行恢復，而非依賴關鍵人員）
+
+<span class="hi">四、勒索軟件防護特殊要求</span>
+□ 備份網絡是否與生產網絡隔離（防止勒索軟件橫向加密在線備份）
+□ 是否有不可變備份（Immutable Backup）——即使管理員也無法刪除
+□ 備份管理系統的訪問憑證是否與生產系統憑證隔離
+□ 備份是否定期做離線副本（磁帶或斷網存儲）</pre>
+</div>
+</div>
+
+
+<!-- ===== CH3: 日誌分析 ===== -->
+
+<!-- L3-1 日誌框架 -->
+<div class="cb" id="l3-1">
+<h2>日誌巡檢框架：收集與規範化</h2>
+<p>有效的日誌分析前提是完善的日誌收集體系。安全巡檢中的日誌分析環節，首先需要確認日誌收集是否完整，再進行異常行為分析。</p>
+
+<h3>應覆蓋的日誌來源清單</h3>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>日誌類型</th><th>來源設備/系統</th><th>關鍵字段</th><th>保留週期</th></tr></thead>
+    <tbody>
+      <tr><td><strong>網絡流量日誌</strong></td><td>防火牆、邊界路由器、交換機</td><td>源/目的 IP、端口、協議、動作（允許/拒絕）、字節數</td><td>≥6 個月</td></tr>
+      <tr><td><strong>系統登入日誌</strong></td><td>Windows 安全事件日誌、Linux /var/log/auth.log</td><td>帳號、來源 IP、時間、成功/失敗、登入方式</td><td>≥6 個月</td></tr>
+      <tr><td><strong>Web 訪問日誌</strong></td><td>Nginx、Apache、IIS、負載均衡器</td><td>來源 IP、請求 URI、狀態碼、User-Agent、響應大小</td><td>≥3 個月</td></tr>
+      <tr><td><strong>資料庫審計日誌</strong></td><td>MySQL/Oracle/MSSQL 審計</td><td>執行帳號、SQL 語句類型、訪問表/數據量、執行時間</td><td>≥6 個月</td></tr>
+      <tr><td><strong>應用程序日誌</strong></td><td>業務系統應用層日誌</td><td>用戶操作、業務事件、異常錯誤</td><td>≥3 個月</td></tr>
+      <tr><td><strong>安全設備日誌</strong></td><td>IDS/IPS、WAF、防毒/EDR</td><td>告警類型、攻擊源、目標、嚴重程度、處置動作</td><td>≥6 個月</td></tr>
+      <tr><td><strong>VPN/遠端訪問日誌</strong></td><td>SSL VPN、跳板機/堡壘機</td><td>用戶、來源 IP、連接時長、訪問目標</td><td>≥6 個月</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="note warn">
+  <div class="note-lbl">日誌收集盲區</div>
+  <p>巡檢中常見的日誌盲區包括：（1）<strong>DNS 查詢日誌</strong>未收集（C2 通信常利用 DNS 隧道）；（2）<strong>雲平台操作日誌</strong>（AWS CloudTrail/阿里雲 ActionTrail）未開啟；（3）<strong>容器/K8s 日誌</strong>未接入 SIEM；（4）<strong>辦公終端</strong>日誌覆蓋不全；（5）NTP 時間未同步導致日誌時間戳不一致，無法關聯分析。</p>
+</div>
+</div>
+
+<!-- L3-2 系統與網絡日誌分析 -->
+<div class="cb" id="l3-2">
+<h2>系統與網絡日誌分析</h2>
+<p>系統登入日誌和網絡流量日誌是最核心的安全日誌，能反映帳號入侵嘗試、橫向移動、異常外連等關鍵威脅指標（IoC）。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Linux 系統安全日誌分析命令</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── SSH 登入安全分析 ───</span>
+<span class="cm"># 統計 SSH 登入失敗的 IP（暴力破解溯源）</span>
+grep <span class="st">"Failed password"</span> /var/log/auth.log | \
+  awk <span class="st">'{print $(NF-3)}'</span> | sort | uniq -c | sort -rn | head -<span class="nu">20</span>
+
+<span class="cm"># 統計每個 IP 的失敗次數（超過 50 次視為暴力破解）</span>
+grep <span class="st">"Failed password"</span> /var/log/auth.log | \
+  awk <span class="st">'{print $(NF-3)}'</span> | sort | uniq -c | \
+  awk <span class="st">'$1 > 50 {print "暴力破解嫌疑:", $1, "次失敗, 來源:", $2}'</span>
+
+<span class="cm"># 成功登入記錄（確認是否有非預期的成功登入）</span>
+grep <span class="st">"Accepted"</span> /var/log/auth.log | tail -<span class="nu">50</span>
+
+<span class="cm"># 非工作時間（22:00-06:00）的成功登入（可疑）</span>
+grep <span class="st">"Accepted"</span> /var/log/auth.log | \
+  awk <span class="st">'$3 ~ /^(2[2-9]|0[0-5]):/ {print "非工作時間登入:", $0}'</span>
+
+<span class="cm"># ─── sudo 和特權操作日誌 ───</span>
+grep <span class="st">"sudo"</span> /var/log/auth.log | grep <span class="st">"COMMAND"</span> | tail -<span class="nu">30</span>
+<span class="cm"># 特別注意：sudo /bin/bash、sudo su、sudo chmod 等可能表示提權操作</span>
+
+<span class="cm"># ─── 異常進程與網絡連接（當前狀態）───</span>
+<span class="cm"># 非標準端口監聽（高危）</span>
+ss -tlnp | grep -v <span class="st">':22\|:80\|:443\|:25\|:53\|:3306'</span>
+
+<span class="cm"># 已建立的外網連接（排查惡意外連）</span>
+ss -tnp state established | grep -v <span class="st">'127.0.0.1\|10\.\|192\.168\.\|172\.'</span>
+<span class="cm"># 對可疑 IP 進行 whois 查詢</span>
+
+<span class="cm"># ─── 系統完整性快速核查 ───</span>
+<span class="cm"># 最近 7 天修改的關鍵系統文件（可能是後門）</span>
+find /etc /usr/bin /usr/sbin /bin /sbin -newer /tmp -type f <span class="nu">2</span>>/dev/null | head -<span class="nu">20</span>
+<span class="cm"># 最近創建的 SUID 文件（後門常用）</span>
+find / -perm -4000 -newer /tmp -type f <span class="nu">2</span>>/dev/null</pre>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Windows 安全事件日誌核查（關鍵事件 ID）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="hi">關鍵 Windows 安全事件 ID 速查：</span>
+
+4624  帳號成功登入         → 核查非預期登入帳號和來源
+4625  帳號登入失敗         → 大量短時失敗 = 暴力破解
+4648  使用明確憑據登入     → 橫向移動常見指標
+4720  用戶帳號被創建       → 後門帳號創建
+4728  成員加入安全組       → 特權提升操作
+4732  成員加入本地管理員組 → 重要！可能是提權
+4769  Kerberos 服務票證請求→ 大量請求 = Kerberoasting
+4771  Kerberos 預認證失敗  → AS-REP Roasting 攻擊
+7045  新服務被安裝         → 惡意服務/後門安裝
+
+<span class="cm"># PowerShell 查詢最近 24 小時的登入失敗（4625）</span>
+<span class="tg">$time</span> = (Get-Date).AddHours(-<span class="nu">24</span>)
+Get-WinEvent -FilterHashtable @{
+  LogName = <span class="st">'Security'</span>
+  Id = <span class="nu">4625</span>
+  StartTime = <span class="tg">$time</span>
+} | Select-Object TimeCreated, Message | Format-Table -Wrap
+
+<span class="cm"># 查詢特定帳號在過去 7 天的所有登入記錄（追蹤可疑帳號活動）</span>
+Get-WinEvent -FilterHashtable @{LogName=<span class="st">'Security'</span>;Id=<span class="nu">4624</span>} |
+  Where-Object {<span class="tg">$_</span>.Message -like <span class="st">"*Administrator*"</span>} |
+  Select-Object TimeCreated, @{N=<span class="st">'Message'</span>;E={<span class="tg">$_</span>.Message.SubString(<span class="nu">0</span>,<span class="nu">200</span>)}}</pre>
+</div>
+</div>
+
+<!-- L3-3 Web 日誌分析 -->
+<div class="cb" id="l3-3">
+<h2>Web 訪問日誌與攻擊特徵識別</h2>
+<p>Web 訪問日誌是識別針對業務系統攻擊行為的關鍵數據源。通過分析 HTTP 請求特徵，可以發現 SQL 注入嘗試、XSS、目錄掃描、漏洞探測等攻擊活動。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Nginx/Apache Web 日誌攻擊特徵分析</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 訪問統計概覽 ───</span>
+<span class="cm"># 訪問量最大的前 20 IP（確認是否有異常高頻訪問）</span>
+awk <span class="st">'{print $1}'</span> /var/log/nginx/access.log | sort | uniq -c | sort -rn | head -<span class="nu">20</span>
+
+<span class="cm"># HTTP 狀態碼統計（大量 4xx = 掃描；大量 5xx = 攻擊或故障）</span>
+awk <span class="st">'{print $9}'</span> /var/log/nginx/access.log | sort | uniq -c | sort -rn
+<span class="cm"># 重點：大量 403（目錄遍歷/權限繞過嘗試）、404（路徑掃描）、500（代碼執行嘗試）</span>
+
+<span class="cm"># ─── SQL 注入特徵識別 ───</span>
+grep -iE <span class="st">"union.+select|select.+from|insert.+into|drop.+table|or.+1=1|and.+1=1|'.*--|\/\*.*\*\/"</span> \
+  /var/log/nginx/access.log | head -<span class="nu">20</span>
+
+<span class="cm"># ─── 路徑掃描 / 目錄枚舉 ───</span>
+<span class="cm"># 單個 IP 在短時間大量 404 = 目錄掃描</span>
+awk <span class="st">'$9==404 {print $1}'</span> /var/log/nginx/access.log | sort | uniq -c | \
+  awk <span class="st">'$1 > 50 {print "掃描嫌疑 IP:", $2, "404次數:", $1}'</span>
+
+<span class="cm"># 常見掃描工具 User-Agent 識別</span>
+grep -iE <span class="st">"sqlmap|nmap|nikto|masscan|zgrab|dirsearch|gobuster|wfuzz|nessus|openvas|acunetix|awvs"</span> \
+  /var/log/nginx/access.log | awk <span class="st">'{print $1, $7}'</span> | sort -u | head -<span class="nu">20</span>
+
+<span class="cm"># ─── 敏感路徑訪問 ───</span>
+grep -E <span class="st">"\.git|\.env|\.aws|phpinfo|wp-admin|/admin|/.config|/backup|\.bak|\.sql"</span> \
+  /var/log/nginx/access.log | grep -v <span class="st">" 404 "</span>
+<span class="cm"># 返回非 404 的敏感路徑訪問需重點調查</span>
+
+<span class="cm"># ─── 大量數據外傳（可能的數據洩露）───</span>
+<span class="cm"># 找出響應體積異常大的請求（可能為數據大量導出）</span>
+awk <span class="st">'{if ($10+0 > 1000000) print $1, $7, $10, "bytes"}'</span> /var/log/nginx/access.log | \
+  sort -k4 -rn | head -<span class="nu">20</span>
+
+<span class="cm"># ─── 今日攻擊 IP 彙整（生成黑名單建議）───</span>
+today=$(date +%d/%b/%Y)
+grep <span class="st">"$today"</span> /var/log/nginx/access.log | \
+  grep -iE <span class="st">"union|select|script|eval\(|base64|\.\./"</span> | \
+  awk <span class="st">'{print $1}'</span> | sort -u | tee /tmp/attack_ips_today.txt
+echo <span class="st">"今日攻擊來源 IP 共"</span> $(wc -l < /tmp/attack_ips_today.txt) <span class="st">"個"</span></pre>
+</div>
+</div>
+
+<!-- L3-4 SIEM 告警分析 -->
+<div class="cb" id="l3-4">
+<h2>SIEM 平台巡檢告警分析</h2>
+<p>SIEM（Security Information and Event Management）平台集中收集和關聯分析安全日誌，是安全運營的核心平台。巡檢中需重點確認告警規則有效性和告警響應情況。</p>
+
+<h3>SIEM 巡檢核心關注點</h3>
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>告警規則覆蓋率</strong> — 確認 SIEM 告警規則是否覆蓋主要威脅場景：暴力破解、帳號異常行為、內網橫向移動、可疑外連、數據大量導出、高危漏洞攻擊。核查是否有關鍵告警規則處於停用狀態（通常因誤報率高被臨時停用後忘記恢復）。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>告警響應時效</strong> — 抽查過去 30 天的高危告警處理記錄，核查：從告警產生到開始處置的平均時長（MTTD）；是否存在高危告警超過 24 小時未處理的情況；告警關閉的原因是否有記錄（真陽性/誤報/已知例外）。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>告警疲勞核查</strong> — 統計每日平均告警數量，若告警量過大（如每天數千條），運營人員往往會忽略所有告警。核查高頻誤報告警的規則，建議調優或加入白名單。健康的 SIEM 每天應有可人工審查的告警數量（通常 50-200 條需要關注的告警）。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>數據接入完整性</strong> — 確認所有應接入的日誌源都已正常接入，且日誌流量在正常範圍內（突然歸零可能表示日誌斷流）。ELK 環境中可通過 Kibana 的 Data Streams 視圖快速確認各來源的日誌接收狀態。</div></div>
+</div>
+
+<div class="note sec">
+  <div class="note-lbl">SIEM 巡檢常見發現</div>
+  <p>在大量巡檢實踐中，最常見的 SIEM 問題包括：（1）某網段日誌未接入，形成監控盲區；（2）所有告警均被標記為「已處理」但無任何處置說明（形式主義關閉告警）；（3）NTP 時間不同步導致多源日誌時間錯位，關聯規則失效；（4）磁盤空間不足導致舊日誌被自動刪除，保留週期不達標；（5）告警規則長期未更新，對新型攻擊手法完全無告警能力。</p>
+</div>
+</div>
+
+
+<!-- ===== CH4: 漏洞掃描與補丁 ===== -->
+
+<!-- L4-1 定期漏洞掃描 -->
+<div class="cb" id="l4-1">
+<h2>定期漏洞掃描規劃與執行</h2>
+<p>定期漏洞掃描是安全巡檢的核心技術手段之一，通過與上次掃描結果對比，可以追蹤漏洞修復進展、發現新增漏洞，並評估整體脆弱性趨勢。</p>
+
+<h3>掃描規劃原則</h3>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>掃描類型</th><th>頻率</th><th>覆蓋範圍</th><th>工具建議</th></tr></thead>
+    <tbody>
+      <tr><td><strong>互聯網暴露面掃描</strong></td><td>每週（自動）</td><td>所有外網 IP 和域名；專注高危端口和 Web 應用</td><td>Nuclei（新漏洞快速驗證）、AWVS（Web 深度掃描）、Shodan/Fofa 監控</td></tr>
+      <tr><td><strong>內網全量掃描</strong></td><td>每月（自動）</td><td>所有內網資產；完整端口掃描 + 服務識別</td><td>Nessus（全面性好）、OpenVAS（開源）</td></tr>
+      <tr><td><strong>新系統上線前掃描</strong></td><td>按需（每次上線前）</td><td>待上線系統及其依賴組件</td><td>Nessus + 手工驗證高危發現</td></tr>
+      <tr><td><strong>高危 CVE 專項掃描</strong></td><td>按需（重大 CVE 發布後 48 小時內）</td><td>全網相關資產</td><td>Nuclei 單一模板快速掃描</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Nessus 掃描結果導出與對比分析（Python）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="kw">import</span> json
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+
+<span class="cm"># ─── 讀取本次和上次掃描結果（Nessus .csv 導出格式）───</span>
+<span class="cm"># Nessus 導出：掃描任務 → Export → CSV</span>
+current = pd.read_csv(<span class="st">'scan_2024_Q4.csv'</span>)
+previous = pd.read_csv(<span class="st">'scan_2024_Q3.csv'</span>)
+
+<span class="cm"># 使用「主機IP + 插件ID」作為唯一標識</span>
+current[<span class="st">'key'</span>] = current[<span class="st">'Host'</span>] + <span class="st">'_'</span> + current[<span class="st">'Plugin ID'</span>].astype(str)
+previous[<span class="st">'key'</span>] = previous[<span class="st">'Host'</span>] + <span class="st">'_'</span> + previous[<span class="st">'Plugin ID'</span>].astype(str)
+
+current_keys = set(current[<span class="st">'key'</span>])
+previous_keys = set(previous[<span class="st">'key'</span>])
+
+<span class="cm"># ─── 趨勢分析 ───</span>
+new_vulns = current_keys - previous_keys        <span class="cm"># 本次新增漏洞</span>
+fixed_vulns = previous_keys - current_keys      <span class="cm"># 已修復漏洞（上次有，本次沒有）</span>
+persistent = current_keys &amp; previous_keys       <span class="cm"># 持續存在的漏洞</span>
+
+<span class="fn">print</span>(f<span class="st">"本次掃描漏洞總數：{len(current_keys)}"</span>)
+<span class="fn">print</span>(f<span class="st">"相比上次新增：{len(new_vulns)}"</span>)
+<span class="fn">print</span>(f<span class="st">"已修復：{len(fixed_vulns)}"</span>)
+<span class="fn">print</span>(f<span class="st">"持續存在：{len(persistent)}"</span>)
+
+<span class="cm"># ─── 本次新增漏洞詳情（重點關注高危/嚴重）───</span>
+new_df = current[current[<span class="st">'key'</span>].isin(new_vulns)]
+critical_new = new_df[new_df[<span class="st">'Risk'</span>].isin([<span class="st">'Critical'</span>, <span class="st">'High'</span>])]
+<span class="fn">print</span>(<span class="st">"\n本次新增高危/嚴重漏洞："</span>)
+<span class="fn">print</span>(critical_new[[<span class="st">'Host'</span>, <span class="st">'Risk'</span>, <span class="st">'Name'</span>, <span class="st">'Plugin ID'</span>]].to_string())
+
+<span class="cm"># ─── 生成巡檢月報數據 ───</span>
+risk_dist = current[<span class="st">'Risk'</span>].value_counts()
+<span class="fn">print</span>(<span class="st">"\n本次掃描風險分布："</span>)
+<span class="fn">for</span> risk, count <span class="kw">in</span> risk_dist.items():
+    <span class="fn">print</span>(f<span class="st">"  {risk}: {count}"</span>)</pre>
+</div>
+</div>
+
+<!-- L4-2 補丁管理 -->
+<div class="cb" id="l4-2">
+<h2>補丁管理流程與合規核查</h2>
+<p>補丁管理（Patch Management）是降低漏洞風險的根本手段，但在實際組織中往往面臨「打補丁可能影響業務穩定性」的阻力。安全巡檢需核查補丁管理流程是否成熟，以及關鍵系統的補丁狀態。</p>
+
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>補丁評估窗口</strong> — 核查組織是否有明確的補丁評估流程：新 CVE 發布後多少天內完成評估（建議 7 天內）；評估內容是否包含業務影響分析；是否有補丁優先級分類標準（緊急/高/普通，對應不同修補期限）。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>高危漏洞修補時效</strong> — 核查近期高危 CVE（CVSS ≥ 9.0）的修補時效：是否在 14 天內完成修補；若無法及時修補是否有臨時緩解措施（WAF 規則/網絡隔離）；是否有書面記錄說明延遲原因。等保 2.0 三級以上系統要求高危漏洞 30 天內修復。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>作業系統補丁狀態</strong> — 對關鍵伺服器進行補丁狀態核查，重點關注：Windows Server 上次更新時間（應在 30 天內）；Linux 系統是否有待安裝的安全更新（<code>yum check-update --security</code>）；是否有 EOL（生命週期結束）的系統在繼續使用（如 Windows Server 2008/CentOS 6）。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>第三方組件補丁</strong> — 核查業務系統所用的第三方組件（框架/中間件/開源庫）是否有未修復的高危漏洞。重點關注：Apache/Nginx/Tomcat/Spring 框架版本；Java 依賴包（<code>mvn dependency:check</code>）；Python/Node.js 依賴（<code>pip-audit</code>/<code>npm audit</code>）。</div></div>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">補丁狀態核查命令（多系統）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── Linux 補丁核查 ───</span>
+<span class="cm"># CentOS/RHEL：列出待安裝的安全更新</span>
+yum check-update --security
+yum updateinfo list security        <span class="cm"># 含 CVE 編號的安全更新清單</span>
+yum updateinfo summary              <span class="cm"># 安全更新概要統計</span>
+
+<span class="cm"># Ubuntu/Debian：列出待安裝的安全更新</span>
+apt-get -s upgrade <span class="nu">2</span>>/dev/null | grep <span class="st">'^Inst'</span>
+apt list --upgradable <span class="nu">2</span>>/dev/null | grep <span class="st">'-security'</span>
+
+<span class="cm"># 確認上次系統更新時間</span>
+rpm -qa --last | head -<span class="nu">10</span>          <span class="cm"># RPM 系：最近安裝/更新的包</span>
+cat /var/log/apt/history.log | tail -<span class="nu">30</span>  <span class="cm"># DEB 系</span>
+
+<span class="cm"># ─── 第三方組件安全審計 ───</span>
+<span class="cm"># Python 依賴漏洞掃描</span>
+pip-audit                           <span class="cm"># 需先安裝：pip install pip-audit</span>
+safety check                        <span class="cm"># 另一個工具：pip install safety</span>
+
+<span class="cm"># Node.js 依賴漏洞掃描</span>
+npm audit
+npm audit --json | python3 -c <span class="st">"import sys,json; d=json.load(sys.stdin); \
+  print('高危:', d['metadata']['vulnerabilities']['high'], \
+        '嚴重:', d['metadata']['vulnerabilities']['critical'])"</span>
+
+<span class="cm"># Java Maven 依賴漏洞掃描（在項目目錄執行）</span>
+mvn org.owasp:dependency-check-maven:check
+
+<span class="cm"># ─── EOL 系統識別 ───</span>
+<span class="cm"># Linux：核查系統版本</span>
+cat /etc/os-release
+<span class="cm"># EOL 清單參考：https://endoflife.date/</span>
+<span class="cm"># 常見 EOL：CentOS 6（2020-11）、CentOS 7（2024-06）、Ubuntu 18.04（2023-04）</span>
+<span class="cm"># Windows Server 2008 R2（2020-01）、2012 R2（2023-10）</span></pre>
+</div>
+</div>
+
+<!-- L4-3 互聯網暴露面監控 -->
+<div class="cb" id="l4-3">
+<h2>互聯網暴露面持續監控</h2>
+<p>暴露面管理（Attack Surface Management，ASM）是近年安全運營的重要趨勢，核心理念是：<strong>攻擊者發現你的資產，比你自己更快</strong>。定期巡檢中必須包含對互聯網暴露面的系統性核查。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">互聯網暴露面自動化監控腳本</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">#!/bin/bash
+# ─── 互聯網暴露面週期巡檢腳本 ───
+# 前提：已有上次巡檢的子域名清單 prev_subdomains.txt</span>
+
+DOMAIN=<span class="st">"example.com"</span>
+DATE=$(date +%Y%m%d)
+OUTDIR=<span class="st">"/opt/asm_scans/$DATE"</span>
+mkdir -p <span class="tg">$OUTDIR</span>
+
+<span class="cm"># ─── 1. 子域名枚舉（發現新增子域名）───</span>
+echo <span class="st">"[*] 枚舉子域名..."</span>
+subfinder -d <span class="tg">$DOMAIN</span> -silent -all > <span class="tg">$OUTDIR</span>/subdomains.txt
+<span class="cm"># 對比上次結果，找出新增子域名</span>
+diff <span class="st">"prev_subdomains.txt"</span> <span class="tg">$OUTDIR</span>/subdomains.txt | grep <span class="st">'^>'</span> | \
+  awk <span class="st">'{print $2}'</span> > <span class="tg">$OUTDIR</span>/new_subdomains.txt
+echo <span class="st">"新發現子域名："</span> $(wc -l < <span class="tg">$OUTDIR</span>/new_subdomains.txt) <span class="st">"個"</span>
+
+<span class="cm"># ─── 2. 存活探測與端口掃描 ───</span>
+echo <span class="st">"[*] 探測存活主機..."</span>
+httpx -l <span class="tg">$OUTDIR</span>/subdomains.txt -silent -status-code -title -tech-detect \
+  -o <span class="tg">$OUTDIR</span>/web_alive.txt
+
+<span class="cm"># ─── 3. 高危端口直接暴露核查 ───</span>
+echo <span class="st">"[*] 核查高危端口..."</span>
+<span class="kw">while</span> read subdomain; <span class="kw">do</span>
+  ip=$(dig +short <span class="tg">$subdomain</span> | head -<span class="nu">1</span>)
+  [ -z <span class="st">"$ip"</span> ] &amp;&amp; <span class="kw">continue</span>
+  <span class="kw">for</span> port in 22 23 3306 3389 6379 27017 5432 11211; <span class="kw">do</span>
+    nc -z -w <span class="nu">2</span> <span class="tg">$ip</span> <span class="tg">$port</span> <span class="nu">2</span>>/dev/null &amp;&amp; \
+      echo <span class="hl">"[高危] $subdomain ($ip) 端口 $port 對外開放"</span> >> <span class="tg">$OUTDIR</span>/exposed_ports.txt
+  <span class="kw">done</span>
+<span class="kw">done</span> < <span class="tg">$OUTDIR</span>/subdomains.txt
+
+<span class="cm"># ─── 4. 新增資產立即用 Nuclei 掃描 ───</span>
+<span class="kw">if</span> [ -s <span class="tg">$OUTDIR</span>/new_subdomains.txt ]; <span class="kw">then</span>
+  echo <span class="st">"[*] 對新增資產進行漏洞掃描..."</span>
+  nuclei -l <span class="tg">$OUTDIR</span>/new_subdomains.txt -severity high,critical \
+    -o <span class="tg">$OUTDIR</span>/new_asset_vulns.txt
+<span class="kw">fi</span>
+
+<span class="cm"># ─── 5. 輸出本次巡檢摘要 ───</span>
+echo <span class="st">"======= 暴露面巡檢摘要 ======="</span>
+echo <span class="st">"子域名總數："</span> $(wc -l < <span class="tg">$OUTDIR</span>/subdomains.txt)
+echo <span class="st">"存活 Web 資產："</span> $(wc -l < <span class="tg">$OUTDIR</span>/web_alive.txt)
+echo <span class="st">"新增子域名："</span> $(wc -l < <span class="tg">$OUTDIR</span>/new_subdomains.txt)
+[ -f <span class="tg">$OUTDIR</span>/exposed_ports.txt ] &amp;&amp; echo <span class="hl">"高危端口暴露："</span> $(wc -l < <span class="tg">$OUTDIR</span>/exposed_ports.txt) <span class="st">"項"</span>
+</pre>
+</div>
+</div>
+
+<!-- L4-4 弱密碼掃描 -->
+<div class="cb" id="l4-4">
+<h2>常態化弱密碼掃描</h2>
+<p>弱密碼是最常見且危害最大的安全問題之一。在獲得明確授權的前提下，定期對內網服務進行弱密碼探測，是安全巡檢不可或缺的環節。</p>
+
+<h3>常見弱密碼類型</h3>
+<div class="kg">
+  <div class="kt"><div class="kt-n">空密碼/默認密碼</div><div class="kt-d">admin:admin、root:root、test:test、admin:123456；設備廠商默認密碼（如 Cisco 的 admin:cisco，路由器 admin:password）；應用系統默認密碼（如 Tomcat Manager admin:tomcat、phpMyAdmin admin:root）。</div></div>
+  <div class="kt"><div class="kt-n">組織相關弱密碼</div><div class="kt-d">公司名+年份（Company2024）；項目名+序號（Project@001）；域名前綴+常見後綴（example123、example@123）；系統名稱+123（Oracle123、MysqlAdmin1）。這類密碼人工難發現，需定制字典。</div></div>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">多服務弱密碼掃描（授權環境）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 注意：以下操作必須在書面授權範圍內進行！───</span>
+
+<span class="cm"># ─── SSH 弱密碼掃描 ───</span>
+hydra -L /tmp/users.txt -P /tmp/passwords.txt -t <span class="nu">4</span> -T <span class="nu">10</span> \
+  ssh://<span class="nu">192.168.1.0</span>/24 -o /tmp/ssh_weak.txt
+<span class="cm"># -t 4：每目標4個並發（太高可能影響業務）</span>
+<span class="cm"># -T 10：最大10個目標並發</span>
+
+<span class="cm"># ─── MySQL 弱密碼掃描 ───</span>
+hydra -L /tmp/db_users.txt -P /tmp/passwords.txt \
+  -t <span class="nu">4</span> mysql://<span class="nu">10.0.0.50</span> -o /tmp/mysql_weak.txt
+
+<span class="cm"># ─── Redis 未授權訪問核查（無需密碼）───</span>
+<span class="kw">for</span> ip <span class="kw">in</span> $(nmap -p 6379 --open 192.168.0.0/24 -oG - | grep <span class="st">'/open'</span> | awk <span class="st">'{print $2}'</span>); <span class="kw">do</span>
+  result=$(redis-cli -h <span class="tg">$ip</span> -p 6379 ping <span class="nu">2</span>>/dev/null)
+  [ <span class="st">"$result"</span> = <span class="st">"PONG"</span> ] &amp;&amp; echo <span class="hl">"[高危] Redis 未授權訪問: $ip"</span>
+<span class="kw">done</span>
+
+<span class="cm"># ─── Web 後台弱密碼（Burp Intruder / 腳本）───</span>
+<span class="cm"># 對登入接口進行有限次嘗試（注意：帳號鎖定閾值，不要超過 5 次/帳號）</span>
+<span class="kw">for</span> passwd <span class="kw">in</span> admin123 Admin@123 <span class="st">"admin@2024"</span> P@ssw0rd Test1234; <span class="kw">do</span>
+  resp=$(curl -s -o /dev/null -w <span class="st">"%{http_code}"</span> -X POST \
+    https://example.com/admin/login \
+    -d <span class="st">"username=admin&password=$passwd"</span>)
+  [ <span class="st">"$resp"</span> != <span class="st">"401"</span> ] &amp;&amp; echo <span class="hl">"疑似弱密碼: $passwd (HTTP $resp)"</span>
+<span class="kw">done</span>
+
+<span class="cm"># ─── 定制弱密碼字典（基於組織特徵）───</span>
+<span class="cm"># 使用 CeWL 從組織網站爬取關鍵詞生成字典</span>
+cewl -d <span class="nu">2</span> -m <span class="nu">5</span> -w /tmp/org_words.txt https://example.com</pre>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">在對某企業進行季度安全巡檢時，日誌分析發現某個外部 IP（1.2.3.4）在過去 6 小時內對 Web 伺服器產生了 3000 次 HTTP 404 錯誤，且 User-Agent 為 <code>dirsearch/0.4.2</code>。這最可能代表什麼威脅，應如何處置？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>服務器故障導致 404，應通知業務負責人檢查應用</div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">B</span>主動目錄掃描（攻擊者使用 dirsearch 工具枚舉 Web 路徑），應記錄 IP 和發現，建議在 WAF 或防火牆封鎖該 IP，並核查是否有任何返回 200 的請求（表示路徑被成功發現）</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">C</span>搜索引擎爬蟲正常訪問，不需要處置</td></div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>DDoS 攻擊，應立即聯繫 ISP 請求流量清洗</div>
+  </div>
+  <div class="q-exp">正確！<code>dirsearch</code> 是一款知名的 Web 目錄/路徑枚舉工具（攻擊者常用），短時間大量 404 是典型的<strong>目錄掃描</strong>特徵。正確處置步驟：（1）確認威脅：User-Agent 含 dirsearch + 大量 404 = 確定是目錄掃描；（2）確認是否有成功發現：過濾 User-Agent 為 dirsearch 且返回碼非 404 的請求（如有 200/301，則攻擊者已發現可訪問路徑）；（3）封鎖來源 IP：在 WAF 或防火牆加入黑名單規則；（4）記錄到巡檢報告中，作為外部威脅活動的證據；（5）如有成功返回的敏感路徑，需評估是否需要立即修復或限制訪問。</div>
+</div>
+</div>
+
+
+<!-- ===== CH5: 巡檢報告與閉環 ===== -->
+
+<!-- L5-1 發現分類與評級 -->
+<div class="cb" id="l5-1">
+<h2>巡檢發現分類與評級</h2>
+<p>統一的發現分類和評級標準是確保不同批次巡檢結果可比較、可追蹤的基礎。不同於風險評估的多維度計算，巡檢發現評級更注重直接影響和修復緊迫性。</p>
+
+<h3>巡檢發現嚴重程度評級標準</h3>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>等級</th><th>定義</th><th>示例</th><th>整改期限</th></tr></thead>
+    <tbody>
+      <tr><td><strong style="color:#f05252">嚴重</strong></td><td>存在直接被利用的高危漏洞，或已有攻擊入侵跡象，可能導致系統完全淪陷或重要數據大規模洩露</td><td>已知高危 CVE 未修補且有公開 PoC（如 Log4Shell）；發現活躍的惡意進程/後門；核心數據庫 root 帳號可從外網登入</td><td>立即（24小時內）</td></tr>
+      <tr><td><strong style="color:#f97316">高危</strong></td><td>存在可被利用的安全問題，成功利用可導致重大業務影響，但利用條件相對複雜</td><td>高危漏洞未及時修補（CVSS 7.0-9.0）；高危服務（SSH/RDP）暴露互聯網；管理員帳號未啟用 MFA；防火牆默認策略為 ACCEPT</td><td>3-7 天</td></tr>
+      <tr><td><strong style="color:#fbbf24">中危</strong></td><td>存在安全隱患，在一定條件下可被利用或會為攻擊者提供信息，但直接影響有限</td><td>中危漏洞未修補；存在長期未登入帳號；SSL/TLS 使用過時協議版本；缺少部分 HTTP 安全頭</td><td>14-30 天</td></tr>
+      <tr><td><strong style="color:#3ecf8e">低危</strong></td><td>配置不符合最佳實踐，不會直接導致安全事件，但屬於縱深防禦的薄弱環節</td><td>日誌保留週期不足；備份未加密；部分系統缺少防毒覆蓋；文檔未及時更新</td><td>下次巡檢前</td></tr>
+      <tr><td><strong>建議</strong></td><td>安全加強建議，現狀不算問題，但有改善空間</td><td>建議部署 MFA（現狀有密碼策略）；建議升級到更新版本；建議完善安全制度</td><td>根據優先級排期</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>發現分類維度</h3>
+<div class="kg">
+  <div class="kt"><div class="kt-n">技術配置問題</div><div class="kt-d">系統/設備安全配置不符合基線要求。特點：有明確的「正確配置」標準，整改操作相對直接。例：SSH 未禁用 root 登入、防火牆規則冗餘、TLS 1.0 未停用。</div></div>
+  <div class="kt"><div class="kt-n">漏洞風險</div><div class="kt-d">已知 CVE 漏洞未及時修補。特點：有 CVE 編號可查詢，CVSS 評分可直接參考，整改方式為升級版本或安裝補丁。</div></div>
+  <div class="kt"><div class="kt-n">帳號與訪問控制問題</div><div class="kt-d">帳號管理不符合最小權限和生命週期管理要求。特點：需要業務確認（不能擅自停用帳號），整改需協調 HR 和業務。</div></div>
+  <div class="kt"><div class="kt-n">管理制度問題</div><div class="kt-d">安全制度缺失或未執行。特點：整改涉及流程和文化，週期較長。例：無安全培訓記錄、無安全事件響應流程、補丁管理無書面流程。</div></div>
+  <div class="kt"><div class="kt-n">異常事件線索</div><div class="kt-d">日誌分析中發現可疑活動，需進一步排查確認是否為真實安全事件。特點：不確定性高，需要應急響應流程介入。</div></div>
+  <div class="kt"><div class="kt-n">合規差距</div><div class="kt-d">不符合等保/法規要求的具體差距。特點：以合規標準條款為參考依據，整改有明確的合規驗收標準。</div></div>
+</div>
+</div>
+
+<!-- L5-2 報告撰寫規範 -->
+<div class="cb" id="l5-2">
+<h2>綜合巡檢報告撰寫規範</h2>
+<p>巡檢報告是定期服務的核心交付物，其質量直接影響客戶對安全服務的滿意度和信任感。好的巡檢報告應讓客戶清楚地看到：<strong>本次發現了什麼問題</strong>、<strong>和上次相比安全狀況如何變化</strong>、<strong>下一步應該做什麼</strong>。</p>
+
+<h3>安全巡檢報告標準結構</h3>
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>封面與基本信息</strong> — 報告標題、巡檢週期（第X次季度巡檢）、被巡檢方名稱、巡檢時間範圍、本次巡檢範圍摘要、報告出具日期、服務方蓋章、密級標識（通常為「機密」）。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>管理層摘要（1頁）</strong> — 用非技術語言描述：本次巡檢的整體安全評分（如 A/B/C 等或 85/100）；嚴重/高危發現數量及最重要的 2-3 個問題；與上季度相比安全趨勢（好轉/穩定/惡化）；最高優先整改建議。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>發現匯總與趨勢分析</strong> — 本次發現統計表（按嚴重程度分類：嚴重/高/中/低/建議各多少條）；上次未整改發現閉環情況（已修復X條，持續存在X條）；本次新增發現X條；安全趨勢圖（按時間軸展示歷次巡檢發現數量變化）。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>技術發現詳情</strong> — 按嚴重程度排序，每個發現包含：唯一編號、發現標題、嚴重程度、受影響資產、問題描述（技術細節）、風險說明（業務影響）、截圖或代碼片段（客觀證據）、整改建議（具體可執行步驟）、整改期限。</div></div>
+  <div class="il-item"><span class="il-num">05</span><div class="il-txt"><strong>整改工單清單</strong> — 所有需要整改的發現生成可操作的工單清單，包含：工單編號、問題描述、嚴重程度、責任人、截止日期、整改建議。此清單應可直接作為工作任務分發給各負責人。</div></div>
+  <div class="il-item"><span class="il-num">06</span><div class="il-txt"><strong>上次整改情況複驗</strong> — 逐條核查上次巡檢高危/嚴重發現的整改情況：已整改並複驗通過（附複驗截圖）；已整改但複驗失敗（說明原因）；未整改（說明原因，重新評估風險等級）；延期（新截止日期）。</div></div>
+</div>
+</div>
+
+<!-- L5-3 整改追蹤與閉環 -->
+<div class="cb" id="l5-3">
+<h2>整改追蹤與閉環管理</h2>
+<p>安全巡檢的價值不只在發現問題，更在於推動問題得到解決。有效的整改追蹤機制是安全服務持續創造價值的關鍵。</p>
+
+<h3>整改閉環管理流程</h3>
+<div class="atkflow">
+  <div class="af-step s1"><span class="af-n">Day 0</span><div><div class="af-t">發現記錄與工單創建</div><div class="af-d">巡檢結束後即創建整改工單，明確：問題描述、嚴重程度、指定責任人（IT 負責人或具體系統管理員）、整改截止日期（嚴重：24h；高危：7天；中危：30天）。</div></div></div>
+  <div class="af-step s2"><span class="af-n">整改期</span><div><div class="af-t">整改執行與進度更新</div><div class="af-d">責任人按整改建議執行修復操作；重要操作前做好回滾準備；整改完成後在工單中更新狀態並說明修復方式；如遇阻礙（業務原因無法按期整改）需及時溝通並申請延期，說明臨時緩解措施。</div></div></div>
+  <div class="af-step s3"><span class="af-n">截止前</span><div><div class="af-t">整改驗證（複查）</div><div class="af-d">服務方對已整改發現進行技術複驗：執行相同的測試步驟；確認問題確實已修復；記錄複驗截圖作為閉環證據；更新工單狀態為「已驗證關閉」。若複驗失敗，重新開啟工單並協助分析原因。</div></div></div>
+  <div class="af-step s4"><span class="af-n">下次巡檢</span><div><div class="af-t">閉環狀態更新到下次報告</div><div class="af-d">在下次巡檢報告的「上次整改情況複驗」章節，逐條呈現整改結果：修復率、按期完成率；持續未整改的問題提升一個嚴重等級（如高危升為嚴重）；形成問題台帳的歷史記錄。</div></div></div>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">整改問題台帳（Excel 模板結構）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="hi">安全巡檢問題台帳欄位設計（Excel / 項目管理工具）：</span>
+
+工單編號     │ 格式：YYYYQX-NNN（如 2024Q4-001）
+巡檢批次     │ 哪次巡檢發現（如 2024年第4季度）
+嚴重程度     │ 嚴重/高危/中危/低危/建議
+發現類別     │ 技術配置/漏洞/帳號管理/管理制度/異常線索/合規差距
+問題簡述     │ 一句話描述（如：Redis 服務未設置密碼，允許未授權訪問）
+受影響資產   │ IP/系統名稱（如：10.0.1.50 Redis 6.2.7）
+CVE 編號     │ 如有（如 CVE-2022-0543）
+整改責任人   │ 指定到具體人員
+整改截止日期 │ 根據嚴重程度自動填充
+實際整改日期 │ 整改完成後填寫
+整改方式     │ 簡要說明修復操作（如：設置 Redis requirepass 並重啟服務）
+複驗狀態     │ 待複驗/複驗通過/複驗失敗/延期/已接受
+複驗日期     │ 
+複驗人       │ 
+備注         │ 延期原因/臨時緩解措施/接受風險說明
+
+<span class="cm"># ─── 台帳統計示例（Python pandas 分析）───</span>
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+df = pd.read_excel(<span class="st">'security_findings.xlsx'</span>)
+
+<span class="cm"># 各嚴重程度未整改數量</span>
+open_items = df[df[<span class="st">'複驗狀態'</span>] != <span class="st">'複驗通過'</span>]
+<span class="fn">print</span>(open_items.groupby(<span class="st">'嚴重程度'</span>)[<span class="st">'工單編號'</span>].count())
+
+<span class="cm"># 超期未整改項目（重點追蹤）</span>
+today = pd.Timestamp(<span class="st">'today'</span>)
+overdue = df[(df[<span class="st">'整改截止日期'</span>] &lt; today) &amp; (df[<span class="st">'複驗狀態'</span>] != <span class="st">'複驗通過'</span>)]
+<span class="fn">print</span>(<span class="st">"超期未整改項目："</span>, len(overdue))</pre>
+</div>
+</div>
+
+<!-- L5-4 自動化腳本 -->
+<div class="cb" id="l5-4">
+<h2>巡檢自動化腳本開發</h2>
+<p>成熟的安全巡檢體系需要將重複性工作自動化，既提高效率，又降低人工失誤風險。下面以實際可用的 Python 自動化巡檢框架為示例。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Python 綜合巡檢框架</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="kw">import</span> subprocess, datetime, json, csv, os
+<span class="kw">import</span> paramiko   <span class="cm"># SSH 連接庫: pip install paramiko</span>
+<span class="kw">import</span> pymysql    <span class="cm"># MySQL 連接: pip install pymysql</span>
+
+<span class="cm"># ─── 配置：巡檢目標清單 ───</span>
+CONFIG = {
+    <span class="st">'targets'</span>: [
+        {<span class="st">'ip'</span>: <span class="st">'192.168.1.10'</span>, <span class="st">'type'</span>: <span class="st">'linux'</span>, <span class="st">'user'</span>: <span class="st">'auditor'</span>, <span class="st">'key'</span>: <span class="st">'/tmp/audit.pem'</span>},
+        {<span class="st">'ip'</span>: <span class="st">'192.168.1.20'</span>, <span class="st">'type'</span>: <span class="st">'mysql'</span>, <span class="st">'user'</span>: <span class="st">'audit_ro'</span>, <span class="st">'password'</span>: <span class="st">'****'</span>},
+    ],
+    <span class="st">'output_dir'</span>: <span class="st">f'/opt/inspections/{datetime.date.today()}'</span>
+}
+
+<span class="kw">class</span> <span class="fn">LinuxInspector</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, ip, user, key_path):
+        self.ip = ip
+        self.ssh = paramiko.SSHClient()
+        self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        self.ssh.connect(ip, username=user, key_filename=key_path)
+        self.findings = []
+
+    <span class="kw">def</span> <span class="fn">run_cmd</span>(self, cmd):
+        _, stdout, _ = self.ssh.exec_command(cmd)
+        <span class="kw">return</span> stdout.read().decode().strip()
+
+    <span class="kw">def</span> <span class="fn">check_root_login</span>(self):
+        <span class="cm"># 核查 SSH 是否禁用 root 直接登入</span>
+        val = self.run_cmd(<span class="st">"grep -i 'PermitRootLogin' /etc/ssh/sshd_config | grep -v '^#'"</span>)
+        <span class="kw">if</span> <span class="st">'no'</span> <span class="kw">not in</span> val.lower():
+            self.findings.append({
+                <span class="st">'id'</span>: <span class="st">'SRV-001'</span>, <span class="st">'level'</span>: <span class="st">'high'</span>,
+                <span class="st">'title'</span>: <span class="st">'SSH 未禁用 root 直接登入'</span>,
+                <span class="st">'detail'</span>: f<span class="st">'PermitRootLogin 當前值: {val or "未配置（默認允許）"}'</span>,
+                <span class="st">'fix'</span>: <span class="st">'設置 PermitRootLogin no 並重啟 sshd'</span>
+            })
+
+    <span class="kw">def</span> <span class="fn">check_uid0_accounts</span>(self):
+        <span class="cm"># 核查是否有非 root 的 UID=0 帳號</span>
+        result = self.run_cmd(<span class="st">"awk -F: '($3==0 && $1!=\"root\"){print $1}' /etc/passwd"</span>)
+        <span class="kw">if</span> result:
+            self.findings.append({
+                <span class="st">'id'</span>: <span class="st">'SRV-002'</span>, <span class="st">'level'</span>: <span class="st">'critical'</span>,
+                <span class="st">'title'</span>: <span class="st">'發現非 root 的 UID=0 帳號（潛在後門）'</span>,
+                <span class="st">'detail'</span>: f<span class="st">'UID=0 帳號: {result}'</span>,
+                <span class="st">'fix'</span>: <span class="st">'立即確認帳號合法性，若為非授權帳號立即刪除'</span>
+            })
+
+    <span class="kw">def</span> <span class="fn">run_all_checks</span>(self):
+        <span class="kw">for</span> check <span class="kw">in</span> [self.check_root_login, self.check_uid0_accounts]:
+            <span class="kw">try</span>: check()
+            <span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+                <span class="fn">print</span>(f<span class="st">"核查失敗 {check.__name__}: {e}"</span>)
+        self.ssh.close()
+        <span class="kw">return</span> {<span class="st">'target'</span>: self.ip, <span class="st">'findings'</span>: self.findings}
+
+<span class="cm"># ─── 輸出報告 ───</span>
+<span class="kw">def</span> <span class="fn">generate_report</span>(all_results, output_dir):
+    os.makedirs(output_dir, exist_ok=<span class="kw">True</span>)
+    <span class="cm"># JSON 原始數據</span>
+    <span class="kw">with</span> <span class="fn">open</span>(f<span class="st">'{output_dir}/findings.json'</span>, <span class="st">'w'</span>) <span class="kw">as</span> f:
+        json.dump(all_results, f, ensure_ascii=<span class="kw">False</span>, indent=<span class="nu">2</span>)
+    <span class="cm"># CSV 工單導出</span>
+    <span class="kw">with</span> <span class="fn">open</span>(f<span class="st">'{output_dir}/findings.csv'</span>, <span class="st">'w'</span>, newline=<span class="st">''</span>) <span class="kw">as</span> f:
+        w = csv.DictWriter(f, [<span class="st">'target'</span>,<span class="st">'id'</span>,<span class="st">'level'</span>,<span class="st">'title'</span>,<span class="st">'detail'</span>,<span class="st">'fix'</span>])
+        w.writeheader()
+        <span class="kw">for</span> r <span class="kw">in</span> all_results:
+            <span class="kw">for</span> f_ <span class="kw">in</span> r[<span class="st">'findings'</span>]:
+                w.writerow({<span class="st">'target'</span>: r[<span class="st">'target'</span>], **f_})
+    <span class="fn">print</span>(f<span class="st">"報告已輸出至 {output_dir}"</span>)</pre>
+</div>
+
+<div class="done-banner">
+  <h3>Stage 12 完成：安全巡檢全流程實戰</h3>
+  <p>你已掌握完整的安全巡檢技術體系：巡檢概述與服務場景、六步巡檢項目流程、資產調研與清單制定、工具箱準備；防火牆策略核查、帳號訪問控制巡檢（AD PowerShell 核查）、安全設備策略巡檢（IDS/IPS/WAF/VPN）、備份與災備核查；日誌收集框架、系統日誌分析（Linux auth.log + Windows 事件 ID）、Web 日誌攻擊特徵識別、SIEM 告警分析；定期漏洞掃描對比（Python 趨勢分析）、補丁管理合規核查、暴露面自動化監控腳本、弱密碼掃描；以及發現評級標準（嚴重/高/中/低）、報告撰寫規範、整改閉環管理流程和自動化巡檢 Python 框架。繼續進入數據安全。</p>
+  <div class="btn-row">
+    <a href="stage13.html" class="btn-p">前往第十三階段：數據安全</a>
+    <a href="stage11.html" class="btn-g">回顧第十一階段</a>
+    <a href="index.html" class="btn-g">返回課程首頁</a>
+  </div>
+</div>
+</div><!-- /cw -->
+
+<div class="lnav">
+  <button class="lb" id="prevb" onclick="prevL()" disabled>&#8592; 上一課</button>
+  <div class="ln-mid">
+    <div class="ln-cnt" id="cnt">1 / 20</div>
+    <div class="ln-sub" id="lsub">安全巡檢定義與服務場景</div>
+  </div>
+  <button class="lb pri" id="nextb" onclick="nextL()">下一課 &#8594;</button>
+</div>
+</main>
+</div>
+
+<script>
+const LS=[
+  {id:'l1-1',ch:'CH1',title:'安全巡檢定義與服務場景',time:'20分鐘',type:'巡檢概述'},
+  {id:'l1-2',ch:'CH1',title:'巡檢流程與項目管理',time:'20分鐘',type:'項目管理'},
+  {id:'l1-3',ch:'CH1',title:'資產調研與巡檢清單制定',time:'20分鐘',type:'清單制定'},
+  {id:'l1-4',ch:'CH1',title:'巡檢工具箱準備',time:'15分鐘',type:'工具準備'},
+  {id:'l2-1',ch:'CH2',title:'防火牆策略巡檢',time:'25分鐘',type:'策略核查'},
+  {id:'l2-2',ch:'CH2',title:'帳號與訪問控制巡檢',time:'25分鐘',type:'帳號安全'},
+  {id:'l2-3',ch:'CH2',title:'安全設備策略巡檢（IDS/IPS/WAF）',time:'20分鐘',type:'設備策略'},
+  {id:'l2-4',ch:'CH2',title:'備份與災備策略巡檢',time:'20分鐘',type:'備份核查'},
+  {id:'l3-1',ch:'CH3',title:'日誌巡檢框架：收集與規範化',time:'20分鐘',type:'日誌框架'},
+  {id:'l3-2',ch:'CH3',title:'系統與網絡日誌分析',time:'25分鐘',type:'系統日誌'},
+  {id:'l3-3',ch:'CH3',title:'Web 訪問日誌與攻擊特徵識別',time:'25分鐘',type:'Web日誌'},
+  {id:'l3-4',ch:'CH3',title:'SIEM 平台巡檢告警分析',time:'20分鐘',type:'SIEM分析'},
+  {id:'l4-1',ch:'CH4',title:'定期漏洞掃描規劃與執行',time:'25分鐘',type:'漏洞掃描'},
+  {id:'l4-2',ch:'CH4',title:'補丁管理流程與合規核查',time:'20分鐘',type:'補丁管理'},
+  {id:'l4-3',ch:'CH4',title:'互聯網暴露面持續監控',time:'25分鐘',type:'暴露面監控'},
+  {id:'l4-4',ch:'CH4',title:'常態化弱密碼掃描',time:'20分鐘',type:'弱密碼掃描'},
+  {id:'l5-1',ch:'CH5',title:'巡檢發現分類與評級',time:'15分鐘',type:'發現評級'},
+  {id:'l5-2',ch:'CH5',title:'綜合巡檢報告撰寫規範',time:'20分鐘',type:'報告撰寫'},
+  {id:'l5-3',ch:'CH5',title:'整改追蹤與閉環管理',time:'20分鐘',type:'閉環管理'},
+  {id:'l5-4',ch:'CH5',title:'巡檢自動化腳本開發',time:'25分鐘',type:'自動化'},
+];
+const done=new Set(JSON.parse(localStorage.getItem('s12_done')||'[]'));
+let cur=0;
+function go(id,btn){
+  document.querySelectorAll('.cb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.ls-btn').forEach(b=>b.classList.remove('lact'));
+  const bl=document.getElementById(id);if(bl)bl.classList.add('on');
+  if(btn)btn.classList.add('lact');
+  cur=LS.findIndex(l=>l.id===id);syncUI();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function toggleCh(btn,id){
+  btn.classList.toggle('copen');
+  const l=document.getElementById(id);if(l)l.classList.toggle('lopen');
+}
+function prevL(){if(cur>0)findAndGo(LS[cur-1].id);}
+function nextL(){
+  done.add(LS[cur].id);
+  localStorage.setItem('s12_done',JSON.stringify([...done]));
+  if(cur<LS.length-1)findAndGo(LS[cur+1].id);
+}
+function findAndGo(id){
+  let btn=null;
+  document.querySelectorAll('.ls-btn').forEach(b=>{
+    if((b.getAttribute('onclick')||'').includes("'"+id+"'")){
+      btn=b;
+      const p=b.parentElement;
+      if(p&&!p.classList.contains('lopen')){
+        p.classList.add('lopen');
+        const cb=p.previousElementSibling;
+        if(cb)cb.classList.add('copen');
+      }
+    }
+  });
+  go(id,btn);
+}
+function syncUI(){
+  const l=LS[cur];if(!l)return;
+  document.getElementById('crumb').innerHTML=`STAGE 12 &gt; ${l.ch} &gt; <em>${l.title}</em>`;
+  document.getElementById('ltitle').textContent=l.title;
+  document.getElementById('chip1').textContent=l.type;
+  document.getElementById('chip2').textContent=`預計 ${l.time}`;
+  document.getElementById('cnt').textContent=`${cur+1} / ${LS.length}`;
+  document.getElementById('lsub').textContent=l.title;
+  document.getElementById('prevb').disabled=cur===0;
+  document.getElementById('nextb').disabled=cur===LS.length-1;
+  if(cur===LS.length-1)document.getElementById('nextb').textContent='Stage 完成';
+  else document.getElementById('nextb').innerHTML='下一課 &#8594;';
+  const pct=done.size?Math.round(done.size/LS.length*100):0;
+  document.getElementById('pct').textContent=pct+'%';
+  document.getElementById('pf').style.width=pct+'%';
+  document.querySelectorAll('.ls-btn').forEach(b=>{
+    const m=(b.getAttribute('onclick')||'').match(/'(l\d+-\d+)'/);
+    if(m&&done.has(m[1])&&!b.classList.contains('lact'))b.classList.add('ldone');
+  });
+}
+function chkQ(el,correct){
+  const box=el.closest('.quiz');
+  if(box.dataset.answered)return;
+  box.dataset.answered='1';
+  box.querySelectorAll('.qo').forEach(o=>o.style.pointerEvents='none');
+  el.classList.add(correct?'ok':'bad');
+  if(!correct)box.querySelectorAll('.qo').forEach(o=>{
+    if((o.getAttribute('onclick')||'').includes('true'))o.classList.add('ok');
+  });
+  const exp=box.querySelector('.q-exp');
+  if(exp)exp.classList.add('on');
+}
+function cpCode(btn){
+  const pre=btn.closest('.cblock').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(()=>{
+    btn.textContent='已複製';setTimeout(()=>btn.textContent='複製',2000);
+  });
+}
+syncUI();
+</script>
+</body>
+</html>

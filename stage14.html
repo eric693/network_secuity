@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Stage 14 — ISO 27001 信息安全管理體系 | SEC_TRACK</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050814;--bg2:#070b18;--bg3:#0c1228;--sur:#111a35;--bdr:#1e2f5a;
+  --acc:#4a7fff;--acc2:#2563eb;--txt:#ccd8ff;--txt2:#6b82b8;--txt3:#2e3d6a;
+  --red:#f05252;--grn:#3ecf8e;--cyn:#67e8f9;--ylw:#fbbf24;--pur:#a78bfa;--rose:#fb7185;--org:#f97316;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse 60% 40% at 8% 0%,rgba(74,127,255,.06) 0%,transparent 55%),
+  radial-gradient(ellipse 45% 30% at 92% 100%,rgba(37,99,235,.04) 0%,transparent 55%);
+  pointer-events:none;z-index:0;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 36px;background:rgba(5,8,20,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--bdr);}
+.n-logo{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.95rem;color:var(--acc);text-decoration:none;}
+.n-logo span{color:var(--txt3);}
+.n-mid{display:flex;align-items:center;gap:10px;}
+.s-pill{font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;background:rgba(74,127,255,.12);color:var(--acc);border:1px solid rgba(74,127,255,.3);}
+.n-sname{font-size:.8rem;color:var(--txt2);}
+.n-back{font-size:.8rem;color:var(--txt3);text-decoration:none;transition:color .2s;}
+.n-back:hover{color:var(--acc);}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh;padding-top:60px;}
+.sidebar{position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;background:var(--bg2);border-right:1px solid var(--bdr);display:flex;flex-direction:column;z-index:10;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--bdr);}
+.sb-h{padding:22px 22px 16px;border-bottom:1px solid var(--bdr);flex-shrink:0;}
+.sb-tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--acc);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
+.sb-title{font-size:.88rem;font-weight:700;line-height:1.45;margin-bottom:13px;}
+.sb-meta{display:flex;gap:16px;}
+.sm-item{display:flex;flex-direction:column;gap:2px;}
+.sm-val{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;color:var(--acc);}
+.sm-key{font-size:.62rem;color:var(--txt3);letter-spacing:.06em;text-transform:uppercase;}
+.sb-nav{flex:1;overflow-y:auto;padding:6px 0;}
+.ch-btn{width:100%;display:flex;align-items:center;gap:9px;padding:9px 22px;background:none;border:none;border-bottom:1px solid rgba(30,47,90,.7);color:var(--txt2);font-family:'Noto Sans TC',sans-serif;font-size:.79rem;font-weight:500;cursor:pointer;text-align:left;transition:color .18s,background .18s;}
+.ch-btn:hover{color:var(--txt);background:var(--bg3);}
+.ch-btn.cact{color:var(--acc);}
+.ch-num{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt3);min-width:26px;flex-shrink:0;}
+.ch-btn.cact .ch-num{color:var(--acc);}
+.ch-arr{font-size:.52rem;color:var(--txt3);transition:transform .2s;flex-shrink:0;}
+.ch-btn.copen .ch-arr{transform:rotate(90deg);}
+.ls-list{display:none;flex-direction:column;background:rgba(0,0,0,.15);}
+.ls-list.lopen{display:flex;}
+.ls-btn{display:flex;align-items:flex-start;gap:9px;padding:7px 22px 7px 44px;background:none;border:none;border-bottom:1px solid rgba(30,47,90,.4);color:var(--txt3);font-family:'Noto Sans TC',sans-serif;font-size:.74rem;cursor:pointer;text-align:left;width:100%;transition:color .18s,background .18s;line-height:1.4;}
+.ls-btn:hover{color:var(--txt2);background:rgba(74,127,255,.04);}
+.ls-btn.lact{color:var(--acc);background:rgba(74,127,255,.08);}
+.ls-btn.ldone{color:var(--txt3);}
+.ls-dot{width:5px;height:5px;border-radius:50%;background:var(--bdr);flex-shrink:0;margin-top:5px;transition:background .2s;}
+.ls-btn.lact .ls-dot,.ls-btn.ldone .ls-dot{background:var(--acc);}
+.sb-f{padding:13px 22px;border-top:1px solid var(--bdr);flex-shrink:0;}
+.pr{display:flex;justify-content:space-between;font-size:.68rem;color:var(--txt3);margin-bottom:6px;}
+.pt{height:3px;background:var(--bdr);border-radius:2px;overflow:hidden;}
+.pf{height:100%;background:var(--acc);border-radius:2px;transition:width .4s;}
+.main{position:relative;z-index:1;display:flex;flex-direction:column;}
+.lh{padding:38px 56px 30px;border-bottom:1px solid var(--bdr);background:linear-gradient(180deg,rgba(74,127,255,.04) 0%,transparent 100%);}
+.lh-crumb{font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--txt3);letter-spacing:.08em;margin-bottom:11px;}
+.lh-crumb em{color:var(--acc);font-style:normal;}
+.lh-title{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin-bottom:11px;}
+.lh-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{padding:3px 11px;border-radius:20px;font-size:.67rem;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;border:1px solid var(--bdr);color:var(--txt3);}
+.chip.ac{border-color:rgba(74,127,255,.4);color:var(--acc);}
+.cw{padding:38px 56px 80px;max-width:880px;}
+.cb{display:none;}
+.cb.on{display:block;animation:rise .25s ease both;}
+@keyframes rise{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:none;}}
+h2{font-size:1.25rem;font-weight:800;letter-spacing:-.01em;margin:36px 0 13px;color:var(--txt);display:flex;align-items:center;gap:10px;}
+h2::before{content:'';display:inline-block;width:3px;height:1.1em;border-radius:2px;background:var(--acc);flex-shrink:0;}
+h2:first-child{margin-top:0;}
+h3{font-size:.98rem;font-weight:700;margin:22px 0 9px;color:var(--txt);}
+p{font-size:.9rem;line-height:1.85;color:var(--txt2);margin-bottom:11px;font-weight:300;}
+strong{color:var(--txt);font-weight:600;}
+code{font-family:'JetBrains Mono',monospace;font-size:.8em;background:var(--sur);border:1px solid var(--bdr);padding:1px 6px;border-radius:3px;color:var(--acc);}
+.note{border-left:3px solid;padding:13px 17px;margin:18px 0;border-radius:0 4px 4px 0;}
+.note-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:6px;}
+.note p{margin:0;font-size:.86rem;line-height:1.7;}
+.note.tip{border-color:var(--acc);background:rgba(74,127,255,.06);}
+.note.tip .note-lbl{color:var(--acc);}
+.note.warn{border-color:var(--ylw);background:rgba(251,191,36,.06);}
+.note.warn .note-lbl{color:var(--ylw);}
+.note.sec{border-color:var(--grn);background:rgba(62,207,142,.06);}
+.note.sec .note-lbl{color:var(--grn);}
+.note.danger{border-color:var(--red);background:rgba(240,82,82,.07);}
+.note.danger .note-lbl{color:var(--red);}
+.note.law{border-color:var(--pur);background:rgba(167,139,250,.07);}
+.note.law .note-lbl{color:var(--pur);}
+.cblock{background:#020508;border:1px solid var(--bdr);border-radius:6px;margin:16px 0;overflow:hidden;}
+.ctop{display:flex;align-items:center;justify-content:space-between;padding:7px 15px;background:rgba(7,11,24,.8);border-bottom:1px solid var(--bdr);}
+.clang{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;}
+.ccopy{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);background:none;border:none;cursor:pointer;transition:color .2s;}
+.ccopy:hover{color:var(--acc);}
+pre{padding:16px 20px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.75;color:#b4c8f0;}
+pre .kw{color:#c792ea;}pre .fn{color:#82aaff;}pre .st{color:#c3e88d;}pre .cm{color:#1a2a4a;font-style:italic;}
+pre .nu{color:#f78c6c;}pre .hi{color:#4a7fff;font-weight:700;}pre .ok{color:#3ecf8e;}
+pre .bad{color:#f05252;}pre .ylw{color:#fbbf24;}
+.tbl{overflow-x:auto;margin:16px 0;}
+table.t{width:100%;border-collapse:collapse;font-size:.82rem;}
+table.t th{background:var(--sur);padding:9px 14px;text-align:left;font-size:.63rem;font-family:'JetBrains Mono',monospace;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--bdr);}
+table.t td{padding:9px 14px;border:1px solid var(--bdr);color:var(--txt2);font-weight:300;vertical-align:top;line-height:1.55;}
+table.t tr:hover td{background:var(--bg3);}
+.kg{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--bdr);border:1px solid var(--bdr);margin:16px 0;}
+.kt{background:var(--bg2);padding:14px 17px;}
+.kt-n{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--acc);font-weight:700;margin-bottom:5px;}
+.kt-d{font-size:.79rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.kg3{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--bdr);border:1px solid var(--bdr);margin:16px 0;}
+.ilist{display:flex;flex-direction:column;border:1px solid var(--bdr);border-radius:4px;overflow:hidden;margin:16px 0;}
+.il-item{display:flex;align-items:flex-start;gap:13px;padding:12px 17px;border-bottom:1px solid var(--bdr);transition:background .15s;}
+.il-item:last-child{border-bottom:none;}
+.il-item:hover{background:var(--bg3);}
+.il-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--acc);min-width:24px;flex-shrink:0;padding-top:2px;font-weight:700;}
+.il-txt{font-size:.85rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.il-txt strong{color:var(--txt);}
+.pdca{display:grid;grid-template-columns:repeat(2,1fr);gap:3px;background:var(--bdr);border:1px solid var(--bdr);margin:18px 0;}
+.pdca-cell{background:var(--bg2);padding:18px;}
+.pdca-label{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:6px;}
+.pdca-title{font-size:.95rem;font-weight:700;margin-bottom:7px;color:var(--txt);}
+.pdca-desc{font-size:.79rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.pdca-cell:nth-child(1) .pdca-label{color:#4a7fff;}
+.pdca-cell:nth-child(2) .pdca-label{color:#3ecf8e;}
+.pdca-cell:nth-child(3) .pdca-label{color:#f97316;}
+.pdca-cell:nth-child(4) .pdca-label{color:#a78bfa;}
+.timeline{display:flex;flex-direction:column;gap:0;margin:18px 0;border:1px solid var(--bdr);border-radius:4px;overflow:hidden;}
+.tl-item{display:flex;align-items:flex-start;gap:0;border-bottom:1px solid var(--bdr);}
+.tl-item:last-child{border-bottom:none;}
+.tl-phase{background:var(--sur);padding:12px 16px;min-width:110px;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid var(--bdr);}
+.tl-ph-n{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--acc);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px;}
+.tl-ph-t{font-size:.8rem;font-weight:700;color:var(--txt);}
+.tl-ph-d{font-size:.68rem;color:var(--txt3);margin-top:3px;}
+.tl-body{padding:12px 16px;flex:1;}
+.tl-body p{margin:0;font-size:.82rem;color:var(--txt2);line-height:1.65;font-weight:300;}
+.atkflow{display:flex;flex-direction:column;gap:3px;margin:18px 0;}
+.af-step{display:flex;align-items:flex-start;gap:13px;padding:13px 16px;background:var(--sur);border:1px solid var(--bdr);border-radius:4px;position:relative;}
+.af-step::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:4px 0 0 4px;}
+.af-step.s1::before{background:var(--acc);}
+.af-step.s2::before{background:var(--ylw);}
+.af-step.s3::before{background:var(--org);}
+.af-step.s4::before{background:var(--cyn);}
+.af-step.s5::before{background:var(--pur);}
+.af-step.s6::before{background:var(--grn);}
+.af-n{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt3);font-weight:700;min-width:44px;flex-shrink:0;padding-top:2px;letter-spacing:.04em;}
+.af-t{font-size:.82rem;font-weight:700;color:var(--txt);margin-bottom:4px;}
+.af-d{font-size:.78rem;color:var(--txt2);line-height:1.55;font-weight:300;}
+.quiz{background:var(--bg3);border:1px solid var(--bdr);border-radius:6px;padding:22px;margin:26px 0;}
+.q-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--ylw);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;}
+.q-q{font-size:.9rem;font-weight:600;margin-bottom:13px;line-height:1.5;color:var(--txt);}
+.q-opts{display:flex;flex-direction:column;gap:6px;}
+.qo{display:flex;align-items:flex-start;gap:10px;padding:8px 13px;border:1px solid var(--bdr);border-radius:4px;cursor:pointer;font-size:.83rem;color:var(--txt2);transition:all .18s;line-height:1.5;}
+.qo:hover{border-color:var(--acc);color:var(--txt);}
+.qo.ok{border-color:var(--acc);background:rgba(74,127,255,.08);color:var(--acc);}
+.qo.bad{border-color:var(--red);background:rgba(240,82,82,.07);color:var(--red);}
+.qo-k{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--txt3);min-width:16px;padding-top:1px;flex-shrink:0;}
+.q-exp{display:none;margin-top:12px;padding:11px 14px;background:rgba(74,127,255,.05);border-left:2px solid var(--acc);border-radius:0 4px 4px 0;font-size:.82rem;color:var(--txt2);line-height:1.65;}
+.q-exp.on{display:block;}
+.done-banner{background:linear-gradient(135deg,rgba(74,127,255,.07),rgba(37,99,235,.05));border:1px solid rgba(74,127,255,.2);border-radius:6px;padding:28px;margin:34px 0 14px;text-align:center;}
+.done-banner h3{font-size:1.1rem;font-weight:800;color:var(--acc);margin-bottom:8px;}
+.done-banner p{font-size:.87rem;margin-bottom:20px;}
+.btn-row{display:flex;gap:11px;justify-content:center;flex-wrap:wrap;}
+.btn-p{display:inline-block;padding:10px 24px;background:var(--acc);color:#050814;text-decoration:none;font-weight:700;font-size:.84rem;border-radius:4px;transition:all .2s;}
+.btn-p:hover{background:#7aa3ff;transform:translateY(-1px);}
+.btn-g{display:inline-block;padding:10px 24px;border:1px solid var(--bdr);color:var(--txt2);text-decoration:none;font-size:.84rem;border-radius:4px;transition:all .2s;}
+.btn-g:hover{border-color:var(--acc);color:var(--acc);}
+.lnav{display:flex;justify-content:space-between;align-items:center;padding:22px 56px;border-top:1px solid var(--bdr);background:var(--bg2);position:sticky;bottom:0;z-index:5;}
+.lb{display:flex;align-items:center;gap:7px;padding:8px 18px;border:1px solid var(--bdr);border-radius:4px;background:none;color:var(--txt2);font-size:.82rem;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .18s;}
+.lb:hover:not(:disabled){border-color:var(--acc);color:var(--acc);}
+.lb.pri{background:var(--acc);color:#050814;border-color:var(--acc);font-weight:700;}
+.lb.pri:hover:not(:disabled){background:#7aa3ff;}
+.lb:disabled{opacity:.2;cursor:not-allowed;}
+.ln-mid{text-align:center;}
+.ln-cnt{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--txt3);}
+.ln-sub{font-size:.75rem;color:var(--txt3);margin-top:3px;max-width:260px;}
+@media(max-width:900px){.layout{grid-template-columns:1fr;}.sidebar{position:static;height:auto;}.lh,.cw{padding-left:20px;padding-right:20px;}.lnav{padding:16px 20px;}.kg,.kg3,.pdca{grid-template-columns:1fr;}.ln-sub{display:none;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="n-logo">SEC<span>_</span>TRACK</a>
+  <div class="n-mid"><span class="s-pill">STAGE 14</span><span class="n-sname">ISO 27001 信息安全管理體系</span></div>
+  <a href="index.html" class="n-back">&#8592; 首頁</a>
+</nav>
+<div class="layout">
+<aside class="sidebar">
+  <div class="sb-h">
+    <div class="sb-tag">STAGE 14 · 3週</div>
+    <div class="sb-title">ISO 27001<br>信息安全管理體系</div>
+    <div class="sb-meta">
+      <div class="sm-item"><span class="sm-val">5</span><span class="sm-key">章節</span></div>
+      <div class="sm-item"><span class="sm-val">20</span><span class="sm-key">課程</span></div>
+      <div class="sm-item"><span class="sm-val">3週</span><span class="sm-key">時長</span></div>
+    </div>
+  </div>
+  <div class="sb-nav">
+    <div><button class="ch-btn copen cact" onclick="toggleCh(this,'ch1')"><span class="ch-num">CH1</span><span>ISO 27001 概述與架構</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list lopen" id="ch1">
+      <button class="ls-btn lact" onclick="go('l1-1',this)"><span class="ls-dot"></span>ISO 27001 歷史、版本與認證生態</button>
+      <button class="ls-btn" onclick="go('l1-2',this)"><span class="ls-dot"></span>ISMS 框架：PDCA 循環與十大條款</button>
+      <button class="ls-btn" onclick="go('l1-3',this)"><span class="ls-dot"></span>組織環境分析：內外部議題與利害關係人</button>
+      <button class="ls-btn" onclick="go('l1-4',this)"><span class="ls-dot"></span>ISMS 適用性宣告（SoA）編制</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch2')"><span class="ch-num">CH2</span><span>風險評估與處置</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch2">
+      <button class="ls-btn" onclick="go('l2-1',this)"><span class="ls-dot"></span>ISO 27001 風險評估方法論</button>
+      <button class="ls-btn" onclick="go('l2-2',this)"><span class="ls-dot"></span>資產識別與風險登錄冊建立</button>
+      <button class="ls-btn" onclick="go('l2-3',this)"><span class="ls-dot"></span>風險處置計劃（RTP）制定</button>
+      <button class="ls-btn" onclick="go('l2-4',this)"><span class="ls-dot"></span>殘餘風險接受與管理審查</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch3')"><span class="ch-num">CH3</span><span>安全委員會與安全制度</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch3">
+      <button class="ls-btn" onclick="go('l3-1',this)"><span class="ls-dot"></span>信息安全委員會架構與職責</button>
+      <button class="ls-btn" onclick="go('l3-2',this)"><span class="ls-dot"></span>ISMS 制度體系建設：四層文件架構</button>
+      <button class="ls-btn" onclick="go('l3-3',this)"><span class="ls-dot"></span>核心安全策略與程序文件編制</button>
+      <button class="ls-btn" onclick="go('l3-4',this)"><span class="ls-dot"></span>員工安全意識培訓體系建立</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch4')"><span class="ch-num">CH4</span><span>內審員與認證審核</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch4">
+      <button class="ls-btn" onclick="go('l4-1',this)"><span class="ls-dot"></span>內部審核員角色與審核方法</button>
+      <button class="ls-btn" onclick="go('l4-2',this)"><span class="ls-dot"></span>內審計劃制定與現場審核技巧</button>
+      <button class="ls-btn" onclick="go('l4-3',this)"><span class="ls-dot"></span>不符合項（NCF）管理與糾正措施</button>
+      <button class="ls-btn" onclick="go('l4-4',this)"><span class="ls-dot"></span>外部認證審核（Stage 1 / Stage 2）</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch5')"><span class="ch-num">CH5</span><span>業務連續性管理（BCM）</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch5">
+      <button class="ls-btn" onclick="go('l5-1',this)"><span class="ls-dot"></span>業務影響分析（BIA）</button>
+      <button class="ls-btn" onclick="go('l5-2',this)"><span class="ls-dot"></span>業務連續性計劃（BCP）制定</button>
+      <button class="ls-btn" onclick="go('l5-3',this)"><span class="ls-dot"></span>災難恢復計劃（DRP）與演練</button>
+      <button class="ls-btn" onclick="go('l5-4',this)"><span class="ls-dot"></span>ISO 22301 與 BCM 認證路徑</button>
+    </div></div>
+  </div>
+  <div class="sb-f">
+    <div class="pr"><span>學習進度</span><span id="pct">0%</span></div>
+    <div class="pt"><div class="pf" id="pf" style="width:0%"></div></div>
+  </div>
+</aside>
+<main class="main">
+  <div class="lh">
+    <div class="lh-crumb" id="crumb">STAGE 14 &gt; CH1 &gt; <em>課程 1</em></div>
+    <h1 class="lh-title" id="ltitle">ISO 27001 歷史、版本與認證生態</h1>
+    <div class="lh-chips">
+      <span class="chip ac" id="chip1">體系概述</span>
+      <span class="chip" id="chip2">25 分鐘</span>
+    </div>
+  </div>
+  <div class="cw">
+
+<!-- ===== CH1 ===== -->
+<div class="cb on" id="l1-1">
+<h2>ISO 27001 歷史、版本與認證生態</h2>
+<p>ISO/IEC 27001 是全球最廣泛採用的信息安全管理體系（ISMS）國際標準，由國際標準化組織（ISO）與國際電工委員會（IEC）聯合發佈。它規定了建立、實施、保持和持續改進信息安全管理體系的要求，適用於任何規模和行業的組織。</p>
+<h3>標準版本演進</h3>
+<div class="tbl"><table class="t"><thead><tr><th>版本</th><th>發佈年份</th><th>主要特點</th></tr></thead><tbody>
+<tr><td><strong>BS 7799-2</strong></td><td>1998/2002</td><td>英國標準，ISO 27001 的前身；確立了 ISMS 核心概念</td></tr>
+<tr><td><strong>ISO/IEC 27001:2005</strong></td><td>2005</td><td>首個 ISO 版本；基於 BS 7799-2；包含 133 項附錄 A 控制措施；採用 PDCA 模型</td></tr>
+<tr><td><strong>ISO/IEC 27001:2013</strong></td><td>2013</td><td>重大改版；採用高階架構（HLS）與其他管理體系對齊；附錄 A 精簡為 114 項控制；廢除強制 PDCA</td></tr>
+<tr><td><strong>ISO/IEC 27001:2022</strong></td><td>2022</td><td>現行最新版本；附錄 A 重組為 4 個主題域，93 項控制（新增 11 項），11 項控制合併；引入「威脅情報」「雲服務安全」「數據洩露預防」等新控制</td></tr>
+</tbody></table></div>
+<div class="note warn"><div class="note-lbl">版本遷移期限</div><p>2022 版發佈後，原持有 2013 版認證的組織有 3 年過渡期（至 2025 年 10 月 31 日）完成向 2022 版的遷移。自 2024 年起，新申請認證應直接基於 2022 版進行。中國已將 GB/T 22080（等同採用 ISO 27001）更新至 2022 版對應版本。</p></div>
+<h3>ISO 27000 系列標準族</h3>
+<div class="tbl"><table class="t"><thead><tr><th>標準編號</th><th>標題</th><th>用途</th></tr></thead><tbody>
+<tr><td><strong>ISO 27001</strong></td><td>ISMS 要求</td><td>認證基礎，規定「必須做什麼」</td></tr>
+<tr><td><strong>ISO 27002</strong></td><td>信息安全控制實踐指南</td><td>27001 附錄 A 的詳細實施指南，規定「怎麼做」</td></tr>
+<tr><td><strong>ISO 27005</strong></td><td>信息安全風險管理</td><td>ISMS 風險評估和處置的方法論指引</td></tr>
+<tr><td><strong>ISO 27701</strong></td><td>隱私信息管理擴展</td><td>GDPR/個人信息保護的 ISMS 擴展認證</td></tr>
+<tr><td><strong>ISO 27017</strong></td><td>雲服務信息安全控制</td><td>雲服務提供商和用戶的額外控制措施</td></tr>
+<tr><td><strong>ISO 27018</strong></td><td>雲端個人數據保護</td><td>公有雲中個人識別信息（PII）保護</td></tr>
+</tbody></table></div>
+<p>ISO 27001 認證由獲得國際認可論壇（IAF）授權的認證機構（CB）負責發放，常見機構包括 BSI、SGS、TÜV、BV、DNV 等。企業通過認證後，每年接受一次監督審核，三年後進行再認證審核，構成持續運作的認證周期。</p>
+</div>
+
+<div class="cb" id="l1-2">
+<h2>ISMS 框架：PDCA 循環與十大條款</h2>
+<p>ISO 27001:2022 採用高階架構（HLS），包含 10 個主要條款。條款 1-3 為介紹性條款（範圍、引用標準、術語），條款 4-10 為體系要求核心，每個條款的「應當做什麼」通過一套 PDCA 持續改進循環來實現。</p>
+<div class="pdca">
+  <div class="pdca-cell">
+    <div class="pdca-label">PLAN — 規劃</div>
+    <div class="pdca-title">條款 4-6：建立 ISMS</div>
+    <div class="pdca-desc">第 4 條：組織環境（內外部議題、利害關係人）；第 5 條：領導力（管理層承諾、信息安全方針、角色職責）；第 6 條：規劃（風險評估、風險處置計劃、安全目標）</div>
+  </div>
+  <div class="pdca-cell">
+    <div class="pdca-label">DO — 實施</div>
+    <div class="pdca-title">條款 7-8：運行 ISMS</div>
+    <div class="pdca-desc">第 7 條：支援（資源配置、能力培養、意識提升、溝通、文件管理）；第 8 條：運行（實施風險評估計劃、執行控制措施、供應商管理）</div>
+  </div>
+  <div class="pdca-cell">
+    <div class="pdca-label">CHECK — 檢查</div>
+    <div class="pdca-title">條款 9：績效評估</div>
+    <div class="pdca-desc">第 9 條：績效評估（監測、測量、分析和評估；內部審核；管理審查）。這是確認 ISMS 是否按計劃有效運作的關鍵環節。</div>
+  </div>
+  <div class="pdca-cell">
+    <div class="pdca-label">ACT — 改進</div>
+    <div class="pdca-title">條款 10：持續改進</div>
+    <div class="pdca-desc">第 10 條：改進（不符合項與糾正措施；持續改進）。對審核發現的問題進行根本原因分析和系統性改善，驅動下一個 PDCA 循環。</div>
+  </div>
+</div>
+<h3>附錄 A：四大主題域控制措施（2022 版）</h3>
+<div class="kg">
+  <div class="kt"><div class="kt-n">A.5 組織控制（37 項）</div><div class="kt-d">信息安全方針、角色和職責、威脅情報（新增）、信息安全納入項目管理（新增）、供應商管理、信息安全事件管理、業務連續性等組織層面控制。</div></div>
+  <div class="kt"><div class="kt-n">A.6 人員控制（8 項）</div><div class="kt-d">背景調查、僱傭條款、信息安全意識/教育/培訓、紀律處分、終止/變更後職責、保密協議、遠程辦公、信息安全事件報告。</div></div>
+  <div class="kt"><div class="kt-n">A.7 物理控制（14 項）</div><div class="kt-d">物理安全邊界、物理訪問控制、辦公室和機房安全、監控、工作清桌清屏、設備安置和保護、設備維護和報廢、無人值守設備安全等。</div></div>
+  <div class="kt"><div class="kt-n">A.8 技術控制（34 項）</div><div class="kt-d">訪問控制、身份認證、特權管理、數據保護、日誌記錄、漏洞管理、配置管理、數據洩露預防（新增）、Web 過濾（新增）、安全編碼（新增）等。</div></div>
+</div>
+</div>
+
+<div class="cb" id="l1-3">
+<h2>組織環境分析：內外部議題與利害關係人</h2>
+<p>ISO 27001 條款 4 要求組織系統地分析自身的內外部環境，這是整個 ISMS 建設的出發點——只有了解組織所處的環境和各方期望，才能確定 ISMS 的適用範圍和管控重點。</p>
+<div class="tbl"><table class="t"><thead><tr><th>分析維度</th><th>常見議題示例</th><th>對 ISMS 的影響</th></tr></thead><tbody>
+<tr><td><strong>外部議題</strong></td><td>法規環境（《數據安全法》《個人信息保護法》GDPR）；行業監管要求（等保 2.0 三級）；地緣政治與供應鏈安全；競爭環境（行業安全事件趨勢）；技術演進（AI 威脅、雲遷移）</td><td>確定合規義務清單；確認客戶/監管方的安全要求；識別外部威脅</td></tr>
+<tr><td><strong>內部議題</strong></td><td>組織規模和結構（子公司、跨國運營）；信息技術架構成熟度；現有安全投入和人員能力；歷史安全事件記錄；企業文化對安全的重視程度</td><td>確定 ISMS 範圍和深度；識別內部風險；確定資源需求</td></tr>
+<tr><td><strong>利害關係人</strong></td><td>客戶和合作夥伴（要求供應商安全評估）；監管機構（等保測評機構、數據保護局）；股東/董事會（要求安全風險報告）；員工（安全培訓義務）；雲服務商（共擔責任模型）</td><td>確定需要滿足的安全要求和期望；識別合同義務；確定溝通需求</td></tr>
+</tbody></table></div>
+<div class="note law"><div class="note-lbl">ISMS 範圍界定</div><p>ISMS 範圍（Scope）是明確哪些資產、流程、人員、物理地點被納入管理體系的聲明。範圍可以是整個組織，也可以是特定業務單元（如「支付系統」「研發部門」）。範圍界定過窄會導致認證的可信度不足（如將高風險業務排除在外）；範圍過寬則增加建設成本。範圍聲明需要記錄為 ISMS 文件，審核時認證機構會重點核查範圍的合理性。</p></div>
+<div class="cblock"><div class="ctop"><span class="clang">SWOT 分析用於組織環境分析</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="hi">信息安全 SWOT 分析模板（用於 ISO 27001 條款 4.1）</span>
+
+優勢（Strengths — 內部正面因素）
+  - 已通過等保 2.0 三級認證，具備基礎安全管理框架
+  - 安全團隊規模較大（8 人），技術能力覆蓋攻防兩端
+  - 核心業務系統採用雲原生架構，安全彈性較強
+
+劣勢（Weaknesses — 內部負面因素）
+  - 安全意識培訓尚未形成系統化體系，員工參與率低
+  - 供應商安全管理缺乏標準化評估流程
+  - 安全運營自動化程度不足，大量依賴人工處理告警
+
+機會（Opportunities — 外部正面因素）
+  - 客戶合同要求提供 ISO 27001 認證，推動業務拓展
+  - ISO 27001 2022 版引入現代控制（如威脅情報），符合當前威脅態勢
+  - 公司正在進行雲遷移，適合同步建立雲安全控制框架
+
+威脅（Threats — 外部負面因素）
+  - 勒索軟件攻擊頻率上升，同行業已有多起重大事件
+  - 監管要求趨嚴（《數據安全法》分級保護要求）
+  - 關鍵人員離職風險（安全人才市場競爭激烈）</pre>
+</div>
+</div>
+
+<div class="cb" id="l1-4">
+<h2>ISMS 適用性宣告（SoA）編制</h2>
+<p>適用性宣告（Statement of Applicability，SoA）是 ISO 27001 最重要的文件之一，也是認證審核的核心檢查對象。SoA 聲明了組織選用和排除附錄 A 中各項控制措施的決策，並提供充分理由。</p>
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>列舉所有附錄 A 控制措施</strong> — SoA 必須涵蓋 ISO 27001:2022 附錄 A 中全部 93 項控制措施（2013 版為 114 項）。每項控制均需明確說明選用或排除。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>選用理由</strong> — 對每項已納入的控制，說明為何選用（如法律合規要求、風險評估結果、合同義務、最佳實踐等）。不能僅填寫「適用」而無實質說明。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>排除理由</strong> — 對排除的控制，必須提供充分、可接受的理由（如：「我司無開發活動，A.8.28 安全編碼不適用」）。排除不能影響信息安全目標的實現。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>實施狀態</strong> — 說明控制是否已實施（已實施 / 部分實施 / 計劃中）。認證審核時，審核員會抽樣核查「已實施」的控制是否真正有效運作。</div></div>
+  <div class="il-item"><span class="il-num">05</span><div class="il-txt"><strong>風險評估連結</strong> — SoA 中的控制選用決策應來源於風險評估結果。審核員會核查從「風險登錄冊」到「風險處置計劃」再到「SoA 控制選用」的邏輯一致性。</div></div>
+</div>
+<div class="cblock"><div class="ctop"><span class="clang">SoA 表格示例（節選）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="hi">控制ID  | 控制名稱           | 選用/排除 | 理由                          | 實施狀態</span>
+A.5.1   | 信息安全方針       | 選用      | 法規要求；管理層承諾基礎      | 已實施
+A.5.14  | 信息傳輸           | 選用      | 業務需要與外部合作夥伴傳輸數據 | 已實施
+A.5.23  | 雲服務信息安全     | 選用      | 公司核心業務使用 AWS/阿里雲   | 部分實施
+A.5.29  | 業務連續性信息安全 | 選用      | 關鍵業務系統 RTO &lt; 4小時     | 計劃中
+A.8.28  | 安全編碼           | 排除      | 本組織不開展軟件開發活動      | 不適用
+A.8.30  | 外包開發           | 排除      | 本組織不外包軟件開發          | 不適用
+A.6.7   | 遠程辦公           | 選用      | 公司有遠程辦公政策，覆蓋 60% 員工 | 已實施</pre>
+</div>
+<div class="quiz"><div class="q-lbl">小測驗</div>
+<div class="q-q">ISO 27001:2022 附錄 A 共有多少項控制措施？相比 2013 版有哪些主要變化？</div>
+<div class="q-opts">
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>133 項；新增了雲服務相關控制，其他基本不變</div>
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">B</span>114 項；沿用 2013 版架構，僅更新了部分控制描述</div>
+  <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">C</span>93 項（2013 版為 114 項）；重組為 4 個主題域；新增 11 項控制（含威脅情報、數據洩露預防等）；合併了 11 項控制</div>
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>100 項；主要增加了 AI 安全和零信任相關控制</div>
+</div>
+<div class="q-exp">正確！ISO 27001:2022 附錄 A 共 <strong>93 項</strong>控制措施，比 2013 版的 114 項少 21 項，但這並非因為刪除了控制，而是通過合併（11 對控制合併為更精簡的形式）和重組實現的。控制域從 14 個減少為 4 個主題域（組織/人員/物理/技術）。新增的 11 項控制包括：A.5.7 威脅情報、A.5.23 雲服務信息安全、A.8.9 配置管理、A.8.10 信息刪除、A.8.11 數據遮碼、A.8.12 數據洩露預防、A.8.16 監控活動、A.8.23 Web 過濾、A.8.28 安全編碼、A.5.30 業務連續性信息安全準備、A.6.8 信息安全事件報告。</div>
+</div>
+</div>
+
+<!-- ===== CH2 ===== -->
+<div class="cb" id="l2-1">
+<h2>ISO 27001 風險評估方法論</h2>
+<p>ISO 27001 條款 6.1.2 要求組織建立並應用信息安全風險評估過程。與 Stage 11 所學的 GB/T 20984 方法不同，ISO 27001 標準本身不規定具體的評估方法，允許組織自行選擇，但要求方法具有一致性、有效性和可比較性。</p>
+<h3>常見風險評估方法對比</h3>
+<div class="tbl"><table class="t"><thead><tr><th>方法</th><th>特點</th><th>適用場景</th></tr></thead><tbody>
+<tr><td><strong>資產基礎法</strong>（Asset-Based）</td><td>從資產識別出發，評估每項資產面臨的威脅和脆弱性，計算風險值；與 GB/T 20984 方法一致</td><td>組織有明確資產清單；希望建立詳細的資產風險登錄冊；適合技術導向的安全團隊</td></tr>
+<tr><td><strong>場景基礎法</strong>（Scenario-Based）</td><td>識別對業務目標最具威脅的攻擊場景（如勒索軟件、數據洩露），評估每個場景的可能性和影響</td><td>業務風險視角更直觀；適合向管理層匯報；STRIDE 威脅建模可作為輸入</td></tr>
+<tr><td><strong>混合法</strong></td><td>結合資產法和場景法；高價值資產進行詳細評估，整體層面使用場景法識別頂層風險</td><td>最常見的實際做法；平衡深度和效率</td></tr>
+</tbody></table></div>
+<div class="note tip"><div class="note-lbl">ISO 27001 風險評估的四個關鍵輸出</div><p>無論使用何種方法，ISO 27001 要求風險評估過程產生以下輸出：（1）<strong>風險登錄冊</strong>（Risk Register）——所有已識別風險的清單，含可能性、影響和風險等級；（2）<strong>風險所有者</strong>——每項風險必須明確分配到負責管理的個人；（3）<strong>與接受準則的比較</strong>——哪些風險超過了可接受水平，需要處置；（4）<strong>可比較、可重複的方法文件</strong>——確保每次評估結果具有可比性。</p></div>
+</div>
+
+<div class="cb" id="l2-2">
+<h2>資產識別與風險登錄冊建立</h2>
+<p>完整的資產識別是風險評估的前提。ISO 27001 附錄 A.5.9 要求建立和維護信息及其他相關資產的清單，包括其所有者。資產清單不僅是技術資產列表，更是風險評估的工作底稿。</p>
+<div class="cblock"><div class="ctop"><span class="clang">ISO 27001 資產分類框架與風險登錄冊模板</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="hi">一、資產分類框架（ISO 27002:2022 指引）</span>
+
+1. 信息資產
+   - 數據庫（客戶數據、財務數據、研發資料）
+   - 紙質文件（合同、設計圖紙）
+   - 知識產權和源代碼
+
+2. 軟件資產
+   - 業務應用系統
+   - 操作系統和中間件
+   - 開發工具和許可軟件
+
+3. 物理/硬件資產
+   - 伺服器（本地/雲）
+   - 網絡設備
+   - 移動設備和端點
+
+4. 服務
+   - 雲服務（IaaS/PaaS/SaaS）
+   - 外部供應商服務（支付、物流）
+   - 公用設施（電力、互聯網接入）
+
+5. 人員
+   - 員工（特別是關鍵崗位人員）
+   - 外包人員和供應商
+
+6. 無形資產
+   - 組織聲譽
+   - 客戶信任
+
+<span class="hi">二、風險登錄冊欄位（Risk Register）</span>
+
+風險ID  : RSK-2024-001
+風險標題: 外部攻擊者入侵客戶數據庫導致數據洩露
+資產    : 客戶數據庫（DB-001）
+威脅    : 外部攻擊者通過 SQL 注入漏洞未授權訪問
+脆弱性  : Web 應用存在未修補的 SQL 注入漏洞
+風險所有者: CTO（李XX）
+可能性評級: 4/5（近期行業有類似事件）
+影響評級  : 5/5（含百萬級個人信息，《個保法》高額罰款）
+風險等級  : 高（4×5=20）
+現有控制  : WAF 攔截、資料庫審計
+殘餘可能性: 3/5
+殘餘影響  : 5/5
+殘餘風險  : 中高（3×5=15）
+處置決策  : 降低風險（代碼審計+修復）
+目標完成日: 2024-03-31
+狀態    : 整改中</pre>
+</div>
+</div>
+
+<div class="cb" id="l2-3">
+<h2>風險處置計劃（RTP）制定</h2>
+<p>風險評估完成後，必須對超過接受準則的風險制定正式的風險處置計劃（Risk Treatment Plan，RTP）。RTP 是 ISO 27001 條款 6.1.3 的強制要求，也是管理審查的重要輸入。</p>
+<div class="tbl"><table class="t"><thead><tr><th>處置選項</th><th>ISO 27001 術語</th><th>適用條件</th><th>示例</th></tr></thead><tbody>
+<tr><td><strong>降低風險</strong></td><td>Modify（修改）</td><td>風險超過接受水平且可通過技術/管理控制降低</td><td>修補漏洞、部署 MFA、員工培訓、訪問控制加強</td></tr>
+<tr><td><strong>規避風險</strong></td><td>Avoid（避免）</td><td>風險太高且業務活動本身不值得承擔</td><td>停止高風險業務線；不處理某類敏感數據</td></tr>
+<tr><td><strong>轉移風險</strong></td><td>Share（共享）</td><td>風險的財務影響可通過外部機制分散</td><td>購買網絡安全保險；合同明確第三方責任</td></tr>
+<tr><td><strong>接受風險</strong></td><td>Retain（保留）</td><td>風險在可接受水平內，或處置成本超過收益</td><td>低評級風險正式記錄並由授權人簽字接受</td></tr>
+</tbody></table></div>
+<div class="cblock"><div class="ctop"><span class="clang">RTP 文件模板（單項風險處置計劃）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="hi">風險處置計劃（Risk Treatment Plan）</span>
+
+風險參考：RSK-2024-001
+風險描述：外部攻擊者通過 SQL 注入入侵客戶數據庫
+初始風險等級：高（可能性 4/5 × 影響 5/5 = 20）
+處置策略：降低風險（Modify）
+
+目標控制措施（來自 ISO 27001:2022 附錄 A）：
+  A.8.8  技術脆弱性管理 — 修補 Web 應用 SQL 注入漏洞
+  A.8.20 網絡安全 — WAF 規則更新覆蓋注入類攻擊
+  A.8.25 安全開發生命週期 — 開發流程引入 SAST 靜態掃描
+
+具體行動計劃：
+  行動 1: 委託第三方對核心 Web 應用進行代碼審計
+          負責人：研發總監（王XX）
+          截止：2024-02-29
+          驗收標準：審計報告無高危 SQL 注入漏洞
+
+  行動 2: 按審計結果完成漏洞修復並複掃驗證
+          負責人：研發總監（王XX）
+          截止：2024-03-31
+          驗收標準：複掃報告無遺留高危項
+
+  行動 3: 在 CI/CD 流水線集成 Semgrep SAST 掃描
+          負責人：DevOps 工程師（張XX）
+          截止：2024-04-30
+          驗收標準：每次代碼提交自動掃描，高危發現阻斷合併
+
+預期殘餘風險：中（可能性 2/5 × 影響 5/5 = 10）
+風險所有者確認簽字：____________  日期：________
+CISO 審批簽字：____________  日期：________</pre>
+</div>
+</div>
+
+<div class="cb" id="l2-4">
+<h2>殘餘風險接受與管理審查</h2>
+<p>風險處置計劃執行後仍會存在殘餘風險（Residual Risk）。ISO 27001 要求組織最高管理層對殘餘風險進行審查和正式批准，這個過程體現了「風險由管理層負責」的核心治理原則。</p>
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>風險接受標準的建立</strong> — 在風險評估開始前，組織必須先建立風險接受準則（如：「低於 9 分的風險可接受，9-15 分需要管理層審批接受，15 分以上必須處置」）。這一準則需由管理層批准並文件化。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>管理審查（Management Review）</strong> — ISO 27001 條款 9.3 要求最高管理層定期審查 ISMS。管理審查輸入包括：審核結果、風險評估和處置狀態、安全事件統計、安全目標達成情況、前次管理審查的跟進情況。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>管理審查輸出文件</strong> — 管理審查必須輸出改進決策，包括：ISMS 改進需求、資源需求（人員/預算）、安全控制措施的變更、安全目標的修訂。審查記錄是認證審核的必查文件。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>殘餘風險接受聲明</strong> — 對每項選擇「接受（Retain）」策略的風險，必須有被授權人員（通常為業務負責人或 CISO）簽字的正式接受聲明，記錄接受理由、接受有效期和下次評估時間。</div></div>
+</div>
+<div class="quiz"><div class="q-lbl">小測驗</div>
+<div class="q-q">ISO 27001 要求風險評估在何時進行？以下哪項描述最符合標準要求？</div>
+<div class="q-opts">
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>只在申請認證前進行一次即可</div>
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">B</span>每年固定進行一次，不得更改頻率</div>
+  <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">C</span>按計劃定期進行，以及在重大變更或發生安全事件時觸發臨時評估；具體頻率由組織根據業務需求自行確定</div>
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>只有在重大安全事件後才需要重新評估</div>
+</div>
+<div class="q-exp">正確！ISO 27001 條款 6.1.2 要求「按計劃的時間間隔或當重大變更被提議或發生時執行信息安全風險評估」。標準並未規定固定頻率，而是讓組織根據自身業務環境、風險態勢和資源情況自行決定（通常每年一次）。觸發臨時風險評估的常見情況包括：重大系統上線或架構變更、業務擴展至新地區或新業務領域、重大安全事件發生後、法規要求發生重大變化等。</div>
+</div>
+
+<!-- ===== CH3 ===== -->
+<div class="cb" id="l3-1">
+<h2>信息安全委員會架構與職責</h2>
+<p>ISO 27001 條款 5.1 要求最高管理層展示對 ISMS 的領導力和承諾。實際落地時，組織通常建立信息安全委員會（Information Security Committee）作為 ISMS 的治理機構，承擔決策、監督和協調職責。</p>
+<div class="tbl"><table class="t"><thead><tr><th>層級</th><th>角色</th><th>主要職責</th><th>參與頻率</th></tr></thead><tbody>
+<tr><td><strong>決策層</strong></td><td>最高管理層（CEO/CTO/CFO）組成的安全委員會</td><td>批准信息安全方針；批准安全預算；審批高風險決策；接受管理審查彙報</td><td>每季度一次管理審查</td></tr>
+<tr><td><strong>管理層</strong></td><td>首席信息安全官（CISO）或信息安全負責人</td><td>主持日常安全工作；制定安全目標和指標；監督風險處置執行；對接認證審核</td><td>持續</td></tr>
+<tr><td><strong>執行層</strong></td><td>信息安全團隊（安全工程師、安全運維）</td><td>實施技術控制措施；執行漏洞掃描和滲透測試；監控安全告警；撰寫技術文件</td><td>持續</td></tr>
+<tr><td><strong>協作層</strong></td><td>各業務部門安全聯絡人（Security Champion）</td><td>協助業務系統風險識別；推動部門安全合規；傳達安全要求至業務團隊</td><td>每月一次安全例會</td></tr>
+</tbody></table></div>
+<div class="note tip"><div class="note-lbl">RACI 矩陣定義安全職責</div><p>建議用 RACI 矩陣明確每項 ISMS 活動的職責分配：<strong>R</strong>esponsible（執行）、<strong>A</strong>ccountable（負責）、<strong>C</strong>onsulted（諮詢）、<strong>I</strong>nformed（知會）。例如風險評估：CISO 負責（A）、安全工程師執行（R）、業務部門諮詢（C）、最高管理層知會（I）。RACI 矩陣有助於避免職責重疊或遺漏，是認證審核中體現「角色和職責明確」要求的有效文件。</p></div>
+</div>
+
+<div class="cb" id="l3-2">
+<h2>ISMS 制度體系建設：四層文件架構</h2>
+<p>完善的文件體系是 ISO 27001 條款 7.5 的核心要求。業界普遍採用「四層文件架構」構建 ISMS 制度體系，形成從戰略到操作的完整文件金字塔。</p>
+<div class="atkflow">
+  <div class="af-step s1"><span class="af-n">第一層</span><div><div class="af-t">信息安全方針（Policy）</div><div class="af-d">最高層級文件，通常 1-3 頁，由最高管理層簽署發佈。聲明組織對信息安全的承諾、整體安全目標和原則、ISMS 的範圍。示例：《信息安全管理方針》——「公司承諾保護信息資產的機密性、完整性和可用性，並遵守所有適用的法規要求。」</div></div></div>
+  <div class="af-step s2"><span class="af-n">第二層</span><div><div class="af-t">安全策略（Policy 細分）</div><div class="af-d">針對各控制領域的詳細策略文件，每份 3-10 頁。示例：《訪問控制策略》《密碼管理策略》《遠程辦公安全策略》《供應商安全管理策略》《事件響應策略》《業務連續性策略》《BYOD 策略》等。每份策略文件需包含：目的、範圍、定義、策略要求、職責、違規後果。</div></div></div>
+  <div class="af-step s3"><span class="af-n">第三層</span><div><div class="af-t">程序/流程（Procedure）</div><div class="af-d">說明「如何執行」的操作性文件，規定具體步驟、流程和時間節點。示例：《用戶帳號申請和審批流程》《漏洞管理處置程序》《安全事件響應程序》《內部審核程序》《供應商安全評估程序》《人員入離職安全程序》等。通常包含流程圖和步驟說明。</div></div></div>
+  <div class="af-step s4"><span class="af-n">第四層</span><div><div class="af-t">作業指導書 / 記錄（Work Instruction / Record）</div><div class="af-d">最詳細層級：作業指導書提供具體技術操作步驟（如「伺服器安全基線配置手冊」）；記錄是 ISMS 運作的証據文件（如風險登錄冊、審核記錄、培訓出席記錄、管理審查會議記錄）。記錄是審核員最常要求查閱的文件，必須受控保存，保存期限通常 3-5 年。</div></div></div>
+</div>
+</div>
+
+<div class="cb" id="l3-3">
+<h2>核心安全策略與程序文件編制</h2>
+<p>在 ISMS 建設初期，重點是先完成覆蓋 ISO 27001 關鍵控制領域的核心文件。以下是最常被認證審核員檢查的重要文件及其關鍵要素。</p>
+<div class="cblock"><div class="ctop"><span class="clang">訪問控制策略 — 核心要素（A.5.15-A.8.3）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="hi">《訪問控制策略》必須覆蓋的要點：</span>
+
+1. 訪問控制原則
+   - 最小特權原則（用戶僅獲得完成工作所需的最低權限）
+   - 職責分離（關鍵職責分配給不同人員，避免一人控制全流程）
+   - 需要知道原則（信息只提供給有業務需要的人）
+
+2. 用戶訪問生命周期
+   - 申請：業務部門主管提交申請，安全部門審批
+   - 授予：IT 運維依據審批結果配置，72 小時內完成
+   - 審核：每季度對特權帳號進行訪問權限複核
+   - 撤銷：員工離職當天撤銷所有訪問，72 小時內完成
+
+3. 特權訪問管理
+   - 特權帳號（root/admin）數量最小化，生產系統每類不超過 3 人
+   - 所有特權操作通過堡壘機進行，保留完整審計日誌
+   - 特權帳號啟用多因素認證（MFA）
+
+4. 密碼要求（對接《密碼管理策略》）
+   - 最小長度 12 字符，包含大小寫字母+數字+特殊字符
+   - 有效期 90 天（特權帳號 60 天）
+   - 禁止重複使用最近 10 個密碼
+
+5. 遠程訪問安全
+   - 遠程訪問僅允許通過企業 VPN，啟用 MFA
+   - VPN 使用記錄保留 6 個月</pre>
+</div>
+<div class="cblock"><div class="ctop"><span class="clang">安全事件響應程序 — 核心流程（A.5.24-A.5.27）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="hi">《安全事件響應程序》必須定義的流程：</span>
+
+事件分級定義：
+  P1-嚴重：核心業務中斷 / 大規模數據洩露 / 勒索軟件
+    → 1 小時內通知 CISO + CEO，立即啟動應急響應
+  P2-高：單一系統入侵 / 數百條數據洩露
+    → 4 小時內通知 CISO，成立響應小組
+  P3-中：可疑活動待確認 / 小規模配置錯誤
+    → 24 小時內記錄並分配負責人
+  P4-低：安全政策輕微違規 / 日常安全告警
+    → 工單系統記錄，正常工作流程處理
+
+響應流程（五步）：
+  1. 識別（Identification）
+     - 安全監控系統告警或人員報告
+     - 初步確認是否為真實安全事件
+     - 填寫事件初始記錄
+
+  2. 遏制（Containment）
+     - 隔離受影響系統（斷網/下線）
+     - 保留取證證據（不要直接關機，先取記憶體轉儲）
+     - 防止事件擴散至其他系統
+
+  3. 根除（Eradication）
+     - 識別根本原因（惡意程式、脆弱性、內鬼）
+     - 清除惡意程式/後門
+     - 修補漏洞，重置受影響帳號憑證
+
+  4. 恢復（Recovery）
+     - 從可信備份恢復系統
+     - 驗證恢復後系統完整性
+     - 監控恢復後系統確認無再次入侵跡象
+     - 逐步恢復業務服務
+
+  5. 事後分析（Lessons Learned）
+     - 5 個工作日內完成事後分析報告
+     - 識別並追蹤改進行動
+     - 更新風險登錄冊，必要時觸發風險評估</pre>
+</div>
+</div>
+
+<div class="cb" id="l3-4">
+<h2>員工安全意識培訓體系建立</h2>
+<p>ISO 27001 條款 7.2 和 7.3 分別要求組織確保相關人員具備必要的信息安全能力，並使所有人員意識到信息安全方針和自身的貢獻。統計顯示，超過 80% 的安全事件涉及人為因素——員工安全意識是最難被技術工具替代的防線。</p>
+<div class="tbl"><table class="t"><thead><tr><th>培訓層級</th><th>目標人群</th><th>培訓內容</th><th>頻率</th></tr></thead><tbody>
+<tr><td><strong>全員基礎培訓</strong></td><td>所有員工（含新入職）</td><td>信息安全方針概述；密碼安全和帳號保護；釣魚郵件識別（含模擬演練）；清桌清屏規範；工作設備使用規範；安全事件報告流程</td><td>入職必修；每年複訓</td></tr>
+<tr><td><strong>崗位專項培訓</strong></td><td>IT 運維、開發人員</td><td>安全配置基線；安全開發規範（OWASP）；代碼安全審計；特權帳號管理；雲服務安全配置</td><td>半年一次</td></tr>
+<tr><td><strong>管理層培訓</strong></td><td>部門主管、業務負責人</td><td>信息安全治理責任；風險決策與接受；信息安全投資決策；第三方供應商安全管理</td><td>年度管理層安全簡報</td></tr>
+<tr><td><strong>ISMS 專項培訓</strong></td><td>安全委員會成員、內審員</td><td>ISO 27001 條款深度解讀；風險評估實操；內部審核技巧；不符合項管理</td><td>認證前集中培訓；年度更新</td></tr>
+</tbody></table></div>
+<div class="note sec"><div class="note-lbl">釣魚模擬演練最佳實踐</div><p>釣魚模擬（Phishing Simulation）是最有效的安全意識培訓工具之一。關鍵要點：（1）定期（如每季度）向員工發送模擬釣魚郵件，不提前通知；（2）點擊的員工立即跳轉到安全教育頁面，而非懲罰；（3）統計點擊率作為安全意識指標，目標是逐年降低；（4）使用真實的攻擊場景（如冒充 HR 發工資附件、冒充 CEO 緊急轉帳請求）。工具推薦：KnowBe4、GoPhish（開源）、Microsoft Attack Simulator。記錄培訓完成率和釣魚點擊率作為 ISMS 績效指標的一部分。</p></div>
+</div>
+
+<!-- ===== CH4 ===== -->
+<div class="cb" id="l4-1">
+<h2>內部審核員角色與審核方法</h2>
+<p>ISO 27001 條款 9.2 要求組織按計劃的時間間隔實施內部審核，以判斷 ISMS 是否符合標準要求並得到有效實施和保持。內部審核員（Internal Auditor）是這一過程的執行者。</p>
+<div class="kg">
+  <div class="kt"><div class="kt-n">內審員資格要求</div><div class="kt-d">具備 ISO 27001 標準知識（通常完成 Foundation 或 Lead Auditor 培訓課程）；熟悉組織業務和 IT 環境；保持客觀性和獨立性（不審核自己負責的領域）；具備文件分析和面談技巧；能夠識別不符合項並書寫清晰的發現報告。</div></div>
+  <div class="kt"><div class="kt-n">審核客觀性保障</div><div class="kt-d">內審員不得審核自己參與建設的控制措施（利益衝突）。常見解決方式：跨部門輪換審核；委託其他業務線的資深員工擔任審核員；聘請外部顧問作為內審員（費用合理且更客觀）。審核發現不受被審核部門主管干預。</div></div>
+</div>
+<h3>三種主要審核技術</h3>
+<div class="ilist">
+  <div class="il-item"><span class="il-num">面談</span><div class="il-txt"><strong>人員訪談</strong> — 與相關人員進行有結構的訪談，確認其是否了解並執行安全控制要求。示例問題：「請描述您處理客戶數據的日常操作」「如果您發現可疑郵件，您會怎麼做？」「您上次安全培訓是什麼時候？」訪談不僅收集信息，也是驗證培訓有效性的機會。</div></div>
+  <div class="il-item"><span class="il-num">審閱</span><div class="il-txt"><strong>文件審閱</strong> — 核查 ISMS 文件的完整性、現時性和符合性。包括：安全策略和程序文件（是否符合 ISO 27001 要求）、記錄（是否有實際活動的証據）、外部文件（合同、法規清單）。關鍵看文件是否「活的」——版本是否更新，是否被員工實際使用。</div></div>
+  <div class="il-item"><span class="il-num">觀察</span><div class="il-txt"><strong>現場觀察</strong> — 在現場直接觀察安全控制措施的實際執行情況。示例：觀察員工離開工位時是否鎖屏（清桌清屏）；檢查機房門禁記錄；觀察系統操作是否通過堡壘機；核查備份是否按計劃執行（看備份日誌）。現場觀察的發現往往比文件審閱更能反映真實情況。</div></div>
+</div>
+</div>
+
+<div class="cb" id="l4-2">
+<h2>內審計劃制定與現場審核技巧</h2>
+<p>內部審核需要系統規劃，確保在審核周期內（通常 12 個月）覆蓋 ISMS 全部範圍，同時平衡資源投入和審核深度。</p>
+<div class="cblock"><div class="ctop"><span class="clang">年度內審計劃示例（12 個月覆蓋所有控制域）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="hi">年度信息安全內部審核計劃 — 2024</span>
+
+審核目標：驗證 ISMS 符合 ISO 27001:2022 要求並有效運作
+審核週期：2024 年 1 月 - 2024 年 12 月
+審核負責人：信息安全部（CISO）
+外部認證審核預計時間：2024 年 11 月（留出改進空間）
+
+┌─────────┬──────────────────────────┬───────────────────────┬─────────┐
+│ 審核期次  │ 審核範圍（ISO 27001 條款）  │ 重點領域               │  日期   │
+├─────────┼──────────────────────────┼───────────────────────┼─────────┤
+│ Q1 審核  │ 條款 4-6（環境、領導、規劃） │ 風險評估完整性、SoA 更新 │ 3 月   │
+│ Q2 審核  │ 附錄 A - 組織和人員控制     │ 供應商管理、員工培訓     │ 6 月   │
+│ Q3 審核  │ 附錄 A - 技術控制（A.8）    │ 漏洞管理、訪問控制      │ 9 月   │
+│ Q4 審核  │ 條款 7-10 + 物理控制        │ 事件響應、業務連續性     │ 11 月  │
+└─────────┴──────────────────────────┴───────────────────────┴─────────┘
+
+每次審核產出：
+  - 審核計劃（提前 2 週發送至被審核部門）
+  - 審核清單（Checklist）
+  - 審核報告（含不符合項和觀察項清單）
+  - 不符合項糾正措施追蹤（提交 CISO 和管理層）
+
+<span class="hi">審核前準備要點：</span>
+1. 收集上次審核的不符合項，確認是否已閉環
+2. 收集被審核領域的 ISMS 記錄（如訪問日誌、培訓記錄、掃描報告）
+3. 準備針對性的審核清單（基於 ISO 27001 條款要求和組織控制程序）
+4. 提前安排面談對象（含部門主管和操作人員）
+5. 若為跨部門聯合審核，協調審核員日程</pre>
+</div>
+</div>
+
+<div class="cb" id="l4-3">
+<h2>不符合項（NCF）管理與糾正措施</h2>
+<p>不符合項（Nonconformity，NCF）是審核中發現的實際狀況與 ISMS 要求不符的情況。有效的不符合項管理是推動 ISMS 持續改進的核心機制，也是 ISO 27001 條款 10.1 的直接要求。</p>
+<div class="tbl"><table class="t"><thead><tr><th>發現類型</th><th>定義</th><th>處置要求</th><th>示例</th></tr></thead><tbody>
+<tr><td><strong>重大不符合項</strong>（Major NCF）</td><td>系統性缺失或重要控制措施完全未實施；可能導致 ISMS 目標無法實現</td><td>必須在認證審核前解決（通常 3 個月內），並提交証據；不解決則無法獲得認證</td><td>未建立任何風險評估程序；訪問控制策略完全缺失；從未進行內部審核</td></tr>
+<tr><td><strong>輕微不符合項</strong>（Minor NCF）</td><td>單一或偶發的不符合；對 ISMS 整體有效性影響有限</td><td>制定糾正措施計劃，在下次監督審核前閉環</td><td>部分員工未完成年度安全培訓；個別系統補丁更新延遲；某次備份失敗未及時記錄</td></tr>
+<tr><td><strong>觀察項</strong>（Observation）</td><td>目前符合要求，但存在潛在改進空間或趨勢性風險；不強制糾正</td><td>組織自行評估是否採取行動；建議納入持續改進計劃</td><td>密碼策略符合最低要求但低於行業最佳實踐；供應商評估流程文件化程度有待提升</td></tr>
+</tbody></table></div>
+<div class="cblock"><div class="ctop"><span class="clang">不符合項糾正措施報告（CAR）模板</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="hi">糾正措施報告（Corrective Action Report）</span>
+
+NCF 編號：NCF-2024-003
+發現日期：2024-06-15
+審核員：李XX
+類型：輕微不符合項
+
+不符合描述：
+  抽查 IT 部門 15 名員工的安全培訓記錄，其中 4 名員工（26.7%）
+  未完成 2024 年度信息安全基礎培訓，截止日期已過期 60 天。
+  違反《員工信息安全管理程序》第 3.2 條要求（所有員工每年
+  完成不少於 4 學時的信息安全培訓）。
+
+不符合條款：ISO 27001:2022 條款 7.3；A.6.3
+
+根本原因分析（5 Why）：
+  Why 1: 4 名員工未完成培訓
+  Why 2: 培訓平台的逾期提醒郵件僅發送一次，未升級提醒
+  Why 3: 培訓追蹤流程未包含逾期升級機制
+  Why 4: 培訓管理規程建立時未考慮逾期場景
+  根本原因：培訓追蹤程序設計不完善，缺少逾期升級通知機制
+
+糾正措施：
+  即時措施（1 週內）：通知 4 名逾期員工立即完成培訓
+  根本改正（1 個月內）：在培訓管理系統配置三級提醒機制
+    Level 1：截止日期前 2 週提醒
+    Level 2：截止日期前 3 天提醒
+    Level 3：逾期後自動通知部門主管
+
+驗收標準：培訓完成率 100%；三級提醒機制配置並測試完成
+責任人：IT 部培訓管理員（王XX）
+計劃完成日期：2024-07-31
+驗收人：CISO（張XX）
+狀態：進行中</pre>
+</div>
+</div>
+
+<div class="cb" id="l4-4">
+<h2>外部認證審核（Stage 1 / Stage 2）</h2>
+<p>獲得 ISO 27001 認證需要通過認證機構（Certification Body，CB）的正式外部審核。審核分兩個階段進行，完整周期通常需要 2-4 個月。</p>
+<div class="timeline">
+  <div class="tl-item">
+    <div class="tl-phase"><span class="tl-ph-n">STAGE 1</span><div class="tl-ph-t">文件審核</div><div class="tl-ph-d">1-2 天，通常遠程</div></div>
+    <div class="tl-body"><p>審核員對 ISMS 關鍵文件進行桌面審查，確認文件體系基本符合 ISO 27001 要求，組織是否準備好接受 Stage 2 現場審核。必審文件：信息安全方針、ISMS 範圍聲明、風險評估方法論和結果、風險處置計劃、適用性宣告（SoA）、內部審核結果、管理審查記錄。Stage 1 結束後審核員出具報告，指出 ISMS 文件中的不足之處，並確認是否同意進入 Stage 2。</p></div>
+  </div>
+  <div class="tl-item">
+    <div class="tl-phase"><span class="tl-ph-n">STAGE 2</span><div class="tl-ph-t">現場審核</div><div class="tl-ph-d">2-5 天，依規模定</div></div>
+    <div class="tl-body"><p>審核員現場驗證 ISMS 的實際實施效果——文件說的和實際做的是否一致。主要活動：高管訪談（確認領導力承諾）；部門訪談和現場觀察；技術控制抽樣核查（訪問控制、日誌、備份）；記錄核查（培訓記錄、事件記錄、供應商評估）。Stage 2 結束後審核員出具審核報告，列出所有不符合項（Major/Minor）和觀察項。</p></div>
+  </div>
+  <div class="tl-item">
+    <div class="tl-phase"><span class="tl-ph-n">決定</span><div class="tl-ph-t">認證決定</div><div class="tl-ph-d">審核後 2-4 週</div></div>
+    <div class="tl-body"><p>審核員提交報告至認證機構技術審核委員會，審核委員會作出認證決定。若存在重大不符合項，組織需在指定期限內完成整改並提交証據，審核委員會確認後方可頒發認證。若僅有輕微不符合項，通常可在下次監督審核前閉環。認證證書有效期 3 年，每年接受監督審核（Surveillance Audit）。</p></div>
+  </div>
+  <div class="tl-item">
+    <div class="tl-phase"><span class="tl-ph-n">維持</span><div class="tl-ph-t">年度監督審核</div><div class="tl-ph-d">每年 1-2 天</div></div>
+    <div class="tl-body"><p>認證後每年接受監督審核，驗證 ISMS 持續有效運作。監督審核會抽查上次審核中發現問題的改進情況、變更控制（新系統/新業務是否納入 ISMS）、持續改進活動。三年後進行再認證審核（相當於重新 Stage 2），開始新的三年認證週期。</p></div>
+  </div>
+</div>
+<div class="quiz"><div class="q-lbl">小測驗</div>
+<div class="q-q">ISO 27001 認證 Stage 1 審核主要核查什麼？以下哪個描述最準確？</div>
+<div class="q-opts">
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>現場核查所有安全技術控制措施是否正確實施</div>
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">B</span>對員工進行安全知識考試，確認培訓效果</div>
+  <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">C</span>文件審核為主：確認 ISMS 關鍵文件（方針/SoA/風險評估/RTP/內審記錄/管理審查）是否完整、符合標準要求，判斷是否具備進入 Stage 2 現場審核的條件</div>
+  <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>進行滲透測試，評估組織實際安全防護能力</div>
+</div>
+<div class="q-exp">正確！Stage 1（文件審核）的核心目的是確認 ISMS 的「設計符合性」——文件體系是否滿足 ISO 27001 的要求，組織是否真正理解並規劃了正確的 ISMS 框架。Stage 2（現場審核）才驗證「實施有效性」——文件描述的控制措施是否真正在組織中執行。常見的 Stage 1 失誤：SoA 未涵蓋所有控制措施、風險評估方法未文件化、缺少管理審查記錄、內部審核未執行或記錄不完整。</div>
+</div>
+
+<!-- ===== CH5 ===== -->
+<div class="cb" id="l5-1">
+<h2>業務影響分析（BIA）</h2>
+<p>業務影響分析（Business Impact Analysis，BIA）是業務連續性管理的起點，旨在識別組織的關鍵業務流程、量化中斷對組織的影響，並確定恢復優先級和目標。BIA 的輸出直接決定了 BCP/DRP 的設計方向。</p>
+<div class="kg">
+  <div class="kt"><div class="kt-n">RTO（恢復時間目標）</div><div class="kt-d">Recovery Time Objective — 從中斷發生到業務恢復可接受運作水平所允許的最長時間。代表業務可以容忍多長時間的中斷。示例：核心支付系統 RTO = 2 小時；內部 OA 系統 RTO = 24 小時。</div></div>
+  <div class="kt"><div class="kt-n">RPO（恢復點目標）</div><div class="kt-d">Recovery Point Objective — 業務可以接受的最大數據丟失量，以時間衡量。代表最近一次可接受的備份時間點。示例：交易數據庫 RPO = 1 小時（最多丟失 1 小時的交易）；日誌數據 RPO = 24 小時。</div></div>
+  <div class="kt"><div class="kt-n">MTPD（最大可容忍中斷期）</div><div class="kt-d">Maximum Tolerable Period of Disruption — 業務中斷後不會造成不可恢復損失的最長時間。超過此時間，業務可能永久喪失市場地位、客戶信任或違反法規。MTPD 通常大於 RTO。</div></div>
+  <div class="kt"><div class="kt-n">MRA（最低資源需求）</div><div class="kt-d">Minimum Resource Requirements — 業務在最低可接受水平運作所需的最少資源（人員、系統、場所）。用於設計輕量級應急運作方案，確保在主系統恢復前業務不完全停滯。</div></div>
+</div>
+<div class="cblock"><div class="ctop"><span class="clang">BIA 調研問卷模板（面向業務部門）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+<pre><span class="hi">業務影響分析調研問卷</span>
+<span class="hi">填寫說明：請業務部門主管或業務代表填寫</span>
+
+第一部分：業務流程識別
+  1. 貴部門有哪些主要業務流程？（列舉前 5 項）
+  2. 哪些流程是時間敏感的（如：訂單處理、客服響應）？
+  3. 哪些流程對公司營收有直接影響？
+
+第二部分：中斷影響評估
+  對以下中斷時長，評估對業務的影響（1=低，5=嚴重）：
+                    1小時   4小時   1天   3天   1週
+  財務損失影響     [___]   [___]  [___] [___] [___]
+  客戶關係影響     [___]   [___]  [___] [___] [___]
+  監管合規影響     [___]   [___]  [___] [___] [___]
+  聲譽影響         [___]   [___]  [___] [___] [___]
+
+第三部分：恢復目標
+  4. 您認為可接受的最大系統中斷時間（RTO）是？
+     □ 1小時  □ 4小時  □ 8小時  □ 24小時  □ 72小時
+  5. 您可以接受的最大數據丟失時間（RPO）是？
+     □ 實時  □ 1小時  □ 4小時  □ 24小時
+
+第四部分：依賴關係
+  6. 您的業務流程依賴哪些關鍵 IT 系統？（請列舉）
+  7. 是否依賴關鍵第三方服務商？（如支付網關、物流系統）
+  8. 是否有季節性業務高峰期（如雙 11、年末結算）？</pre>
+</div>
+</div>
+
+<div class="cb" id="l5-2">
+<h2>業務連續性計劃（BCP）制定</h2>
+<p>業務連續性計劃（Business Continuity Plan，BCP）是在發生中斷事件時，指導組織如何以最低可接受水平維持關鍵業務運作的行動計劃。BCP 必須基於 BIA 的輸出，針對最可能和最有影響的中斷場景制定具體應對措施。</p>
+<div class="atkflow">
+  <div class="af-step s1"><span class="af-n">觸發</span><div><div class="af-t">BCP 啟動條件和判斷</div><div class="af-d">明確定義觸發 BCP 的條件（如：核心業務系統中斷超過 2 小時；機房因火災不可訪問；主要數據中心失聯）。指定 BCP 啟動權限（通常為 CISO 或業務連續性負責人），避免重大事件時無人決策啟動。建立 24/7 緊急聯繫列表（含備用聯繫方式）。</div></div></div>
+  <div class="af-step s2"><span class="af-n">評估</span><div><div class="af-t">初始損害評估</div><div class="af-d">事件發生後 1 小時內完成初始評估：受影響的系統和數據範圍；預估恢復時間（與 RTO 比較）；通知範圍（內部管理層、外部客戶、監管機構）；是否需要啟動應急恢復方案。</div></div></div>
+  <div class="af-step s3"><span class="af-n">啟動</span><div><div class="af-t">應急恢復操作</div><div class="af-d">依據 BCP 中預先定義的恢復步驟執行。優先恢復最關鍵業務（依 BIA 確定的優先級）。若主數據中心不可用，切換至災備站點（DR Site）或雲備份環境。激活備用業務流程（如手動處理替代自動化系統）。</div></div></div>
+  <div class="af-step s4"><span class="af-n">溝通</span><div><div class="af-t">內外部溝通管理</div><div class="af-d">BCP 中必須包含溝通計劃：通知客戶（預計服務恢復時間）；上報監管機構（若法規要求，如金融機構的重大事件報告義務）；媒體溝通（由公關部門統一口徑，避免不一致信息）；內部更新頻率（每 2 小時向管理層更新進展）。</div></div></div>
+  <div class="af-step s5"><span class="af-n">恢復</span><div><div class="af-t">業務正常化和事後改進</div><div class="af-d">從應急狀態恢復至正常業務運作（計劃切回主系統）；完成恢復後核查數據完整性；5 個工作日內召開事後分析會議（Post-Incident Review）；更新 BCP 以反映事件中發現的改進點；觸發相關風險評估更新。</div></div></div>
+</div>
+</div>
+
+<div class="cb" id="l5-3">
+<h2>災難恢復計劃（DRP）與演練</h2>
+<p>災難恢復計劃（Disaster Recovery Plan，DRP）是 BCP 的技術子集，專注於 IT 系統和數據的恢復。與 BCP 的業務視角不同，DRP 面向 IT 團隊，提供具體的技術恢復步驟。</p>
+<div class="tbl"><table class="t"><thead><tr><th>DR 策略</th><th>RTO 能力</th><th>RPO 能力</span><th>成本</th><th>適用場景</th></tr></thead><tbody>
+<tr><td><strong>冷備（Cold Standby）</strong></td><td>24-72 小時</td><td>最近一次備份（可能 24 小時）</td><td>低（僅備份存儲費用）</td><td>非關鍵業務系統；成本敏感型組織</td></tr>
+<tr><td><strong>暖備（Warm Standby）</strong></td><td>4-8 小時</td><td>1-4 小時（定期同步）</td><td>中（備份環境保持基本就緒）</td><td>重要業務系統；平衡成本和恢復速度</td></tr>
+<tr><td><strong>熱備（Hot Standby）</strong></td><td>分鐘級</td><td>接近零丟失（實時同步）</td><td>高（雙環境全量運行）</td><td>核心關鍵系統；如支付系統、交易平台</td></tr>
+<tr><td><strong>雲災備（Cloud DR）</strong></td><td>1-4 小時</td><td>數分鐘至 1 小時</td><td>中低（按需付費）</td><td>現代化方案；彈性擴展；替代自建 DR 站點</td></tr>
+</tbody></table></div>
+<h3>DRP 演練：三種模式</h3>
+<div class="ilist">
+  <div class="il-item"><span class="il-num">桌面</span><div class="il-txt"><strong>桌面演練（Tabletop Exercise）</strong> — 所有相關人員圍坐討論，模擬災難場景下各自的職責和決策。不涉及實際系統操作，風險低，適合評估 BCP 邏輯完整性和人員熟悉度。每年至少一次。</div></div>
+  <div class="il-item"><span class="il-num">切換</span><div class="il-txt"><strong>功能性演練（Functional Exercise）</strong> — 在非生產環境實際執行 DR 切換步驟，驗證備份系統是否可正常啟動、數據是否完整可用、RTO/RPO 是否可達到目標。通常在業務低峰期進行，不影響生產業務。每半年一次。</div></div>
+  <div class="il-item"><span class="il-num">全量</span><div class="il-txt"><strong>全量切換演練（Full-Scale Exercise）</strong> — 模擬真實災難，將生產流量完全切換至災備環境運行一段時間（如 2-4 小時）。最高強度的驗證，可完整測試 RTO/RPO 目標是否達成。需提前告知客戶，風險較高，通常每年一次。</div></div>
+</div>
+<div class="note warn"><div class="note-lbl">DRP 演練的常見發現</div><p>實際 DRP 演練中最常發現的問題：（1）備份恢復時間遠超 RTO 目標（如計劃 4 小時，實際需要 12 小時）；（2）備份數據損壞或不完整（長期未驗證）；（3）DR 環境的 IP 配置與應用配置不匹配，導致服務無法啟動；（4）DNS 切換記錄未更新，導致用戶請求仍指向主站點；（5）關鍵恢復步驟只有一個人知道，且此人在演練中「離線」。每次演練必須輸出問題清單和改進計劃。</p></div>
+</div>
+
+<div class="cb" id="l5-4">
+<h2>ISO 22301 與 BCM 認證路徑</h2>
+<p>ISO 22301 是業務連續性管理體系（Business Continuity Management System，BCMS）的國際標準，與 ISO 27001 的關係類似：ISO 27001 關注信息安全，ISO 22301 關注業務連續性。許多組織在 ISO 27001 認證後，選擇進一步取得 ISO 22301 認證，建立更完善的韌性管理體系。</p>
+<div class="tbl"><table class="t"><thead><tr><th>維度</th><th>ISO 27001</th><th>ISO 22301</th></tr></thead><tbody>
+<tr><td><strong>關注焦點</strong></td><td>信息資產的機密性、完整性、可用性</td><td>關鍵業務流程的連續性和組織韌性</td></tr>
+<tr><td><strong>核心輸入</strong></td><td>信息安全風險評估</td><td>業務影響分析（BIA）</td></tr>
+<tr><td><strong>核心產出</strong></td><td>安全控制措施（附錄 A）</td><td>業務連續性計劃（BCP/DRP）</td></tr>
+<tr><td><strong>主要受益者</strong></td><td>安全團隊、合規部門、客戶</td><td>業務部門、管理層、監管機構</td></tr>
+<tr><td><strong>協同點</strong></td><td>ISO 27001 A.5.29/A.5.30 業務連續性控制與 ISO 22301 高度重疊</td><td>同上</td></tr>
+</tbody></table></div>
+<h3>ISMS 成熟度與持續改進路線圖</h3>
+<div class="timeline">
+  <div class="tl-item">
+    <div class="tl-phase"><span class="tl-ph-n">Level 1</span><div class="tl-ph-t">初始建設</div><div class="tl-ph-d">第 1-3 個月</div></div>
+    <div class="tl-body"><p>完成 ISMS 基礎框架搭建：組織環境分析、ISMS 範圍確定、信息安全方針發佈、核心安全策略文件編制（訪問控制、事件響應等）、第一輪風險評估完成、風險處置計劃制定。</p></div>
+  </div>
+  <div class="tl-item">
+    <div class="tl-phase"><span class="tl-ph-n">Level 2</span><div class="tl-ph-t">運行推廣</div><div class="tl-ph-d">第 4-9 個月</div></div>
+    <div class="tl-body"><p>控制措施落地執行：員工安全培訓體系建立、技術控制措施部署（MFA/EDR/SIEM）、供應商安全評估流程建立、第一次內部審核完成、不符合項追蹤閉環、第一次管理審查。</p></div>
+  </div>
+  <div class="tl-item">
+    <div class="tl-phase"><span class="tl-ph-n">Level 3</span><div class="tl-ph-t">認證申請</div><div class="tl-ph-d">第 10-12 個月</div></div>
+    <div class="tl-body"><p>準備外部認證：Stage 1 文件審核準備（SoA 完善、記錄整理）；Stage 2 現場審核；不符合項整改；獲得 ISO 27001 認證。</p></div>
+  </div>
+  <div class="tl-item">
+    <div class="tl-phase"><span class="tl-ph-n">Level 4</span><div class="tl-ph-t">成熟優化</div><div class="tl-ph-d">第 13-36 個月</div></div>
+    <div class="tl-body"><p>ISMS 持續改進：安全指標體系建立（KPI 追蹤）、安全自動化提升、BIA/BCP 完善並通過 DRP 演練驗證、考慮拓展至 ISO 22301 認證、向 CISO 級別安全治理演進。</p></div>
+  </div>
+</div>
+
+<div class="done-banner">
+  <h3>Stage 14 完成</h3>
+  <p>你已完成 ISO 27001 信息安全管理體系的全部 20 個課程，掌握了從體系規劃到認證審核的完整實戰能力。</p>
+  <div class="btn-row">
+    <a href="index.html" class="btn-p">返回課程首頁</a>
+    <a href="stage15.html" class="btn-g">前往 Stage 15 &#8594;</a>
+  </div>
+</div>
+</div>
+
+  </div><!-- .cw -->
+  <div class="lnav">
+    <button class="lb" id="prevb" onclick="prevL()" disabled>&#8592; 上一課</button>
+    <div class="ln-mid">
+      <div class="ln-cnt" id="cnt">1 / 20</div>
+      <div class="ln-sub" id="lsub">ISO 27001 歷史、版本與認證生態</div>
+    </div>
+    <button class="lb pri" id="nextb" onclick="nextL()">下一課 &#8594;</button>
+  </div>
+</main>
+</div>
+
+<script>
+const LS=[
+  {id:'l1-1',ch:'CH1',title:'ISO 27001 歷史、版本與認證生態',time:'25分鐘',type:'體系概述'},
+  {id:'l1-2',ch:'CH1',title:'ISMS 框架：PDCA 循環與十大條款',time:'25分鐘',type:'體系架構'},
+  {id:'l1-3',ch:'CH1',title:'組織環境分析：內外部議題與利害關係人',time:'20分鐘',type:'環境分析'},
+  {id:'l1-4',ch:'CH1',title:'ISMS 適用性宣告（SoA）編制',time:'25分鐘',type:'SoA 制作'},
+  {id:'l2-1',ch:'CH2',title:'ISO 27001 風險評估方法論',time:'25分鐘',type:'風險評估'},
+  {id:'l2-2',ch:'CH2',title:'資產識別與風險登錄冊建立',time:'25分鐘',type:'資產管理'},
+  {id:'l2-3',ch:'CH2',title:'風險處置計劃（RTP）制定',time:'20分鐘',type:'風險處置'},
+  {id:'l2-4',ch:'CH2',title:'殘餘風險接受與管理審查',time:'20分鐘',type:'管理審查'},
+  {id:'l3-1',ch:'CH3',title:'信息安全委員會架構與職責',time:'20分鐘',type:'治理架構'},
+  {id:'l3-2',ch:'CH3',title:'ISMS 制度體系建設：四層文件架構',time:'25分鐘',type:'文件體系'},
+  {id:'l3-3',ch:'CH3',title:'核心安全策略與程序文件編制',time:'25分鐘',type:'策略制定'},
+  {id:'l3-4',ch:'CH3',title:'員工安全意識培訓體系建立',time:'20分鐘',type:'安全培訓'},
+  {id:'l4-1',ch:'CH4',title:'內部審核員角色與審核方法',time:'20分鐘',type:'內審技術'},
+  {id:'l4-2',ch:'CH4',title:'內審計劃制定與現場審核技巧',time:'25分鐘',type:'審核計劃'},
+  {id:'l4-3',ch:'CH4',title:'不符合項（NCF）管理與糾正措施',time:'20分鐘',type:'NCF 管理'},
+  {id:'l4-4',ch:'CH4',title:'外部認證審核（Stage 1 / Stage 2）',time:'25分鐘',type:'認證審核'},
+  {id:'l5-1',ch:'CH5',title:'業務影響分析（BIA）',time:'25分鐘',type:'業務連續性'},
+  {id:'l5-2',ch:'CH5',title:'業務連續性計劃（BCP）制定',time:'25分鐘',type:'BCP 制定'},
+  {id:'l5-3',ch:'CH5',title:'災難恢復計劃（DRP）與演練',time:'25分鐘',type:'災難恢復'},
+  {id:'l5-4',ch:'CH5',title:'ISO 22301 與 BCM 認證路徑',time:'20分鐘',type:'BCM 認證'},
+];
+const done=new Set(JSON.parse(localStorage.getItem('s14_done')||'[]'));
+let cur=0;
+function go(id,btn){
+  document.querySelectorAll('.cb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.ls-btn').forEach(b=>b.classList.remove('lact'));
+  const bl=document.getElementById(id);if(bl)bl.classList.add('on');
+  if(btn)btn.classList.add('lact');
+  cur=LS.findIndex(l=>l.id===id);syncUI();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function toggleCh(btn,id){
+  btn.classList.toggle('copen');
+  const l=document.getElementById(id);if(l)l.classList.toggle('lopen');
+}
+function prevL(){if(cur>0)findAndGo(LS[cur-1].id);}
+function nextL(){
+  done.add(LS[cur].id);
+  localStorage.setItem('s14_done',JSON.stringify([...done]));
+  if(cur<LS.length-1)findAndGo(LS[cur+1].id);
+}
+function findAndGo(id){
+  let btn=null;
+  document.querySelectorAll('.ls-btn').forEach(b=>{
+    if((b.getAttribute('onclick')||'').includes("'"+id+"'")){
+      btn=b;
+      const p=b.parentElement;
+      if(p&&!p.classList.contains('lopen')){
+        p.classList.add('lopen');
+        const cb=p.previousElementSibling;
+        if(cb)cb.classList.add('copen');
+      }
+    }
+  });
+  go(id,btn);
+}
+function syncUI(){
+  const l=LS[cur];if(!l)return;
+  document.getElementById('crumb').innerHTML=`STAGE 14 &gt; ${l.ch} &gt; <em>${l.title}</em>`;
+  document.getElementById('ltitle').textContent=l.title;
+  document.getElementById('chip1').textContent=l.type;
+  document.getElementById('chip2').textContent=`預計 ${l.time}`;
+  document.getElementById('cnt').textContent=`${cur+1} / ${LS.length}`;
+  document.getElementById('lsub').textContent=l.title;
+  document.getElementById('prevb').disabled=cur===0;
+  document.getElementById('nextb').disabled=cur===LS.length-1;
+  if(cur===LS.length-1)document.getElementById('nextb').textContent='Stage 完成';
+  else document.getElementById('nextb').innerHTML='下一課 &#8594;';
+  const pct=done.size?Math.round(done.size/LS.length*100):0;
+  document.getElementById('pct').textContent=pct+'%';
+  document.getElementById('pf').style.width=pct+'%';
+  document.querySelectorAll('.ls-btn').forEach(b=>{
+    const m=(b.getAttribute('onclick')||'').match(/'(l\d+-\d+)'/);
+    if(m&&done.has(m[1])&&!b.classList.contains('lact'))b.classList.add('ldone');
+  });
+}
+function chkQ(el,correct){
+  const box=el.closest('.quiz');
+  if(box.dataset.answered)return;
+  box.dataset.answered='1';
+  box.querySelectorAll('.qo').forEach(o=>o.style.pointerEvents='none');
+  el.classList.add(correct?'ok':'bad');
+  if(!correct)box.querySelectorAll('.qo').forEach(o=>{
+    if((o.getAttribute('onclick')||'').includes('true'))o.classList.add('ok');
+  });
+  const exp=box.querySelector('.q-exp');
+  if(exp)exp.classList.add('on');
+}
+function cpCode(btn){
+  const pre=btn.closest('.cblock').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(()=>{
+    btn.textContent='已複製';setTimeout(()=>btn.textContent='複製',2000);
+  });
+}
+syncUI();
+</script>
+</body>
+</html>

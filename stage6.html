@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Stage 06 — iOS 安全測試 | SEC_TRACK</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#090807;--bg2:#0e0c0a;--bg3:#141210;--sur:#1c1916;--bdr:#27231e;
+  --acc:#e8a048;--acc2:#c87d28;--txt:#ede8df;--txt2:#9b9185;--txt3:#524b41;
+  --red:#f05252;--grn:#3ecf8e;--cyn:#22d3ee;--pur:#a78bfa;--ylw:#fbbf24;--rose:#fb7185;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse 55% 35% at 12% 0%,rgba(232,160,72,.04) 0%,transparent 55%),
+  radial-gradient(ellipse 45% 30% at 88% 100%,rgba(200,125,40,.03) 0%,transparent 55%);
+  pointer-events:none;z-index:0;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 36px;background:rgba(9,8,7,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--bdr);}
+.n-logo{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.95rem;color:var(--acc);text-decoration:none;}
+.n-logo span{color:var(--txt3);}
+.n-mid{display:flex;align-items:center;gap:10px;}
+.s-pill{font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;background:rgba(232,160,72,.1);color:var(--acc);border:1px solid rgba(232,160,72,.28);}
+.n-sname{font-size:.8rem;color:var(--txt2);}
+.n-back{font-size:.8rem;color:var(--txt3);text-decoration:none;transition:color .2s;}
+.n-back:hover{color:var(--acc);}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh;padding-top:60px;}
+.sidebar{position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;background:var(--bg2);border-right:1px solid var(--bdr);display:flex;flex-direction:column;z-index:10;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--bdr);}
+.sb-h{padding:22px 22px 16px;border-bottom:1px solid var(--bdr);flex-shrink:0;}
+.sb-tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--acc);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
+.sb-title{font-size:.88rem;font-weight:700;line-height:1.45;margin-bottom:13px;}
+.sb-meta{display:flex;gap:16px;}
+.sm-item{display:flex;flex-direction:column;gap:2px;}
+.sm-val{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;color:var(--acc);}
+.sm-key{font-size:.62rem;color:var(--txt3);letter-spacing:.06em;text-transform:uppercase;}
+.sb-nav{flex:1;overflow-y:auto;padding:6px 0;}
+.ch-btn{width:100%;display:flex;align-items:center;gap:9px;padding:9px 22px;background:none;border:none;border-bottom:1px solid rgba(39,35,30,.7);color:var(--txt2);font-family:'Noto Sans TC',sans-serif;font-size:.79rem;font-weight:500;cursor:pointer;text-align:left;transition:color .18s,background .18s;}
+.ch-btn:hover{color:var(--txt);background:var(--bg3);}
+.ch-btn.cact{color:var(--acc);}
+.ch-num{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt3);min-width:26px;flex-shrink:0;}
+.ch-btn.cact .ch-num{color:var(--acc);}
+.ch-arr{font-size:.52rem;color:var(--txt3);transition:transform .2s;flex-shrink:0;}
+.ch-btn.copen .ch-arr{transform:rotate(90deg);}
+.ls-list{display:none;flex-direction:column;background:rgba(0,0,0,.15);}
+.ls-list.lopen{display:flex;}
+.ls-btn{display:flex;align-items:flex-start;gap:9px;padding:7px 22px 7px 44px;background:none;border:none;border-bottom:1px solid rgba(39,35,30,.4);color:var(--txt3);font-family:'Noto Sans TC',sans-serif;font-size:.74rem;cursor:pointer;text-align:left;width:100%;transition:color .18s,background .18s;line-height:1.4;}
+.ls-btn:hover{color:var(--txt2);background:rgba(232,160,72,.03);}
+.ls-btn.lact{color:var(--acc);background:rgba(232,160,72,.06);}
+.ls-btn.ldone{color:var(--txt3);}
+.ls-dot{width:5px;height:5px;border-radius:50%;background:var(--bdr);flex-shrink:0;margin-top:5px;transition:background .2s;}
+.ls-btn.lact .ls-dot{background:var(--acc);}
+.ls-btn.ldone .ls-dot{background:var(--acc);}
+.sb-f{padding:13px 22px;border-top:1px solid var(--bdr);flex-shrink:0;}
+.pr{display:flex;justify-content:space-between;font-size:.68rem;color:var(--txt3);margin-bottom:6px;}
+.pt{height:3px;background:var(--bdr);border-radius:2px;overflow:hidden;}
+.pf{height:100%;background:var(--acc);border-radius:2px;transition:width .4s;}
+.main{position:relative;z-index:1;display:flex;flex-direction:column;}
+.lh{padding:38px 56px 30px;border-bottom:1px solid var(--bdr);background:linear-gradient(180deg,rgba(232,160,72,.03) 0%,transparent 100%);}
+.lh-crumb{font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--txt3);letter-spacing:.08em;margin-bottom:11px;}
+.lh-crumb em{color:var(--acc);font-style:normal;}
+.lh-title{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin-bottom:11px;}
+.lh-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{padding:3px 11px;border-radius:20px;font-size:.67rem;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;border:1px solid var(--bdr);color:var(--txt3);}
+.chip.ac{border-color:rgba(232,160,72,.4);color:var(--acc);}
+.cw{padding:38px 56px 80px;max-width:880px;}
+.cb{display:none;}
+.cb.on{display:block;animation:rise .25s ease both;}
+@keyframes rise{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:none;}}
+h2{font-size:1.25rem;font-weight:800;letter-spacing:-.01em;margin:36px 0 13px;color:var(--txt);display:flex;align-items:center;gap:10px;}
+h2::before{content:'';display:inline-block;width:3px;height:1.1em;border-radius:2px;background:var(--acc);flex-shrink:0;}
+h2:first-child{margin-top:0;}
+h3{font-size:.98rem;font-weight:700;margin:22px 0 9px;color:var(--txt);}
+p{font-size:.9rem;line-height:1.85;color:var(--txt2);margin-bottom:11px;font-weight:300;}
+strong{color:var(--txt);font-weight:600;}
+code{font-family:'JetBrains Mono',monospace;font-size:.8em;background:var(--sur);border:1px solid var(--bdr);padding:1px 6px;border-radius:3px;color:var(--acc);}
+.note{border-left:3px solid;padding:13px 17px;margin:18px 0;border-radius:0 4px 4px 0;}
+.note-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:6px;}
+.note p{margin:0;font-size:.86rem;line-height:1.7;}
+.note.tip{border-color:var(--acc);background:rgba(232,160,72,.06);}
+.note.tip .note-lbl{color:var(--acc);}
+.note.warn{border-color:var(--ylw);background:rgba(251,191,36,.06);}
+.note.warn .note-lbl{color:var(--ylw);}
+.note.sec{border-color:var(--grn);background:rgba(62,207,142,.06);}
+.note.sec .note-lbl{color:var(--grn);}
+.note.danger{border-color:var(--red);background:rgba(240,82,82,.07);}
+.note.danger .note-lbl{color:var(--red);}
+.note.law{border-color:var(--pur);background:rgba(167,139,250,.07);}
+.note.law .note-lbl{color:var(--pur);}
+.note.ios{border-color:var(--cyn);background:rgba(34,211,238,.05);}
+.note.ios .note-lbl{color:var(--cyn);}
+.cblock{background:#060504;border:1px solid var(--bdr);border-radius:6px;margin:16px 0;overflow:hidden;}
+.ctop{display:flex;align-items:center;justify-content:space-between;padding:7px 15px;background:rgba(20,18,16,.8);border-bottom:1px solid var(--bdr);}
+.clang{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;}
+.ccopy{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);background:none;border:none;cursor:pointer;transition:color .2s;}
+.ccopy:hover{color:var(--acc);}
+pre{padding:16px 20px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.75;color:#d8cfc4;}
+pre .kw{color:#c792ea;}pre .fn{color:#82aaff;}pre .st{color:#c3e88d;}pre .cm{color:#3d3730;font-style:italic;}
+pre .nu{color:#f78c6c;}pre .tg{color:#f07178;}pre .at{color:#ffcb6b;}pre .vl{color:#c3e88d;}
+pre .sl{color:#89ddff;}pre .op{color:#89ddff;}pre .hl{background:rgba(232,160,72,.12);border-radius:2px;padding:0 2px;}
+.tbl{overflow-x:auto;margin:16px 0;}
+table.t{width:100%;border-collapse:collapse;font-size:.82rem;}
+table.t th{background:var(--sur);padding:9px 14px;text-align:left;font-size:.63rem;font-family:'JetBrains Mono',monospace;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--bdr);}
+table.t td{padding:9px 14px;border:1px solid var(--bdr);color:var(--txt2);font-weight:300;vertical-align:top;line-height:1.55;}
+table.t tr:hover td{background:var(--bg3);}
+.mc{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--acc);}
+.kg{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--bdr);border:1px solid var(--bdr);margin:16px 0;}
+.kt{background:var(--bg2);padding:14px 17px;}
+.kt-n{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--acc);font-weight:700;margin-bottom:5px;}
+.kt-d{font-size:.79rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.ilist{display:flex;flex-direction:column;border:1px solid var(--bdr);border-radius:4px;overflow:hidden;margin:16px 0;}
+.il-item{display:flex;align-items:flex-start;gap:13px;padding:12px 17px;border-bottom:1px solid var(--bdr);transition:background .15s;}
+.il-item:last-child{border-bottom:none;}
+.il-item:hover{background:var(--bg3);}
+.il-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--acc);min-width:24px;flex-shrink:0;padding-top:2px;font-weight:700;}
+.il-txt{font-size:.85rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.il-txt strong{color:var(--txt);}
+.atkflow{display:flex;flex-direction:column;gap:3px;margin:18px 0;}
+.af-step{display:flex;align-items:flex-start;gap:13px;padding:13px 16px;background:var(--sur);border:1px solid var(--bdr);border-radius:4px;position:relative;}
+.af-step::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--bdr);border-radius:4px 0 0 4px;}
+.af-step.s1::before{background:var(--acc);}
+.af-step.s2::before{background:var(--cyn);}
+.af-step.s3::before{background:var(--ylw);}
+.af-step.s4::before{background:var(--grn);}
+.af-step.s5::before{background:var(--rose);}
+.af-step.s6::before{background:var(--pur);}
+.af-n{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt3);font-weight:700;min-width:44px;flex-shrink:0;padding-top:2px;letter-spacing:.04em;}
+.af-t{font-size:.82rem;font-weight:700;color:var(--txt);margin-bottom:4px;}
+.af-d{font-size:.78rem;color:var(--txt2);line-height:1.55;font-weight:300;}
+.quiz{background:var(--bg3);border:1px solid var(--bdr);border-radius:6px;padding:22px;margin:26px 0;}
+.q-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--ylw);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;}
+.q-q{font-size:.9rem;font-weight:600;margin-bottom:13px;line-height:1.5;color:var(--txt);}
+.q-opts{display:flex;flex-direction:column;gap:6px;}
+.qo{display:flex;align-items:flex-start;gap:10px;padding:8px 13px;border:1px solid var(--bdr);border-radius:4px;cursor:pointer;font-size:.83rem;color:var(--txt2);transition:all .18s;line-height:1.5;}
+.qo:hover{border-color:var(--acc);color:var(--txt);}
+.qo.ok{border-color:var(--acc);background:rgba(232,160,72,.07);color:var(--acc);}
+.qo.bad{border-color:var(--red);background:rgba(240,82,82,.07);color:var(--red);}
+.qo-k{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--txt3);min-width:16px;padding-top:1px;flex-shrink:0;}
+.q-exp{display:none;margin-top:12px;padding:11px 14px;background:rgba(232,160,72,.05);border-left:2px solid var(--acc);border-radius:0 4px 4px 0;font-size:.82rem;color:var(--txt2);line-height:1.65;}
+.q-exp.on{display:block;}
+.done-banner{background:linear-gradient(135deg,rgba(232,160,72,.07),rgba(200,125,40,.05));border:1px solid rgba(232,160,72,.2);border-radius:6px;padding:28px;margin:34px 0 14px;text-align:center;}
+.done-banner h3{font-size:1.1rem;font-weight:800;color:var(--acc);margin-bottom:8px;}
+.done-banner p{font-size:.87rem;margin-bottom:20px;}
+.btn-row{display:flex;gap:11px;justify-content:center;flex-wrap:wrap;}
+.btn-p{display:inline-block;padding:10px 24px;background:var(--acc);color:var(--bg);text-decoration:none;font-weight:700;font-size:.84rem;border-radius:4px;transition:all .2s;}
+.btn-p:hover{background:#f0b060;transform:translateY(-1px);}
+.btn-g{display:inline-block;padding:10px 24px;border:1px solid var(--bdr);color:var(--txt2);text-decoration:none;font-size:.84rem;border-radius:4px;transition:all .2s;}
+.btn-g:hover{border-color:var(--acc);color:var(--acc);}
+.lnav{display:flex;justify-content:space-between;align-items:center;padding:22px 56px;border-top:1px solid var(--bdr);background:var(--bg2);position:sticky;bottom:0;z-index:5;}
+.lb{display:flex;align-items:center;gap:7px;padding:8px 18px;border:1px solid var(--bdr);border-radius:4px;background:none;color:var(--txt2);font-size:.82rem;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .18s;}
+.lb:hover:not(:disabled){border-color:var(--acc);color:var(--acc);}
+.lb.pri{background:var(--acc);color:var(--bg);border-color:var(--acc);font-weight:700;}
+.lb.pri:hover:not(:disabled){background:#f0b060;}
+.lb:disabled{opacity:.2;cursor:not-allowed;}
+.ln-mid{text-align:center;}
+.ln-cnt{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--txt3);}
+.ln-sub{font-size:.75rem;color:var(--txt3);margin-top:3px;max-width:260px;}
+@media(max-width:900px){.layout{grid-template-columns:1fr;}.sidebar{position:static;height:auto;}.lh,.cw{padding-left:20px;padding-right:20px;}.lnav{padding:16px 20px;}.kg{grid-template-columns:1fr;}.ln-sub{display:none;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="n-logo">SEC<span>_</span>TRACK</a>
+  <div class="n-mid"><span class="s-pill">STAGE 06</span><span class="n-sname">iOS 安全測試</span></div>
+  <a href="index.html" class="n-back">&#8592; 首頁</a>
+</nav>
+
+<div class="layout">
+<aside class="sidebar">
+  <div class="sb-h">
+    <div class="sb-tag">STAGE 06 · 3週</div>
+    <div class="sb-title">iOS 應用安全<br>測試全流程</div>
+    <div class="sb-meta">
+      <div class="sm-item"><span class="sm-val">5</span><span class="sm-key">章節</span></div>
+      <div class="sm-item"><span class="sm-val">20</span><span class="sm-key">課程</span></div>
+      <div class="sm-item"><span class="sm-val">3週</span><span class="sm-key">時長</span></div>
+    </div>
+  </div>
+  <div class="sb-nav">
+    <div><button class="ch-btn copen cact" onclick="toggleCh(this,'ch1')"><span class="ch-num">CH1</span><span class="ch-name">iOS 安全基礎</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list lopen" id="ch1">
+      <button class="ls-btn lact" onclick="go('l1-1',this)"><span class="ls-dot"></span>iOS 架構與安全機制概覽</button>
+      <button class="ls-btn" onclick="go('l1-2',this)"><span class="ls-dot"></span>IPA 結構與 App 沙盒</button>
+      <button class="ls-btn" onclick="go('l1-3',this)"><span class="ls-dot"></span>測試環境：越獄設備與 Checkra1n</button>
+      <button class="ls-btn" onclick="go('l1-4',this)"><span class="ls-dot"></span>SSH 連線與 iOS 文件系統</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch2')"><span class="ch-num">CH2</span><span class="ch-name">靜態分析</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch2">
+      <button class="ls-btn" onclick="go('l2-1',this)"><span class="ls-dot"></span>IPA 解密與 class-dump</button>
+      <button class="ls-btn" onclick="go('l2-2',this)"><span class="ls-dot"></span>Hopper / Ghidra 逆向分析</button>
+      <button class="ls-btn" onclick="go('l2-3',this)"><span class="ls-dot"></span>Info.plist 安全審計</button>
+      <button class="ls-btn" onclick="go('l2-4',this)"><span class="ls-dot"></span>代碼審計：硬編碼與不安全 API</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch3')"><span class="ch-num">CH3</span><span class="ch-name">動態分析</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch3">
+      <button class="ls-btn" onclick="go('l3-1',this)"><span class="ls-dot"></span>HTTPS 流量攔截與 SSL Pinning 繞過</button>
+      <button class="ls-btn" onclick="go('l3-2',this)"><span class="ls-dot"></span>Frida on iOS：Hook Objective-C 與 Swift</button>
+      <button class="ls-btn" onclick="go('l3-3',this)"><span class="ls-dot"></span>Cycript / LLDB 動態調試</button>
+      <button class="ls-btn" onclick="go('l3-4',this)"><span class="ls-dot"></span>Objection iOS 自動化測試</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch4')"><span class="ch-num">CH4</span><span class="ch-name">常見漏洞攻防</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch4">
+      <button class="ls-btn" onclick="go('l4-1',this)"><span class="ls-dot"></span>不安全的數據存儲（Keychain / NSUserDefaults）</button>
+      <button class="ls-btn" onclick="go('l4-2',this)"><span class="ls-dot"></span>WKWebView 漏洞與 JSContext 注入</button>
+      <button class="ls-btn" onclick="go('l4-3',this)"><span class="ls-dot"></span>URL Scheme 劫持與 Universal Links</button>
+      <button class="ls-btn" onclick="go('l4-4',this)"><span class="ls-dot"></span>越獄檢測與繞過策略</button>
+      <button class="ls-btn" onclick="go('l4-5',this)"><span class="ls-dot"></span>Binary 保護機制分析（PIE / Stack Canary）</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch5')"><span class="ch-num">CH5</span><span class="ch-name">自動化與報告</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch5">
+      <button class="ls-btn" onclick="go('l5-1',this)"><span class="ls-dot"></span>MobSF iOS 靜態分析</button>
+      <button class="ls-btn" onclick="go('l5-2',this)"><span class="ls-dot"></span>OWASP Mobile Top 10：iOS 視角</button>
+      <button class="ls-btn" onclick="go('l5-3',this)"><span class="ls-dot"></span>Android vs iOS 安全差異對照</button>
+    </div></div>
+  </div>
+  <div class="sb-f">
+    <div class="pr"><span>學習進度</span><span id="pct">0%</span></div>
+    <div class="pt"><div class="pf" id="pf" style="width:0%"></div></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="lh">
+    <div class="lh-crumb" id="crumb">STAGE 06 &gt; CH1 &gt; <em>課程 1</em></div>
+    <h1 class="lh-title" id="ltitle">iOS 架構與安全機制概覽</h1>
+    <div class="lh-chips">
+      <span class="chip ac" id="chip1">基礎架構</span>
+      <span class="chip" id="chip2">20 分鐘</span>
+    </div>
+  </div>
+  <div class="cw">
+
+<!-- ===== L1-1 iOS 架構 ===== -->
+<div class="cb on" id="l1-1">
+<h2>iOS 架構與安全機制概覽</h2>
+<p>iOS 安全架構建立在硬體信任根之上，多層機制相互配合。與 Android 相比，iOS 更封閉，安全測試的門檻更高，但漏洞的商業價值也更高。</p>
+
+<h3>iOS 分層安全架構</h3>
+<div class="atkflow">
+  <div class="af-step s1"><span class="af-n">硬體層</span><div><div class="af-t">Secure Enclave Processor（SEP）</div><div class="af-d">獨立的安全協處理器，負責 Face ID / Touch ID 生物特徵處理、設備加密金鑰管理。SEP 的資料無法被主處理器讀取，即使越獄也無法繞過。</div></div></div>
+  <div class="af-step s2"><span class="af-n">啟動層</span><div><div class="af-t">安全啟動鏈（Secure Boot Chain）</div><div class="af-d">從 Boot ROM（硬體燒錄，不可修改）開始，每一級引導程式都會驗證下一級的 Apple 數位簽章。任何未簽名的啟動組件都會被拒絕，是越獄需要突破的核心屏障。</div></div></div>
+  <div class="af-step s3"><span class="af-n">核心層</span><div><div class="af-t">XNU 核心 + 系統完整性保護</div><div class="af-d">基於 Mach / BSD 的混合核心。AMFI（Apple Mobile File Integrity）強制執行代碼簽名，確保每個執行的二進制文件都有 Apple 授權簽名。</div></div></div>
+  <div class="af-step s4"><span class="af-n">系統層</span><div><div class="af-t">沙盒（Sandbox / Seatbelt）</div><div class="af-d">每個 App 運行在獨立沙盒容器中，只能訪問自己的目錄（<code>~/Library/</code>）。跨 App 通訊必須通過 URL Scheme、Universal Links 或 App Groups 等受控機制。</div></div></div>
+  <div class="af-step s5"><span class="af-n">應用層</span><div><div class="af-t">App Store 審核 + 代碼簽名</div><div class="af-d">所有 App 必須通過 App Store 審核並使用 Apple 頒發的開發者憑證簽名。企業證書（Enterprise Certificate）可繞過 App Store，曾被惡意 App 濫用。</div></div></div>
+</div>
+
+<h3>iOS 核心安全特性速覽</h3>
+<div class="kg">
+  <div class="kt"><div class="kt-n">數據保護（Data Protection）</div><div class="kt-d">每個文件可設置保護等級（Complete / CompleteUnlessOpen / CompleteUntilFirstUserAuthentication）。設備鎖定後，Complete 等級的文件金鑰被清除，即使硬體提取也無法讀取。</div></div>
+  <div class="kt"><div class="kt-n">ATS（App Transport Security）</div><div class="kt-d">iOS 9+ 強制所有網路連線使用 TLS 1.2+，禁止 HTTP 明文通訊。開發者可在 Info.plist 中明確豁免（NSAllowsArbitraryLoads），但這是安全問題。</div></div>
+  <div class="kt"><div class="kt-n">Keychain</div><div class="kt-d">iOS 系統級加密金鑰庫，用於安全存儲密碼、Token、憑證。不同 App 的 Keychain 項目相互隔離，但同一 App Group 可共享。越獄後 Keychain 可被提取。</div></div>
+  <div class="kt"><div class="kt-n">ASLR + PIE</div><div class="kt-d">地址空間佈局隨機化（ASLR）每次啟動隨機化記憶體佈局，Position Independent Executable（PIE）讓二進制可在任意地址載入。大幅增加記憶體漏洞利用難度。</div></div>
+</div>
+
+<div class="note ios">
+  <div class="note-lbl">iOS vs Android 測試差異</div>
+  <p>iOS 安全測試的最大挑戰是<strong>設備依賴性</strong>：許多動態分析操作需要越獄設備，而越獄往往依賴特定的 iOS 版本和設備型號。此外，iOS 無法像 Android 那樣輕易修改和重打包 IPA，因為所有二進制文件都需要 Apple 有效簽名。建議準備一台舊款 iPhone（iPhone X 或更早，A11 晶片）並保持在可越獄的 iOS 版本。</p>
+</div>
+</div>
+
+<!-- ===== L1-2 IPA 結構 ===== -->
+<div class="cb" id="l1-2">
+<h2>IPA 結構與 App 沙盒</h2>
+<p>IPA（iPhone Package Archive）是 iOS App 的分發格式，本質上是 ZIP 壓縮包。理解其內部結構是靜態分析的基礎。</p>
+
+<h3>IPA 內部結構</h3>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>路徑</th><th>內容</th><th>安全關注點</th></tr></thead>
+    <tbody>
+      <tr><td class="mc">Payload/AppName.app/</td><td>App 主目錄，包含所有資源</td><td>整個分析的起點</td></tr>
+      <tr><td class="mc">AppName（二進制）</td><td>Mach-O 格式可執行文件（可能含多架構 Fat Binary）</td><td>class-dump / Hopper 逆向的主要目標；注意是否有加密（FairPlay DRM）</td></tr>
+      <tr><td class="mc">Info.plist</td><td>App 配置：Bundle ID、版本、URL Scheme、權限說明</td><td>URL Scheme 聲明、ATS 豁免、危險權限、是否宣告備份排除</td></tr>
+      <tr><td class="mc">Frameworks/</td><td>App 內嵌的私有 Framework（.framework）</td><td>可能包含硬編碼金鑰；各 Framework 可單獨逆向</td></tr>
+      <tr><td class="mc">PlugIns/</td><td>App Extension（Today Widget、Share Extension 等）</td><td>Extension 可能共享 App Group 數據，是額外攻擊面</td></tr>
+      <tr><td class="mc">_CodeSignature/</td><td>代碼簽名資訊（CodeResources 文件）</td><td>篡改任何文件後簽名失效；重打包需要有效開發者憑證</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>App 沙盒目錄結構</h3>
+<div class="cblock">
+  <div class="ctop"><span class="clang">iOS App 沙盒目錄</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># 每個 App 的沙盒根目錄（UUID 每次安裝不同）</span>
+/var/mobile/Containers/Data/Application/[UUID]/
+
+├── Documents/          <span class="cm"># 用戶文件，iTunes / iCloud 備份，用戶可訪問</span>
+│   └── user_data.db    <span class="cm"># 常見：SQLite 資料庫（重點檢查）</span>
+│
+├── Library/
+│   ├── Preferences/    <span class="cm"># NSUserDefaults（.plist 文件），敏感數據常存於此</span>
+│   │   └── com.target.app.plist
+│   ├── Caches/         <span class="cm"># 快取資料，不備份，系統可清除</span>
+│   │   └── snapshots/  <span class="cm"># App 切換時的截圖！可能截到敏感畫面</span>
+│   └── Application Support/  <span class="cm"># App 支援文件，備份</span>
+│
+└── tmp/                <span class="cm"># 臨時文件，App 退出後可能被清除</span>
+
+<span class="cm"># App Bundle（安裝目錄，只讀）</span>
+/var/containers/Bundle/Application/[UUID]/AppName.app/</pre>
+</div>
+
+<div class="note warn">
+  <div class="note-lbl">截圖快取洩露</div>
+  <p>iOS 在 App 進入後台時會自動截圖用於 App 切換器的預覽。如果截圖的瞬間畫面包含密碼、金融資訊等敏感內容，這個截圖會被儲存在 <code>Library/Caches/Snapshots/</code>。防禦方法：在 <code>applicationDidEnterBackground</code> 中隱藏敏感視圖，或使用 <code>ignoreSnapshotOnNextApplicationLaunch</code>。</p>
+</div>
+</div>
+
+<!-- ===== L1-3 越獄環境 ===== -->
+<div class="cb" id="l1-3">
+<h2>測試環境：越獄設備與 Checkra1n</h2>
+
+<div class="kg">
+  <div class="kt"><div class="kt-n">checkra1n（硬體漏洞型）</div><div class="kt-d">利用 A5–A11 晶片 Boot ROM 漏洞（checkm8），半持久越獄（重啟後需重新執行 checkra1n）。支援 iPhone 5s–iPhone X，iOS 12–14.x。由於是硬體漏洞，Apple 無法修補。</div></div>
+  <div class="kt"><div class="kt-n">unc0ver / Dopamine</div><div class="kt-d">軟體漏洞型越獄，針對特定 iOS 版本的核心漏洞。unc0ver 支援 iOS 11–14.8，Dopamine 針對 iOS 15–16.x。版本依賴性強，Apple 發版後通常修補。</div></div>
+  <div class="kt"><div class="kt-n">Palera1n</div><div class="kt-d">基於 checkm8 的現代越獄工具，支援 iPhone 6–iPhone X 的 iOS 15–16.x。rootless 模式對系統分區改動最小，是目前最受推薦的 A11 及以下設備越獄方案。</div></div>
+  <div class="kt"><div class="kt-n">Cydia / Sileo</div><div class="kt-d">越獄後的套件管理器（類似 apt/brew）。安全測試常用套件：SSH（openssh）、Frida（frida）、debugserver（允許 LLDB 連線）、com.tigisoftware.Filza（文件管理器）。</div></div>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">越獄環境初始化</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── checkra1n 越獄步驟（Linux / macOS）───</span>
+<span class="cm"># 1. 下載 checkra1n：https://checkra.in</span>
+<span class="cm"># 2. iPhone 進入 DFU 模式（工具會提示操作步驟）</span>
+./checkra1n              <span class="cm"># 啟動圖形介面</span>
+<span class="cm"># 3. 執行後設備重啟，安裝 Cydia</span>
+
+<span class="cm"># ─── 安裝測試必備套件（Cydia / Sileo）───</span>
+<span class="cm"># 1. 添加 Frida 源：https://build.frida.re</span>
+<span class="cm"># 2. 安裝：Frida、OpenSSH、Filza File Manager</span>
+
+<span class="cm"># ─── 通過 SSH 連線到設備 ───</span>
+<span class="cm"># 方法1：同一 WiFi 網路（設備 IP 可在設定 → WiFi 查看）</span>
+ssh root@192.168.1.101          <span class="cm"># 預設密碼：alpine（立即修改！）</span>
+
+<span class="cm"># 方法2：USB SSH（USB Muxing，不需要 WiFi）</span>
+<span class="cm"># 安裝 iproxy（libimobiledevice 套件）</span>
+iproxy 2222 22 &               <span class="cm"># 將本機 2222 → 設備 22 端口</span>
+ssh root@localhost -p 2222
+
+<span class="cm"># 首次連線後立即修改密碼！</span>
+passwd root                    <span class="cm"># 修改 root 密碼</span>
+passwd mobile                  <span class="cm"># 修改 mobile 用戶密碼（App 以此用戶運行）</span></pre>
+</div>
+</div>
+
+<!-- ===== L1-4 SSH 與文件系統 ===== -->
+<div class="cb" id="l1-4">
+<h2>SSH 連線與 iOS 文件系統</h2>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">iOS 文件系統探索命令</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 找到目標 App 的沙盒目錄 ───</span>
+<span class="cm"># 方法1：根據 Bundle ID 查找</span>
+find /var/mobile/Containers/Data/Application/ -name "*.plist" 2>/dev/null | \
+  xargs grep -l "com.target.app" 2>/dev/null
+
+<span class="cm"># 方法2：用 ipainstaller 查詢（需安裝 com.slugrail.ipainstaller）</span>
+ipainstaller -l                            <span class="cm"># 列出所有已安裝 App</span>
+ipainstaller -i com.target.app            <span class="cm"># 查看 App 詳細信息和路徑</span>
+
+<span class="cm"># 方法3：通過 ps 找到運行中的 App 進程</span>
+ps aux | grep AppName
+
+<span class="cm"># ─── 提取 App 數據（沙盒內容）───</span>
+<span class="cm"># SSH 後直接訪問沙盒</span>
+ls /var/mobile/Containers/Data/Application/[UUID]/
+
+<span class="cm"># 用 scp 傳回電腦分析</span>
+scp -r root@192.168.1.101:/var/mobile/Containers/Data/Application/[UUID]/ ./sandbox_data/
+
+<span class="cm"># ─── 常見敏感文件路徑 ───</span>
+<span class="cm"># NSUserDefaults（明文 plist）</span>
+cat /var/mobile/Containers/Data/Application/[UUID]/Library/Preferences/com.target.app.plist
+plutil -p /path/to/file.plist              <span class="cm"># 格式化輸出 plist 內容</span>
+
+<span class="cm"># SQLite 資料庫</span>
+find /var/mobile/Containers/Data/Application/[UUID]/ -name "*.db" -o -name "*.sqlite"
+sqlite3 /path/to/database.db ".tables"
+sqlite3 /path/to/database.db "SELECT * FROM users;"
+
+<span class="cm"># Keychain（需越獄 + keychain-dumper 工具）</span>
+./keychain_dumper                          <span class="cm"># 傾倒所有 Keychain 項目</span>
+./keychain_dumper -a                       <span class="cm"># 包含通用密碼（generic passwords）</span></pre>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">一位測試人員對一個 iOS 銀行 App 進行安全測試，發現即使在越獄設備上，也無法通過 Frida 繞過 Face ID 認證，因為相關處理完全在一個獨立處理器中進行且無法被 Hook。這個處理器是？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>Apple Neural Engine（ANE），用於機器學習加速</div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">B</span>Secure Enclave Processor（SEP），獨立的安全協處理器</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">C</span>Image Signal Processor（ISP），用於攝影機處理</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>Motion Coprocessor（M 系列），用於感測器資料</div>
+  </div>
+  <div class="q-exp">正確！Secure Enclave Processor（SEP）是 Apple A7 晶片（iPhone 5s）以後所有 iPhone 中的獨立安全協處理器。它負責 Face ID / Touch ID 生物特徵資料的處理與比對，以及設備加密金鑰的管理。SEP 與主處理器完全隔離，主處理器只能發送「是否驗證成功」的結果，無法直接存取生物特徵資料。即使在越獄設備上，Frida 也無法 Hook SEP 的操作，這是 iOS 硬體安全的核心設計。</div>
+</div>
+</div>
+
+
+<!-- ===== CH2: 靜態分析 ===== -->
+
+<!-- L2-1 IPA 解密 -->
+<div class="cb" id="l2-1">
+<h2>IPA 解密與 class-dump</h2>
+<p>從 App Store 下載的 App 受 FairPlay DRM 加密保護，直接用 Hopper 或 class-dump 分析只會看到加密的二進制。必須在越獄設備上將 App 從記憶體傾倒（Dump）出來，才能得到可分析的明文二進制。</p>
+
+<h3>解密工具</h3>
+<div class="kg">
+  <div class="kt"><div class="kt-n">frida-ios-dump</div><div class="kt-d">基於 Frida 的自動化 IPA 傾倒工具。在 App 運行時從記憶體提取解密後的二進制，並重新打包為 IPA。這是目前最常用且最可靠的解密方式。</div></div>
+  <div class="kt"><div class="kt-n">bagbak</div><div class="kt-d">另一個基於 Frida 的傾倒工具，語法更簡潔。<code>bagbak --output ./dump com.target.app</code> 即可完成解密和打包。</div></div>
+  <div class="kt"><div class="kt-n">class-dump / dsdump</div><div class="kt-d">從 Objective-C 或 Swift 的 Mach-O 二進制提取類別、方法、屬性的宣告，生成類似頭文件（.h）的輸出。是理解 App 結構的快速方法，但不顯示實作細節。</div></div>
+  <div class="kt"><div class="kt-n">Clutch（舊版工具）</div><div class="kt-d">較舊的傾倒工具，部分新版 iOS 相容性差。已基本被 frida-ios-dump 和 bagbak 取代，但在某些環境下仍可使用。</div></div>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">IPA 解密與 class-dump 使用</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 方法1：bagbak（推薦，最簡單）───</span>
+pip3 install bagbak
+<span class="cm"># 確保 frida-server 在 iOS 設備上運行</span>
+bagbak --output ./decrypted/ com.target.app
+<span class="cm"># 輸出：decrypted/AppName.ipa（已解密，可直接用 jadx / Hopper 分析）</span>
+
+<span class="cm"># ─── 方法2：frida-ios-dump ───</span>
+git clone https://github.com/AloneMonkey/frida-ios-dump.git
+pip3 install -r frida-ios-dump/requirements.txt
+
+<span class="cm"># 配置 dump.py 中的連線設定（IP / Port）</span>
+<span class="cm"># 列出設備上的 App</span>
+python3 frida-ios-dump/dump.py -l
+
+<span class="cm"># 傾倒指定 App</span>
+python3 frida-ios-dump/dump.py com.target.app
+<span class="cm"># 輸出：AppName.ipa</span>
+
+<span class="cm"># ─── 解壓 IPA 並執行 class-dump ───</span>
+unzip AppName.ipa -d AppName_extracted/
+cd AppName_extracted/Payload/AppName.app/
+
+<span class="cm"># class-dump：適用於 Objective-C</span>
+class-dump -S -s -H AppName -o ./headers/
+<span class="cm"># 輸出：每個類別一個 .h 頭文件</span>
+ls ./headers/                 <span class="cm"># LoginViewController.h, UserManager.h 等</span>
+cat ./headers/LoginViewController.h
+
+<span class="cm"># dsdump：支援 Objective-C 和 Swift</span>
+dsdump --objc --verbose AppName        <span class="cm"># Objective-C 詳細輸出</span>
+dsdump --swift --verbose AppName       <span class="cm"># Swift 類別和方法</span></pre>
+</div>
+</div>
+
+<!-- L2-2 Hopper / Ghidra -->
+<div class="cb" id="l2-2">
+<h2>Hopper / Ghidra 逆向分析</h2>
+<p>class-dump 只能看到方法宣告，要了解方法的實作邏輯，需要反組譯（Disassembly）或反編譯（Decompilation）工具。Hopper 是 macOS 上最流行的 iOS 逆向工具，Ghidra 是免費的替代方案。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>工具</th><th>平台</th><th>特點</th><th>適用場景</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Hopper Disassembler</strong></td><td>macOS / Linux</td><td>ARM64 反組譯 + 偽代碼生成，Objective-C 訊息語義識別，試用版免費但有時間限制</td><td>iOS 逆向首選；偽代碼可讀性高</td></tr>
+      <tr><td><strong>Ghidra</strong></td><td>跨平台（Java）</td><td>NSA 開源工具，功能全面，插件豐富，無時間限制。ARM64 分析能力強</td><td>免費替代 Hopper；複雜分析、指令碼自動化</td></tr>
+      <tr><td><strong>IDA Pro</strong></td><td>跨平台</td><td>業界標準，ARM64 分析最強，Hex-Rays 反編譯器輸出品質最高</td><td>高端漏洞研究；價格昂貴（數千美元）</td></tr>
+      <tr><td><strong>Binary Ninja</strong></td><td>跨平台</td><td>現代化介面，API 豐富，適合腳本化分析，個人版較 IDA 便宜</td><td>商業替代 IDA；自動化分析</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Hopper / Ghidra 逆向工作流</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 使用 Hopper 分析（GUI 工具）───</span>
+<span class="cm"># 1. File → Open → 選擇解密後的 Mach-O 二進制</span>
+<span class="cm"># 2. 架構選擇 ARM 64-bit</span>
+<span class="cm"># 3. 等待分析完成（幾分鐘）</span>
+<span class="cm"># 4. 使用搜索功能定位感興趣的方法：</span>
+<span class="cm">#    - 搜索「login」「password」「verify」「decrypt」等關鍵詞</span>
+<span class="cm">#    - 找到方法後按 Alt+Enter 查看偽代碼（Pseudo-code）</span>
+
+<span class="cm"># ─── Ghidra 分析（命令列 + GUI）───</span>
+<span class="cm"># 啟動 Ghidra</span>
+./ghidraRun
+
+<span class="cm"># 或使用命令列分析腳本（無 GUI）</span>
+./analyzeHeadless /tmp/ghidra_project AppProject \
+  -import AppName \
+  -postScript ExtractStrings.py   <span class="cm"># 執行後處理腳本</span>
+
+<span class="cm"># ─── 定位關鍵函數的通用技巧 ───</span>
+<span class="cm"># 1. 從字串入手：搜索錯誤訊息字串（如「Invalid password」）</span>
+<span class="cm">#    → 找到引用該字串的函數 → 這通常就是認證邏輯所在位置</span>
+<span class="cm">#</span>
+<span class="cm"># 2. 從 class-dump 頭文件入手：</span>
+<span class="cm">#    找到 -[LoginViewController verifyPassword:] 等方法</span>
+<span class="cm">#    → 在 Hopper 搜索該方法名 → 分析其實作</span>
+<span class="cm">#</span>
+<span class="cm"># 3. 從交叉引用（XRef）入手：</span>
+<span class="cm">#    找到 Keychain 讀取函數 SecItemCopyMatching 的所有呼叫位置</span>
+<span class="cm">#    → 了解 App 在哪些地方讀取憑證</span></pre>
+</div>
+</div>
+
+<!-- L2-3 Info.plist -->
+<div class="cb" id="l2-3">
+<h2>Info.plist 安全審計</h2>
+<p>Info.plist 是 iOS App 的核心設定清單，等同於 Android 的 AndroidManifest.xml。靜態分析的第一步就是仔細審查其中的安全相關設定。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Info.plist — 關鍵安全設定審查</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">&lt;!-- ─── 1. App Transport Security（ATS）設定 ─── --&gt;</span>
+<span class="cm">&lt;!-- 危險：完全禁用 ATS，允許任意明文 HTTP 連線 --&gt;</span>
+<span class="op">&lt;</span><span class="tg">key</span><span class="op">&gt;</span>NSAppTransportSecurity<span class="op">&lt;/</span><span class="tg">key</span><span class="op">&gt;</span>
+<span class="op">&lt;</span><span class="tg">dict</span><span class="op">&gt;</span>
+  <span class="op">&lt;</span><span class="tg">key</span><span class="op">&gt;</span>NSAllowsArbitraryLoads<span class="op">&lt;/</span><span class="tg">key</span><span class="op">&gt;</span>
+  <span class="op">&lt;</span><span class="tg">true</span><span class="op">/&gt;</span>  <span class="cm">&lt;!-- 高危！允許 HTTP 明文通訊 --&gt;</span>
+<span class="op">&lt;/</span><span class="tg">dict</span><span class="op">&gt;</span>
+
+<span class="cm">&lt;!-- ─── 2. URL Scheme 聲明（潛在劫持點）─── --&gt;</span>
+<span class="op">&lt;</span><span class="tg">key</span><span class="op">&gt;</span>CFBundleURLTypes<span class="op">&lt;/</span><span class="tg">key</span><span class="op">&gt;</span>
+<span class="op">&lt;</span><span class="tg">array</span><span class="op">&gt;</span>
+  <span class="op">&lt;</span><span class="tg">dict</span><span class="op">&gt;</span>
+    <span class="op">&lt;</span><span class="tg">key</span><span class="op">&gt;</span>CFBundleURLSchemes<span class="op">&lt;/</span><span class="tg">key</span><span class="op">&gt;</span>
+    <span class="op">&lt;</span><span class="tg">array</span><span class="op">&gt;</span>
+      <span class="op">&lt;</span><span class="tg">string</span><span class="op">&gt;</span>myapp<span class="op">&lt;/</span><span class="tg">string</span><span class="op">&gt;</span>  <span class="cm">&lt;!-- 任何 App 可搶注此 scheme，劫持回調 --&gt;</span>
+    <span class="op">&lt;/</span><span class="tg">array</span><span class="op">&gt;</span>
+  <span class="op">&lt;/</span><span class="tg">dict</span><span class="op">&gt;</span>
+<span class="op">&lt;/</span><span class="tg">array</span><span class="op">&gt;</span>
+
+<span class="cm">&lt;!-- ─── 3. 過度請求權限（超出功能需要）─── --&gt;</span>
+<span class="op">&lt;</span><span class="tg">key</span><span class="op">&gt;</span>NSCameraUsageDescription<span class="op">&lt;/</span><span class="tg">key</span><span class="op">&gt;</span>
+<span class="op">&lt;</span><span class="tg">string</span><span class="op">&gt;</span>用於掃描二維碼<span class="op">&lt;/</span><span class="tg">string</span><span class="op">&gt;</span>
+<span class="op">&lt;</span><span class="tg">key</span><span class="op">&gt;</span>NSMicrophoneUsageDescription<span class="op">&lt;/</span><span class="tg">key</span><span class="op">&gt;</span>
+<span class="op">&lt;</span><span class="tg">string</span><span class="op">&gt;</span>用於語音輸入<span class="op">&lt;/</span><span class="tg">string</span><span class="op">&gt;</span>
+<span class="op">&lt;</span><span class="tg">key</span><span class="op">&gt;</span>NSContactsUsageDescription<span class="op">&lt;/</span><span class="tg">key</span><span class="op">&gt;</span>
+<span class="op">&lt;</span><span class="tg">string</span><span class="op">&gt;</span>用於找到好友<span class="op">&lt;/</span><span class="tg">string</span><span class="op">&gt;</span>
+<span class="cm">&lt;!-- 一個計算機 App 為何需要麥克風和通訊錄？值得質疑 --&gt;</span>
+
+<span class="cm">&lt;!-- ─── 4. 應用程式查詢（窺探已安裝 App）─── --&gt;</span>
+<span class="op">&lt;</span><span class="tg">key</span><span class="op">&gt;</span>LSApplicationQueriesSchemes<span class="op">&lt;/</span><span class="tg">key</span><span class="op">&gt;</span>
+<span class="op">&lt;</span><span class="tg">array</span><span class="op">&gt;</span>
+  <span class="op">&lt;</span><span class="tg">string</span><span class="op">&gt;</span>weixin<span class="op">&lt;/</span><span class="tg">string</span><span class="op">&gt;</span>  <span class="cm">&lt;!-- 可查詢是否安裝了微信 --&gt;</span>
+  <span class="op">&lt;</span><span class="tg">string</span><span class="op">&gt;</span>alipay<span class="op">&lt;/</span><span class="tg">string</span><span class="op">&gt;</span>  <span class="cm">&lt;!-- 可查詢是否安裝了支付寶（隱私問題）--&gt;</span>
+<span class="op">&lt;/</span><span class="tg">array</span><span class="op">&gt;</span></pre>
+</div>
+</div>
+
+<!-- L2-4 代碼審計 -->
+<div class="cb" id="l2-4">
+<h2>代碼審計：硬編碼與不安全 API</h2>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">iOS 靜態分析 — 高危模式搜索</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 在解密後的 IPA 目錄中搜索敏感字串 ───</span>
+
+<span class="cm"># 搜索二進制中的字串（硬編碼 Key / URL / 密碼）</span>
+strings Payload/AppName.app/AppName | grep -iE "password|secret|apikey|token|http:|192\.168"
+
+<span class="cm"># 搜索 plist 資源文件</span>
+grep -r "secret\|apikey\|password" Payload/AppName.app/ --include="*.plist"
+
+<span class="cm"># ─── 危險 API 識別（class-dump 輸出後搜索）───</span>
+<span class="cm"># 不安全的隨機數（應使用 SecRandomCopyBytes）</span>
+grep -i "arc4random\|rand()" ./headers/*.h
+
+<span class="cm"># MD5 使用（不應用於密碼 Hash 或安全目的）</span>
+grep -i "CC_MD5\|md5" ./headers/*.h
+
+<span class="cm"># 弱加密（DES / 3DES / ECB 模式）</span>
+grep -i "kCCAlgorithmDES\|ECBMode" ./headers/*.h
+
+<span class="cm"># NSLog 洩露（生產版本應關閉敏感日誌）</span>
+grep -i "NSLog\|printf" ./headers/*.h
+
+<span class="cm"># UIPasteboard 使用（剪貼板可被其他 App 讀取）</span>
+grep -i "UIPasteboard" ./headers/*.h</pre>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">iOS 危險 API 對照表（Objective-C / Swift）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">// ─── 硬編碼憑證（最常見！）───</span>
+<span class="kw">let</span> apiKey = <span class="st">"sk-live-xxxxxxxxxxxxxxxxxx"</span>    <span class="cm">// 硬編碼 API 金鑰</span>
+<span class="kw">let</span> aesKey = <span class="st">"MySecret16ByteKey"</span>              <span class="cm">// 硬編碼加密金鑰</span>
+
+<span class="cm">// ─── 明文存儲敏感數據 ───</span>
+UserDefaults.standard.set(authToken, forKey: <span class="st">"token"</span>)  <span class="cm">// 應使用 Keychain</span>
+<span class="kw">let</span> path = FileManager.default.urls(for: .documentDirectory)
+<span class="cm">// 在 Documents 中存儲未加密的密碼文件 → 可備份，可被提取</span>
+
+<span class="cm">// ─── 不安全的 WebView ───</span>
+<span class="kw">let</span> config = WKWebViewConfiguration()
+<span class="cm">// 添加 JS Bridge 暴露原生功能</span>
+config.userContentController.add(self, name: <span class="st">"nativeBridge"</span>)
+<span class="cm">// JavaScript 可呼叫：window.webkit.messageHandlers.nativeBridge.postMessage()</span>
+
+<span class="cm">// ─── 弱加密算法 ───</span>
+<span class="cm">// Objective-C：使用 CommonCrypto</span>
+CCCrypt(kCCEncrypt, kCCAlgorithmDES,    <span class="cm">// DES：56-bit，已不安全</span>
+        kCCOptionPKCS7Padding, ...)
+CCCrypt(kCCEncrypt, kCCAlgorithmAES,
+        kCCOptionECBMode, ...)           <span class="cm">// ECB 模式：相同明文輸出相同密文</span>
+
+<span class="cm">// ─── 剪貼板洩露 ───</span>
+UIPasteboard.general.string = password   <span class="cm">// 密碼複製到剪貼板，其他 App 可讀取</span>
+
+<span class="cm">// ─── 不安全的 TLS 設定 ───</span>
+<span class="kw">func</span> <span class="fn">urlSession</span>(_ session: URLSession,
+    didReceive challenge: URLAuthenticationChallenge,
+    completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+    completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
+    <span class="cm">// 接受任何憑證！相當於禁用 TLS 驗證</span>
+}</pre>
+</div>
+</div>
+
+
+<!-- ===== CH3: 動態分析 ===== -->
+
+<!-- L3-1 HTTPS 抓包 -->
+<div class="cb" id="l3-1">
+<h2>HTTPS 流量攔截與 SSL Pinning 繞過</h2>
+<p>iOS HTTPS 流量攔截的基本流程與 Android 相似，但細節有所不同。iOS 14+ 引入了更嚴格的 ATS 強制執行，部分 App 的 SSL Pinning 實作方式也與 Android 不同。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">iOS HTTPS 抓包設定流程</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 步驟1：設定 iOS 設備使用 Burp 代理 ───</span>
+<span class="cm"># 設定 → WiFi → 點選已連線的網路 → 設定代理 → 手動</span>
+<span class="cm"># 伺服器：攻擊機 IP（如 192.168.1.50）</span>
+<span class="cm"># 通訊埠：8080</span>
+
+<span class="cm"># ─── 步驟2：在 iOS 設備上安裝 Burp CA 憑證 ───</span>
+<span class="cm"># 在 Safari 訪問 http://burpsuite（自動跳至 http://192.168.1.50:8080）</span>
+<span class="cm"># 點選 CA Certificate 下載 → 安裝設定檔</span>
+<span class="cm"># 設定 → 一般 → VPN 與裝置管理 → 已下載的設定檔 → 安裝</span>
+
+<span class="cm"># ─── 步驟3：信任 CA（iOS 10.3+ 必須額外步驟）───</span>
+<span class="cm"># 設定 → 一般 → 關於本機 → 憑證信任設定</span>
+<span class="cm"># 找到 PortSwigger CA → 開啟完整信任</span>
+
+<span class="cm"># ─── SSL Pinning 繞過：iOS 常見方式 ───</span>
+<span class="cm"># App 實作 SSL Pinning 的常見方式：</span>
+<span class="cm"># 1. URLSessionDelegate 中驗證憑證 Hash</span>
+<span class="cm"># 2. TrustKit 框架（需 Hook trustkit 的驗證函數）</span>
+<span class="cm"># 3. NSURLSession/NSURLConnection 的 AuthenticationChallenge</span>
+<span class="cm"># 4. 原生 SecTrustEvaluate / SecTrustEvaluateWithError</span>
+
+<span class="cm"># ─── 使用 Objection 一鍵繞過 SSL Pinning ───</span>
+objection --gadget com.target.app explore
+<span class="cm"># 在 objection shell 中：</span>
+ios sslpinning disable
+
+<span class="cm"># ─── 使用 SSL Kill Switch 2 Tweak（Cydia 套件）───</span>
+<span class="cm"># 在 Cydia 搜索並安裝 SSL Kill Switch 2</span>
+<span class="cm"># 安裝後在設定 → SSL Kill Switch 2 → 啟用</span>
+<span class="cm"># 強制禁用所有 App 的 SSL Pinning（系統級）</span></pre>
+</div>
+</div>
+
+<!-- L3-2 Frida on iOS -->
+<div class="cb" id="l3-2">
+<h2>Frida on iOS：Hook Objective-C 與 Swift</h2>
+<p>iOS 上的 Frida 使用方式與 Android 類似，但 Hook 語法完全不同：iOS 使用 Objective-C 的訊息傳遞機制（Message Passing），方法呼叫格式為 <code>-[ClassName methodName:arg]</code>。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Frida iOS — Objective-C Hook 語法</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">// ─── 基本 Objective-C 方法 Hook ───</span>
+ObjC.schedule(ObjC.mainQueue, <span class="kw">function</span>() {
+    <span class="kw">var</span> LoginVC = ObjC.classes.LoginViewController;
+
+    <span class="cm">// Hook 實例方法 -[LoginViewController verifyPassword:]</span>
+    <span class="kw">var</span> verifyPassword = LoginVC[<span class="st">'- verifyPassword:'</span>];
+    Interceptor.attach(verifyPassword.implementation, {
+        onEnter: <span class="kw">function</span>(args) {
+            <span class="cm">// args[0] = self, args[1] = _cmd, args[2] = 第一個參數</span>
+            <span class="kw">var</span> password = new ObjC.Object(args[<span class="nu">2</span>]).toString();
+            console.log(<span class="st">'[+] verifyPassword called with: '</span> + password);
+        },
+        onLeave: <span class="kw">function</span>(retval) {
+            console.log(<span class="st">'[+] return value: '</span> + retval);
+            retval.replace(<span class="nu">1</span>);  <span class="cm">// 強制返回 YES（BOOL 在 ObjC 中是 1）</span>
+        }
+    });
+});
+
+<span class="cm">// ─── Hook 類別方法（+[Class method]）───</span>
+ObjC.schedule(ObjC.mainQueue, <span class="kw">function</span>() {
+    <span class="kw">var</span> UserManager = ObjC.classes.UserManager;
+
+    <span class="cm">// Hook 類別方法 +[UserManager sharedInstance]</span>
+    <span class="kw">var</span> sharedInstance = UserManager[<span class="st">'+ sharedInstance'</span>];
+    Interceptor.attach(sharedInstance.implementation, {
+        onLeave: <span class="kw">function</span>(retval) {
+            <span class="kw">var</span> instance = new ObjC.Object(retval);
+            <span class="cm">// 讀取 instance 的屬性：</span>
+            console.log(<span class="st">'authToken: '</span> + instance.authToken().toString());
+        }
+    });
+});
+
+<span class="cm">// ─── 列出類別的所有方法 ───</span>
+ObjC.schedule(ObjC.mainQueue, <span class="kw">function</span>() {
+    <span class="kw">var</span> cls = ObjC.classes.LoginViewController;
+    var methods = cls.$ownMethods;
+    methods.forEach(<span class="kw">function</span>(method) {
+        console.log(method);
+    });
+});
+
+<span class="cm">// ─── Hook Swift 方法（需先知道 mangled name）───</span>
+<span class="cm">// Swift 方法名稱被 mangled，需先找到正確名稱</span>
+<span class="cm">// 使用 nm 或 rabin2 查找：</span>
+<span class="cm">// nm AppName | grep -i "verify\|auth"</span>
+<span class="kw">var</span> swiftFunc = Module.findExportByName(<span class="kw">null</span>, <span class="st">'$s9TargetApp12LoginManagerC14verifyPasswordySbSSF'</span>);
+Interceptor.attach(swiftFunc, {
+    onEnter: <span class="kw">function</span>(args) { console.log(<span class="st">'Swift func called'</span>); },
+    onLeave: <span class="kw">function</span>(retval) { retval.replace(<span class="nu">1</span>); }
+});</pre>
+</div>
+</div>
+
+<!-- L3-3 Cycript / LLDB -->
+<div class="cb" id="l3-3">
+<h2>Cycript / LLDB 動態調試</h2>
+<p>Cycript 允許在執行中的 App 進程中注入 Objective-C 代碼，適合快速探索 App 的物件狀態。LLDB 是 Xcode 的調試器，可配合 debugserver 進行完整的斷點調試。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Cycript — 注入執行中 App</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── Cycript 基本使用 ───</span>
+<span class="cm"># 在越獄設備上（SSH 連線後）：</span>
+cycript -p AppName            <span class="cm"># 通過進程名附加</span>
+cycript -p 1234               <span class="cm"># 通過 PID 附加</span>
+
+<span class="cm"># ─── Cycript 常用操作（互動式 shell 中）───</span>
+<span class="cm"># 列出所有 UIViewController</span>
+cy# UIApp.keyWindow.rootViewController
+
+<span class="cm"># 列出特定類別的所有實例</span>
+cy# choose(LoginViewController)
+
+<span class="cm"># 呼叫方法</span>
+cy# [choose(LoginViewController)[0] verifyPassword:@"test123"]
+
+<span class="cm"># 讀取屬性值</span>
+cy# [choose(UserManager)[0] authToken]
+
+<span class="cm"># 修改屬性值（繞過 UI 控制）</span>
+cy# [choose(PremiumManager)[0] isPremiumUser] = YES
+
+<span class="cm"># ─── LLDB 遠端調試（需越獄 + debugserver）───</span>
+<span class="cm"># 在越獄設備上啟動 debugserver</span>
+debugserver *:1234 -a AppName         <span class="cm"># 附加到已運行的 App</span>
+
+<span class="cm"># 在電腦端連線</span>
+lldb
+(lldb) process connect connect://192.168.1.101:1234
+
+<span class="cm"># LLDB 基本調試命令</span>
+(lldb) b -[LoginViewController verifyPassword:]    <span class="cm"># 設定斷點</span>
+(lldb) c                                            <span class="cm"># 繼續執行</span>
+(lldb) po $x2                                       <span class="cm"># 印出 ARM64 暫存器 x2（第一個 ObjC 參數）</span>
+(lldb) memory read --format utf8 $x2               <span class="cm"># 讀取記憶體字串</span>
+(lldb) thread return YES                            <span class="cm"># 強制函數返回 YES</span></pre>
+</div>
+</div>
+
+<!-- L3-4 Objection iOS -->
+<div class="cb" id="l3-4">
+<h2>Objection iOS 自動化測試</h2>
+<div class="cblock">
+  <div class="ctop"><span class="clang">Objection iOS — 核心命令速查</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># 連線（需要 frida-server 在 iOS 設備上運行）</span>
+objection --gadget com.target.app explore
+
+<span class="cm"># ─── iOS 常用 Objection 命令 ───</span>
+
+<span class="cm"># SSL Pinning 繞過</span>
+ios sslpinning disable
+
+<span class="cm"># 越獄檢測繞過</span>
+ios jailbreak disable
+
+<span class="cm"># 查看 NSUserDefaults</span>
+ios nsuserdefaults get
+
+<span class="cm"># 查看 NSHTTPCookieStorage（Cookie）</span>
+ios cookies get
+
+<span class="cm"># 列出 Keychain 所有項目</span>
+ios keychain dump
+ios keychain dump --json ./keychain.json    <span class="cm"># 匯出為 JSON</span>
+
+<span class="cm"># 列出 App 所有文件</span>
+env                              <span class="cm"># 查看沙盒目錄路徑</span>
+ls                               <span class="cm"># 在沙盒目錄中瀏覽</span>
+
+<span class="cm"># Hook 所有 Objective-C 方法（監聽呼叫）</span>
+ios hooking watch class LoginViewController
+ios hooking watch method "-[LoginViewController verifyPassword:]" --dump-args
+
+<span class="cm"># 搜索並監聽包含關鍵字的方法</span>
+ios hooking search methods password
+
+<span class="cm"># 截圖</span>
+ios ui screenshot /tmp/screen.png</pre>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">在使用 Frida Hook iOS App 的 Objective-C 方法時，你需要 Hook 方法 <code>-[AuthManager isValidToken:]</code> 並讓它永遠返回 <code>YES</code>。以下哪段代碼是正確的？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span><code>Java.use('AuthManager').isValidToken.implementation = function() { return true; }</code></div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">B</span><code>ObjC.classes.AuthManager['- isValidToken:'].implementation</code> 加上 <code>onLeave: retval.replace(1)</code></div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">C</span><code>Module.findExportByName('AuthManager', 'isValidToken')</code> 加上 Interceptor.attach</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span><code>Interceptor.replace(ptr(AuthManager.isValidToken), new NativeCallback(...))</code></div>
+  </div>
+  <div class="q-exp">正確！iOS Objective-C 方法的 Frida Hook 必須使用 ObjC API，而不是 Android 的 Java.use()。語法格式是 ObjC.classes.ClassName['- methodName:']，其中「-」代表實例方法，「+」代表類別方法。返回 BOOL YES 需要 retval.replace(1)，因為 Objective-C 的 BOOL 在底層是整數，YES = 1，NO = 0。選項 A 是 Android 的語法；選項 C 適用於 C/C++ 匯出函數，不直接適用於 ObjC 方法。</div>
+</div>
+</div>
+
+
+<!-- ===== CH4: 漏洞攻防 ===== -->
+
+<!-- L4-1 不安全數據存儲 -->
+<div class="cb" id="l4-1">
+<h2>不安全的數據存儲（Keychain / NSUserDefaults）</h2>
+<p>iOS 提供了多種數據存儲機制，安全性各不相同。測試人員必須檢查 App 是否將敏感資訊存儲在不適當的位置。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>存儲機制</th><th>安全性</th><th>常見問題</th><th>正確用途</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Keychain</strong></td><td>高（硬體加密）</td><td>使用 kSecAttrAccessible 設定過於寬鬆（如 kSecAttrAccessibleAlways）；越獄後可被 keychain-dumper 提取</td><td>密碼、Token、私鑰、憑證</td></tr>
+      <tr><td><strong>NSUserDefaults</strong></td><td>低（明文 plist）</td><td>明文存儲 Session Token、用戶偏好設定含敏感業務邏輯</td><td>僅用於非敏感的 UI 偏好設定</td></tr>
+      <tr><td><strong>Core Data / SQLite</strong></td><td>中（依設定）</td><td>資料庫未加密，敏感欄位明文存儲</td><td>搭配 SQLCipher 加密；或使用 Data Protection API</td></tr>
+      <tr><td><strong>文件系統（Documents/）</strong></td><td>低（可備份）</td><td>將包含個人資料的文件存入 Documents，iCloud / iTunes 備份可提取</td><td>設定 NSURLIsExcludedFromBackupKey 排除備份</td></tr>
+      <tr><td><strong>剪貼板（UIPasteboard）</strong></td><td>極低</td><td>密碼/OTP 複製到剪貼板，其他 App 可監聽讀取（iOS 14 以前）</td><td>iOS 14+ 已有提示，但仍應避免敏感資料進剪貼板</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Keychain 安全設定與提取</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">// ─── Keychain 存取控制等級對比 ───</span>
+<span class="cm">// 危險：設備未上鎖時也可讀取，且備份後在新設備可讀</span>
+kSecAttrAccessibleAlways
+kSecAttrAccessibleAlwaysThisDeviceOnly
+
+<span class="cm">// 較安全：設備上鎖後無法讀取</span>
+kSecAttrAccessibleWhenUnlocked              <span class="cm">// 解鎖時可讀，可備份（預設）</span>
+kSecAttrAccessibleWhenUnlockedThisDeviceOnly <span class="cm">// 解鎖時可讀，不可備份（推薦）</span>
+
+<span class="cm">// 最安全：需要設備密碼 + 生物辨識，且不可備份</span>
+kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly
+
+<span class="cm">// ─── 使用 Objection 傾倒 Keychain ───</span>
+<span class="cm">// 在 objection shell 中：</span>
+ios keychain dump
+<span class="cm">// 輸出每個 Keychain 項目的 Service、Account、Value</span>
+
+<span class="cm">// ─── 使用 keychain-dumper（越獄設備 shell）───</span>
+<span class="cm">// 需要在越獄設備 SSH 後執行：</span>
+<span class="cm">// chmod +x keychain_dumper</span>
+<span class="cm">// ./keychain_dumper</span>
+<span class="cm">// 輸出格式：</span>
+<span class="cm">// Service: com.target.app</span>
+<span class="cm">// Account: authToken</span>
+<span class="cm">// Entitlement Group: com.target.app</span>
+<span class="cm">// Label: Auth Token</span>
+<span class="cm">// Generic Attribute: (null)</span>
+<span class="cm">// Keychain Data: eyJhbGciOiJSUzI1NiJ9...（JWT Token！）</span></pre>
+</div>
+</div>
+
+<!-- L4-2 WKWebView -->
+<div class="cb" id="l4-2">
+<h2>WKWebView 漏洞與 JSContext 注入</h2>
+<p>WKWebView 是 iOS 8 後取代 UIWebView 的 Web 視圖元件。UIWebView 已被 Apple 棄用（Deprecated），且有嚴重的 JSContext 注入漏洞，仍在使用 UIWebView 的 App 是重點攻擊目標。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">WebView 漏洞：UIWebView vs WKWebView</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">// ─── UIWebView（已棄用）的 JSContext 注入漏洞 ───</span>
+<span class="cm">// UIWebView 將 JavaScript 執行環境暴露為 JSContext</span>
+<span class="cm">// 攻擊者可通過 Cycript / Frida 直接修改 JSContext</span>
+
+<span class="cm">// 用 Cycript 注入 UIWebView 的 JavaScript 環境：</span>
+cy# <span class="kw">var</span> webView = choose(UIWebView)[0];
+cy# [webView stringByEvaluatingJavaScriptFromString:@"document.cookie"];
+cy# [webView stringByEvaluatingJavaScriptFromString:@"window.localStorage"];
+
+<span class="cm">// ─── WKWebView JavaScript Bridge 測試 ───</span>
+<span class="cm">// 如果 App 設置了 JS 訊息處理器：</span>
+<span class="cm">// Swift 代碼：config.userContentController.add(self, name: "nativeBridge")</span>
+<span class="cm">// JavaScript 可呼叫：</span>
+window.webkit.messageHandlers.nativeBridge.postMessage({
+    action: <span class="st">"readFile"</span>,
+    path: <span class="st">"/var/mobile/Containers/Data/Application/.../Library/Preferences/"</span>
+});
+<span class="cm">// 如果 nativeBridge 未做輸入驗證 → 可能讀取任意文件或執行敏感操作</span>
+
+<span class="cm">// ─── 檢測 App 是否使用 UIWebView（class-dump / frida）───</span>
+<span class="cm">// 方法1：grep 頭文件</span>
+grep "UIWebView" ./headers/*.h
+
+<span class="cm">// 方法2：Frida 執行時查詢</span>
+ObjC.schedule(ObjC.mainQueue, <span class="kw">function</span>() {
+    <span class="kw">var</span> webViews = choose(UIWebView);
+    console.log(<span class="st">'UIWebView instances: '</span> + webViews.length);
+});</pre>
+</div>
+</div>
+
+<!-- L4-3 URL Scheme 劫持 -->
+<div class="cb" id="l4-3">
+<h2>URL Scheme 劫持與 Universal Links</h2>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">URL Scheme 劫持攻擊與 Universal Links 測試</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── URL Scheme 劫持（自定義 Scheme）───</span>
+<span class="cm"># 問題：自定義 URL Scheme（如 myapp://）非唯一，任何 App 均可聲明相同 Scheme</span>
+<span class="cm"># 攻擊場景：OAuth 回呼</span>
+<span class="cm">#   1. 目標 App 使用 myapp://oauth/callback 接收 OAuth Token</span>
+<span class="cm">#   2. 攻擊者 App 也聲明 myapp:// Scheme</span>
+<span class="cm">#   3. 系統隨機選擇其中一個 App 處理該 URL</span>
+<span class="cm">#   4. 攻擊者 App 收到包含 access_token 的 URL</span>
+
+<span class="cm"># 測試 URL Scheme：用 adb（iOS 使用 xcrun simctl 或 Frida）</span>
+xcrun simctl openurl booted "myapp://oauth/callback?code=test_code"
+
+<span class="cm"># 或在設備上用 Safari 測試：</span>
+<span class="cm"># 在 Safari 地址欄輸入：myapp://admin/delete_account?user=victim</span>
+
+<span class="cm"># ─── Universal Links（較安全的方案）───</span>
+<span class="cm"># Universal Links 使用 https://yourdomain.com/path 格式</span>
+<span class="cm"># 需要在 apple-app-site-association (AASA) 文件中宣告，Apple 服務器驗證</span>
+<span class="cm"># 測試 AASA 配置：</span>
+curl https://target.com/.well-known/apple-app-site-association
+<span class="cm"># 或</span>
+curl https://target.com/apple-app-site-association
+
+<span class="cm"># 回應應包含：</span>
+<span class="cm"># {</span>
+<span class="cm">#   "applinks": {</span>
+<span class="cm">#     "apps": [],</span>
+<span class="cm">#     "details": [{"appID": "TEAMID.com.target.app", "paths": ["/path/*"]}]</span>
+<span class="cm">#   }</span>
+<span class="cm"># }</span>
+
+<span class="cm"># ─── 測試 openURL: 的參數驗證 ───</span>
+<span class="cm"># App 應對收到的 URL 做嚴格驗證，防止注入攻擊</span>
+<span class="cm"># 用 Frida Hook application:openURL:options:</span>
+ObjC.schedule(ObjC.mainQueue, <span class="kw">function</span>() {
+    <span class="kw">var</span> AppDelegate = ObjC.classes.AppDelegate;
+    <span class="kw">var</span> openURL = AppDelegate[<span class="st">'- application:openURL:options:'</span>];
+    Interceptor.attach(openURL.implementation, {
+        onEnter: <span class="kw">function</span>(args) {
+            <span class="kw">var</span> url = new ObjC.Object(args[<span class="nu">3</span>]).absoluteString().toString();
+            console.log(<span class="st">'[+] openURL: '</span> + url);
+        }
+    });
+});</pre>
+</div>
+</div>
+
+<!-- L4-4 越獄檢測繞過 -->
+<div class="cb" id="l4-4">
+<h2>越獄檢測與繞過策略</h2>
+<p>iOS App（尤其是金融類）廣泛使用越獄檢測來拒絕在越獄設備上運行，因為越獄環境會削弱沙盒和系統完整性保護。測試人員必須能夠繞過這些檢測。</p>
+
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>檢測越獄文件是否存在</strong> — 檢查 <code>/Applications/Cydia.app</code>、<code>/bin/bash</code>、<code>/usr/sbin/sshd</code>、<code>/etc/apt</code> 等越獄環境特有路徑</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>嘗試寫入沙盒外路徑</strong> — 正常設備的 App 無法寫入 <code>/private/jailbreak_test.txt</code>；越獄設備可能成功，代表沙盒已被破壞</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>檢測 Cydia URL Scheme</strong> — <code>canOpenURL: "cydia://"</code> 若返回 YES，說明 Cydia 已安裝</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>動態函式庫注入檢測</strong> — 檢查進程是否載入了未預期的 dylib（如 FridaGadget.dylib、Substrate.dylib）</div></div>
+  <div class="il-item"><span class="il-num">05</span><div class="il-txt"><strong>Integrity Check / AMFI</strong> — 驗證 App 本身的代碼簽名完整性，在越獄環境下某些簽名驗證行為會改變</div></div>
+  <div class="il-item"><span class="il-num">06</span><div class="il-txt"><strong>IOSurface 沙盒逃逸檢測</strong> — 嘗試通過私有 API 存取受限資源，正常環境會失敗</div></div>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">越獄檢測繞過方法</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 方法1：Objection 一鍵繞過 ───</span>
+objection --gadget com.target.app explore
+ios jailbreak disable         <span class="cm"># Hook 常見越獄檢測函數，統一返回「未越獄」</span>
+
+<span class="cm"># ─── 方法2：Liberty Lite / Shadow（Cydia 套件）───</span>
+<span class="cm"># 在 Cydia 安裝 Liberty Lite 或 Shadow</span>
+<span class="cm"># 設定 → Liberty → 針對特定 App 啟用隱藏越獄</span>
+
+<span class="cm"># ─── 方法3：Frida 手動 Hook 越獄檢測函數 ───</span>
+ObjC.schedule(ObjC.mainQueue, <span class="kw">function</span>() {
+    <span class="cm">// Hook fileExistsAtPath:（Cydia.app 路徑檢測）</span>
+    <span class="kw">var</span> NSFileManager = ObjC.classes.NSFileManager;
+    <span class="kw">var</span> fileExists = NSFileManager[<span class="st">'- fileExistsAtPath:'</span>];
+    Interceptor.attach(fileExists.implementation, {
+        onEnter: <span class="kw">function</span>(args) {
+            <span class="kw">var</span> path = new ObjC.Object(args[<span class="nu">2</span>]).toString();
+            <span class="kw">if</span> (path.indexOf(<span class="st">'Cydia'</span>) !== -<span class="nu">1</span> || path.indexOf(<span class="st">'jailbreak'</span>) !== -<span class="nu">1</span>) {
+                this.jailbreakPath = <span class="kw">true</span>;
+            }
+        },
+        onLeave: <span class="kw">function</span>(retval) {
+            <span class="kw">if</span> (this.jailbreakPath) {
+                retval.replace(<span class="nu">0</span>);  <span class="cm">// fileExists 返回 NO</span>
+            }
+        }
+    });
+});</pre>
+</div>
+</div>
+
+<!-- L4-5 Binary 保護 -->
+<div class="cb" id="l4-5">
+<h2>Binary 保護機制分析（PIE / Stack Canary）</h2>
+<p>分析 iOS App 的二進制保護機制是安全審計的組成部分。缺乏保護的 App 在遭遇記憶體漏洞時更容易被利用。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Binary 保護檢測命令</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 使用 otool 和 checksec 分析 Mach-O 保護機制 ───</span>
+
+<span class="cm"># 檢測 PIE（Position Independent Executable）</span>
+otool -hv AppName | grep PIE
+<span class="cm"># 有 PIE 標記 → ASLR 有效；無 PIE → 固定記憶體位址，易於 ROP 攻擊</span>
+
+<span class="cm"># 檢測 Stack Canary（堆疊金絲雀，防堆疊溢位）</span>
+otool -Iv AppName | grep -i stack_chk
+<span class="cm"># 找到 ___stack_chk_guard 和 ___stack_chk_fail → Stack Canary 已啟用</span>
+
+<span class="cm"># 檢測 ARC（Automatic Reference Counting，防 UAF）</span>
+otool -Iv AppName | grep -i objc_release
+<span class="cm"># 有 _objc_release → 使用 ARC</span>
+
+<span class="cm"># 檢測加密（FairPlay DRM）</span>
+otool -l AppName | grep -A4 LC_ENCRYPTION_INFO
+<span class="cm"># cryptsize 不為 0 → 仍有加密，需先解密（frida-ios-dump / bagbak）</span>
+
+<span class="cm"># ─── 使用 MobSF 自動分析所有保護機制 ───</span>
+<span class="cm"># 上傳 IPA 到 MobSF 後，在「Binary Analysis」區域可看到：</span>
+<span class="cm"># PIE: Yes/No</span>
+<span class="cm"># Stack Canary: Yes/No</span>
+<span class="cm"># ARC: Yes/No</span>
+<span class="cm"># Rpath: Yes/No（含 Rpath 可能有 Dylib Injection 風險）</span>
+<span class="cm"># Symbols Stripped: Yes/No</span>
+<span class="cm"># Bitcode: Yes/No</span>
+
+<span class="cm"># ─── 使用 rabin2（radare2 套件）全面分析 ───</span>
+rabin2 -I AppName          <span class="cm"># 顯示所有保護機制</span>
+rabin2 -z AppName          <span class="cm"># 提取所有字串</span>
+rabin2 -i AppName          <span class="cm"># 列出所有 import 函數</span></pre>
+</div>
+</div>
+
+<!-- ===== CH5: 自動化與報告 ===== -->
+
+<!-- L5-1 MobSF iOS -->
+<div class="cb" id="l5-1">
+<h2>MobSF iOS 靜態分析</h2>
+<p>MobSF 支援 iOS IPA 靜態分析，可自動化完成大部分靜態審計工作，包括二進制保護機制、Info.plist 安全設定、硬編碼憑證等的分析。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">MobSF iOS 分析重點項目</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── MobSF iOS 靜態分析報告重點解讀 ───</span>
+
+<span class="cm"># 1. App Transport Security（ATS）分析</span>
+<span class="cm">#    - NSAllowsArbitraryLoads: true → 高危</span>
+<span class="cm">#    - NSExceptionDomains 中的 NSTemporaryExceptionAllowsInsecureHTTPLoads → 中危</span>
+
+<span class="cm"># 2. 二進制分析（Binary Analysis）</span>
+<span class="cm">#    檢查 PIE / Stack Canary / ARC / Symbol Stripped</span>
+
+<span class="cm"># 3. 代碼分析（Code Analysis）</span>
+<span class="cm">#    自動偵測：</span>
+<span class="cm">#    - MD5/SHA1 弱雜湊使用</span>
+<span class="cm">#    - NSLog 洩露</span>
+<span class="cm">#    - 剪貼板使用</span>
+<span class="cm">#    - 動態代碼執行（NSExpression, JavaScriptCore）</span>
+<span class="cm">#    - SQL 注入風險（未使用參數化查詢）</span>
+<span class="cm">#    - 明文 HTTP 字串</span>
+
+<span class="cm"># 4. 文件分析</span>
+<span class="cm">#    - 嵌入的憑證文件（.p12, .cer）</span>
+<span class="cm">#    - 嵌入的設定文件（config.json 等）</span>
+<span class="cm">#    - SQLite 資料庫結構分析</span>
+
+<span class="cm"># ─── 使用 MobSF REST API 整合到 CI/CD ───</span>
+<span class="cm"># 上傳 IPA</span>
+curl -F "file=@target.ipa" http://localhost:8000/api/v1/upload \
+  -H "Authorization: YOUR_API_KEY"
+
+<span class="cm"># 觸發掃描（scan_type = ipa）</span>
+curl -X POST "http://localhost:8000/api/v1/scan" \
+  -d "scan_type=ipa&file_name=target.ipa&hash=FILE_HASH" \
+  -H "Authorization: YOUR_API_KEY"
+
+<span class="cm"># 取得 PDF 報告</span>
+curl "http://localhost:8000/api/v1/download_pdf?hash=FILE_HASH" \
+  -H "Authorization: YOUR_API_KEY" -o report.pdf</pre>
+</div>
+</div>
+
+<!-- L5-2 OWASP Mobile Top 10 iOS -->
+<div class="cb" id="l5-2">
+<h2>OWASP Mobile Top 10：iOS 視角</h2>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>#</th><th>風險名稱</th><th>iOS 測試方法</th><th>典型案例</th></tr></thead>
+    <tbody>
+      <tr><td class="mc">M1</td><td><strong>憑證使用不當</strong></td><td>strings / class-dump 搜索硬編碼金鑰；Hopper 分析加密實作</td><td>Info.plist 中的 API Key；AES 固定 IV；硬編碼 Keychain 服務名</td></tr>
+      <tr><td class="mc">M2</td><td><strong>不安全的數據存儲</strong></td><td>Objection keychain dump；NSUserDefaults 檢查；沙盒文件分析</td><td>authToken 存入 NSUserDefaults；Keychain 使用 kSecAttrAccessibleAlways</td></tr>
+      <tr><td class="mc">M3</td><td><strong>不安全的通訊</strong></td><td>Burp + Objection sslpinning disable；Info.plist ATS 審查</td><td>NSAllowsArbitraryLoads=true；自訂 URLSessionDelegate 接受任意憑證</td></tr>
+      <tr><td class="mc">M4</td><td><strong>不充分的身份驗證</strong></td><td>Frida Hook isAuthenticated 等方法；Cycript 修改物件屬性</td><td>本地端 isPremium 屬性可被 Frida 修改；Touch ID 繞過後直接給予存取</td></tr>
+      <tr><td class="mc">M5</td><td><strong>不充分的加密</strong></td><td>class-dump 搜索 kCCAlgorithmDES / ECBMode；Hopper 分析加密流程</td><td>使用 DES；ECB 模式；自製 XOR 加密；MD5 做密碼 Hash</td></tr>
+      <tr><td class="mc">M6</td><td><strong>不充分的授權</strong></td><td>URL Scheme 測試；Universal Links AASA 分析；Frida Hook openURL</td><td>URL Scheme 未驗證來源；深度連結可被第三方 App 任意觸發</td></tr>
+      <tr><td class="mc">M7</td><td><strong>客戶端代碼品質</strong></td><td>Hopper 分析記憶體操作；rabin2 檢查保護機制；UIWebView 偵測</td><td>使用 UIWebView（JSContext 注入）；缺少 Stack Canary；無 PIE</td></tr>
+      <tr><td class="mc">M8</td><td><strong>代碼篡改</strong></td><td>嘗試重打包 IPA；class-dump 分析完整性檢查邏輯</td><td>App 未驗證自身簽名完整性；可被修改後重新企業簽名安裝</td></tr>
+      <tr><td class="mc">M9</td><td><strong>逆向工程</strong></td><td>Hopper 偽代碼品質；class-dump 輸出可讀性；字串加密情況</td><td>未混淆的方法名暴露業務邏輯（如 -[PaymentManager bypassPaywall]）</td></tr>
+      <tr><td class="mc">M10</td><td><strong>多餘功能</strong></td><td>class-dump 搜索 debug / test / backdoor；Info.plist 審查</td><td>調試端點殘留（/debug/users）；測試帳號硬編碼；隱藏管理員功能</td></tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+<!-- L5-3 Android vs iOS 對比 -->
+<div class="cb" id="l5-3">
+<h2>Android vs iOS 安全差異對照</h2>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>面向</th><th>Android</th><th>iOS</th></tr></thead>
+    <tbody>
+      <tr><td><strong>測試前提</strong></td><td>Root 設備（Magisk）或模擬器（較易取得）</td><td>越獄設備（版本限制嚴格，需舊款硬體）</td></tr>
+      <tr><td><strong>二進制格式</strong></td><td>DEX（Dalvik 字節碼）→ jadx 可直接反編譯為 Java</td><td>Mach-O ARM64 → 需 Hopper / Ghidra 反組譯，可讀性較差</td></tr>
+      <tr><td><strong>靜態分析工具</strong></td><td>jadx-gui（主力）、apktool（Smali 修改）</td><td>class-dump + Hopper / Ghidra；dsdump（Swift）</td></tr>
+      <tr><td><strong>動態插樁</strong></td><td>Frida（Java.use）、Objection</td><td>Frida（ObjC.classes）、Cycript、LLDB + debugserver</td></tr>
+      <tr><td><strong>App 重打包</strong></td><td>apktool 反編譯 → 修改 → 重打包 → 自簽名 → 安裝（相對容易）</td><td>需要有效 Apple 開發者憑證；企業憑證可繞過 App Store 但需付費</td></tr>
+      <tr><td><strong>流量攔截</strong></td><td>設定代理 + 安裝 CA；Android 7+ 需 Root 或修改 App</td><td>設定代理 + 安裝並信任 CA；ATS 強制 TLS</td></tr>
+      <tr><td><strong>數據存儲</strong></td><td>SharedPreferences / SQLite / 外部存儲</td><td>NSUserDefaults / Core Data / Keychain</td></tr>
+      <tr><td><strong>密鑰存儲</strong></td><td>Android Keystore（硬體支援，TEE）</td><td>Keychain + Secure Enclave（更強硬體保護）</td></tr>
+      <tr><td><strong>App 間通訊</strong></td><td>Intent（顯式/隱式）、ContentProvider、BroadcastReceiver</td><td>URL Scheme、Universal Links、App Groups、Pasteboard</td></tr>
+      <tr><td><strong>自動化掃描</strong></td><td>MobSF、AndroBugs、QARK</td><td>MobSF（IPA）、iRET（舊版）、needle</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="done-banner">
+  <h3>Stage 06 完成：iOS 安全測試</h3>
+  <p>你已掌握 iOS 安全測試的核心技術：IPA 解密（bagbak/frida-ios-dump）、Hopper/class-dump 靜態逆向、Frida Objective-C Hook、Keychain 分析、越獄檢測繞過，以及 Android 與 iOS 的全面對照。繼續進入內網滲透。</p>
+  <div class="btn-row">
+    <a href="stage7.html" class="btn-p">前往第七階段：內網滲透</a>
+    <a href="stage5.html" class="btn-g">回顧第五階段</a>
+    <a href="index.html" class="btn-g">返回課程首頁</a>
+  </div>
+</div>
+
+</div><!-- /cw -->
+
+<div class="lnav">
+  <button class="lb" id="prevb" onclick="prevL()" disabled>&#8592; 上一課</button>
+  <div class="ln-mid">
+    <div class="ln-cnt" id="cnt">1 / 20</div>
+    <div class="ln-sub" id="lsub">iOS 架構與安全機制概覽</div>
+  </div>
+  <button class="lb pri" id="nextb" onclick="nextL()">下一課 &#8594;</button>
+</div>
+
+</main>
+</div>
+
+<script>
+const LS=[
+  {id:'l1-1',ch:'CH1',title:'iOS 架構與安全機制概覽',time:'20分鐘',type:'基礎架構'},
+  {id:'l1-2',ch:'CH1',title:'IPA 結構與 App 沙盒',time:'20分鐘',type:'IPA 結構'},
+  {id:'l1-3',ch:'CH1',title:'測試環境：越獄設備與 Checkra1n',time:'30分鐘',type:'環境配置'},
+  {id:'l1-4',ch:'CH1',title:'SSH 連線與 iOS 文件系統',time:'20分鐘',type:'文件系統'},
+  {id:'l2-1',ch:'CH2',title:'IPA 解密與 class-dump',time:'25分鐘',type:'靜態分析'},
+  {id:'l2-2',ch:'CH2',title:'Hopper / Ghidra 逆向分析',time:'30分鐘',type:'逆向工程'},
+  {id:'l2-3',ch:'CH2',title:'Info.plist 安全審計',time:'20分鐘',type:'Manifest 分析'},
+  {id:'l2-4',ch:'CH2',title:'代碼審計：硬編碼與不安全 API',time:'25分鐘',type:'代碼審計'},
+  {id:'l3-1',ch:'CH3',title:'HTTPS 流量攔截與 SSL Pinning 繞過',time:'25分鐘',type:'流量分析'},
+  {id:'l3-2',ch:'CH3',title:'Frida on iOS：Hook Objective-C 與 Swift',time:'30分鐘',type:'Frida 實戰'},
+  {id:'l3-3',ch:'CH3',title:'Cycript / LLDB 動態調試',time:'25分鐘',type:'動態調試'},
+  {id:'l3-4',ch:'CH3',title:'Objection iOS 自動化測試',time:'20分鐘',type:'自動化測試'},
+  {id:'l4-1',ch:'CH4',title:'不安全的數據存儲（Keychain / NSUserDefaults）',time:'20分鐘',type:'M2 存儲'},
+  {id:'l4-2',ch:'CH4',title:'WKWebView 漏洞與 JSContext 注入',time:'20分鐘',type:'WebView'},
+  {id:'l4-3',ch:'CH4',title:'URL Scheme 劫持與 Universal Links',time:'20分鐘',type:'URL Scheme'},
+  {id:'l4-4',ch:'CH4',title:'越獄檢測與繞過策略',time:'25分鐘',type:'越獄繞過'},
+  {id:'l4-5',ch:'CH4',title:'Binary 保護機制分析（PIE / Stack Canary）',time:'20分鐘',type:'Binary 分析'},
+  {id:'l5-1',ch:'CH5',title:'MobSF iOS 靜態分析',time:'20分鐘',type:'自動化'},
+  {id:'l5-2',ch:'CH5',title:'OWASP Mobile Top 10：iOS 視角',time:'15分鐘',type:'標準映射'},
+  {id:'l5-3',ch:'CH5',title:'Android vs iOS 安全差異對照',time:'20分鐘',type:'對比總結'},
+];
+const done=new Set(JSON.parse(localStorage.getItem('s6_done')||'[]'));
+let cur=0;
+function go(id,btn){
+  document.querySelectorAll('.cb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.ls-btn').forEach(b=>b.classList.remove('lact'));
+  const bl=document.getElementById(id);if(bl)bl.classList.add('on');
+  if(btn)btn.classList.add('lact');
+  cur=LS.findIndex(l=>l.id===id);syncUI();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function toggleCh(btn,id){
+  btn.classList.toggle('copen');
+  const l=document.getElementById(id);if(l)l.classList.toggle('lopen');
+}
+function prevL(){if(cur>0)findAndGo(LS[cur-1].id);}
+function nextL(){
+  done.add(LS[cur].id);
+  localStorage.setItem('s6_done',JSON.stringify([...done]));
+  if(cur<LS.length-1)findAndGo(LS[cur+1].id);
+}
+function findAndGo(id){
+  let btn=null;
+  document.querySelectorAll('.ls-btn').forEach(b=>{
+    if((b.getAttribute('onclick')||'').includes("'"+id+"'")){
+      btn=b;
+      const p=b.parentElement;
+      if(p&&!p.classList.contains('lopen')){
+        p.classList.add('lopen');
+        const cb=p.previousElementSibling;
+        if(cb)cb.classList.add('copen');
+      }
+    }
+  });
+  go(id,btn);
+}
+function syncUI(){
+  const l=LS[cur];if(!l)return;
+  document.getElementById('crumb').innerHTML=`STAGE 06 &gt; ${l.ch} &gt; <em>${l.title}</em>`;
+  document.getElementById('ltitle').textContent=l.title;
+  document.getElementById('chip1').textContent=l.type;
+  document.getElementById('chip2').textContent=`預計 ${l.time}`;
+  document.getElementById('cnt').textContent=`${cur+1} / ${LS.length}`;
+  document.getElementById('lsub').textContent=l.title;
+  document.getElementById('prevb').disabled=cur===0;
+  document.getElementById('nextb').disabled=cur===LS.length-1;
+  if(cur===LS.length-1)document.getElementById('nextb').textContent='Stage 完成';
+  else document.getElementById('nextb').innerHTML='下一課 &#8594;';
+  const pct=done.size?Math.round(done.size/LS.length*100):0;
+  document.getElementById('pct').textContent=pct+'%';
+  document.getElementById('pf').style.width=pct+'%';
+  document.querySelectorAll('.ls-btn').forEach(b=>{
+    const m=(b.getAttribute('onclick')||'').match(/'(l\d+-\d+)'/);
+    if(m&&done.has(m[1])&&!b.classList.contains('lact'))b.classList.add('ldone');
+  });
+}
+function chkQ(el,correct){
+  const box=el.closest('.quiz');
+  if(box.dataset.answered)return;
+  box.dataset.answered='1';
+  box.querySelectorAll('.qo').forEach(o=>o.style.pointerEvents='none');
+  el.classList.add(correct?'ok':'bad');
+  if(!correct)box.querySelectorAll('.qo').forEach(o=>{
+    if((o.getAttribute('onclick')||'').includes('true'))o.classList.add('ok');
+  });
+  const exp=box.querySelector('.q-exp');
+  if(exp)exp.classList.add('on');
+}
+function cpCode(btn){
+  const pre=btn.closest('.cblock').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(()=>{
+    btn.textContent='已複製';setTimeout(()=>btn.textContent='複製',2000);
+  });
+}
+syncUI();
+</script>
+</body>
+</html>

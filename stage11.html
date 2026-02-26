@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Stage 11 — 風險評估 | SEC_TRACK</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050c06;--bg2:#081009;--bg3:#0c160d;--sur:#132016;--bdr:#1e3422;
+  --acc:#7dd96a;--acc2:#56b545;--txt:#d6edd8;--txt2:#6a9a6e;--txt3:#375c3b;
+  --red:#f05252;--grn:#3ecf8e;--cyn:#22d3ee;--ylw:#fbbf24;--pur:#a78bfa;--rose:#fb7185;--org:#f97316;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse 60% 40% at 8% 0%,rgba(125,217,106,.05) 0%,transparent 55%),
+  radial-gradient(ellipse 45% 30% at 92% 100%,rgba(86,181,69,.04) 0%,transparent 55%);
+  pointer-events:none;z-index:0;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 36px;background:rgba(5,12,6,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--bdr);}
+.n-logo{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.95rem;color:var(--acc);text-decoration:none;}
+.n-logo span{color:var(--txt3);}
+.n-mid{display:flex;align-items:center;gap:10px;}
+.s-pill{font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;background:rgba(125,217,106,.1);color:var(--acc);border:1px solid rgba(125,217,106,.28);}
+.n-sname{font-size:.8rem;color:var(--txt2);}
+.n-back{font-size:.8rem;color:var(--txt3);text-decoration:none;transition:color .2s;}
+.n-back:hover{color:var(--acc);}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh;padding-top:60px;}
+.sidebar{position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;background:var(--bg2);border-right:1px solid var(--bdr);display:flex;flex-direction:column;z-index:10;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--bdr);}
+.sb-h{padding:22px 22px 16px;border-bottom:1px solid var(--bdr);flex-shrink:0;}
+.sb-tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--acc);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
+.sb-title{font-size:.88rem;font-weight:700;line-height:1.45;margin-bottom:13px;}
+.sb-meta{display:flex;gap:16px;}
+.sm-item{display:flex;flex-direction:column;gap:2px;}
+.sm-val{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;color:var(--acc);}
+.sm-key{font-size:.62rem;color:var(--txt3);letter-spacing:.06em;text-transform:uppercase;}
+.sb-nav{flex:1;overflow-y:auto;padding:6px 0;}
+.ch-btn{width:100%;display:flex;align-items:center;gap:9px;padding:9px 22px;background:none;border:none;border-bottom:1px solid rgba(30,52,34,.7);color:var(--txt2);font-family:'Noto Sans TC',sans-serif;font-size:.79rem;font-weight:500;cursor:pointer;text-align:left;transition:color .18s,background .18s;}
+.ch-btn:hover{color:var(--txt);background:var(--bg3);}
+.ch-btn.cact{color:var(--acc);}
+.ch-num{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt3);min-width:26px;flex-shrink:0;}
+.ch-btn.cact .ch-num{color:var(--acc);}
+.ch-arr{font-size:.52rem;color:var(--txt3);transition:transform .2s;flex-shrink:0;}
+.ch-btn.copen .ch-arr{transform:rotate(90deg);}
+.ls-list{display:none;flex-direction:column;background:rgba(0,0,0,.15);}
+.ls-list.lopen{display:flex;}
+.ls-btn{display:flex;align-items:flex-start;gap:9px;padding:7px 22px 7px 44px;background:none;border:none;border-bottom:1px solid rgba(30,52,34,.4);color:var(--txt3);font-family:'Noto Sans TC',sans-serif;font-size:.74rem;cursor:pointer;text-align:left;width:100%;transition:color .18s,background .18s;line-height:1.4;}
+.ls-btn:hover{color:var(--txt2);background:rgba(125,217,106,.03);}
+.ls-btn.lact{color:var(--acc);background:rgba(125,217,106,.06);}
+.ls-btn.ldone{color:var(--txt3);}
+.ls-dot{width:5px;height:5px;border-radius:50%;background:var(--bdr);flex-shrink:0;margin-top:5px;transition:background .2s;}
+.ls-btn.lact .ls-dot,.ls-btn.ldone .ls-dot{background:var(--acc);}
+.sb-f{padding:13px 22px;border-top:1px solid var(--bdr);flex-shrink:0;}
+.pr{display:flex;justify-content:space-between;font-size:.68rem;color:var(--txt3);margin-bottom:6px;}
+.pt{height:3px;background:var(--bdr);border-radius:2px;overflow:hidden;}
+.pf{height:100%;background:var(--acc);border-radius:2px;transition:width .4s;}
+.main{position:relative;z-index:1;display:flex;flex-direction:column;}
+.lh{padding:38px 56px 30px;border-bottom:1px solid var(--bdr);background:linear-gradient(180deg,rgba(125,217,106,.03) 0%,transparent 100%);}
+.lh-crumb{font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--txt3);letter-spacing:.08em;margin-bottom:11px;}
+.lh-crumb em{color:var(--acc);font-style:normal;}
+.lh-title{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin-bottom:11px;}
+.lh-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{padding:3px 11px;border-radius:20px;font-size:.67rem;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;border:1px solid var(--bdr);color:var(--txt3);}
+.chip.ac{border-color:rgba(125,217,106,.4);color:var(--acc);}
+.cw{padding:38px 56px 80px;max-width:880px;}
+.cb{display:none;}
+.cb.on{display:block;animation:rise .25s ease both;}
+@keyframes rise{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:none;}}
+h2{font-size:1.25rem;font-weight:800;letter-spacing:-.01em;margin:36px 0 13px;color:var(--txt);display:flex;align-items:center;gap:10px;}
+h2::before{content:'';display:inline-block;width:3px;height:1.1em;border-radius:2px;background:var(--acc);flex-shrink:0;}
+h2:first-child{margin-top:0;}
+h3{font-size:.98rem;font-weight:700;margin:22px 0 9px;color:var(--txt);}
+p{font-size:.9rem;line-height:1.85;color:var(--txt2);margin-bottom:11px;font-weight:300;}
+strong{color:var(--txt);font-weight:600;}
+code{font-family:'JetBrains Mono',monospace;font-size:.8em;background:var(--sur);border:1px solid var(--bdr);padding:1px 6px;border-radius:3px;color:var(--acc);}
+.note{border-left:3px solid;padding:13px 17px;margin:18px 0;border-radius:0 4px 4px 0;}
+.note-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:6px;}
+.note p{margin:0;font-size:.86rem;line-height:1.7;}
+.note.tip{border-color:var(--acc);background:rgba(125,217,106,.06);}
+.note.tip .note-lbl{color:var(--acc);}
+.note.warn{border-color:var(--ylw);background:rgba(251,191,36,.06);}
+.note.warn .note-lbl{color:var(--ylw);}
+.note.sec{border-color:var(--grn);background:rgba(62,207,142,.06);}
+.note.sec .note-lbl{color:var(--grn);}
+.note.danger{border-color:var(--red);background:rgba(240,82,82,.07);}
+.note.danger .note-lbl{color:var(--red);}
+.note.law{border-color:var(--pur);background:rgba(167,139,250,.07);}
+.note.law .note-lbl{color:var(--pur);}
+.note.std{border-color:var(--cyn);background:rgba(34,211,238,.05);}
+.note.std .note-lbl{color:var(--cyn);}
+.cblock{background:#020804;border:1px solid var(--bdr);border-radius:6px;margin:16px 0;overflow:hidden;}
+.ctop{display:flex;align-items:center;justify-content:space-between;padding:7px 15px;background:rgba(8,20,10,.8);border-bottom:1px solid var(--bdr);}
+.clang{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;}
+.ccopy{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt3);background:none;border:none;cursor:pointer;transition:color .2s;}
+.ccopy:hover{color:var(--acc);}
+pre{padding:16px 20px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.75;color:#c8ddc9;}
+pre .kw{color:#c792ea;}pre .fn{color:#82aaff;}pre .st{color:#c3e88d;}pre .cm{color:#1d3d20;font-style:italic;}
+pre .nu{color:#f78c6c;}pre .tg{color:#f07178;}pre .at{color:#ffcb6b;}
+pre .hl{background:rgba(125,217,106,.12);border-radius:2px;padding:0 2px;}
+pre .hi{color:#7dd96a;font-weight:700;}
+.tbl{overflow-x:auto;margin:16px 0;}
+table.t{width:100%;border-collapse:collapse;font-size:.82rem;}
+table.t th{background:var(--sur);padding:9px 14px;text-align:left;font-size:.63rem;font-family:'JetBrains Mono',monospace;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--bdr);}
+table.t td{padding:9px 14px;border:1px solid var(--bdr);color:var(--txt2);font-weight:300;vertical-align:top;line-height:1.55;}
+table.t tr:hover td{background:var(--bg3);}
+.mc{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--acc);}
+.kg{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--bdr);border:1px solid var(--bdr);margin:16px 0;}
+.kt{background:var(--bg2);padding:14px 17px;}
+.kt-n{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--acc);font-weight:700;margin-bottom:5px;}
+.kt-d{font-size:.79rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.ilist{display:flex;flex-direction:column;border:1px solid var(--bdr);border-radius:4px;overflow:hidden;margin:16px 0;}
+.il-item{display:flex;align-items:flex-start;gap:13px;padding:12px 17px;border-bottom:1px solid var(--bdr);transition:background .15s;}
+.il-item:last-child{border-bottom:none;}
+.il-item:hover{background:var(--bg3);}
+.il-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--acc);min-width:24px;flex-shrink:0;padding-top:2px;font-weight:700;}
+.il-txt{font-size:.85rem;color:var(--txt2);line-height:1.6;font-weight:300;}
+.il-txt strong{color:var(--txt);}
+.atkflow{display:flex;flex-direction:column;gap:3px;margin:18px 0;}
+.af-step{display:flex;align-items:flex-start;gap:13px;padding:13px 16px;background:var(--sur);border:1px solid var(--bdr);border-radius:4px;position:relative;}
+.af-step::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--bdr);border-radius:4px 0 0 4px;}
+.af-step.s1::before{background:var(--acc);}
+.af-step.s2::before{background:var(--ylw);}
+.af-step.s3::before{background:var(--org);}
+.af-step.s4::before{background:var(--cyn);}
+.af-step.s5::before{background:var(--pur);}
+.af-step.s6::before{background:var(--grn);}
+.af-step.s7::before{background:var(--rose);}
+.af-n{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txt3);font-weight:700;min-width:44px;flex-shrink:0;padding-top:2px;letter-spacing:.04em;}
+.af-t{font-size:.82rem;font-weight:700;color:var(--txt);margin-bottom:4px;}
+.af-d{font-size:.78rem;color:var(--txt2);line-height:1.55;font-weight:300;}
+.risk-matrix{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;margin:18px 0;background:var(--bdr);border:1px solid var(--bdr);}
+.rm-cell{padding:9px 5px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;}
+.rm-hdr{background:var(--sur);color:var(--txt3);}
+.rm-vhdr{background:var(--sur);color:var(--txt3);font-size:.6rem;}
+.rm-low{background:rgba(62,207,142,.15);color:#3ecf8e;}
+.rm-mid{background:rgba(251,191,36,.15);color:#fbbf24;}
+.rm-hi{background:rgba(249,115,22,.2);color:#f97316;}
+.rm-crit{background:rgba(240,82,82,.2);color:#f05252;}
+.quiz{background:var(--bg3);border:1px solid var(--bdr);border-radius:6px;padding:22px;margin:26px 0;}
+.q-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--ylw);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;}
+.q-q{font-size:.9rem;font-weight:600;margin-bottom:13px;line-height:1.5;color:var(--txt);}
+.q-opts{display:flex;flex-direction:column;gap:6px;}
+.qo{display:flex;align-items:flex-start;gap:10px;padding:8px 13px;border:1px solid var(--bdr);border-radius:4px;cursor:pointer;font-size:.83rem;color:var(--txt2);transition:all .18s;line-height:1.5;}
+.qo:hover{border-color:var(--acc);color:var(--txt);}
+.qo.ok{border-color:var(--acc);background:rgba(125,217,106,.07);color:var(--acc);}
+.qo.bad{border-color:var(--red);background:rgba(240,82,82,.07);color:var(--red);}
+.qo-k{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--txt3);min-width:16px;padding-top:1px;flex-shrink:0;}
+.q-exp{display:none;margin-top:12px;padding:11px 14px;background:rgba(125,217,106,.05);border-left:2px solid var(--acc);border-radius:0 4px 4px 0;font-size:.82rem;color:var(--txt2);line-height:1.65;}
+.q-exp.on{display:block;}
+.done-banner{background:linear-gradient(135deg,rgba(125,217,106,.07),rgba(86,181,69,.05));border:1px solid rgba(125,217,106,.2);border-radius:6px;padding:28px;margin:34px 0 14px;text-align:center;}
+.done-banner h3{font-size:1.1rem;font-weight:800;color:var(--acc);margin-bottom:8px;}
+.done-banner p{font-size:.87rem;margin-bottom:20px;}
+.btn-row{display:flex;gap:11px;justify-content:center;flex-wrap:wrap;}
+.btn-p{display:inline-block;padding:10px 24px;background:var(--acc);color:#050c06;text-decoration:none;font-weight:700;font-size:.84rem;border-radius:4px;transition:all .2s;}
+.btn-p:hover{background:#9aeb84;transform:translateY(-1px);}
+.btn-g{display:inline-block;padding:10px 24px;border:1px solid var(--bdr);color:var(--txt2);text-decoration:none;font-size:.84rem;border-radius:4px;transition:all .2s;}
+.btn-g:hover{border-color:var(--acc);color:var(--acc);}
+.lnav{display:flex;justify-content:space-between;align-items:center;padding:22px 56px;border-top:1px solid var(--bdr);background:var(--bg2);position:sticky;bottom:0;z-index:5;}
+.lb{display:flex;align-items:center;gap:7px;padding:8px 18px;border:1px solid var(--bdr);border-radius:4px;background:none;color:var(--txt2);font-size:.82rem;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .18s;}
+.lb:hover:not(:disabled){border-color:var(--acc);color:var(--acc);}
+.lb.pri{background:var(--acc);color:#050c06;border-color:var(--acc);font-weight:700;}
+.lb.pri:hover:not(:disabled){background:#9aeb84;}
+.lb:disabled{opacity:.2;cursor:not-allowed;}
+.ln-mid{text-align:center;}
+.ln-cnt{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--txt3);}
+.ln-sub{font-size:.75rem;color:var(--txt3);margin-top:3px;max-width:260px;}
+@media(max-width:900px){.layout{grid-template-columns:1fr;}.sidebar{position:static;height:auto;}.lh,.cw{padding-left:20px;padding-right:20px;}.lnav{padding:16px 20px;}.kg{grid-template-columns:1fr;}.risk-matrix{grid-template-columns:repeat(3,1fr);}.ln-sub{display:none;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="n-logo">SEC<span>_</span>TRACK</a>
+  <div class="n-mid"><span class="s-pill">STAGE 11</span><span class="n-sname">風險評估</span></div>
+  <a href="index.html" class="n-back">&#8592; 首頁</a>
+</nav>
+<div class="layout">
+<aside class="sidebar">
+  <div class="sb-h">
+    <div class="sb-tag">STAGE 11 · 3週</div>
+    <div class="sb-title">風險評估<br>全流程實戰</div>
+    <div class="sb-meta">
+      <div class="sm-item"><span class="sm-val">5</span><span class="sm-key">章節</span></div>
+      <div class="sm-item"><span class="sm-val">21</span><span class="sm-key">課程</span></div>
+      <div class="sm-item"><span class="sm-val">3週</span><span class="sm-key">時長</span></div>
+    </div>
+  </div>
+  <div class="sb-nav">
+    <div><button class="ch-btn copen cact" onclick="toggleCh(this,'ch1')"><span class="ch-num">CH1</span><span class="ch-name">風險評估基礎</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list lopen" id="ch1">
+      <button class="ls-btn lact" onclick="go('l1-1',this)"><span class="ls-dot"></span>風險評估概述與法規依據</button>
+      <button class="ls-btn" onclick="go('l1-2',this)"><span class="ls-dot"></span>風險評估流程與角色分工</button>
+      <button class="ls-btn" onclick="go('l1-3',this)"><span class="ls-dot"></span>資產識別與分類分級</button>
+      <button class="ls-btn" onclick="go('l1-4',this)"><span class="ls-dot"></span>威脅識別與脆弱性分析</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch2')"><span class="ch-num">CH2</span><span class="ch-name">脆弱性技術評估</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch2">
+      <button class="ls-btn" onclick="go('l2-1',this)"><span class="ls-dot"></span>網路設備安全評估</button>
+      <button class="ls-btn" onclick="go('l2-2',this)"><span class="ls-dot"></span>主機作業系統安全評估</button>
+      <button class="ls-btn" onclick="go('l2-3',this)"><span class="ls-dot"></span>資料庫安全評估</button>
+      <button class="ls-btn" onclick="go('l2-4',this)"><span class="ls-dot"></span>中間件與 Web 應用評估</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch3')"><span class="ch-num">CH3</span><span class="ch-name">風險計算與矩陣</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch3">
+      <button class="ls-btn" onclick="go('l3-1',this)"><span class="ls-dot"></span>風險計算模型：定性與定量</button>
+      <button class="ls-btn" onclick="go('l3-2',this)"><span class="ls-dot"></span>風險矩陣構建與等級判定</button>
+      <button class="ls-btn" onclick="go('l3-3',this)"><span class="ls-dot"></span>殘餘風險評估與接受準則</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch4')"><span class="ch-num">CH4</span><span class="ch-name">滲透測試評估</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch4">
+      <button class="ls-btn" onclick="go('l4-1',this)"><span class="ls-dot"></span>滲透測試在風險評估中的定位</button>
+      <button class="ls-btn" onclick="go('l4-2',this)"><span class="ls-dot"></span>評估範圍界定與授權文件</button>
+      <button class="ls-btn" onclick="go('l4-3',this)"><span class="ls-dot"></span>外網 IP 與 Web 資產評估實戰</button>
+      <button class="ls-btn" onclick="go('l4-4',this)"><span class="ls-dot"></span>內網滲透測試評估要點</button>
+    </div></div>
+    <div><button class="ch-btn" onclick="toggleCh(this,'ch5')"><span class="ch-num">CH5</span><span class="ch-name">風險控制與報告</span><span class="ch-arr">&#9658;</span></button>
+    <div class="ls-list" id="ch5">
+      <button class="ls-btn" onclick="go('l5-1',this)"><span class="ls-dot"></span>風險處置策略：接受/規避/轉移/降低</button>
+      <button class="ls-btn" onclick="go('l5-2',this)"><span class="ls-dot"></span>安全加固建議清單編制</button>
+      <button class="ls-btn" onclick="go('l5-3',this)"><span class="ls-dot"></span>風險評估報告撰寫規範</button>
+      <button class="ls-btn" onclick="go('l5-4',this)"><span class="ls-dot"></span>風險評估工具集與自動化</button>
+      <button class="ls-btn" onclick="go('l5-5',this)"><span class="ls-dot"></span>風險評估專案管理與交付</button>
+    </div></div>
+  </div>
+  <div class="sb-f">
+    <div class="pr"><span>學習進度</span><span id="pct">0%</span></div>
+    <div class="pt"><div class="pf" id="pf" style="width:0%"></div></div>
+  </div>
+</aside>
+<main class="main">
+  <div class="lh">
+    <div class="lh-crumb" id="crumb">STAGE 11 &gt; CH1 &gt; <em>課程 1</em></div>
+    <h1 class="lh-title" id="ltitle">風險評估概述與法規依據</h1>
+    <div class="lh-chips">
+      <span class="chip ac" id="chip1">風險框架</span>
+      <span class="chip" id="chip2">25 分鐘</span>
+    </div>
+  </div>
+  <div class="cw">
+
+<!-- ===== CH1: 風險評估基礎 ===== -->
+
+<!-- L1-1 概述與法規 -->
+<div class="cb on" id="l1-1">
+<h2>風險評估概述與法規依據</h2>
+<p>資訊安全風險評估（Information Security Risk Assessment）是對組織資訊資產所面臨的威脅、脆弱性及其可能造成的損失進行系統性識別、分析和評價的過程。它是制定安全策略、確定投資優先級的核心依據。</p>
+
+<h3>為什麼需要風險評估？</h3>
+<p>企業面臨的網路威脅持續增加，但安全預算始終有限。風險評估回答三個核心問題：<strong>我們有哪些資產？</strong>、<strong>它們面臨什麼威脅？</strong>、<strong>我們應該優先保護什麼？</strong> 沒有系統性評估，安全投入往往是盲目的。</p>
+
+<h3>主要法規與標準依據</h3>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>法規/標準</th><th>適用範圍</th><th>風險評估要求</th></tr></thead>
+    <tbody>
+      <tr><td><strong>GB/T 20984-2022</strong><br>信息安全技術—信息安全風險評估方法</td><td>國內所有組織（主要標準）</td><td>明確規定資產識別、威脅識別、脆弱性識別、風險分析、風險評價的完整方法論，是國內風險評估的核心技術標準</td></tr>
+      <tr><td><strong>《網路安全法》第二十一條</strong></td><td>網路運營者（幾乎所有企業）</td><td>要求監測、記錄網路運行狀態，採取措施防範電腦病毒和網路攻擊，相當於強制要求風險識別和控制</td></tr>
+      <tr><td><strong>等保 2.0（GB/T 22239-2019）</strong></td><td>等保定級對象</td><td>三級以上系統每年至少開展一次安全自查（相當於風險評估），二級每兩年一次</td></tr>
+      <tr><td><strong>《關鍵信息基礎設施安全保護條例》</strong></td><td>關基運營者</td><td>要求每年至少開展一次安全檢測評估，包括對重大網絡安全風險的評估</td></tr>
+      <tr><td><strong>ISO/IEC 27005:2022</strong></td><td>ISO 27001 認證組織</td><td>信息安全風險管理國際標準，與 ISO 27001 ISMS 體系配合使用，提供詳細的風險評估方法</td></tr>
+      <tr><td><strong>NIST SP 800-30</strong></td><td>美國聯邦機構（國際參考）</td><td>信息技術系統風險評估指南，NIST 風險管理框架（RMF）的基礎，許多跨國企業參考使用</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="note std">
+  <div class="note-lbl">GB/T 20984-2022 核心要點</div>
+  <p>2022 年最新修訂版在 2007 年版基礎上，增加了對<strong>供應鏈風險</strong>和<strong>雲計算環境</strong>的評估要求，引入了<strong>風險場景</strong>概念（將威脅與脆弱性組合為具體攻擊場景），並強化了殘餘風險管理要求。同時新增了對<strong>數據安全風險</strong>（個人信息、重要數據）的評估指引，與《數據安全法》和《個人信息保護法》的要求相銜接。</p>
+</div>
+</div>
+
+<!-- L1-2 流程與角色 -->
+<div class="cb" id="l1-2">
+<h2>風險評估流程與角色分工</h2>
+<p>一個完整的風險評估項目通常歷時 2-6 週，涉及評估方、被評估方多個角色協作。明確的流程和責任分工是項目成功的前提。</p>
+
+<h3>風險評估完整流程</h3>
+<div class="atkflow">
+  <div class="af-step s1"><span class="af-n">階段 1</span><div><div class="af-t">項目啟動與準備</div><div class="af-d">簽訂服務合同和保密協議；確定評估範圍（系統邊界、業務範圍）；成立評估工作組；制定項目計劃（時間表、里程碑）；收集背景信息（組織架構、業務流程、現有安全制度）。</div></div></div>
+  <div class="af-step s2"><span class="af-n">階段 2</span><div><div class="af-t">資產調研與識別</div><div class="af-d">通過問卷、訪談、現場調研收集資產清單；對資產進行分類（硬體/軟體/數據/服務/人員）；評估資產重要性（賦值）；建立資產清冊，作為後續評估的基礎。</div></div></div>
+  <div class="af-step s3"><span class="af-n">階段 3</span><div><div class="af-t">威脅識別</div><div class="af-d">識別可能影響資產的威脅來源（自然災害、人為惡意、系統故障）；評估威脅主體能力（外部黑客、內部人員、供應商）；評估每類威脅的發生可能性（頻率）。</div></div></div>
+  <div class="af-step s4"><span class="af-n">階段 4</span><div><div class="af-t">脆弱性評估（技術+管理）</div><div class="af-d">技術脆弱性：漏洞掃描、配置基線核查、滲透測試；管理脆弱性：安全制度審查、員工訪談、安全意識評估；評估每個脆弱性的嚴重程度（賦值）。</div></div></div>
+  <div class="af-step s5"><span class="af-n">階段 5</span><div><div class="af-t">風險計算與分析</div><div class="af-d">根據風險計算模型（資產價值 × 威脅概率 × 脆弱性嚴重度）計算每個風險點的風險值；對照風險等級判定標準劃分高/中/低/極高等級；識別關鍵風險點。</div></div></div>
+  <div class="af-step s6"><span class="af-n">階段 6</span><div><div class="af-t">風險處置規劃</div><div class="af-d">針對每個風險點提出處置建議（接受/規避/轉移/降低）；制定整改優先級和路線圖；評估整改成本與效益；確認殘餘風險。</div></div></div>
+  <div class="af-step s7"><span class="af-n">階段 7</span><div><div class="af-t">報告輸出與評審</div><div class="af-d">撰寫風險評估報告（技術報告+管理摘要）；組織評審會議，與客戶確認評估結論；根據客戶反饋修訂報告；正式交付並存檔。</div></div></div>
+</div>
+
+<h3>角色分工</h3>
+<div class="kg">
+  <div class="kt"><div class="kt-n">評估方（甲方委託的安全公司）</div><div class="kt-d">項目負責人：統籌協調、客戶溝通、報告審核；技術評估人員：漏洞掃描、配置核查、滲透測試；文檔分析人員：制度審查、訪談記錄、風險計算；報告撰寫人員：整理發現、撰寫報告、製作圖表。</div></div>
+  <div class="kt"><div class="kt-n">被評估方（甲方/客戶）</div><div class="kt-d">業務負責人：提供業務背景、確認資產重要性、審核評估結果；IT 負責人：提供技術環境信息、協調系統訪問授權、確認技術發現；安全負責人：參與評估過程、確認安全措施現狀；相關業務部門：配合問卷調查和訪談。</div></div>
+</div>
+</div>
+
+<!-- L1-3 資產識別 -->
+<div class="cb" id="l1-3">
+<h2>資產識別與分類分級</h2>
+<p>資產（Asset）是對組織有價值的任何事物。準確的資產識別是風險評估的基石——無法識別的資產，其風險也無法被管理。</p>
+
+<h3>資產分類體系（GB/T 20984-2022）</h3>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>資產類型</th><th>典型示例</th><th>評估重點</th></tr></thead>
+    <tbody>
+      <tr><td><strong>數據資產</strong>（最核心）</td><td>客戶個人信息、財務數據、業務數據、配置文件、源代碼、密鑰憑證</td><td>機密性要求（是否含個人信息/商業秘密）；完整性要求（篡改影響）；可用性要求（宕機損失）</td></tr>
+      <tr><td><strong>軟體資產</strong></td><td>作業系統、資料庫軟體、中間件、業務應用系統、開發工具、安全軟體</td><td>版本及補丁狀態；授權合規性；開源組件安全</td></tr>
+      <tr><td><strong>硬體資產</strong></td><td>伺服器、網路設備（路由器/交換機/防火牆）、終端設備、物聯網設備、存儲設備</td><td>物理安全、生命週期、冗餘配置</td></tr>
+      <tr><td><strong>服務資產</strong></td><td>對外提供的業務系統、API 服務、雲服務、網路連接服務（VPN/互聯網出口）</td><td>服務可用性 SLA；對外暴露面；依賴關係</td></tr>
+      <tr><td><strong>人員資產</strong></td><td>IT 管理人員、安全人員、業務人員、第三方運維人員、供應商人員</td><td>特權帳號管理；安全意識；離職風險</td></tr>
+      <tr><td><strong>物理環境</strong></td><td>機房、辦公場所、電力供應、空調系統、門禁系統</td><td>物理訪問控制；環境安全</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>資產賦值方法</h3>
+<p>資產賦值從<strong>機密性（C）</strong>、<strong>完整性（I）</strong>、<strong>可用性（A）</strong>三個維度進行評估，每個維度評分 1-5，取最高值作為資產重要性等級。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">資產賦值標準（CI A 三維度）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="hi">機密性（Confidentiality）賦值標準：</span>
+  5 — 最高機密：洩露會導致嚴重法律後果或重大財務損失
+      例：銀行客戶完整金融數據、國家秘密
+  4 — 秘密：洩露嚴重影響業務，涉及大量個人敏感信息
+      例：用戶密碼/身份證號/手機號批量數據
+  3 — 內部：洩露對競爭對手有利或影響合作關係
+      例：業務策略、合同報價、員工薪資
+  2 — 限制：洩露影響較小，僅內部使用
+      例：內部操作手冊、IT 資產清單
+  1 — 公開：可對外公開的信息
+
+<span class="hi">完整性（Integrity）賦值標準：</span>
+  5 — 篡改導致直接重大財務損失或人身危害
+      例：財務轉帳記錄、醫療記錄、工控系統指令
+  4 — 篡改嚴重影響業務決策或導致重大業務中斷
+      例：交易記錄、合同文本
+  3 — 篡改需要大量資源恢復，影響業務效率
+  2 — 篡改有一定影響，但可較快恢復
+  1 — 篡改影響很小或可輕易發現恢復
+
+<span class="hi">可用性（Availability）賦值標準：</span>
+  5 — 7×24 連續運行，中斷 &lt;5 分鐘導致嚴重損失
+      例：交易系統、核心業務系統
+  4 — 工作時間必須可用，中斷 &lt;1 小時可接受
+      例：ERP、OA 系統
+  3 — 每天需要數小時可用，中斷 &lt;4 小時可接受
+  2 — 不要求連續可用，定期使用即可
+  1 — 偶發性使用，長時間中斷也可接受
+
+<span class="hi">資產重要性 = MAX(C, I, A)</span>
+<span class="cm"># 示例：核心業務資料庫  C=5, I=5, A=5 → 重要性等級 5（極高）</span>
+<span class="cm"># 示例：公告網站         C=1, I=3, A=3 → 重要性等級 3（中等）</span></pre>
+</div>
+</div>
+
+<!-- L1-4 威脅與脆弱性 -->
+<div class="cb" id="l1-4">
+<h2>威脅識別與脆弱性分析</h2>
+<p>威脅（Threat）是可能對資產造成損害的潛在事件，脆弱性（Vulnerability）是資產中存在的可被威脅利用的弱點。兩者共同決定風險的可能性。</p>
+
+<h3>威脅分類與賦值</h3>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>威脅類別</th><th>主要威脅示例</th><th>頻率賦值參考</th></tr></thead>
+    <tbody>
+      <tr><td><strong>網路攻擊</strong></td><td>外部入侵、DDoS 攻擊、Web 漏洞利用（SQL 注入/XSS）、釣魚郵件、勒索軟件</td><td>互聯網暴露系統：4-5（高頻）；內部系統：2-3</td></tr>
+      <tr><td><strong>內部威脅</strong></td><td>員工誤操作、離職員工資料洩露、特權濫用、數據竊取</td><td>大型組織：3-4；小型組織：2-3</td></tr>
+      <tr><td><strong>軟件缺陷</strong></td><td>已知漏洞未修補、0-day 漏洞、配置錯誤、代碼漏洞</td><td>取決於修補管理成熟度：1-5</td></tr>
+      <tr><td><strong>供應鏈風險</strong></td><td>第三方軟件後門、供應商訪問越權、開源組件漏洞（如 Log4Shell）</td><td>近年趨勢明顯：3-4</td></tr>
+      <tr><td><strong>物理安全</strong></td><td>未授權人員進入機房、設備被盜、硬件篡改</td><td>一般辦公環境：1-2；高風險行業：3</td></tr>
+      <tr><td><strong>環境與自然</strong></td><td>電力中斷、水災、火災、地震、設備故障</td><td>取決於地理位置和基礎設施：1-3</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>脆弱性識別方法</h3>
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>技術脆弱性掃描</strong> — 使用漏洞掃描工具（Nessus/Qualys/OpenVAS）自動發現已知 CVE 漏洞、系統補丁缺失、服務配置問題。針對 Web 應用使用 AWVS/Burp 進行掃描。評估結果依據 CVSS 評分進行嚴重程度賦值。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>配置基線核查</strong> — 對照安全基線標準（如 CIS Benchmarks、等保基線）逐項核查系統配置，包括帳號策略、服務開啟狀態、文件權限、審計日誌設置等。記錄每個不符合項作為脆弱性發現。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>滲透測試驗證</strong> — 對掃描發現的高危漏洞進行手工驗證，確認可利用性。發現掃描工具無法自動識別的邏輯漏洞（越權、業務邏輯缺陷）。提供真實攻擊場景下的脆弱性評估。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>訪談與問卷</strong> — 對管理人員和技術人員進行結構化訪談，了解安全管理制度執行情況、員工安全意識水平、安全事件歷史。識別管理層面的脆弱性（如無安全培訓、無事件響應流程）。</div></div>
+  <div class="il-item"><span class="il-num">05</span><div class="il-txt"><strong>文件審查</strong> — 審查安全相關文件：安全策略、操作規程、系統建設文件、網絡拓撲圖。對比文件要求和實際執行情況，識別制度和執行之間的差距。</div></div>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">某銀行核心業務系統資料庫，機密性評分為 5（含大量客戶金融數據），完整性評分為 5（篡改導致直接財務損失），可用性評分為 4（工作時間必須可用）。按 GB/T 20984-2022 的資產賦值方法，該資料庫的資產重要性等級為？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>4（取三個值的平均：(5+5+4)/3 ≈ 4.7，四捨五入）</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">B</span>4.7（保留一位小數的平均值）</div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">C</span>5（取三個維度中的最高值）</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>14（三個維度值相加的總和）</div>
+  </div>
+  <div class="q-exp">正確！GB/T 20984-2022 規定，資產重要性等級取機密性、完整性、可用性三個維度賦值中的<strong>最高值</strong>，而非平均值或總和。這樣做的邏輯是：只要資產在任何一個維度上有極高要求，整個資產就應被視為高重要性資產進行保護。此例中 MAX(5,5,4) = 5，該資料庫為最高等級資產，需要最嚴格的安全控制措施。</div>
+</div>
+</div>
+
+
+<!-- ===== CH2: 脆弱性技術評估 ===== -->
+
+<!-- L2-1 網路設備安全評估 -->
+<div class="cb" id="l2-1">
+<h2>網路設備安全評估</h2>
+<p>網路設備（路由器、交換機、防火牆、負載均衡器）是組織網路的基礎設施，其安全配置直接影響整體防護能力。評估時需兼顧技術核查和配置審查兩個層面。</p>
+
+<h3>評估檢查項目</h3>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>評估類別</th><th>具體檢查項</th><th>風險說明</th></tr></thead>
+    <tbody>
+      <tr><td><strong>帳號管理</strong></td><td>是否存在默認帳號/密碼；特權帳號數量是否最小化；是否啟用帳號鎖定策略</td><td>默認憑證是最常見的設備入侵途徑</td></tr>
+      <tr><td><strong>訪問控制</strong></td><td>管理訪問是否限制特定 IP；是否禁用不安全管理協議（Telnet、HTTP）；SNMPv1/v2 是否已停用</td><td>Telnet 明文傳輸、SNMPv1/v2 弱認證可被竊聽</td></tr>
+      <tr><td><strong>協議安全</strong></td><td>路由協議是否啟用認證（OSPF MD5/SHA）；BGP 是否配置 MD5 認證；STP 是否啟用 BPDU Guard</td><td>未認證路由協議可被偽造注入惡意路由</td></tr>
+      <tr><td><strong>日誌審計</strong></td><td>是否啟用 Syslog 並集中轉發；日誌是否覆蓋登入/配置變更/異常流量；NTP 時間同步是否正確</td><td>無日誌則安全事件無法溯源</td></tr>
+      <tr><td><strong>防火牆策略</strong></td><td>是否遵循最小開放原則；是否存在「任意到任意」寬鬆規則；出口流量是否有控制；規則是否有定期清理</td><td>規則集混亂是防火牆被繞過的主要原因</td></tr>
+      <tr><td><strong>韌體版本</strong></td><td>設備韌體版本是否為最新穩定版；是否存在已知高危 CVE；廠商支持是否已結束（EOL）</td><td>EOL 設備無安全補丁，長期處於脆弱狀態</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Cisco 路由器/交換機安全核查命令</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">! ─── 帳號安全核查 ───</span>
+show running-config | include username          <span class="cm">! 查看所有本地帳號</span>
+show running-config | include enable secret     <span class="cm">! 確認 enable 密碼是否加密（secret 而非 password）</span>
+show running-config | include service password  <span class="cm">! 確認是否啟用 password-encryption</span>
+
+<span class="cm">! ─── 管理協議核查 ───</span>
+show running-config | include telnet            <span class="cm">! 確認 telnet 是否禁用</span>
+show running-config | section line vty          <span class="cm">! 查看 VTY 線路配置（應為 transport input ssh）</span>
+show running-config | include snmp-server       <span class="cm">! 查看 SNMP 版本和 community string</span>
+show ip http server status                      <span class="cm">! 確認 HTTP 管理是否禁用</span>
+show ip http secure-server status               <span class="cm">! 確認 HTTPS 狀態</span>
+
+<span class="cm">! ─── 訪問控制列表核查 ───</span>
+show ip access-lists                            <span class="cm">! 列出所有 ACL 規則</span>
+show running-config | section ip access-list    <span class="cm">! 查看 ACL 詳細配置</span>
+
+<span class="cm">! ─── 路由協議安全 ───</span>
+show running-config | section router ospf       <span class="cm">! 確認 OSPF 是否配置認證</span>
+show ip ospf interface                          <span class="cm">! 查看 OSPF 接口認證狀態</span>
+show running-config | section router bgp        <span class="cm">! 確認 BGP neighbor password</span>
+
+<span class="cm">! ─── 日誌配置核查 ───</span>
+show running-config | include logging           <span class="cm">! 查看 Syslog 配置（應有外部服務器地址）</span>
+show clock detail                               <span class="cm">! 確認 NTP 時間同步狀態</span>
+show running-config | include ntp server        <span class="cm">! 查看 NTP 配置</span>
+
+<span class="cm">! ─── 韌體版本 ───</span>
+show version                                    <span class="cm">! 顯示設備型號、IOS 版本、序列號</span>
+<span class="cm">! 確認版本後，在 https://tools.cisco.com/security/center 查詢是否有已知 CVE</span></pre>
+</div>
+</div>
+
+<!-- L2-2 主機安全評估 -->
+<div class="cb" id="l2-2">
+<h2>主機作業系統安全評估</h2>
+<p>伺服器主機（Windows Server / Linux）是業務系統的運行基礎，主機安全評估需覆蓋系統配置、帳號管理、補丁狀態、服務開放、審計設置等核心項目。</p>
+
+<div class="kg">
+  <div class="kt"><div class="kt-n">Windows Server 評估重點</div><div class="kt-d">帳號安全：本地管理員帳號、禁用 Guest、密碼策略（最小長度 8 位、複雜度要求、最長使用期）；補丁狀態：Windows Update 策略、最近一次更新時間；服務：不必要服務停用（列印假脫機/Telnet/NetBIOS）；審計：安全事件日誌設置、Sysmon 是否部署；UAC/防火牆狀態。</div></div>
+  <div class="kt"><div class="kt-n">Linux 評估重點</div><div class="kt-d">帳號安全：/etc/shadow 密碼策略（minlen/maxdays）、UID=0 帳號數、sudo 配置；SSH 安全：是否禁用 root 直接登入、金鑰認證、已知弱演算法；補丁：未更新套件數量；SUID/SGID 文件；SELinux/AppArmor 狀態；關鍵文件完整性。</div></div>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Linux 主機安全評估腳本（核查項）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">#!/bin/bash
+# ─── Linux 主機安全評估核查腳本（需 root 權限）───</span>
+
+echo <span class="st">"===== 1. 帳號安全 ====="</span>
+<span class="cm"># 查找 UID=0 的非 root 帳號（安全風險！）</span>
+awk <span class="st">'-F:'</span> <span class="st">'($3==0){print "UID=0帳號:", $1}'</span> /etc/passwd
+<span class="cm"># 查找可登入的系統帳號</span>
+awk <span class="st">'-F:'</span> <span class="st">'($7!~/nologin|false/){print "可登入帳號:", $1, "shell:", $7}'</span> /etc/passwd
+<span class="cm"># 密碼策略核查</span>
+grep -E <span class="st">'PASS_MAX_DAYS|PASS_MIN_DAYS|PASS_MIN_LEN|PASS_WARN_AGE'</span> /etc/login.defs
+
+echo <span class="st">"===== 2. SSH 配置 ====="</span>
+grep -E <span class="st">'PermitRootLogin|PasswordAuthentication|PubkeyAuthentication|Protocol|AllowUsers|MaxAuthTries'</span> /etc/ssh/sshd_config
+<span class="cm"># 應確認：PermitRootLogin no | PasswordAuthentication no（使用金鑰）</span>
+
+echo <span class="st">"===== 3. 補丁狀態 ====="</span>
+<span class="cm"># CentOS/RHEL</span>
+yum check-update --security <span class="nu">2</span>>/dev/null | grep -c <span class="st">'Security'</span>
+<span class="cm"># Ubuntu/Debian</span>
+apt-get -s upgrade <span class="nu">2</span>>/dev/null | grep -c <span class="st">'^Inst'</span>
+
+echo <span class="st">"===== 4. SUID/SGID 文件 ====="</span>
+<span class="cm"># 查找不常見的 SUID 文件（可能為後門）</span>
+find / -perm -4000 -type f <span class="nu">2</span>>/dev/null | grep -v <span class="st">'/usr/bin\|/usr/sbin\|/bin\|/sbin'</span>
+
+echo <span class="st">"===== 5. 監聽服務 ====="</span>
+ss -tlnp    <span class="cm"># 列出所有監聽的 TCP 端口和對應進程</span>
+<span class="cm"># 核查高危服務：23(Telnet)/21(FTP)/111(RPC)/2049(NFS)/512-514(Rsh)</span>
+
+echo <span class="st">"===== 6. 計劃任務（後門排查）====="</span>
+crontab -l                              <span class="cm"># root crontab</span>
+ls -la /etc/cron.{d,daily,weekly,monthly}/  <span class="cm"># 系統計劃任務目錄</span>
+cat /etc/crontab
+
+echo <span class="st">"===== 7. 重要文件完整性 ====="</span>
+stat /etc/passwd /etc/shadow /etc/sudoers   <span class="cm"># 查看修改時間（是否被異常修改）</span>
+<span class="cm"># 是否部署文件完整性監控（AIDE/Tripwire）</span>
+which aide &amp;&amp; aide --check <span class="nu">2</span>>/dev/null | head -<span class="nu">20</span></pre>
+</div>
+</div>
+
+<!-- L2-3 資料庫安全評估 -->
+<div class="cb" id="l2-3">
+<h2>資料庫安全評估</h2>
+<p>資料庫往往存儲組織最核心的數據資產，是攻擊者的主要目標。資料庫安全評估需覆蓋認證授權、網絡訪問、審計加密、補丁配置等全面維度。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>評估維度</th><th>MySQL/MariaDB 核查</th><th>MSSQL 核查</th><th>Oracle 核查</th></tr></thead>
+    <tbody>
+      <tr><td><strong>默認帳號</strong></td><td><code>SELECT user,host FROM mysql.user WHERE user='root'</code>；匿名帳號是否存在；test 資料庫是否刪除</td><td>SA 帳號是否禁用或更改密碼；是否存在空密碼帳號</td><td>SYS/SYSTEM 默認密碼是否已修改；SCOTT/OUTLN 示例帳號是否禁用</td></tr>
+      <tr><td><strong>網絡訪問</strong></td><td>bind-address 是否限制為 127.0.0.1 或內網 IP；3306 端口是否直接暴露公網</td><td>SQL Server Browser 服務狀態；動態端口是否已固定；Windows 防火牆規則</td><td>Listener 是否限制訪問來源；TNS 毒化防護配置</td></tr>
+      <tr><td><strong>權限最小化</strong></td><td>應用帳號是否僅有必要權限（SELECT/INSERT，無 DROP/SUPER）；是否存在 GRANT ALL 的帳號</td><td>應用帳號 db_datareader/db_datawriter 而非 db_owner；xp_cmdshell 是否禁用</td><td>PUBLIC 角色是否撤銷不必要權限；DBA 帳號數量</td></tr>
+      <tr><td><strong>審計日誌</strong></td><td>general_log 和 audit_plugin 狀態；慢查詢日誌是否啟用</td><td>SQL Server Audit 配置；登入失敗審計；DDL 操作審計</td><td>統一審計策略（Unified Audit）是否啟用；審計記錄是否集中存儲</td></tr>
+      <tr><td><strong>傳輸加密</strong></td><td>SSL/TLS 是否啟用（require_secure_transport）；ssl-ca/ssl-cert/ssl-key 配置</td><td>強制加密連接（Force Encryption = Yes）；證書配置</td><td>Advanced Security Option 中的網絡加密配置</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">MySQL 安全評估常用查詢</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm">-- ─── 帳號安全核查 ───</span>
+<span class="cm">-- 列出所有帳號及其主機限制</span>
+<span class="kw">SELECT</span> user, host, authentication_string, account_locked, password_expired
+<span class="kw">FROM</span> mysql.user;
+<span class="cm">-- 注意：host='%' 表示允許任意主機連接（高風險）</span>
+
+<span class="cm">-- 查找空密碼帳號</span>
+<span class="kw">SELECT</span> user, host <span class="kw">FROM</span> mysql.user
+<span class="kw">WHERE</span> authentication_string = <span class="st">''</span> <span class="kw">OR</span> authentication_string <span class="kw">IS NULL</span>;
+
+<span class="cm">-- ─── 權限核查 ───</span>
+<span class="cm">-- 查找擁有 SUPER/GRANT 等高危權限的非管理帳號</span>
+<span class="kw">SELECT</span> user, host, Super_priv, Grant_priv, File_priv, Shutdown_priv
+<span class="kw">FROM</span> mysql.user
+<span class="kw">WHERE</span> user <span class="kw">NOT IN</span> (<span class="st">'root'</span>, <span class="st">'mysql.sys'</span>, <span class="st">'mysql.session'</span>)
+  <span class="kw">AND</span> (Super_priv = <span class="st">'Y'</span> <span class="kw">OR</span> Grant_priv = <span class="st">'Y'</span> <span class="kw">OR</span> File_priv = <span class="st">'Y'</span>);
+
+<span class="cm">-- ─── 配置安全核查 ───</span>
+<span class="cm">-- 查看關鍵安全配置</span>
+<span class="kw">SHOW</span> VARIABLES <span class="kw">LIKE</span> <span class="st">'local_infile'</span>;           <span class="cm">-- 應為 OFF（防止讀取本地文件）</span>
+<span class="kw">SHOW</span> VARIABLES <span class="kw">LIKE</span> <span class="st">'secure_file_priv'</span>;       <span class="cm">-- 應限制路徑（非空非 NULL）</span>
+<span class="kw">SHOW</span> VARIABLES <span class="kw">LIKE</span> <span class="st">'sql_mode'</span>;              <span class="cm">-- 應包含 STRICT_TRANS_TABLES</span>
+<span class="kw">SHOW</span> VARIABLES <span class="kw">LIKE</span> <span class="st">'have_ssl'</span>;             <span class="cm">-- 確認 SSL 支持</span>
+<span class="kw">SHOW</span> VARIABLES <span class="kw">LIKE</span> <span class="st">'require_secure_transport'</span>; <span class="cm">-- 是否強制 SSL 連接</span>
+
+<span class="cm">-- ─── 審計配置核查 ───</span>
+<span class="kw">SHOW</span> VARIABLES <span class="kw">LIKE</span> <span class="st">'general_log'</span>;           <span class="cm">-- 一般查詢日誌（生產通常關閉，改用審計插件）</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> information_schema.PLUGINS
+<span class="kw">WHERE</span> PLUGIN_NAME <span class="kw">LIKE</span> <span class="st">'%audit%'</span>;            <span class="cm">-- 確認審計插件是否安裝啟用</span></pre>
+</div>
+</div>
+
+<!-- L2-4 中間件與 Web 評估 -->
+<div class="cb" id="l2-4">
+<h2>中間件與 Web 應用評估</h2>
+<p>中間件（Nginx、Apache、Tomcat、Spring Boot）和 Web 應用是對外攻擊面最大的組件，也是風險評估中技術脆弱性最集中的領域。</p>
+
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>版本與補丁</strong> — 確認 Nginx/Apache/Tomcat 版本，對照 CVE 數據庫（或 Vulhub）查詢已知高危漏洞。重點關注：Nginx 的 HTTP Request Smuggling、Apache Log4j2（Log4Shell）、Tomcat 的反序列化漏洞（CVE-2017-12617）、Spring Framework（Spring4Shell）。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>敏感信息洩露</strong> — 錯誤頁面是否洩露版本/路徑信息（應配置自訂錯誤頁）；是否存在 .git/.svn 目錄洩露源碼；備份文件洩露（.bak/.zip/.tar.gz）；調試信息是否在生產環境開啟（Django DEBUG=True、PHP display_errors=On）。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>HTTP 安全頭</strong> — 核查響應頭：X-Frame-Options（防點擊劫持）、Content-Security-Policy（防 XSS）、X-Content-Type-Options: nosniff、Strict-Transport-Security（HSTS）、Set-Cookie 的 Secure/HttpOnly/SameSite 屬性。使用 <code>securityheaders.com</code> 快速評測。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>OWASP Top 10 掃描</strong> — 使用 AWVS/Burp Suite Pro/OWASP ZAP 對 Web 應用進行掃描，覆蓋：SQL 注入、XSS（反射/存儲/DOM）、不安全的直接對象引用（IDOR）、安全配置錯誤、組件漏洞。重點驗證高危發現的可利用性。</div></div>
+  <div class="il-item"><span class="il-num">05</span><div class="il-txt"><strong>API 安全</strong> — API 端點是否有認證授權；是否暴露 Swagger UI 至外網（洩露 API 文檔）；rate limiting 是否配置；CORS 策略是否過於寬鬆（Access-Control-Allow-Origin: *）；GraphQL introspection 是否在生產環境關閉。</div></div>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Nginx 安全配置核查要點</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── 查看版本（確認是否暴露）───</span>
+nginx -v                               <span class="cm"># 查看安裝版本</span>
+curl -I https://target.com/            <span class="cm"># 確認響應頭是否含版本（Server: nginx/1.x.x）</span>
+<span class="cm"># 加固：在 nginx.conf 中加入 server_tokens off;</span>
+
+<span class="cm"># ─── 核查 nginx.conf 關鍵安全配置 ───</span>
+grep -E <span class="st">'server_tokens|ssl_protocols|ssl_ciphers|add_header|client_max_body|limit_req'</span> /etc/nginx/nginx.conf
+
+<span class="cm"># ─── 理想的安全 HTTP 頭配置 ───</span>
+<span class="cm"># 在 server {} 或 http {} 塊中應包含：</span>
+add_header X-Frame-Options <span class="st">"SAMEORIGIN"</span> always;
+add_header X-Content-Type-Options <span class="st">"nosniff"</span> always;
+add_header X-XSS-Protection <span class="st">"1; mode=block"</span> always;
+add_header Strict-Transport-Security <span class="st">"max-age=31536000; includeSubDomains"</span> always;
+add_header Content-Security-Policy <span class="st">"default-src 'self'; script-src 'self' 'nonce-...'"</span> always;
+add_header Referrer-Policy <span class="st">"strict-origin-when-cross-origin"</span> always;
+
+<span class="cm"># ─── TLS 配置核查（應禁用舊版協議）───</span>
+ssl_protocols TLSv1.2 TLSv1.3;        <span class="cm"># 禁用 SSLv2/SSLv3/TLSv1.0/TLSv1.1</span>
+ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:...;
+ssl_prefer_server_ciphers on;
+
+<span class="cm"># ─── 使用 testssl.sh 快速檢測 TLS 配置 ───</span>
+./testssl.sh https://target.com/       <span class="cm"># 自動檢測 POODLE/BEAST/LUCKY13/SWEET32 等</span>
+<span class="cm"># 或使用線上工具：https://www.ssllabs.com/ssltest/</span></pre>
+</div>
+</div>
+
+
+<!-- ===== CH3: 風險計算與矩陣 ===== -->
+
+<!-- L3-1 風險計算模型 -->
+<div class="cb" id="l3-1">
+<h2>風險計算模型：定性與定量</h2>
+<p>風險計算是將前期收集的資產重要性、威脅頻率、脆弱性嚴重度三項輸入整合，得到量化的風險值。GB/T 20984-2022 提供了定性和定量兩類方法。</p>
+
+<h3>GB/T 20984-2022 風險計算公式</h3>
+<div class="cblock">
+  <div class="ctop"><span class="clang">風險計算公式與示例</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="hi">核心公式：風險值 = 資產重要性 × 威脅可能性 × 脆弱性嚴重度</span>
+
+<span class="cm">─── 各指標賦值範圍（均為 1-5 分）───</span>
+資產重要性（A）：1-5（基於 CIA 三維度最高值）
+威脅可能性（T）：1=極低（近5年無事件）
+                 2=低（每年偶發）
+                 3=中（每季度偶發）
+                 4=高（每月可能）
+                 5=極高（持續面臨）
+脆弱性嚴重度（V）：1=可忽略  2=低  3=中  4=高  5=嚴重
+                   （參考 CVSS 評分映射：
+                     CVSS 0.1-3.9 → 1-2
+                     CVSS 4.0-6.9 → 3
+                     CVSS 7.0-8.9 → 4
+                     CVSS 9.0-10  → 5）
+
+<span class="cm">─── 計算示例 ───</span>
+<span class="cm"># 場景：互聯網暴露的 Web 服務器，存在 Apache Log4j2 RCE 漏洞（CVE-2021-44228）</span>
+A（資產重要性）= 4  <span class="cm"># 業務系統，C=3 I=3 A=4</span>
+T（威脅可能性）= 5  <span class="cm"># Log4Shell 漏洞已有完整 PoC，持續被掃描利用</span>
+V（脆弱性嚴重度）= 5  <span class="cm"># CVSS 10.0，直接 RCE</span>
+
+風險值 = 4 × 5 × 5 = <span class="hl">100</span>  <span class="cm">→ 超高風險（立即處置）</span>
+
+<span class="cm"># 場景：內網 FTP 服務器，使用默認帳號 anonymous</span>
+A（資產重要性）= 3  <span class="cm"># 內部文件服務器，C=3 I=2 A=3</span>
+T（威脅可能性）= 2  <span class="cm"># 內網威脅，概率較低</span>
+V（脆弱性嚴重度）= 3  <span class="cm"># 允許匿名登入，但訪問有限</span>
+
+風險值 = 3 × 2 × 3 = <span class="hl">18</span>  <span class="cm">→ 中等風險（計劃整改）</span></pre>
+</div>
+
+<h3>定量方法：年度損失期望（ALE）</h3>
+<div class="cblock">
+  <div class="ctop"><span class="clang">ALE 定量風險計算</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="hi">ALE（Annual Loss Expectancy）= SLE × ARO</span>
+
+SLE（Single Loss Expectancy，單次損失期望）
+  = 資產價值（AV）× 暴露因子（EF，百分比）
+  暴露因子：若威脅完全實現，資產損失的比例
+  例：數據洩露導致客戶流失、罰款，損失 40% 業務價值
+
+ARO（Annualized Rate of Occurrence，年化發生率）
+  = 預計每年發生次數
+  例：根據行業統計，勒索軟件攻擊成功概率 0.1 次/年
+
+<span class="cm">─── 計算示例：勒索軟件攻擊生產資料庫 ───</span>
+資產價值（AV）      = ¥5,000,000（資料庫系統及數據商業價值）
+暴露因子（EF）      = 70%（加密後業務恢復成本+數據損失）
+SLE = ¥5,000,000 × 70% = <span class="hl">¥3,500,000</span>
+
+ARO = 0.2（行業統計：中型金融機構每5年遭受一次成功勒索）
+ALE = ¥3,500,000 × 0.2 = <span class="hl">¥700,000/年</span>
+
+<span class="cm"># 安全投資決策：若部署 EDR 系統年費 ¥200,000，可將 EF 降低到 20%</span>
+<span class="cm"># 新 SLE = ¥5,000,000 × 20% = ¥1,000,000</span>
+<span class="cm"># 新 ALE = ¥1,000,000 × 0.2 = ¥200,000/年</span>
+<span class="cm"># 安全投資收益 = ¥700,000 - ¥200,000 - ¥200,000（成本）= ¥300,000/年 → 值得投資</span></pre>
+</div>
+</div>
+
+<!-- L3-2 風險矩陣 -->
+<div class="cb" id="l3-2">
+<h2>風險矩陣構建與等級判定</h2>
+<p>風險矩陣（Risk Matrix）是將風險可能性和影響程度可視化的工具，便於快速判定風險等級和優先處置順序。</p>
+
+<h3>5×5 風險矩陣</h3>
+<div class="risk-matrix">
+  <div class="rm-cell rm-hdr"></div>
+  <div class="rm-cell rm-hdr">影響1<br>可忽略</div>
+  <div class="rm-cell rm-hdr">影響2<br>輕微</div>
+  <div class="rm-cell rm-hdr">影響3<br>中等</div>
+  <div class="rm-cell rm-hdr">影響4<br>嚴重</div>
+  <div class="rm-cell rm-hdr">影響5<br>災難性</div>
+  <div class="rm-cell rm-vhdr">可能5<br>極高</div>
+  <div class="rm-cell rm-mid">中</div>
+  <div class="rm-cell rm-hi">高</div>
+  <div class="rm-cell rm-crit">極高</div>
+  <div class="rm-cell rm-crit">極高</div>
+  <div class="rm-cell rm-crit">極高</div>
+  <div class="rm-cell rm-vhdr">可能4<br>高</div>
+  <div class="rm-cell rm-low">低</div>
+  <div class="rm-cell rm-mid">中</div>
+  <div class="rm-cell rm-hi">高</div>
+  <div class="rm-cell rm-crit">極高</div>
+  <div class="rm-cell rm-crit">極高</div>
+  <div class="rm-cell rm-vhdr">可能3<br>中</div>
+  <div class="rm-cell rm-low">低</div>
+  <div class="rm-cell rm-mid">中</div>
+  <div class="rm-cell rm-mid">中</div>
+  <div class="rm-cell rm-hi">高</div>
+  <div class="rm-cell rm-crit">極高</div>
+  <div class="rm-cell rm-vhdr">可能2<br>低</div>
+  <div class="rm-cell rm-low">低</div>
+  <div class="rm-cell rm-low">低</div>
+  <div class="rm-cell rm-mid">中</div>
+  <div class="rm-cell rm-mid">中</div>
+  <div class="rm-cell rm-hi">高</div>
+  <div class="rm-cell rm-vhdr">可能1<br>極低</div>
+  <div class="rm-cell rm-low">低</div>
+  <div class="rm-cell rm-low">低</div>
+  <div class="rm-cell rm-low">低</div>
+  <div class="rm-cell rm-mid">中</div>
+  <div class="rm-cell rm-mid">中</div>
+</div>
+
+<h3>風險等級對應處置要求</h3>
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>風險等級</th><th>風險值範圍</th><th>顏色</th><th>處置要求</th><th>響應時限</th></tr></thead>
+    <tbody>
+      <tr><td><strong>極高風險</strong></td><td>75-125</td><td>紅色</td><td>立即上報管理層，啟動應急預案，優先分配資源，必要時暫停受影響系統</td><td>24 小時內啟動</td></tr>
+      <tr><td><strong>高風險</strong></td><td>40-74</td><td>橙色</td><td>制定整改計劃，確定責任人，納入近期工作優先處理</td><td>1 個月內完成</td></tr>
+      <tr><td><strong>中等風險</strong></td><td>15-39</td><td>黃色</td><td>納入年度安全整改計劃，按計劃推進</td><td>3 個月內完成</td></tr>
+      <tr><td><strong>低風險</strong></td><td>1-14</td><td>綠色</td><td>記錄在案，定期複評，可視資源情況處置</td><td>按資源計劃</td></tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+<!-- L3-3 殘餘風險 -->
+<div class="cb" id="l3-3">
+<h2>殘餘風險評估與接受準則</h2>
+<p>殘餘風險（Residual Risk）是在實施安全控制措施後仍然存在的風險。沒有任何組織能消除所有風險，因此確定可接受的殘餘風險水平至關重要。</p>
+
+<div class="note warn">
+  <div class="note-lbl">常見誤區</div>
+  <p>許多組織錯誤地認為「安裝了防火牆/殺毒軟件就沒有風險了」。實際上，任何安全控制只能<strong>降低</strong>風險，不能消除風險。殘餘風險評估的目的是確認控制措施是否有效，以及剩餘的風險是否在可接受範圍內。如果殘餘風險仍高於可接受水平，需要補充額外的安全措施或作出接受決策（由管理層書面確認接受）。</p>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">殘餘風險計算示例</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="hi">殘餘風險評估流程：</span>
+
+<span class="cm"># 初始風險識別</span>
+風險場景：外網 Web 應用存在 SQL 注入漏洞
+原始風險值：A=4 × T=4 × V=5 = 80（極高風險）
+
+<span class="cm"># 已部署安全控制措施</span>
+控制 1：WAF（Web 應用防火牆）—— 降低 T（有效攔截自動化掃描）
+控制 2：輸入驗證（代碼層修復）—— 降低 V
+控制 3：最小權限資料庫帳號 —— 降低 A（即使注入也無法提權）
+
+<span class="cm"># 控制措施有效性評估（需現場驗證，而非假設）</span>
+WAF 有效性：繞過測試顯示 80% 的 SQL 注入 payload 被攔截
+            但 10% 的繞過技術（編碼、HTTP 分塊）仍可繞過
+
+<span class="cm"># 殘餘風險計算</span>
+控制後 T 降低：4 → 2（WAF 降低威脅可能性）
+控制後 V 降低：5 → 3（部分修復，仍有遺漏）
+控制後 A 不變：4（資產重要性不因控制而降低）
+
+殘餘風險值 = A=4 × T=2 × V=3 = <span class="hl">24（中等風險）</span>
+<span class="cm"># 從極高風險降至中等風險，仍需納入整改計劃（3個月內完成代碼根本修復）</span>
+
+<span class="cm"># 風險接受聲明格式</span>
+<span class="cm"># ─────────────────────────────────────</span>
+<span class="cm"># 風險項：Web 應用 SQL 注入（殘餘）</span>
+<span class="cm"># 殘餘風險等級：中等（風險值：24）</span>
+<span class="cm"># 接受原因：WAF 已部署並有效運行；代碼修復已納入下季度開發計劃</span>
+<span class="cm"># 計劃複評時間：3 個月後（代碼修復驗證後重新評估）</span>
+<span class="cm"># 批准人：XX 系統信息安全負責人（簽字）</span>
+<span class="cm"># 批准日期：20XX-XX-XX</span>
+<span class="cm"># ─────────────────────────────────────</span></pre>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">某生產資料庫，資產重要性=5，存在一個 CVSS 7.5（高危）的 SQL 注入漏洞，威脅可能性評估為 3（中等）。按公式計算初始風險值，並判定風險等級（參考：極高=75-125，高=40-74，中=15-39，低=1-14）。</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>風險值 45，高風險（CVSS 7.5 直接等於脆弱性嚴重度 7.5 分）</div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">B</span>風險值 60，高風險（CVSS 7.5 映射為嚴重度 4，計算 5×3×4=60）</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">C</span>風險值 37.5，中等風險（5×3×2.5=37.5，CVSS除以4映射）</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>風險值 75，極高風險（5×3×5=75，7.5四捨五入為5）</div>
+  </div>
+  <div class="q-exp">正確！CVSS 7.0-8.9（高危）按 GB/T 20984-2022 的映射規則，對應脆弱性嚴重度賦值為 <strong>4</strong>（不是直接使用 CVSS 原始分數）。計算：風險值 = 資產重要性(5) × 威脅可能性(3) × 脆弱性嚴重度(4) = <strong>60</strong>，落在 40-74 區間，判定為<strong>高風險</strong>，需在 1 個月內制定整改計劃。CVSS 評分映射：0.1-3.9→1-2，4.0-6.9→3，7.0-8.9→4，9.0-10.0→5。</div>
+</div>
+</div>
+
+
+<!-- ===== CH4: 滲透測試評估 ===== -->
+
+<!-- L4-1 滲透測試定位 -->
+<div class="cb" id="l4-1">
+<h2>滲透測試在風險評估中的定位</h2>
+<p>滲透測試（Penetration Testing）是風險評估中脆弱性評估環節的重要手段之一，但它不能替代完整的風險評估流程。兩者是互補關係：風險評估提供全面的管理視角，滲透測試提供深入的技術驗證。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>維度</th><th>漏洞掃描</th><th>滲透測試</th><th>完整風險評估</th></tr></thead>
+    <tbody>
+      <tr><td><strong>範圍</strong></td><td>廣（全量資產自動掃描）</td><td>窄（授權範圍內深度測試）</td><td>最廣（技術+管理+業務全覆蓋）</td></tr>
+      <tr><td><strong>深度</strong></td><td>淺（已知漏洞特徵匹配）</td><td>深（模擬真實攻擊鏈）</td><td>結構化（按方法論逐層深入）</td></tr>
+      <tr><td><strong>輸出</strong></td><td>漏洞清單+CVSS評分</td><td>攻擊路徑+業務影響證明</td><td>風險等級+整改優先級+管理建議</td></tr>
+      <tr><td><strong>週期</strong></td><td>數小時（自動化）</td><td>數天至數週</td><td>數週至數月</td></tr>
+      <tr><td><strong>主要價值</strong></td><td>識別已知漏洞全貌</td><td>驗證真實可利用性、發現邏輯漏洞</td><td>業務風險量化、安全投資決策支撐</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="note tip">
+  <div class="note-lbl">在風險評估中如何使用滲透測試結果</div>
+  <p>滲透測試的發現可直接作為脆弱性評估的輸入：（1）已被驗證可利用的漏洞，其脆弱性嚴重度應設為最高（5分），因為攻擊可行性已被確認；（2）滲透測試發現的攻擊鏈（如從外網入侵到獲取核心數據庫權限），可作為風險場景直接納入風險計算；（3）滲透測試中未能突破的邊界（如防火牆有效阻擋），可在控制措施有效性評估中作為正面證據。</p>
+</div>
+</div>
+
+<!-- L4-2 授權文件 -->
+<div class="cb" id="l4-2">
+<h2>評估範圍界定與授權文件</h2>
+<p>在風險評估中開展滲透測試，必須有嚴格的範圍界定和法律授權。任何未授權的測試活動均可能違反《網路安全法》第二十七條，導致法律責任。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">風險評估授權文件核心要素</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="hi">一、服務合同（甲方簽署）</span>
+□ 評估服務說明（風險評估+脆弱性評估+滲透測試）
+□ 評估範圍清單（IP 段、域名、系統名稱）
+□ 授權方式說明（白盒/灰盒/黑盒）
+□ 禁止行為列表（如禁止 DoS 測試、禁止真實資料導出）
+□ 甲乙雙方法人或授權代表簽字蓋章
+
+<span class="hi">二、保密協議（NDA）</span>
+□ 評估過程中獲取的信息保密義務
+□ 評估報告的使用限制（不得對外披露）
+□ 人員保密聲明（所有參與人員簽署）
+□ 保密期限和違約責任
+
+<span class="hi">三、技術授權書（必備）</span>
+□ 明確授權的目標系統/IP/域名清單
+  示例：
+  授權系統：XXX 集團電商平台
+  授權 IP 範圍：
+    外網：1.2.3.4-1.2.3.10（Web 服務器集群）
+    外網：1.2.3.50（API 網關）
+  授權域名：shop.example.com、api.example.com
+  授權內網（白盒）：192.168.1.0/24（業務服務器）
+  
+□ 授權測試時間窗口
+  示例：非業務高峰期（工作日 22:00-次日 06:00）
+  或：全天（需實時監控，發現異常立即中止）
+
+□ 明確禁止行為
+  - 禁止持久化後門植入
+  - 禁止對非授權系統測試
+  - 禁止真實敏感數據導出（截圖作為証據即可）
+  - 禁止任何破壞性操作（不得刪除/修改業務數據）
+  - 禁止 DDoS 或壓力測試
+
+□ 緊急聯繫人
+  甲方技術聯繫人：姓名、手機（7×24 可達）
+  甲方安全負責人：姓名、手機
+  發現重大高危漏洞時立即電話通知（不等書面報告）
+
+□ 授權方簽字：甲方信息安全主管或 CTO 簽名+日期</pre>
+</div>
+
+<div class="note law">
+  <div class="note-lbl">法律提示</div>
+  <p>授權書必須由被評估方具有足夠授權的人員簽署（通常是 CTO、CISO 或 CEO）。業務負責人或普通技術人員的簽字通常不構成有效法律授權。測試前應留存授權書原件或原件掃描件。若評估涉及第三方（如 SaaS 雲服務供應商提供的系統），還需額外取得第三方的書面同意。</p>
+</div>
+</div>
+
+<!-- L4-3 外網評估實戰 -->
+<div class="cb" id="l4-3">
+<h2>外網 IP 與 Web 資產評估實戰</h2>
+<p>外網資產評估是風險評估中暴露面最大、優先級最高的部分。從攻擊者視角對互聯網暴露面進行系統性識別和脆弱性分析。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">外網資產發現與評估工作流</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="cm"># ─── STEP 1：資產發現（在授權範圍內）───</span>
+<span class="cm"># 子域名枚舉</span>
+subfinder -d example.com -all -recursive > subdomains.txt
+amass enum -passive -d example.com >> subdomains.txt
+sort -u subdomains.txt > subdomains_unique.txt
+
+<span class="cm"># C 段 IP 存活探測</span>
+nmap -sn 1.2.3.0/24 -oG alive_hosts.txt         <span class="cm"># ICMP + TCP SYN ping</span>
+cat alive_hosts.txt | grep "Up" | awk '{print $2}'
+
+<span class="cm"># ─── STEP 2：端口掃描與服務識別 ───</span>
+<span class="cm"># 快速掃描所有授權 IP 的常見端口</span>
+nmap -sV -sC -T4 -p 21,22,23,25,53,80,110,143,443,445,3306,3389,6379,8080,8443 \
+  --open 1.2.3.0/24 -oN port_scan.txt
+
+<span class="cm"># Web 應用指紋識別</span>
+whatweb -v https://example.com                  <span class="cm"># 技術棧識別</span>
+httpx -l subdomains_unique.txt -tech-detect -status-code -title -o web_assets.txt
+
+<span class="cm"># ─── STEP 3：敏感信息暴露核查 ───</span>
+<span class="cm"># 檢查常見敏感路徑</span>
+<span class="kw">for</span> url in $(cat web_assets.txt); <span class="kw">do</span>
+  <span class="kw">for</span> path in /.git/config /.env /.aws/credentials /backup.zip /phpinfo.php /actuator/env; <span class="kw">do</span>
+    code=$(curl -sk -o /dev/null -w <span class="st">"%{http_code}"</span> $url$path)
+    [ <span class="st">"$code"</span> = <span class="st">"200"</span> ] &amp;&amp; echo <span class="hl">"EXPOSED: $url$path"</span>
+  <span class="kw">done</span>
+<span class="kw">done</span>
+
+<span class="cm"># ─── STEP 4：Web 漏洞掃描 ───</span>
+<span class="cm"># AWVS（Acunetix）批量掃描</span>
+<span class="cm"># 或 Nuclei 模板掃描（開源，快速）</span>
+nuclei -l web_assets.txt -t ~/nuclei-templates/ -severity high,critical \
+  -o nuclei_findings.txt -es info,low,medium     <span class="cm"># 只輸出高危和嚴重</span>
+
+<span class="cm"># ─── STEP 5：CVE 驗證（高危漏洞手工確認）───</span>
+<span class="cm"># 對 Nuclei/AWVS 發現的高危漏洞進行手工驗證</span>
+<span class="cm"># 使用 POC 代碼確認可利用性（截圖作為証據）</span>
+<span class="cm"># 切記：驗證可利用性即可，不得進一步深入控制系統</span></pre>
+</div>
+</div>
+
+<!-- L4-4 內網評估 -->
+<div class="cb" id="l4-4">
+<h2>內網滲透測試評估要點</h2>
+<p>內網評估通常以白盒或灰盒方式進行，重點評估縱深防禦能力：攻擊者在突破邊界後能獲取多大的訪問權限，以及橫向移動和提權的難度。</p>
+
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>網絡分段有效性驗證</strong> — 核查 VLAN 和防火牆策略是否真正隔離不同安全區域。從普通辦公網嘗試訪問服務器區（應被阻擋）；測試 DMZ 與內網的隔離是否嚴格；驗證管理網絡是否與業務網絡分離。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>AD/域環境安全性</strong> — 內網有 Active Directory 域環境時，評估域配置安全性：是否存在 Kerberoasting 攻擊面（具有 SPN 的高權限帳號）、域內密碼策略、域管帳號數量、AS-REP Roasting 風險、是否開放 LDAP 未認證查詢。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>憑證管理評估</strong> — 掃描是否存在憑證明文傳輸（Telnet/FTP/HTTP 基本認證）；檢查各系統是否使用相同密碼（密碼複用風險）；測試默認憑證（路由器/交換機/資料庫/中間件管理後台）；評估特權帳號管理（PAM）解決方案是否部署。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>橫向移動路徑評估</strong> — 從一個已落陷的普通主機出發，評估能否橫向移動到其他系統。測試：SMB 文件共享訪問範圍、RDP 可達性、內網服務掃描、是否存在 Pass-the-Hash 機會（Mimikatz 在合法範圍內使用）。記錄完整的橫向移動路徑作為風險場景。</div></div>
+  <div class="il-item"><span class="il-num">05</span><div class="il-txt"><strong>關鍵資產可達性</strong> — 從假設的攻擊初始立足點（如辦公網終端），評估到核心資產（核心業務資料庫、支付系統、工控系統）的攻擊路徑。確認是否有足夠的訪問控制阻止攻擊者直達核心資產，識別縱深防禦的薄弱環節。</div></div>
+</div>
+</div>
+
+
+<!-- ===== CH5: 風險控制與報告 ===== -->
+
+<!-- L5-1 風險處置策略 -->
+<div class="cb" id="l5-1">
+<h2>風險處置策略：接受 / 規避 / 轉移 / 降低</h2>
+<p>識別和計算風險之後，必須為每個風險制定明確的處置決策。ISO/IEC 27005 和 GB/T 20984-2022 均定義了四種標準風險處置策略，選擇哪種策略取決於風險等級、控制成本和業務需求。</p>
+
+<div class="tbl">
+  <table class="t">
+    <thead><tr><th>處置策略</th><th>適用條件</th><th>典型措施</th><th>注意事項</th></tr></thead>
+    <tbody>
+      <tr><td><strong>降低風險</strong><br>（Risk Reduction）<br>最常用</td><td>風險高於可接受水平，且有技術或管理手段可有效降低；控制成本低於預期損失</td><td>修補漏洞、加強訪問控制、部署 WAF/EDR、安全培訓、加密數據、啟用 MFA</td><td>需驗證控制措施的有效性，並重新評估殘餘風險；避免只做表面控制（如只部署工具，不調整配置）</td></tr>
+      <tr><td><strong>規避風險</strong><br>（Risk Avoidance）</td><td>風險極高且無法有效控制；業務活動的風險超過其價值；終止或不開展相關業務更合理</td><td>關閉對外暴露的高危服務；停止使用高風險組件（如使用雲服務替代自建 VPN）；取消高風險業務場景</td><td>規避往往意味著業務功能的損失，需業務部門決策；注意規避後可能引入新風險</td></tr>
+      <tr><td><strong>轉移風險</strong><br>（Risk Transfer）</td><td>無法完全消除風險，但可通過合同或保險將損失轉移；對特定類型風險（財務損失）有效</td><td>購買網絡安全保險（Cyber Insurance）；服務外包合同中明確安全責任；雲服務共擔責任模型</td><td>轉移不等於消除風險，仍需最低限度的安全控制；保險公司通常要求投保前具備基本安全措施</td></tr>
+      <tr><td><strong>接受風險</strong><br>（Risk Acceptance）</td><td>風險已在可接受水平（低風險）；進一步控制的成本高於潛在損失；業務必須接受的固有風險</td><td>文件化記錄接受決策；定期複評（風險可能隨時間變化）；必要時設定觸發條件（超過閾值重新評估）</td><td>必須由具有授權的管理人員書面確認；高風險不應輕易選擇「接受」</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">風險處置計劃表模板</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="hi">風險處置計劃（Risk Treatment Plan）模板結構：</span>
+
+風險編號：RISK-2024-001
+風險描述：外網 Web 應用存在未修復的 Apache Log4j2 RCE 漏洞
+受影響資產：電商業務系統（10.0.1.50）
+初始風險等級：極高（風險值：100）
+處置策略：降低風險
+
+整改措施：
+  ├── 緊急措施（立即執行，今日內）
+  │   ├── 措施 1：在 WAF 添加 Log4Shell 防護規則
+  │   │         責任人：安全運維 A
+  │   │         預計完成：今日 18:00
+  │   └── 措施 2：在 JVM 啟動參數加入 -Dlog4j2.formatMsgNoLookups=true
+  │             責任人：開發負責人 B
+  │             預計完成：今日 22:00（發佈窗口）
+  │
+  └── 根本修復（本週內）
+      └── 措施 3：升級 Log4j2 至 2.17.1 或以上版本
+                責任人：開發負責人 B
+                預計完成：20XX-XX-XX（下次版本發佈）
+                驗證方式：版本核查 + 漏洞掃描複驗
+
+整改後預期殘餘風險：高（風險值：40）→ 根本修復後：低（風險值：12）
+計劃複評時間：根本修復完成後 1 週內
+批准人：IT 安全負責人 C
+批准日期：20XX-XX-XX</pre>
+</div>
+</div>
+
+<!-- L5-2 加固建議清單 -->
+<div class="cb" id="l5-2">
+<h2>安全加固建議清單編制</h2>
+<p>加固建議清單是風險評估報告中最具實操價值的部分，需要將技術發現轉化為可執行的整改步驟，並按優先級排序，幫助客戶有效分配有限的資源。</p>
+
+<h3>建議清單格式規範</h3>
+<p>每條加固建議應包含五個要素：<strong>問題描述</strong>（What）、<strong>風險說明</strong>（Why）、<strong>整改步驟</strong>（How）、<strong>驗證方法</strong>（Verify）、<strong>優先級</strong>（Priority）。</p>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">加固建議示例（MySQL 數據庫）</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="hi">建議 DB-001：禁止 MySQL root 帳號遠端登入</span>
+優先級：高
+問題：生產資料庫的 root 帳號允許從任意主機（host='%'）遠端連接。
+風險：攻擊者可通過暴力破解或憑證洩露直接以最高權限訪問資料庫，
+      獲取、修改或刪除所有業務數據，後果極其嚴重。
+整改步驟：
+  1. 登入 MySQL：mysql -u root -p
+  2. 查詢 root 帳號的 host 設置：
+     SELECT user, host FROM mysql.user WHERE user='root';
+  3. 刪除允許遠端登入的 root 帳號：
+     DROP USER 'root'@'%';
+  4. 確保僅保留 root@localhost：
+     SELECT user, host FROM mysql.user WHERE user='root';
+     -- 應只顯示 root@localhost
+  5. 刷新權限：FLUSH PRIVILEGES;
+  6. 確認防火牆已封鎖 3306 端口的外部訪問（雙重保護）
+驗證方法：
+  嘗試從外部 IP 使用 root 帳號連接，應收到「Access denied」錯誤。
+  mysql -h [公網IP] -u root -p[密碼]
+  預期結果：ERROR 1045 (28000): Access denied...
+參考：MySQL 安全指南 §5.1.1
+
+<span class="hi">建議 OS-003：啟用 Linux 系統安全審計日誌</span>
+優先級：中
+問題：目標主機未安裝 auditd 服務，缺乏對特權操作（su、sudo）、
+      敏感文件訪問的審計記錄，發生安全事件時無法溯源。
+整改步驟：
+  1. 安裝 auditd：
+     yum install audit -y  # RHEL/CentOS
+     apt install auditd -y # Ubuntu/Debian
+  2. 啟用並設為開機啟動：
+     systemctl enable auditd &amp;&amp; systemctl start auditd
+  3. 配置關鍵審計規則（/etc/audit/rules.d/99-security.rules）：
+     -w /etc/passwd -p wa -k identity_change
+     -w /etc/sudoers -p wa -k sudoers_change
+     -a always,exit -F arch=b64 -S execve -k exec_commands
+  4. 重載規則：augenrules --load
+驗證方法：
+  ausearch -k identity_change | tail -5（查看是否有審計記錄生成）</pre>
+</div>
+</div>
+
+<!-- L5-3 報告撰寫規範 -->
+<div class="cb" id="l5-3">
+<h2>風險評估報告撰寫規範</h2>
+<p>風險評估報告是整個項目的核心交付物，面向兩類讀者：<strong>管理層</strong>（需要決策支持，關注業務影響和投資建議）和<strong>技術團隊</strong>（需要可執行的整改步驟）。報告應分層撰寫，滿足不同讀者需求。</p>
+
+<h3>報告結構（GB/T 20984-2022 推薦格式）</h3>
+<div class="ilist">
+  <div class="il-item"><span class="il-num">01</span><div class="il-txt"><strong>執行摘要（Executive Summary）</strong> — 2-3 頁，面向管理層。核心內容：評估背景與目的、主要發現概述（極高/高風險數量）、最重要的 3-5 個風險及業務影響、優先處置建議、整體安全態勢評價。避免技術術語，用業務語言表達。</div></div>
+  <div class="il-item"><span class="il-num">02</span><div class="il-txt"><strong>評估概述</strong> — 評估方法論說明（參考標準：GB/T 20984-2022）、評估範圍和邊界、評估時間、評估方式（白盒/灰盒）、評估局限性聲明（本報告反映評估時間點的狀況）。</div></div>
+  <div class="il-item"><span class="il-num">03</span><div class="il-txt"><strong>資產識別結果</strong> — 資產清冊（按類型分類）、資產重要性分布圖（高/中/低比例）、關鍵資產列表及其 CIA 賦值說明。</div></div>
+  <div class="il-item"><span class="il-num">04</span><div class="il-txt"><strong>威脅與脆弱性分析</strong> — 主要威脅場景描述、脆弱性發現匯總表（按嚴重程度統計：嚴重/高/中/低/信息）、重要脆弱性詳細描述（含截圖或代碼片段作為證據）。</div></div>
+  <div class="il-item"><span class="il-num">05</span><div class="il-txt"><strong>風險評估結果</strong> — 風險值計算過程說明、風險分布熱力圖/矩陣圖、風險清單（按等級排序：極高→高→中→低）、每個風險的詳細描述（風險描述、受影響資產、建議處置措施）。</div></div>
+  <div class="il-item"><span class="il-num">06</span><div class="il-txt"><strong>安全加固建議</strong> — 按優先級排序的整改建議清單；整改路線圖（時間線，哪些先做、哪些後做）；安全能力建設建議（長期）；必要的安全投資建議。</div></div>
+  <div class="il-item"><span class="il-num">07</span><div class="il-txt"><strong>附錄</strong> — 評估工具清單（增加透明度）、評估依據的標準文件清單、關鍵術語說明、人員訪談記錄、相關法規要求對照表。</div></div>
+</div>
+</div>
+
+<!-- L5-4 工具集與自動化 -->
+<div class="cb" id="l5-4">
+<h2>風險評估工具集與自動化</h2>
+<p>系統化的工具集能大幅提升風險評估效率和一致性。從資產發現、漏洞掃描到報告生成，各個環節都有成熟的工具支撐。</p>
+
+<div class="kg">
+  <div class="kt"><div class="kt-n">漏洞掃描工具</div><div class="kt-d">Nessus / Tenable.io（最全面的商業漏洞掃描器，覆蓋 8 萬+ 插件）；Qualys VMDR（雲端平台，適合大規模資產）；OpenVAS/Greenbone（開源替代）；Nuclei（基於模板的快速 PoC 驗證，開源）。</div></div>
+  <div class="kt"><div class="kt-n">Web 應用掃描</div><div class="kt-d">Acunetix (AWVS)（業界標準 Web 漏洞掃描器）；Burp Suite Pro（手動+自動掃描，最靈活）；OWASP ZAP（免費開源替代）；AppScan（IBM，企業級）。</div></div>
+  <div class="kt"><div class="kt-n">配置核查與合規</div><div class="kt-d">CIS-CAT（CIS 基準自動核查工具）；Ansible + 安全劇本（批量配置核查）；Nessus Compliance 插件（等保/CIS 合規性自動評估）；自研 Python 腳本（定制化核查）。</div></div>
+  <div class="kt"><div class="kt-n">CMDB / 資產管理</div><div class="kt-d">CMDB 系統（ServiceNow/藍鯨）：維護資產清冊；Nmap + 自動化腳本定期更新資產清單；Shodan/Fofa（外網暴露面自動監控）；資產台帳電子表格（小型組織）。</div></div>
+  <div class="kt"><div class="kt-n">風險計算與可視化</div><div class="kt-d">Excel/Google Sheets 定制風險計算模板（靈活、普及）；OpenRMF（開源風險管理平台）；PolySpace / ThreadFix（商業 GRC 平台）；Python+Pandas 腳本自動計算和生成熱力圖。</div></div>
+  <div class="kt"><div class="kt-n">報告生成</div><div class="kt-d">Dradis（滲透測試報告協作平台）；Plextrac（風險評估報告管理）；自研 Word 模板 + Python-docx 自動填充數據；Markdown + Pandoc 轉 PDF 報告。</div></div>
+</div>
+
+<div class="cblock">
+  <div class="ctop"><span class="clang">Python — 風險值自動計算與熱力圖生成</span><button class="ccopy" onclick="cpCode(this)">複製</button></div>
+  <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+<span class="kw">import</span> seaborn <span class="kw">as</span> sns
+
+<span class="cm"># ─── 從 Excel 讀取風險評估數據 ───</span>
+df = pd.read_excel(<span class="st">'risk_data.xlsx'</span>, sheet_name=<span class="st">'脆弱性清單'</span>)
+<span class="cm"># 必要欄位：資產名稱, 資產重要性(A), 威脅可能性(T), 脆弱性嚴重度(V)</span>
+
+<span class="cm"># ─── 計算風險值 ───</span>
+df[<span class="st">'風險值'</span>] = df[<span class="st">'資產重要性'</span>] * df[<span class="st">'威脅可能性'</span>] * df[<span class="st">'脆弱性嚴重度'</span>]
+
+<span class="cm"># ─── 風險等級判定 ───</span>
+<span class="kw">def</span> <span class="fn">risk_level</span>(v):
+    <span class="kw">if</span> v >= <span class="nu">75</span>: <span class="kw">return</span> <span class="st">'極高'</span>
+    <span class="kw">elif</span> v >= <span class="nu">40</span>: <span class="kw">return</span> <span class="st">'高'</span>
+    <span class="kw">elif</span> v >= <span class="nu">15</span>: <span class="kw">return</span> <span class="st">'中'</span>
+    <span class="kw">else</span>: <span class="kw">return</span> <span class="st">'低'</span>
+
+df[<span class="st">'風險等級'</span>] = df[<span class="st">'風險值'</span>].apply(risk_level)
+
+<span class="cm"># ─── 按風險值降序排列（優先處置順序）───</span>
+df_sorted = df.sort_values(<span class="st">'風險值'</span>, ascending=<span class="kw">False</span>)
+<span class="fn">print</span>(df_sorted[[<span class="st">'資產名稱'</span>, <span class="st">'脆弱性描述'</span>, <span class="st">'風險值'</span>, <span class="st">'風險等級'</span>]].head(<span class="nu">20</span>))
+
+<span class="cm"># ─── 風險分布統計 ───</span>
+risk_counts = df[<span class="st">'風險等級'</span>].value_counts()
+<span class="fn">print</span>(<span class="st">"\n風險分布："</span>)
+<span class="fn">print</span>(f<span class="st">"極高風險：{risk_counts.get('極高', 0)} 項"</span>)
+<span class="fn">print</span>(f<span class="st">"高風險：{risk_counts.get('高', 0)} 項"</span>)
+<span class="fn">print</span>(f<span class="st">"中等風險：{risk_counts.get('中', 0)} 項"</span>)
+<span class="fn">print</span>(f<span class="st">"低風險：{risk_counts.get('低', 0)} 項"</span>)
+
+<span class="cm"># ─── 生成風險矩陣熱力圖 ───</span>
+matrix = df.groupby([<span class="st">'威脅可能性'</span>, <span class="st">'脆弱性嚴重度'</span>]).size().unstack(fill_value=<span class="nu">0</span>)
+plt.figure(figsize=(<span class="nu">8</span>, <span class="nu">6</span>))
+sns.heatmap(matrix, annot=<span class="kw">True</span>, fmt=<span class="st">'d'</span>, cmap=<span class="st">'RdYlGn_r'</span>, cbar_kws={<span class="st">'label'</span>:<span class="st">'風險數量'</span>})
+plt.title(<span class="st">'風險矩陣熱力圖'</span>)
+plt.xlabel(<span class="st">'脆弱性嚴重度'</span>)
+plt.ylabel(<span class="st">'威脅可能性'</span>)
+plt.savefig(<span class="st">'risk_matrix.png'</span>, dpi=<span class="nu">150</span>, bbox_inches=<span class="st">'tight'</span>)
+<span class="fn">print</span>(<span class="st">"熱力圖已保存至 risk_matrix.png"</span>)</pre>
+</div>
+</div>
+
+<!-- L5-5 項目管理與交付 -->
+<div class="cb" id="l5-5">
+<h2>風險評估專案管理與交付</h2>
+<p>風險評估項目管理涉及時間規劃、客戶溝通、質量控制和成果交付，良好的項目管理是確保評估質量和客戶滿意度的關鍵。</p>
+
+<h3>典型項目時程（3週風險評估）</h3>
+<div class="atkflow">
+  <div class="af-step s1"><span class="af-n">第1-2天</span><div><div class="af-t">啟動準備</div><div class="af-d">簽署合同和保密協議、技術授權書；召開啟動會議（介紹評估方法、確認範圍、收集資產清單模板）；獲取必要的系統訪問憑證（白盒評估）；制定詳細工作計劃和每日里程碑。</div></div></div>
+  <div class="af-step s2"><span class="af-n">第3-5天</span><div><div class="af-t">資產調研</div><div class="af-d">問卷發放和回收（IT 資產清冊、業務流程說明）；關鍵人員訪談（IT 負責人、業務負責人、安全人員）；現場網絡拓撲勘查（機房巡視、網絡架構確認）；完成資產清冊和賦值。</div></div></div>
+  <div class="af-step s3"><span class="af-n">第6-11天</span><div><div class="af-t">技術評估</div><div class="af-d">網絡設備配置核查（1-2天）；主機系統安全基線核查（1-2天）；資料庫/中間件評估（1天）；外網滲透測試（2天）；內網滲透測試（1-2天，按範圍）；安全制度文件審查（同步進行）。</div></div></div>
+  <div class="af-step s4"><span class="af-n">第12-14天</span><div><div class="af-t">風險計算</div><div class="af-d">整理所有脆弱性發現，進行漏洞確認（排除誤報）；完成每個資產的風險計算；填寫風險清單（按等級排序）；識別關鍵風險場景；制定整改建議初稿。</div></div></div>
+  <div class="af-step s5"><span class="af-n">第15-18天</span><div><div class="af-t">報告撰寫</div><div class="af-d">撰寫技術報告初稿（脆弱性描述、風險計算、整改建議）；撰寫管理層摘要；內部質量審核（由資深人員複核）；根據內審意見修改完善。</div></div></div>
+  <div class="af-step s6"><span class="af-n">第19-21天</span><div><div class="af-t">評審與交付</div><div class="af-d">向客戶發送報告初稿（預留 1-2 天閱覽時間）；召開評審會議（介紹主要發現、解答客戶疑問）；根據客戶合理反饋（確認事實錯誤、澄清業務背景）修訂報告；正式交付最終版本（加密傳輸）、項目結束確認。</div></div></div>
+</div>
+
+<div class="note sec">
+  <div class="note-lbl">交付質量控制要點</div>
+  <p>高質量報告的標誌：（1）每個脆弱性都有截圖或代碼片段作為<strong>客觀證據</strong>，不依賴工具自動輸出；（2）風險計算有<strong>清晰的推理過程</strong>，客戶能理解評分依據；（3）整改建議<strong>具體可執行</strong>（包含具體命令或配置步驟），而非空泛的「加強安全管理」；（4）管理層摘要能讓非技術高管<strong>在 10 分鐘內理解核心問題</strong>；（5）所有技術術語都有解釋，或在附錄提供術語表。</p>
+</div>
+
+<div class="quiz">
+  <div class="q-lbl">小測驗</div>
+  <div class="q-q">在對某企業的 MySQL 資料庫進行風險評估時，你發現 root 帳號允許從任意 IP 遠端登入，CVSS 評分為 7.2（高危），資料庫存儲大量客戶個人信息（資產重要性=5），評估威脅可能性為 3（中等）。按正確處置流程，以下哪個描述最完整？</div>
+  <div class="q-opts">
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">A</span>記錄為高危漏洞（CVSS 7.2），建議客戶購買更好的防火牆來降低風險</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">B</span>計算風險值：5×3×7.2=108，判定為極高風險，建議立即整改</div>
+    <div class="qo" onclick="chkQ(this,true)"><span class="qo-k">C</span>CVSS 7.2 映射為脆弱性嚴重度 4，風險值=5×3×4=60（高風險），建議1個月內整改：刪除 root@'%' 帳號，僅保留 root@localhost，並驗證防火牆封鎖 3306 端口</div>
+    <div class="qo" onclick="chkQ(this,false)"><span class="qo-k">D</span>因已有防火牆存在，可將此脆弱性標記為殘餘風險並接受，無需整改</div>
+  </div>
+  <div class="q-exp">正確！完整的風險評估處置流程應包括三步：（1）按標準映射規則將 CVSS 7.2（高危，7.0-8.9 區間）映射為脆弱性嚴重度 <strong>4</strong>，而非直接使用 CVSS 原始分數；（2）正確計算風險值：5×3×4 = <strong>60</strong>，判定為高風險（40-74 區間），需在 1 個月內整改；（3）提供具體可執行的整改建議：直接操作步驟（DROP USER + FLUSH PRIVILEGES）+ 驗證方法 + 雙重防護（應用層+網絡層）。選項 A 的「購買防火牆」是規避建議而非根本修復；選項 B 直接使用 CVSS 原始分數做乘法，方法錯誤；選項 D 在有明確整改方案的情況下選擇風險接受，決策不當。</div>
+</div>
+
+<div class="done-banner">
+  <h3>Stage 11 完成：風險評估全流程實戰</h3>
+  <p>你已掌握完整的風險評估技術體系：GB/T 20984-2022 法規依據、資產識別與 CIA 賦值、威脅與脆弱性分析、網路設備/主機/資料庫/Web 技術評估、風險計算公式與矩陣、殘餘風險評估、滲透測試在評估中的定位、授權文件規範、風險處置四大策略，以及專業報告撰寫。繼續進入安全巡檢。</p>
+  <div class="btn-row">
+    <a href="stage12.html" class="btn-p">前往第十二階段：安全巡檢</a>
+    <a href="stage10.html" class="btn-g">回顧第十階段</a>
+    <a href="index.html" class="btn-g">返回課程首頁</a>
+  </div>
+</div>
+</div><!-- /cw -->
+
+<div class="lnav">
+  <button class="lb" id="prevb" onclick="prevL()" disabled>&#8592; 上一課</button>
+  <div class="ln-mid">
+    <div class="ln-cnt" id="cnt">1 / 21</div>
+    <div class="ln-sub" id="lsub">風險評估概述與法規依據</div>
+  </div>
+  <button class="lb pri" id="nextb" onclick="nextL()">下一課 &#8594;</button>
+</div>
+</main>
+</div>
+
+<script>
+const LS=[
+  {id:'l1-1',ch:'CH1',title:'風險評估概述與法規依據',time:'25分鐘',type:'風險框架'},
+  {id:'l1-2',ch:'CH1',title:'風險評估流程與角色分工',time:'20分鐘',type:'流程管理'},
+  {id:'l1-3',ch:'CH1',title:'資產識別與分類分級',time:'25分鐘',type:'資產管理'},
+  {id:'l1-4',ch:'CH1',title:'威脅識別與脆弱性分析',time:'25分鐘',type:'威脅分析'},
+  {id:'l2-1',ch:'CH2',title:'網路設備安全評估',time:'25分鐘',type:'網路安全'},
+  {id:'l2-2',ch:'CH2',title:'主機作業系統安全評估',time:'25分鐘',type:'主機安全'},
+  {id:'l2-3',ch:'CH2',title:'資料庫安全評估',time:'25分鐘',type:'資料庫'},
+  {id:'l2-4',ch:'CH2',title:'中間件與 Web 應用評估',time:'25分鐘',type:'Web 安全'},
+  {id:'l3-1',ch:'CH3',title:'風險計算模型：定性與定量',time:'25分鐘',type:'風險計算'},
+  {id:'l3-2',ch:'CH3',title:'風險矩陣構建與等級判定',time:'20分鐘',type:'風險矩陣'},
+  {id:'l3-3',ch:'CH3',title:'殘餘風險評估與接受準則',time:'20分鐘',type:'殘餘風險'},
+  {id:'l4-1',ch:'CH4',title:'滲透測試在風險評估中的定位',time:'20分鐘',type:'滲透評估'},
+  {id:'l4-2',ch:'CH4',title:'評估範圍界定與授權文件',time:'20分鐘',type:'授權合規'},
+  {id:'l4-3',ch:'CH4',title:'外網 IP 與 Web 資產評估實戰',time:'25分鐘',type:'外網評估'},
+  {id:'l4-4',ch:'CH4',title:'內網滲透測試評估要點',time:'25分鐘',type:'內網評估'},
+  {id:'l5-1',ch:'CH5',title:'風險處置策略：接受/規避/轉移/降低',time:'20分鐘',type:'風險處置'},
+  {id:'l5-2',ch:'CH5',title:'安全加固建議清單編制',time:'25分鐘',type:'加固建議'},
+  {id:'l5-3',ch:'CH5',title:'風險評估報告撰寫規範',time:'25分鐘',type:'報告撰寫'},
+  {id:'l5-4',ch:'CH5',title:'風險評估工具集與自動化',time:'20分鐘',type:'工具鏈'},
+  {id:'l5-5',ch:'CH5',title:'風險評估專案管理與交付',time:'20分鐘',type:'專案管理'},
+];
+const done=new Set(JSON.parse(localStorage.getItem('s11_done')||'[]'));
+let cur=0;
+function go(id,btn){
+  document.querySelectorAll('.cb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.ls-btn').forEach(b=>b.classList.remove('lact'));
+  const bl=document.getElementById(id);if(bl)bl.classList.add('on');
+  if(btn)btn.classList.add('lact');
+  cur=LS.findIndex(l=>l.id===id);syncUI();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function toggleCh(btn,id){
+  btn.classList.toggle('copen');
+  const l=document.getElementById(id);if(l)l.classList.toggle('lopen');
+}
+function prevL(){if(cur>0)findAndGo(LS[cur-1].id);}
+function nextL(){
+  done.add(LS[cur].id);
+  localStorage.setItem('s11_done',JSON.stringify([...done]));
+  if(cur<LS.length-1)findAndGo(LS[cur+1].id);
+}
+function findAndGo(id){
+  let btn=null;
+  document.querySelectorAll('.ls-btn').forEach(b=>{
+    if((b.getAttribute('onclick')||'').includes("'"+id+"'")){
+      btn=b;
+      const p=b.parentElement;
+      if(p&&!p.classList.contains('lopen')){
+        p.classList.add('lopen');
+        const cb=p.previousElementSibling;
+        if(cb)cb.classList.add('copen');
+      }
+    }
+  });
+  go(id,btn);
+}
+function syncUI(){
+  const l=LS[cur];if(!l)return;
+  document.getElementById('crumb').innerHTML=`STAGE 11 &gt; ${l.ch} &gt; <em>${l.title}</em>`;
+  document.getElementById('ltitle').textContent=l.title;
+  document.getElementById('chip1').textContent=l.type;
+  document.getElementById('chip2').textContent=`預計 ${l.time}`;
+  document.getElementById('cnt').textContent=`${cur+1} / ${LS.length}`;
+  document.getElementById('lsub').textContent=l.title;
+  document.getElementById('prevb').disabled=cur===0;
+  document.getElementById('nextb').disabled=cur===LS.length-1;
+  if(cur===LS.length-1)document.getElementById('nextb').textContent='Stage 完成';
+  else document.getElementById('nextb').innerHTML='下一課 &#8594;';
+  const pct=done.size?Math.round(done.size/LS.length*100):0;
+  document.getElementById('pct').textContent=pct+'%';
+  document.getElementById('pf').style.width=pct+'%';
+  document.querySelectorAll('.ls-btn').forEach(b=>{
+    const m=(b.getAttribute('onclick')||'').match(/'(l\d+-\d+)'/);
+    if(m&&done.has(m[1])&&!b.classList.contains('lact'))b.classList.add('ldone');
+  });
+}
+function chkQ(el,correct){
+  const box=el.closest('.quiz');
+  if(box.dataset.answered)return;
+  box.dataset.answered='1';
+  box.querySelectorAll('.qo').forEach(o=>o.style.pointerEvents='none');
+  el.classList.add(correct?'ok':'bad');
+  if(!correct)box.querySelectorAll('.qo').forEach(o=>{
+    if((o.getAttribute('onclick')||'').includes('true'))o.classList.add('ok');
+  });
+  const exp=box.querySelector('.q-exp');
+  if(exp)exp.classList.add('on');
+}
+function cpCode(btn){
+  const pre=btn.closest('.cblock').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(()=>{
+    btn.textContent='已複製';setTimeout(()=>btn.textContent='複製',2000);
+  });
+}
+syncUI();
+</script>
+</body>
+</html>
